@@ -20,7 +20,7 @@ const plants = [
     edits: [['recipes/impact.cypher', '[:SUPERSEDES]', '[:IGNORED_SUPERSEDES]']],
   },
   {
-    name: 'why-insertion-order', pattern: '^(A3|B16|M3) ',
+    name: 'why-insertion-order', pattern: '^(A3|B16|L5|M3) ',
     // The loader inserts records in id order; force that order instead of date.
     edits: [['recipes/why.cypher', 'ORDER BY rank, date, id', 'ORDER BY rank, id']],
   },
@@ -40,6 +40,41 @@ const plants = [
     name: 'mcp-writable', pattern: '^(M1|M2) ',
     edits: [['src/ask.ts', 'store, "--read-only"]', 'store]']],
   },
+  {
+    name: 'free-text-links-again', pattern: '^(L11|L12) ',
+    edits: [[
+      'src/build.ts',
+      'const trailers = trailerCites(decisionTrailers(root), checked.cites);',
+      `const freeText = commits.map((c) => ({
+    sha: c.sha,
+    decisions: [...ids].filter((id) => {
+      const message = git(root, "show", "-s", "--format=%B", c.sha) ?? "";
+      const forms = id.startsWith("ADR-") ? [id, "ADR " + id.slice(4), id.slice(4) + "-x.md"] : [id];
+      return forms.some((form) => message.includes(form));
+    }),
+  }));
+  const trailers = trailerCites([...decisionTrailers(root), ...freeText], checked.cites);`,
+    ]],
+  },
+  {
+    name: 'near-match-tag-links', pattern: '^L2 ',
+    edits: [
+      ['src/links.pure.ts', '(?<![A-Za-z0-9_-])', ''],
+      ['src/links.pure.ts', '(?![A-Za-z0-9_-])', ''],
+    ],
+  },
+  {
+    name: 'direct-links-after-commit-links', pattern: '^(A3|A4|L7) ',
+    edits: [['src/answers.pure.ts', '  if (named.length === 0)', '  if (viaCommit.length === 0)', 'swap-why-parts']],
+  },
+  {
+    name: 'record-reached-both-ways-listed-twice', pattern: '^(A3|L7) ',
+    edits: [[
+      'src/answers.pure.ts',
+      'const viaCommit = records.filter((r) => list(r.named).length === 0);',
+      'const viaCommit = records.filter((r) => Array.isArray(r.via) && r.via.length > 0);',
+    ]],
+  },
 ];
 const table = [];
 for (const plant of plants) {
@@ -51,7 +86,13 @@ for (const plant of plants) {
     const text = readFileSync(path, 'utf8');
     const count = text.split(before).length - 1;
     assert.ok(count > 0 && (all === 'all' || count === 1), `plant ${plant.name}: expected anchor in ${file}; got ${count}`);
-    writeFileSync(path, all === 'all' ? text.replaceAll(before, after) : text.replace(before, after));
+    if (all === 'swap-why-parts') {
+      const start = text.indexOf(before);
+      const middle = text.indexOf(after, start);
+      const end = text.indexOf('  if (rows.length === 0)', middle);
+      assert.ok(start >= 0 && middle > start && end > middle, `plant ${plant.name}: missing why parts`);
+      writeFileSync(path, text.slice(0, start) + text.slice(middle, end) + text.slice(start, middle) + text.slice(end));
+    } else writeFileSync(path, all === 'all' ? text.replaceAll(before, after) : text.replace(before, after));
   }
   writeFileSync(join(subject, 'plant.json'), JSON.stringify(plant, null, 2) + '\n');
   console.log(`Running ${plant.name} against ${plant.pattern}`);

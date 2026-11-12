@@ -1,0 +1,180 @@
+{
+  "base": "8db8649",
+  "contract": "d7d85ac",
+  "groundTruth": [
+    "git diff 8db8649 d7d85ac -- docs/failures.md README.md scripts/fixture.sh",
+    "public signatures and pre/post doc lines of src/*.pure.ts"
+  ],
+  "legacyFailures": [
+    {
+      "id": "A1",
+      "entryChanged": true,
+      "previous": "| A1 | `decisions adr docs/adr` | Exit 0. Records `ADR-0001`..`ADR-0003` in that order. ADR-0001 commits: `21c643d...`, `b8dc7c9...` (full ids). ADR-0002: restsOn `[ADR-0001]`, commits `[1c8e848...]`. ADR-0003: supersedes `[ADR-0002]`, restsOn `[ADR-0001]`, commits `[d6d2473...]`. Each has status `accepted`, its date, topic, and items `context` and `choice`. |",
+      "current": "| A1 | `decisions adr docs/adr` | Exit 0. Records `ADR-0001`..`ADR-0003` in that order. ADR-0001 commits: `[dfb4ff8...]` only (full id; `73ebd46` names it in free text and is not cited). ADR-0002: restsOn `[ADR-0001]`, commits `[2a59506...]`. ADR-0003: supersedes `[ADR-0002]`, restsOn `[ADR-0001]`, commits `[78884f0...]`. Each has status `accepted`, its date, topic, and items `context` and `choice`. |",
+      "action": "Updated to the new fixture full ids and only the ADR file addition; the free-text format commit is absent.",
+      "legacyPromiseViolated": false
+    },
+    {
+      "id": "A2",
+      "entryChanged": true,
+      "previous": "| A2 | the fixture build | Exit 0. stdout counts: 7 Commit, 3 DecidedTag, 5 Decision, 4 File, 8 Item, 6 Symbol, 4 Topic; 14 CHANGES, 6 CITES, 1 SUPERSEDES, 4 RESTS_ON, 4 USES. No warning. |",
+      "current": "| A2 | the fixture build | Exit 0. stdout counts: 8 Commit, 3 DecidedTag, 5 Decision, 4 File, 8 Item, 6 Symbol, 4 Topic; 23 CHANGES, 7 CITES, 3 NAMES, 1 SUPERSEDES, 4 RESTS_ON, 4 USES. No warning. |",
+      "action": "Updated documented node/edge counts and added the NAMES count assertion.",
+      "legacyPromiseViolated": false
+    },
+    {
+      "id": "A3",
+      "entryChanged": true,
+      "previous": "| A3 | `why src/tax.ts:taxRate` | Exit 0. The doc-comment tag \"the rate depends on the region ...\", the header tag \"tax lives apart from the cart ...\", then records in this order: ADR-0002 (superseded by ADR-0003, changed by `1c8e848`), note-1 (changed by `1c8e848`), ADR-0003 (changed by `d6d2473`). |",
+      "current": "| A3 | `why src/tax.ts:taxRate` | Exit 0. The doc-comment tag \"the rate depends on the region ...\", the header tag \"tax lives apart from the cart ... (ADR-0002)\". Records its tags name, in this order: ADR-0003 (\"named by: a decided: tag in its doc comment\", also cited by `78884f0`, \"that commit changed 1 symbol\"), then ADR-0002 (superseded by ADR-0003, \"named by: a decided: tag in the header of src/tax.ts\", also cited by `2a59506`, 2 symbols). Records linked only through a commit: note-1 (changed by `2a59506`; 2 symbols). Each record appears once. |",
+      "action": "Doc-comment direct records precede header direct records, then loose records; assert each reason, commit symbol count and single occurrence.",
+      "legacyPromiseViolated": false
+    },
+    {
+      "id": "A4",
+      "entryChanged": true,
+      "previous": "| A4 | `why src/tax.ts:taxOf` | ADR-0002 and note-1 only: `d6d2473` did not change `taxOf`'s code. |",
+      "current": "| A4 | `why src/tax.ts:taxOf` | Named by a tag: ADR-0002 (header). Linked only through a commit: ADR-0001 (`395b8c0`, 5 symbols), then note-1 (`2a59506`). Not ADR-0003: `78884f0` did not change `taxOf`'s code, and no tag of `taxOf` names it. |",
+      "action": "Header-direct ADR-0002 precedes loose ADR-0001 and note-1; regional ADR-0003 remains excluded.",
+      "legacyPromiseViolated": false
+    },
+    {
+      "id": "A5",
+      "entryChanged": true,
+      "previous": "| A5 | `impact ADR-0002` | Exit 0. ADR-0002 itself (superseded by ADR-0003; `taxRate` 1 user, `taxOf` 0 users), note-1 directly, note-2 through 1 other record (`formatCents`, 1 user). \"3 distinct symbols in all.\" |",
+      "current": "| A5 | `impact ADR-0002` | Exit 0. ADR-0002 itself (superseded by ADR-0003): no symbol tag names it, the file `src/tax.ts` whose header tag names it; commit `2a59506` (\"it changed 2 symbols\") and its symbols `taxRate` 1 user, `taxOf` 0 users. note-1 directly (no tag; `2a59506`, the same 2 symbols), note-2 through 1 other record (`73ebd46`, `formatCents` 1 user). \"3 distinct symbols in all: 0 named by a decided: tag, 3 reached only through a commit.\" |",
+      "action": "Assert header carrier, citing commit sizes, loose symbol users, supersedes metadata and split distinct-symbol total.",
+      "legacyPromiseViolated": false
+    },
+    {
+      "id": "A6",
+      "entryChanged": true,
+      "previous": "| A6 | `impact ADR-0001` | ADR-0001 with the symbols `b8dc7c9` and `21c643d` changed; ADR-0002, ADR-0003 rest on it directly; note-1 and note-2 through others. ADR-0003 is listed although it supersedes ADR-0002. |",
+      "current": "| A6 | `impact ADR-0001` | ADR-0001: the symbol whose tag names it, `cents` (2 users); 3 commits cite it, oldest first: `dfb4ff8` (3 symbols), `f85c3a6` (1 symbol), `395b8c0` (5 symbols); 4 other symbols they changed: `formatCents` (1 user; `395b8c0, dfb4ff8`), `total`, `round_cents`, `taxOf`; `cents` is not repeated among them. ADR-0002, ADR-0003 rest on it directly (ADR-0003: its tag names `taxRate`; \"That commit changed no other symbol that exists now.\"); note-1 and note-2 through others. ADR-0003 is listed although it supersedes ADR-0002. `73ebd46` is not among ADR-0001's commits. \"6 distinct symbols in all: 2 named by a decided: tag, 4 reached only through a commit.\" |",
+      "action": "Assert direct cents, intentional trailer commits with sizes, other changed symbols, no duplicate cents, dependency traversal and no free-text format commit in the base record.",
+      "legacyPromiseViolated": false
+    },
+    {
+      "id": "A8",
+      "entryChanged": true,
+      "previous": "| A8 | `carry src/money.ts:formatCents` | Commits `21c643d` then `b8dc7c9` (newest first); records ADR-0001 (changed by both) and note-2. |",
+      "current": "| A8 | `carry src/money.ts:formatCents` | Commits `395b8c0`, `73ebd46`, `dfb4ff8` (newest first); no tag names a record; records linked only through a commit: ADR-0001 (changed by `dfb4ff8`, 3 symbols, and `395b8c0`, 5 symbols) and note-2 (`73ebd46`, 1 symbol). |",
+      "action": "Updated three newest-first fixture commits; record links are loose with 3/5/1-symbol sizes.",
+      "legacyPromiseViolated": false
+    },
+    {
+      "id": "B12",
+      "entryChanged": false,
+      "previous": "| B12 | `restsOn` cycle (A rests on B, B on A) | Exit 0, no warning. `impact A` lists B at depth 1 and A once, at depth 0; it terminates. |",
+      "current": "| B12 | `restsOn` cycle (A rests on B, B on A) | Exit 0, no warning. `impact A` lists B at depth 1 and A once, at depth 0; it terminates. |",
+      "action": "Entry unchanged. The old fixture acquired three unresolved tag references and two unresolved trailers, which L4/L8 now require to warn. Isolate the same two-record restsOn cycle in committed code with no tags/trailers. Retain exit 0, stderr empty, A once at depth 0 and B at depth 1.",
+      "legacyPromiseViolated": false
+    },
+    {
+      "id": "B16",
+      "entryChanged": false,
+      "previous": "| B16 | A record with `date: null` | Loads. In `why`, it lists after every dated record, shown as `undated`. |",
+      "current": "| B16 | A record with `date: null` | Loads. In `why`, it lists after every dated record, shown as `undated`. |",
+      "action": "Entry unchanged. Its hard-coded citing commit disappeared with the fixture rewrite. Update only the shared fixture SHA; retain dated-before-undated record order and undated display.",
+      "legacyPromiseViolated": false
+    },
+    {
+      "id": "B28",
+      "entryChanged": true,
+      "previous": "| B28 | A merge commit (`81ce56b`) | Gets the CHANGES edges memod gives it (usually none); it is never cited unless a record names it. |",
+      "current": "| B28 | A merge commit (`13d52e8`) | Gets the CHANGES edges memod gives it (usually none); it is never cited unless a record names it. |",
+      "action": "Only the merge commit fixture id changed; retain the real-memod CHANGES comparison and no CITES unless explicitly listed.",
+      "legacyPromiseViolated": false
+    },
+    {
+      "id": "B29",
+      "entryChanged": false,
+      "previous": "| B29 | A symbol deleted in a later commit | Has no node; commits that changed it give no edge; a record citing only those commits has no CHANGES path, and `impact` says its commits changed no symbol that exists now. |",
+      "current": "| B29 | A symbol deleted in a later commit | Has no node; commits that changed it give no edge; a record citing only those commits has no CHANGES path, and `impact` says its commits changed no symbol that exists now. |",
+      "action": "Entry unchanged and still satisfied: no node/CHANGES target for the deleted symbol. Its old exact empty-answer sentence came from I3, which changed. Assert the cited commit changed 0 symbols and the new I3 sentence saying no current symbol changed.",
+      "legacyPromiseViolated": false
+    },
+    {
+      "id": "D13",
+      "entryChanged": true,
+      "previous": "| D13 | A renamed ADR file | The commits before the rename are cited too (`--follow`). |",
+      "current": "| D13 | An ADR file added, edited, renamed, edited again | The record cites only the commit that added the original file (`--follow`): not the edits, not the rename. |",
+      "action": "The contract now cites only the original file-addition commit, following rename. Exercise edits before/after rename and exclude each later commit.",
+      "legacyPromiseViolated": false
+    },
+    {
+      "id": "D14",
+      "entryChanged": true,
+      "previous": "| D14 | A commit message \"see ADR 4\" and one naming `0004-x.md` | Both cited by ADR-0004. \"ADR 40\" is not cited by ADR-0004. |",
+      "current": "| D14 | A commit message \"see ADR 4\", one naming `0004-x.md`, one \"See ADR 40\", none changing the ADR file | None is cited by ADR-0004: `decisions adr` cites only the commit that added the ADR's file (a commit names a record with a trailer, L8-L12). |",
+      "action": "The contract now rejects all three free-text message/file references. Retain the original addition as the only cite.",
+      "legacyPromiseViolated": false
+    },
+    {
+      "id": "I3",
+      "entryChanged": true,
+      "previous": "| I3 | A record that cites no commit, or whose commits changed no symbol | Exit 0; \"Its cited commits changed no symbol that exists now, or it cites no commit in this repo's history.\" |",
+      "current": "| I3 | A record that cites no commit, or whose commits changed no symbol | Exit 0. No commit: \"No commit in this repo's history cites it (a `Decision:` trailer, or a commit the record lists).\" Commits that changed no symbol: the commits with \"it changed 0 symbols\", then \"That commit changed no symbol that exists now.\" (or \"Those commits ...\"). |",
+      "action": "Assert distinct messages for no citing commit and a citing commit that changed zero current symbols; update the zero-change fixture commit id.",
+      "legacyPromiseViolated": false
+    },
+    {
+      "id": "I4",
+      "entryChanged": false,
+      "previous": "| I4 | A symbol reached through two records | Listed under each record, counted once in \"distinct symbols in all\". |",
+      "current": "| I4 | A symbol reached through two records | Listed under each record, counted once in \"distinct symbols in all\". |",
+      "action": "Entry unchanged. Retain both appearances under their records and distinct total of 3. A5 explicitly changed the total-line separator from a period to a colon followed by tag/commit counts.",
+      "legacyPromiseViolated": false
+    },
+    {
+      "id": "M3",
+      "entryChanged": true,
+      "previous": "| M3 | `read_cypher` with the `why` recipe and `{\"symbol\": \"src/tax.ts#taxRate\"}` | The rows that `whygraph why src/tax.ts:taxRate` renders (A3). |",
+      "current": "| M3 | `read_cypher` with the `why` recipe and `{\"symbol\": \"src/tax.ts#taxRate\"}` | The rows that `whygraph why src/tax.ts:taxRate` renders (A3): kinds `tag`, `file tag`, then `record` ADR-0003 (`named: [\"doc comment\"]`), ADR-0002 (`named: [\"file header\"]`), note-1 (`named: []`, `via` one commit with `symbols: 2`). |",
+      "action": "Assert the newly specified direct/doc, direct/header and loose record order, named arrays and structured via commit symbol counts; compare the resulting rows with CLI text.",
+      "legacyPromiseViolated": false
+    }
+  ],
+  "additionalUpdates": [
+    {
+      "id": "A7",
+      "entryChanged": true,
+      "action": "Added direct ADR-0001 provenance and the new two-commit order; retained topic/check/user assertions."
+    },
+    {
+      "id": "B4",
+      "entryChanged": true,
+      "action": "Added 0 NAMES/CITES and exactly 5 sorted unresolved tag/trailer warnings."
+    },
+    {
+      "id": "W12",
+      "entryChanged": false,
+      "action": "Strengthened the empty-answer check with the newly documented fourth part from whyAnswer postconditions; retained the no-decision final line."
+    }
+  ],
+  "newEntries": [
+    "D16",
+    "I5",
+    "L1",
+    "L2",
+    "L3",
+    "L4",
+    "L5",
+    "L6",
+    "L7",
+    "L8",
+    "L9",
+    "L10",
+    "L11",
+    "L12",
+    "L13",
+    "L14",
+    "L15",
+    "M5",
+    "W16"
+  ],
+  "newCoverage": "D16, W16, I5, M5 and L1 through L15 each have a real-CLI contract test, including real MCP stdio calls for M5.",
+  "preservedPureException": "B6 still uses synthetic colliding commit ids through public pure units; no real collision history was manufactured.",
+  "findings": [],
+  "scope": "Only test/ files changed; all test scratch and reports retained under ignored test-results/. Source plants remain outside the repo. No deletions or pushes."
+}
