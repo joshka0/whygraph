@@ -92,13 +92,16 @@ with an environment that holds only `HOME`, `USER`, `LANG`, `SHELL`, `TERM`,
 `bwrap ... -- /bin/bash -c '<command>'` (`confinement` in `run.mjs`):
 
 - `--unshare-net`: no network.
-- `/` read-only; writable only the repo copy and `<work>/tmp`, where the CLI
-  keeps its per-command files.
+- `/` read-only; writable only the repo copy, `<work>/tmp`, where the CLI
+  keeps its per-command files, and `/tmp`, which is `<work>/systmp`: one folder
+  for all Bash calls of the run. (Until the full run's first pass, `/tmp` was a
+  fresh tmpfs per call, so a file one call wrote there was gone in the next; the
+  two runs that hit this were counted invalid and run again.)
 - Hidden (an empty tmpfs or `/dev/null` over them): `~/.claude` except
   `~/.claude/shell-snapshots`, `~/.claude.json`, `~/.optmem`, `~/.local/bin`,
   `~/.config/spec-ledger`, `/home/dev/scratch`, the memod source repo, all of
-  `/tmp` except this run's work folder (so other runs and the moved fixture
-  records), and whygraph's `eval/`, `scripts/`, `test/`, `test-results/`,
+  the host's `/tmp` (so other runs and the moved fixture records; only this
+  run's work folder is mounted back), and whygraph's `eval/`, `scripts/`, `test/`, `test-results/`,
   `docs/`, `.git` and `README.md`. In `none`, the whole whygraph repo.
 - In every condition, `node src/main.ts report` and `node --test
   test/report.test.ts` run in a memod copy under this confinement (checked by

@@ -141,10 +141,11 @@ export function confinement(condition, work) {
   const home = process.env.HOME;
   const hide = [
     join(home, '.claude'), join(home, '.optmem'), join(home, '.local/bin'), join(home, '.config/spec-ledger'),
-    '/home/dev/scratch', '/home/dev/repos/personal/memod', '/tmp',
+    '/home/dev/scratch', '/home/dev/repos/personal/memod',
     ...(condition === 'none' ? [WHYGRAPH] : ['eval', 'scripts', 'test', 'test-results', 'docs', '.git'].map((d) => join(WHYGRAPH, d))),
   ];
-  const args = ['bwrap', '--die-with-parent', '--unshare-net', '--ro-bind', '/', '/', '--dev', '/dev', '--proc', '/proc'];
+  // One /tmp for every Bash call of the run, so a file a command leaves there is there for the next one.
+  const args = ['bwrap', '--die-with-parent', '--unshare-net', '--ro-bind', '/', '/', '--dev', '/dev', '--proc', '/proc', '--bind', join(work, 'systmp'), '/tmp'];
   for (const d of hide) if (existsSync(d)) args.push('--tmpfs', d);
   for (const f of [join(home, '.claude.json'), ...(condition === 'none' ? [] : [join(WHYGRAPH, 'README.md')])]) if (existsSync(f)) args.push('--ro-bind', '/dev/null', f);
   // The CLI sources a snapshot of the login shell from here before each command.
@@ -163,6 +164,7 @@ export function prepare(task, condition, work) {
   rmSync(work, { recursive: true, force: true });
   mkdirSync(join(work, 'bin'), { recursive: true });
   mkdirSync(join(work, 'tmp'), { recursive: true });
+  mkdirSync(join(work, 'systmp'), { recursive: true });
   const repo = join(work, 'repo');
   const fixture = task.repo === 'fixture' ? fixtureTemplate() : undefined;
   cpSync(fixture?.repo ?? memodTemplate(), repo, { recursive: true, verbatimSymlinks: true });
