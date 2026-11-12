@@ -12,8 +12,8 @@ importers:
         specifier: ^26.6.6
         version: 26.6.6
       memod:
-        specifier: git+file:///home/dev/repos/personal/memod#b78ab9c2cfa42bd8a6d26179a557c22f12708e05
-        version: git+file:///home/dev/repos/personal/memod#b78ab9c2cfa42bd8a6d26179a557c22f12708e05
+        specifier: git+file:///home/dev/repos/personal/memod#be6b12674ea4004f75abd5fa86d925255b3967f7
+        version: git+file:///home/dev/repos/personal/memod#be6b12674ea4004f75abd5fa86d925255b3967f7
       tsrs:
         specifier: 0.23.0-ts7.1.0-beta
         version: 0.23.0-ts7.1.0-beta
@@ -194,8 +194,8 @@ packages:
   '@types/node@26.6.6':
     resolution: {integrity: sha512-MzQj+8Kx3XI40OmUAE6Qoh58ZMNstNNMwn2nfd3qWsfe7nDNSqJNzes4njhz6AHwrSHOffSLwXU6yb474Q4aog==}
 
-  memod@git+file:///home/dev/repos/personal/memod#b78ab9c2cfa42bd8a6d26179a557c22f12708e05:
-    resolution: {commit: b78ab9c2cfa42bd8a6d26179a557c22f12708e05, repo: file:///home/dev/repos/personal/memod, type: git}
+  memod@git+file:///home/dev/repos/personal/memod#be6b12674ea4004f75abd5fa86d925255b3967f7:
+    resolution: {commit: be6b12674ea4004f75abd5fa86d925255b3967f7, repo: file:///home/dev/repos/personal/memod, type: git}
     version: 0.2.0
     engines: {node: '>=24'}
     hasBin: true
@@ -298,7 +298,7 @@ snapshots:
     dependencies:
       undici-types: 8.9.0
 
-  memod@git+file:///home/dev/repos/personal/memod#b78ab9c2cfa42bd8a6d26179a557c22f12708e05:
+  memod@git+file:///home/dev/repos/personal/memod#be6b12674ea4004f75abd5fa86d925255b3967f7:
     dependencies:
       oxc-parser: 0.157.0
 

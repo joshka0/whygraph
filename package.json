@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
-    "memod": "git+file:///home/dev/repos/personal/memod#b78ab9c2cfa42bd8a6d26179a557c22f12708e05",
+    "memod": "git+file:///home/dev/repos/personal/memod#be6b12674ea4004f75abd5fa86d925255b3967f7",
     "tsrs": "0.23.0-ts7.1.0-beta"
   }
 }
