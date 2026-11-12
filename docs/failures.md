@@ -167,3 +167,34 @@ commit). Unless the entry says otherwise, the repo has records `ADR-0004`
 | E3 | `help`, `--help`, no arguments | Exit 0, usage on stdout. |
 | E4 | Any relate call | Runs with `RELATE_TELEMETRY=0` and `DO_NOT_TRACK=1` in its environment (check with a `relate` wrapper that records its environment). |
 | E5 | A store that the relate on `PATH` cannot open (wrong version, damaged) | Exit 1: "relate query failed (exit n): <relate's message>". |
+
+## README check
+
+`node scripts/readme-check.mjs` reruns every ```` ```console ```` block of
+`README.md` and compares the output.
+
+| ID | Input | Required result |
+| --- | --- | --- |
+| R1 | The README as committed | Exit 0; stdout `<n> commands, 0 drifted`. |
+| R2 | One output line of a console block edited, or a command whose output changed (a fixture answer, a usage line) | Exit 1; stderr `drifted: $ <command>` with the README line and the line the run printed; stdout counts the drifted commands. |
+| R3 | A command that exits non-zero (`whygraph carry src/money.ts:cent`) | Its output ends with `[exit 3]`; a README without that line drifts. |
+| R4 | A console block after `<!-- readme-check: preview -->` | Not run. Its output must equal the first later run of the same command; when no later block runs that command, exit 1 naming it, before anything runs. |
+| R5 | Any run | HOME is a fresh folder, shown as `~` in outputs and removed afterwards, also when a command fails; the user's HOME and git config are not read or written. Every `relate` call sees `RELATE_TELEMETRY=0` and `DO_NOT_TRACK=1`. |
+| R6 | `--write` | Rewrites every console block's output from the run, keeping commands and preview markers; a check right after exits 0. |
+| R7 | An argument other than `--write` | Exit 2 with the usage. |
+| R8 | A console block whose first line is not a `$ ` command | The check fails with "a console block starts with output". |
+
+## Agent skill
+
+`skills/whygraph/SKILL.md` is what an agent reads; README "How an agent uses
+it" installs it.
+
+| ID | Input | Required result |
+| --- | --- | --- |
+| S1 | The skill file | Starts with YAML front matter holding `name: whygraph` (equal to its folder name) and a one-line `description` under 1024 characters that names carry, impact and why. |
+| S2 | Every `whygraph ...` command in the skill file | A command `whygraph help` lists, with arguments it accepts (exit 0, 1 or 3 on the fixture, never 2). |
+| S3 | The rule | The skill says: before you change a symbol, `carry`; when a decision changes, `impact`; when you wonder why, `why`. |
+| S4 | README install for Claude Code: `cp -r "$WHYGRAPH/skills/whygraph" .claude/skills/` in a repo | `.claude/skills/whygraph/SKILL.md` exists and Claude Code lists the skill `whygraph` in that repo. |
+| S5 | README install for Codex: `cp -r "$WHYGRAPH/skills/whygraph" .agents/skills/` in a repo | `.agents/skills/whygraph/SKILL.md` exists and Codex lists the skill `whygraph` in that repo. |
+| S6 | README `claude mcp add` and `codex mcp add` lines | Each writes a `whygraph` server entry that runs `relate serve --mcp stdio --database <absolute store> --read-only` with `RELATE_TELEMETRY=0` and `DO_NOT_TRACK=1`. |
+| S7 | `WHYGRAPH` unset; or the skill installed a second time | Unset: `cp` exits 1, "cannot stat '/skills/whygraph'", and installs nothing. Again: the folder's `SKILL.md` is overwritten in place, no nested `whygraph/whygraph`. |
