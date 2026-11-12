@@ -1,0 +1,344 @@
+209 finished runs
+
+Runs:
+  PASS  fixture-conflict-flat-rate__graph__r1  whygraph calls: 1
+  PASS  fixture-conflict-flat-rate__graph__r2  whygraph calls: 1
+  PASS  fixture-conflict-flat-rate__graph__r3  whygraph calls: 1
+  PASS  fixture-conflict-flat-rate__graph__r4  whygraph calls: 1
+  PASS  fixture-conflict-flat-rate__graph__r5  whygraph calls: 1
+  PASS  fixture-conflict-flat-rate__none__r1  whygraph calls: 0
+  PASS  fixture-conflict-flat-rate__none__r2  whygraph calls: 0
+  PASS  fixture-conflict-flat-rate__none__r3  whygraph calls: 0
+  FAIL  fixture-conflict-flat-rate__none__r4  whygraph calls: 0  (edited protected files: src/tax.ts)
+  PASS  fixture-conflict-flat-rate__none__r5  whygraph calls: 0
+  PASS  fixture-conflict-flat-rate__stub__r1  whygraph calls: 2
+  PASS  fixture-conflict-flat-rate__stub__r2  whygraph calls: 2
+  PASS  fixture-conflict-flat-rate__stub__r3  whygraph calls: 1
+  PASS  fixture-conflict-flat-rate__stub__r4  whygraph calls: 2
+  PASS  fixture-conflict-flat-rate__stub__r5  whygraph calls: 2
+  PASS  fixture-conflict-float-cents__graph__r1  whygraph calls: 1
+  PASS  fixture-conflict-float-cents__graph__r2  whygraph calls: 1
+  PASS  fixture-conflict-float-cents__graph__r3  whygraph calls: 1
+  PASS  fixture-conflict-float-cents__graph__r4  whygraph calls: 1
+  PASS  fixture-conflict-float-cents__graph__r5  whygraph calls: 1
+  PASS  fixture-conflict-float-cents__none__r1  whygraph calls: 0
+  PASS  fixture-conflict-float-cents__none__r2  whygraph calls: 0
+  PASS  fixture-conflict-float-cents__none__r3  whygraph calls: 0
+  PASS  fixture-conflict-float-cents__none__r4  whygraph calls: 0
+  PASS  fixture-conflict-float-cents__none__r5  whygraph calls: 0
+  PASS  fixture-conflict-float-cents__stub__r1  whygraph calls: 2
+  PASS  fixture-conflict-float-cents__stub__r2  whygraph calls: 1
+  PASS  fixture-conflict-float-cents__stub__r3  whygraph calls: 2
+  PASS  fixture-conflict-float-cents__stub__r4  whygraph calls: 2
+  PASS  fixture-conflict-float-cents__stub__r5  whygraph calls: 2
+  PASS  fixture-conflict-format-separators__graph__r1  whygraph calls: 1
+  PASS  fixture-conflict-format-separators__graph__r2  whygraph calls: 1
+  PASS  fixture-conflict-format-separators__graph__r3  whygraph calls: 1
+  PASS  fixture-conflict-format-separators__graph__r4  whygraph calls: 1
+  PASS  fixture-conflict-format-separators__graph__r5  whygraph calls: 1
+  FAIL  fixture-conflict-format-separators__none__r1  whygraph calls: 0  (names no required record; false mention: ADR-0001)
+  FAIL  fixture-conflict-format-separators__none__r2  whygraph calls: 0  (names no required record)
+  FAIL  fixture-conflict-format-separators__none__r3  whygraph calls: 0  (names no required record)
+  FAIL  fixture-conflict-format-separators__none__r4  whygraph calls: 0  (names no required record)
+  FAIL  fixture-conflict-format-separators__none__r5  whygraph calls: 0  (names no required record)
+  FAIL  fixture-conflict-format-separators__stub__r1  whygraph calls: 1  (names no required record; false mention: ADR-0001)
+  FAIL  fixture-conflict-format-separators__stub__r2  whygraph calls: 1  (names no required record)
+  FAIL  fixture-conflict-format-separators__stub__r3  whygraph calls: 1  (names no required record)
+  FAIL  fixture-conflict-format-separators__stub__r4  whygraph calls: 1  (names no required record; false mention: ADR-0001)
+  FAIL  fixture-conflict-format-separators__stub__r5  whygraph calls: 1  (names no required record)
+  PASS  fixture-conflict-tax-per-line__graph__r1  whygraph calls: 1
+  PASS  fixture-conflict-tax-per-line__graph__r2  whygraph calls: 1
+  PASS  fixture-conflict-tax-per-line__graph__r3  whygraph calls: 2
+  PASS  fixture-conflict-tax-per-line__graph__r4  whygraph calls: 2
+  PASS  fixture-conflict-tax-per-line__graph__r5  whygraph calls: 1
+  FAIL  fixture-conflict-tax-per-line__none__r1  whygraph calls: 0  (names no required record; edited protected files: src/tax.ts)
+  FAIL  fixture-conflict-tax-per-line__none__r2  whygraph calls: 0  (names no required record; edited protected files: src/tax.ts)
+  FAIL  fixture-conflict-tax-per-line__none__r3  whygraph calls: 0  (names no required record; edited protected files: src/tax.ts)
+  FAIL  fixture-conflict-tax-per-line__none__r4  whygraph calls: 0  (names no required record; edited protected files: src/tax.ts)
+  FAIL  fixture-conflict-tax-per-line__none__r5  whygraph calls: 0  (names no required record; edited protected files: src/tax.ts)
+  FAIL  fixture-conflict-tax-per-line__stub__r1  whygraph calls: 2  (names no required record)
+  FAIL  fixture-conflict-tax-per-line__stub__r2  whygraph calls: 2  (names no required record)
+  FAIL  fixture-conflict-tax-per-line__stub__r3  whygraph calls: 2  (names no required record; edited protected files: src/tax.ts)
+  FAIL  fixture-conflict-tax-per-line__stub__r4  whygraph calls: 2  (names no required record; edited protected files: src/tax.ts)
+  FAIL  fixture-conflict-tax-per-line__stub__r5  whygraph calls: 2  (names no required record; edited protected files: src/tax.ts)
+  PASS  fixture-control-rename-format__graph__r1  whygraph calls: 1
+  PASS  fixture-control-rename-format__graph__r2  whygraph calls: 1
+  PASS  fixture-control-rename-format__graph__r3  whygraph calls: 1
+  PASS  fixture-control-rename-format__graph__r4  whygraph calls: 1
+  PASS  fixture-control-rename-format__graph__r5  whygraph calls: 1
+  PASS  fixture-control-rename-format__none__r1  whygraph calls: 0
+  PASS  fixture-control-rename-format__none__r2  whygraph calls: 0
+  PASS  fixture-control-rename-format__none__r3  whygraph calls: 0
+  PASS  fixture-control-rename-format__none__r4  whygraph calls: 0
+  PASS  fixture-control-rename-format__none__r5  whygraph calls: 0
+  PASS  fixture-control-rename-format__stub__r1  whygraph calls: 2
+  PASS  fixture-control-rename-format__stub__r2  whygraph calls: 1
+  PASS  fixture-control-rename-format__stub__r3  whygraph calls: 2
+  PASS  fixture-control-rename-format__stub__r4  whygraph calls: 1
+  PASS  fixture-control-rename-format__stub__r5  whygraph calls: 1
+  PASS  fixture-edit-region-comment__graph__r1  whygraph calls: 1
+  PASS  fixture-edit-region-comment__graph__r2  whygraph calls: 1
+  PASS  fixture-edit-region-comment__graph__r3  whygraph calls: 1
+  PASS  fixture-edit-region-comment__graph__r4  whygraph calls: 1
+  PASS  fixture-edit-region-comment__graph__r5  whygraph calls: 1
+  FAIL  fixture-edit-region-comment__none__r1  whygraph calls: 0  (the requested change is not in the diff)
+  FAIL  fixture-edit-region-comment__none__r2  whygraph calls: 0  (the requested change is not in the diff)
+  PASS  fixture-edit-region-comment__none__r3  whygraph calls: 0
+  FAIL  fixture-edit-region-comment__none__r4  whygraph calls: 0  (the requested change is not in the diff)
+  FAIL  fixture-edit-region-comment__none__r5  whygraph calls: 0  (the requested change is not in the diff)
+  PASS  fixture-edit-region-comment__stub__r1  whygraph calls: 1
+  PASS  fixture-edit-region-comment__stub__r2  whygraph calls: 1
+  PASS  fixture-edit-region-comment__stub__r3  whygraph calls: 1
+  PASS  fixture-edit-region-comment__stub__r4  whygraph calls: 1
+  PASS  fixture-edit-region-comment__stub__r5  whygraph calls: 1
+  PASS  fixture-impact-decimal-strings__graph__r1  whygraph calls: 2
+  PASS  fixture-impact-decimal-strings__graph__r2  whygraph calls: 2
+  PASS  fixture-impact-decimal-strings__graph__r3  whygraph calls: 2
+  PASS  fixture-impact-decimal-strings__graph__r4  whygraph calls: 2
+  FAIL  fixture-impact-decimal-strings__graph__r5  whygraph calls: 2  (precision 0.88 < 1)
+  FAIL  fixture-impact-decimal-strings__none__r1  whygraph calls: 0  (precision 0.88 < 1)
+  PASS  fixture-impact-decimal-strings__none__r2  whygraph calls: 0
+  FAIL  fixture-impact-decimal-strings__none__r3  whygraph calls: 0  (precision 0.88 < 1)
+  FAIL  fixture-impact-decimal-strings__none__r4  whygraph calls: 0  (precision 0.88 < 1)
+  PASS  fixture-impact-decimal-strings__none__r5  whygraph calls: 0
+  PASS  fixture-impact-decimal-strings__stub__r1  whygraph calls: 1
+  PASS  fixture-impact-decimal-strings__stub__r2  whygraph calls: 2
+  PASS  fixture-impact-decimal-strings__stub__r3  whygraph calls: 3
+  PASS  fixture-impact-decimal-strings__stub__r4  whygraph calls: 2
+  PASS  fixture-impact-decimal-strings__stub__r5  whygraph calls: 1
+  PASS  fixture-impact-note-1-reversed__graph__r1  whygraph calls: 2
+  PASS  fixture-impact-note-1-reversed__graph__r2  whygraph calls: 2
+  PASS  fixture-impact-note-1-reversed__graph__r3  whygraph calls: 2
+  PASS  fixture-impact-note-1-reversed__graph__r4  whygraph calls: 3
+  PASS  fixture-impact-note-1-reversed__graph__r5  whygraph calls: 3
+  FAIL  fixture-impact-note-1-reversed__none__r1  whygraph calls: 0  (recall 0.50 < 1)
+  FAIL  fixture-impact-note-1-reversed__none__r2  whygraph calls: 0  (recall 0.75 < 1)
+  FAIL  fixture-impact-note-1-reversed__none__r3  whygraph calls: 0  (recall 0.75 < 1)
+  FAIL  fixture-impact-note-1-reversed__none__r4  whygraph calls: 0  (recall 0.75 < 1)
+  FAIL  fixture-impact-note-1-reversed__none__r5  whygraph calls: 0  (recall 0.50 < 1)
+  FAIL  fixture-impact-note-1-reversed__stub__r1  whygraph calls: 2  (recall 0.50 < 1)
+  FAIL  fixture-impact-note-1-reversed__stub__r2  whygraph calls: 1  (recall 0.50 < 1)
+  FAIL  fixture-impact-note-1-reversed__stub__r3  whygraph calls: 1  (recall 0.50 < 1)
+  FAIL  fixture-impact-note-1-reversed__stub__r4  whygraph calls: 2  (recall 0.50 < 1)
+  FAIL  fixture-impact-note-1-reversed__stub__r5  whygraph calls: 3  (recall 0.50 < 1)
+  PASS  memod-conflict-append-only-lock__graph__r1  whygraph calls: 1
+  PASS  memod-conflict-append-only-lock__graph__r2  whygraph calls: 1
+  PASS  memod-conflict-append-only-lock__graph__r3  whygraph calls: 1
+  PASS  memod-conflict-append-only-lock__graph__r4  whygraph calls: 1
+  PASS  memod-conflict-append-only-lock__graph__r5  whygraph calls: 1
+  PASS  memod-conflict-append-only-lock__none__r1  whygraph calls: 0
+  PASS  memod-conflict-append-only-lock__none__r2  whygraph calls: 0
+  PASS  memod-conflict-append-only-lock__none__r3  whygraph calls: 0
+  PASS  memod-conflict-append-only-lock__none__r4  whygraph calls: 0
+  PASS  memod-conflict-append-only-lock__none__r5  whygraph calls: 0
+  PASS  memod-conflict-append-only-lock__stub__r1  whygraph calls: 1
+  PASS  memod-conflict-append-only-lock__stub__r2  whygraph calls: 1
+  PASS  memod-conflict-append-only-lock__stub__r3  whygraph calls: 1
+  PASS  memod-conflict-append-only-lock__stub__r4  whygraph calls: 1
+  PASS  memod-conflict-append-only-lock__stub__r5  whygraph calls: 2
+  PASS  memod-conflict-cache-resolved-symbols__graph__r1  whygraph calls: 2
+  PASS  memod-conflict-cache-resolved-symbols__graph__r2  whygraph calls: 2
+  PASS  memod-conflict-cache-resolved-symbols__graph__r3  whygraph calls: 2
+  PASS  memod-conflict-cache-resolved-symbols__graph__r4  whygraph calls: 1
+  PASS  memod-conflict-cache-resolved-symbols__graph__r5  whygraph calls: 1
+  PASS  memod-conflict-cache-resolved-symbols__none__r1  whygraph calls: 0
+  PASS  memod-conflict-cache-resolved-symbols__none__r2  whygraph calls: 0
+  FAIL  memod-conflict-cache-resolved-symbols__none__r3  whygraph calls: 0  (names no required record)
+  PASS  memod-conflict-cache-resolved-symbols__none__r4  whygraph calls: 0
+  FAIL  memod-conflict-cache-resolved-symbols__none__r5  whygraph calls: 0  (names no required record)
+  FAIL  memod-conflict-cache-resolved-symbols__stub__r1  whygraph calls: 3  (names no required record)
+  PASS  memod-conflict-cache-resolved-symbols__stub__r2  whygraph calls: 3
+  FAIL  memod-conflict-cache-resolved-symbols__stub__r3  whygraph calls: 3  (names no required record)
+  FAIL  memod-conflict-cache-resolved-symbols__stub__r4  whygraph calls: 2  (names no required record)
+  FAIL  memod-conflict-cache-resolved-symbols__stub__r5  whygraph calls: 3  (names no required record)
+  PASS  memod-conflict-graph-decision-ids__graph__r1  whygraph calls: 1
+  PASS  memod-conflict-graph-decision-ids__graph__r2  whygraph calls: 2
+  PASS  memod-conflict-graph-decision-ids__graph__r3  whygraph calls: 2
+  PASS  memod-conflict-graph-decision-ids__graph__r4  whygraph calls: 2
+  FAIL  memod-conflict-graph-decision-ids__graph__r5  whygraph calls: 2  (edited protected files: src/graph.pure.ts, test/intent-graph-support.ts, test/intent-graph.pure.test.ts)
+  PASS  memod-conflict-graph-decision-ids__none__r1  whygraph calls: 0
+  FAIL  memod-conflict-graph-decision-ids__none__r2  whygraph calls: 0  (names no required record; edited protected files: src/graph.pure.ts, test/intent-graph-support.ts, test/intent-graph.pure.test.ts)
+  PASS  memod-conflict-graph-decision-ids__none__r4  whygraph calls: 0
+  PASS  memod-conflict-graph-decision-ids__none__r5  whygraph calls: 0
+  PASS  memod-conflict-graph-decision-ids__stub__r1  whygraph calls: 1
+  FAIL  memod-conflict-graph-decision-ids__stub__r2  whygraph calls: 2  (names no required record; edited protected files: src/graph.pure.ts, test/intent-graph-support.ts, test/intent-graph.pure.test.ts)
+  FAIL  memod-conflict-graph-decision-ids__stub__r3  whygraph calls: 2  (names no required record; edited protected files: src/graph.pure.ts, test/intent-graph-support.ts, test/intent-graph.pure.test.ts)
+  PASS  memod-conflict-graph-decision-ids__stub__r4  whygraph calls: 1
+  PASS  memod-conflict-graph-decision-ids__stub__r5  whygraph calls: 2
+  PASS  memod-conflict-report-build-gate__graph__r1  whygraph calls: 4
+  PASS  memod-conflict-report-build-gate__graph__r2  whygraph calls: 2
+  PASS  memod-conflict-report-build-gate__graph__r3  whygraph calls: 3
+  PASS  memod-conflict-report-build-gate__graph__r4  whygraph calls: 2
+  PASS  memod-conflict-report-build-gate__graph__r5  whygraph calls: 3
+  FAIL  memod-conflict-report-build-gate__none__r1  whygraph calls: 0  (names no required record; edited protected files: src/cli.ts, test/cli.test.ts, test/report.test.ts)
+  FAIL  memod-conflict-report-build-gate__none__r2  whygraph calls: 0  (names no required record; edited protected files: src/cli.ts, test/cli.test.ts, test/report.test.ts)
+  FAIL  memod-conflict-report-build-gate__none__r3  whygraph calls: 0  (names no required record; edited protected files: src/cli.ts, test/report.test.ts)
+  FAIL  memod-conflict-report-build-gate__none__r4  whygraph calls: 0  (names no required record; edited protected files: src/cli.ts, test/cli.test.ts, test/report.test.ts)
+  FAIL  memod-conflict-report-build-gate__none__r5  whygraph calls: 0  (names no required record; edited protected files: src/cli.ts, test/cli.test.ts, test/report.test.ts)
+  FAIL  memod-conflict-report-build-gate__stub__r1  whygraph calls: 2  (names no required record; edited protected files: src/cli.ts, test/report.test.ts)
+  FAIL  memod-conflict-report-build-gate__stub__r2  whygraph calls: 4  (names no required record; edited protected files: src/cli.ts, test/cli.test.ts, test/report.test.ts)
+  FAIL  memod-conflict-report-build-gate__stub__r3  whygraph calls: 2  (names no required record; edited protected files: src/cli.ts, test/cli.test.ts, test/report.test.ts)
+  FAIL  memod-conflict-report-build-gate__stub__r4  whygraph calls: 3  (names no required record; edited protected files: src/cli.ts, test/cli.test.ts, test/report.test.ts)
+  FAIL  memod-conflict-report-build-gate__stub__r5  whygraph calls: 3  (names no required record; edited protected files: src/cli.ts, test/cli.test.ts)
+  PASS  memod-control-percent-doc-comment__graph__r1  whygraph calls: 1
+  PASS  memod-control-percent-doc-comment__graph__r2  whygraph calls: 1
+  PASS  memod-control-percent-doc-comment__graph__r3  whygraph calls: 1
+  PASS  memod-control-percent-doc-comment__graph__r4  whygraph calls: 1
+  PASS  memod-control-percent-doc-comment__graph__r5  whygraph calls: 1
+  PASS  memod-control-percent-doc-comment__none__r1  whygraph calls: 0
+  PASS  memod-control-percent-doc-comment__none__r2  whygraph calls: 0
+  PASS  memod-control-percent-doc-comment__none__r3  whygraph calls: 0
+  PASS  memod-control-percent-doc-comment__none__r4  whygraph calls: 0
+  PASS  memod-control-percent-doc-comment__none__r5  whygraph calls: 0
+  PASS  memod-control-percent-doc-comment__stub__r1  whygraph calls: 1
+  PASS  memod-control-percent-doc-comment__stub__r2  whygraph calls: 1
+  PASS  memod-control-percent-doc-comment__stub__r3  whygraph calls: 2
+  PASS  memod-control-percent-doc-comment__stub__r4  whygraph calls: 2
+  PASS  memod-control-percent-doc-comment__stub__r5  whygraph calls: 1
+  PASS  memod-impact-types-require-topics__graph__r1  whygraph calls: 1
+  FAIL  memod-impact-types-require-topics__graph__r2  whygraph calls: 0  (recall 0.67 < 1; precision 0.50 < 0.6)
+  PASS  memod-impact-types-require-topics__graph__r3  whygraph calls: 0
+  PASS  memod-impact-types-require-topics__graph__r4  whygraph calls: 2
+  PASS  memod-impact-types-require-topics__graph__r5  whygraph calls: 2
+  PASS  memod-impact-types-require-topics__none__r1  whygraph calls: 0
+  FAIL  memod-impact-types-require-topics__none__r2  whygraph calls: 0  (recall 0.33 < 1; precision 0.50 < 0.6)
+  FAIL  memod-impact-types-require-topics__none__r3  whygraph calls: 0  (recall 0.67 < 1)
+  FAIL  memod-impact-types-require-topics__none__r4  whygraph calls: 0  (recall 0.00 < 1; precision 0.00 < 0.6)
+  PASS  memod-impact-types-require-topics__none__r5  whygraph calls: 0
+  PASS  memod-impact-types-require-topics__stub__r1  whygraph calls: 0
+  PASS  memod-impact-types-require-topics__stub__r2  whygraph calls: 1
+  PASS  memod-impact-types-require-topics__stub__r3  whygraph calls: 0
+  FAIL  memod-impact-types-require-topics__stub__r4  whygraph calls: 1  (recall 0.67 < 1)
+  PASS  memod-impact-types-require-topics__stub__r5  whygraph calls: 1
+
+=== All tasks
+
+Pass rate per condition:
+  none    51%  (69 runs, 6387965 tokens)
+  graph   96%  (70 runs, 4819322 tokens)
+  stub    61%  (70 runs, 6429486 tokens)
+
+Pass rate per task (none graph stub):
+   80% 100% 100%  fixture-conflict-flat-rate
+  100% 100% 100%  fixture-conflict-float-cents
+    0% 100%   0%  fixture-conflict-format-separators
+    0% 100%   0%  fixture-conflict-tax-per-line
+  100% 100% 100%  fixture-control-rename-format
+   20% 100% 100%  fixture-edit-region-comment
+   40%  80% 100%  fixture-impact-decimal-strings
+    0% 100%   0%  fixture-impact-note-1-reversed
+  100% 100% 100%  memod-conflict-append-only-lock
+   60% 100%  20%  memod-conflict-cache-resolved-symbols
+   75%  80%  60%  memod-conflict-graph-decision-ids
+    0% 100%   0%  memod-conflict-report-build-gate
+  100% 100% 100%  memod-control-percent-doc-comment
+   40%  80%  80%  memod-impact-types-require-topics
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: 0.45 [0.24, 0.67] over 14 tasks
+  graph - stub: 0.34 [0.11, 0.60] over 14 tasks
+
+False-objection rate on control tasks:
+  none     0%  (10 runs)
+  graph    0%  (10 runs)
+  stub     0%  (10 runs)
+
+=== Without the tasks that shaped the tool (memod-conflict-report-build-gate)
+
+Pass rate per condition:
+  none    55%  (64 runs, 5672259 tokens)
+  graph   95%  (65 runs, 4329837 tokens)
+  stub    66%  (65 runs, 5764101 tokens)
+
+Pass rate per task (none graph stub):
+   80% 100% 100%  fixture-conflict-flat-rate
+  100% 100% 100%  fixture-conflict-float-cents
+    0% 100%   0%  fixture-conflict-format-separators
+    0% 100%   0%  fixture-conflict-tax-per-line
+  100% 100% 100%  fixture-control-rename-format
+   20% 100% 100%  fixture-edit-region-comment
+   40%  80% 100%  fixture-impact-decimal-strings
+    0% 100%   0%  fixture-impact-note-1-reversed
+  100% 100% 100%  memod-conflict-append-only-lock
+   60% 100%  20%  memod-conflict-cache-resolved-symbols
+   75%  80%  60%  memod-conflict-graph-decision-ids
+  100% 100% 100%  memod-control-percent-doc-comment
+   40%  80%  80%  memod-impact-types-require-topics
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: 0.40 [0.20, 0.62] over 13 tasks
+  graph - stub: 0.29 [0.06, 0.54] over 13 tasks
+
+False-objection rate on control tasks:
+  none     0%  (10 runs)
+  graph    0%  (10 runs)
+  stub     0%  (10 runs)
+
+=== Unscored runs (an agent timed out twice; not in any rate above): 1
+  memod-conflict-graph-decision-ids__none__r3  (exit 143, 1200 s)
+
+Sensitivity: the same paired differences with every unscored run counted as FAIL:
+  All tasks: graph - none: 0.46 [0.24, 0.67] over 14 tasks; graph - stub: 0.34 [0.11, 0.60] over 14 tasks
+  Without the tasks that shaped the tool: graph - none: 0.42 [0.22, 0.63] over 13 tasks; graph - stub: 0.29 [0.06, 0.54] over 13 tasks
+
+=== Post hoc, added after the results were seen: without the fixture tasks whose records exist only outside the repo
+(fixture-conflict-format-separators, fixture-conflict-tax-per-line, fixture-impact-note-1-reversed: no agent without the graph can name their records, so they score 0/100/0 by design and carry much of the headline.)
+
+=== Post hoc: without the outside-only tasks
+
+Pass rate per condition:
+  none    65%  (54 runs, 5961163 tokens)
+  graph   95%  (55 runs, 4259082 tokens)
+  stub    78%  (55 runs, 5903519 tokens)
+
+Pass rate per task (none graph stub):
+   80% 100% 100%  fixture-conflict-flat-rate
+  100% 100% 100%  fixture-conflict-float-cents
+  100% 100% 100%  fixture-control-rename-format
+   20% 100% 100%  fixture-edit-region-comment
+   40%  80% 100%  fixture-impact-decimal-strings
+  100% 100% 100%  memod-conflict-append-only-lock
+   60% 100%  20%  memod-conflict-cache-resolved-symbols
+   75%  80%  60%  memod-conflict-graph-decision-ids
+    0% 100%   0%  memod-conflict-report-build-gate
+  100% 100% 100%  memod-control-percent-doc-comment
+   40%  80%  80%  memod-impact-types-require-topics
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: 0.30 [0.11, 0.51] over 11 tasks
+  graph - stub: 0.16 [-0.02, 0.40] over 11 tasks
+
+False-objection rate on control tasks:
+  none     0%  (10 runs)
+  graph    0%  (10 runs)
+  stub     0%  (10 runs)
+
+=== Post hoc: without the outside-only tasks and the tasks that shaped the tool (memod-conflict-report-build-gate)
+
+Pass rate per condition:
+  none    71%  (49 runs, 5245457 tokens)
+  graph   94%  (50 runs, 3769597 tokens)
+  stub    86%  (50 runs, 5238134 tokens)
+
+Pass rate per task (none graph stub):
+   80% 100% 100%  fixture-conflict-flat-rate
+  100% 100% 100%  fixture-conflict-float-cents
+  100% 100% 100%  fixture-control-rename-format
+   20% 100% 100%  fixture-edit-region-comment
+   40%  80% 100%  fixture-impact-decimal-strings
+  100% 100% 100%  memod-conflict-append-only-lock
+   60% 100%  20%  memod-conflict-cache-resolved-symbols
+   75%  80%  60%  memod-conflict-graph-decision-ids
+  100% 100% 100%  memod-control-percent-doc-comment
+   40%  80%  80%  memod-impact-types-require-topics
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: 0.23 [0.08, 0.40] over 10 tasks
+  graph - stub: 0.08 [-0.04, 0.26] over 10 tasks
+
+False-objection rate on control tasks:
+  none     0%  (10 runs)
+  graph    0%  (10 runs)
+  stub     0%  (10 runs)
+
+Total tokens: 17636773

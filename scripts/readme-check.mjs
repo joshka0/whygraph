@@ -13,6 +13,11 @@
  * output shows that HOME as `~`. PATH starts with bin/ and node_modules/.bin, as README's
  * setup sets it. ```sh blocks are not run.
  *
+ * A ```text block right after the line `<!-- readme-check: score <file> -->` quotes a score file:
+ * each `===` line must be a line of the file, and each line under it a line of the file's part
+ * from that `===` line to the next one. The README section that holds the block may hold no
+ * digit outside it, so every number in the section comes from the file.
+ *
  * A console block right after the line `<!-- readme-check: preview -->` shows a command
  * before the README reaches it: it does not run, and each of its commands must appear
  * again later, where its output must match the run.
@@ -44,6 +49,35 @@ function readCommands(text) {
     }
   }
   return commands.map(c => ({ ...c, expected: c.expected.join('\n').trimEnd() }));
+}
+
+const SCORE = /^<!-- readme-check: score (\S+) -->\n```text\n([\s\S]*?)^```$/gm;
+
+/**
+ * owns: [[whygraph-readme-check]]
+ * post: one message per line of a score block that its score file does not hold in that place, and per README section that holds a score block and a digit outside it; empty when all match.
+ */
+function checkScores(text) {
+  const errors = [];
+  for (const m of text.matchAll(SCORE)) {
+    const file = readFileSync(join(root, m[1]), 'utf8').split('\n');
+    let part;
+    for (const line of m[2].replace(/\n$/, '').split('\n')) {
+      if (line.startsWith('===')) {
+        const at = file.indexOf(line);
+        if (at < 0) { errors.push(`${m[1]} has no line: ${line}`); part = []; continue; }
+        const end = file.findIndex((l, i) => i > at && l.startsWith('==='));
+        part = file.slice(at + 1, end < 0 ? file.length : end);
+      } else if (part === undefined) errors.push(`a score block starts with a line that is not an === line: ${line}`);
+      else if (!part.includes(line)) errors.push(`${m[1]} holds no such line in its part: ${line}`);
+    }
+    const start = text.lastIndexOf('\n## ', m.index);
+    const next = text.indexOf('\n## ', m.index);
+    const section = text.slice(start, next < 0 ? text.length : next).replace(m[0], '');
+    const digit = section.split('\n').find((l) => /\d/.test(l));
+    if (digit !== undefined) errors.push(`a section with a score block holds a number outside it: ${digit}`);
+  }
+  return errors;
 }
 
 /** Runs `commands` in one bash session and returns what each printed. */
@@ -93,6 +127,8 @@ if (args.some(a => a !== '--write')) {
 }
 const write = args.includes('--write');
 const text = readFileSync(readme, 'utf8');
+const scoreErrors = checkScores(text);
+for (const e of scoreErrors) console.error(`score: ${e}`);
 const commands = readCommands(text);
 const runs = commands.filter(c => !c.preview);
 /** The first run of the same command after the preview at index `i`. */
@@ -126,5 +162,5 @@ if (write) {
   const drifted = commands.filter((c, i) => c.expected !== actual[i]);
   for (const c of drifted) console.error(`drifted: $ ${c.command}\n${diff(c.expected, actual[commands.indexOf(c)])}`);
   console.log(`${commands.length} commands, ${drifted.length} drifted`);
-  process.exitCode = drifted.length === 0 ? 0 : 1;
+  process.exitCode = drifted.length === 0 && scoreErrors.length === 0 ? 0 : 1;
 }

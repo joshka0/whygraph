@@ -311,6 +311,86 @@ whygraph: src/money.ts has no symbol cent. Close: src/money.ts:cents, src/money.
 [exit 3]
 ```
 
+## What a trial measured
+
+Does an agent with the why graph handle change requests better? The trial in
+`eval/` asks. Claude Code ran headless with one model (its `sonnet` alias) on
+fourteen change requests: eight on the fixture shop and six on memod. Some go
+against a recorded decision, some ask what a reversed decision affects, and
+some are harmless controls. Each request ran five times in each of three
+conditions, every run in a fresh copy of the repo:
+
+- **none**: the repo only.
+- **graph**: the repo, a fresh store, the skill and the rule section, as this
+  README installs them.
+- **stub**: the same skill and rule, but `whygraph` answers "no result". It
+  separates what the graph says from the caution the rule text causes.
+
+A conflict request passes when the agent names the decision and either leaves
+the code alone or amends the record along with the change. An impact request
+passes when the agent lists the symbols that change. A control passes when the
+agent makes the change without objecting. `eval/README.md` has the design and
+the rules.
+
+These are the scorer's numbers, copied from `eval/score.txt`: the pass rate per
+condition, then the mean over tasks of the per-task difference in pass rate,
+with a bootstrap interval over tasks.
+
+<!-- readme-check: score eval/score.txt -->
+```text
+=== All tasks
+  none    51%  (69 runs, 6387965 tokens)
+  graph   96%  (70 runs, 4819322 tokens)
+  stub    61%  (70 runs, 6429486 tokens)
+  graph - none: 0.45 [0.24, 0.67] over 14 tasks
+  graph - stub: 0.34 [0.11, 0.60] over 14 tasks
+=== Without the tasks that shaped the tool (memod-conflict-report-build-gate)
+  none    55%  (64 runs, 5672259 tokens)
+  graph   95%  (65 runs, 4329837 tokens)
+  stub    66%  (65 runs, 5764101 tokens)
+  graph - none: 0.40 [0.20, 0.62] over 13 tasks
+  graph - stub: 0.29 [0.06, 0.54] over 13 tasks
+=== Unscored runs (an agent timed out twice; not in any rate above): 1
+Sensitivity: the same paired differences with every unscored run counted as FAIL:
+  All tasks: graph - none: 0.46 [0.24, 0.67] over 14 tasks; graph - stub: 0.34 [0.11, 0.60] over 14 tasks
+  Without the tasks that shaped the tool: graph - none: 0.42 [0.22, 0.63] over 13 tasks; graph - stub: 0.29 [0.06, 0.54] over 13 tasks
+=== Post hoc: without the outside-only tasks
+  none    65%  (54 runs, 5961163 tokens)
+  graph   95%  (55 runs, 4259082 tokens)
+  stub    78%  (55 runs, 5903519 tokens)
+  graph - none: 0.30 [0.11, 0.51] over 11 tasks
+  graph - stub: 0.16 [-0.02, 0.40] over 11 tasks
+=== Post hoc: without the outside-only tasks and the tasks that shaped the tool (memod-conflict-report-build-gate)
+  none    71%  (49 runs, 5245457 tokens)
+  graph   94%  (50 runs, 3769597 tokens)
+  stub    86%  (50 runs, 5238134 tokens)
+  graph - none: 0.23 [0.08, 0.40] over 10 tasks
+  graph - stub: 0.08 [-0.04, 0.26] over 10 tasks
+```
+
+The "Post hoc" groups were added after the results were seen. Three fixture
+requests rest on design notes that live only outside the repo, so no agent
+without the graph can name them. By design they pass in graph every time and
+never in none or stub, and they carry much of the headline. Without them the
+graph still leads none, but the interval of its lead over stub reaches below
+zero.
+
+What this does not show:
+
+- One model, one prompt wrapper, and five repeats per cell: a single run moves
+  a cell a lot.
+- The tool's author chose the eight fixture requests. An agent that knew
+  nothing about whygraph chose the six memod requests blind.
+- The pilot request (memod's report build gate) changed the tool. Graph failed
+  it because `carry` did not show a decision one step away, so `carry` was
+  changed to show it. Its numbers are not independent; the second and fourth
+  groups above leave it out.
+- The verdicts are mechanical, from the reply's words and the diff, not a
+  review of the change.
+- A runner bug was fixed after the run: it kept only the last of a session's
+  replies. The fix rescored every run and changed six verdicts, all from fail
+  to pass, four of them in the graph condition.
+
 ## Your own repo
 
 whygraph runs on any git repo that memod reads (TypeScript, JavaScript,

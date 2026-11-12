@@ -17,6 +17,12 @@ const here = fileURLToPath(new URL('./', import.meta.url));
 
 /** A Bash command that runs whygraph as a command word, not one that only names a path such as /tmp/whygraph-eval. */
 const WHYGRAPH_CALL = /(^|[;&|(\n]|\s)whygraph\s+(carry|why|impact|build|decisions|mcp|help)\b/;
+/**
+ * The fixture tasks whose records exist only outside the repo: none and stub cannot name them, so they
+ * score 0/100/0 by design. The post hoc block leaves them out; it was added after the results were seen.
+ */
+const OUTSIDE_ONLY = ['fixture-conflict-format-separators', 'fixture-conflict-tax-per-line', 'fixture-impact-note-1-reversed'];
+
 /** Words that make a sentence an objection when it also names a record. */
 const OBJECTION = /\b(conflicts?|conflicting|contradicts?|contradicting|against|violat\w*|revers\w*|overrid\w*|undo(es|ing)?|breaks?|breaking|incompatible|inconsistent)\b/gi;
 /** A negation in the 30 characters before an objection word cancels it ("does not conflict"). */
@@ -291,6 +297,11 @@ function main(argv) {
     console.log(`  All tasks: ${headline(all, tasks)}`);
     if (shaped.length > 0) console.log(`  Without the tasks that shaped the tool: ${headline(all.filter((r) => !shaped.includes(r.task.id)), tasks)}`);
   }
+  console.log('\n=== Post hoc, added after the results were seen: without the fixture tasks whose records exist only outside the repo');
+  console.log(`(${OUTSIDE_ONLY.join(', ')}: no agent without the graph can name their records, so they score 0/100/0 by design and carry much of the headline.)`);
+  const reachable = rows.filter((r) => !OUTSIDE_ONLY.includes(r.task.id));
+  rates(reachable, tasks, 'Post hoc: without the outside-only tasks');
+  if (shaped.length > 0) rates(reachable.filter((r) => !shaped.includes(r.task.id)), tasks, `Post hoc: without the outside-only tasks and the tasks that shaped the tool (${shaped.join(', ')})`);
   const total = rows.reduce((a, r) => a + (r.meta.tokens?.total ?? 0), 0);
   console.log(`\nTotal tokens: ${total}`);
   return 0;

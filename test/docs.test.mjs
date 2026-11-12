@@ -24,7 +24,7 @@ function consoleCommands(text) {
 function block(command, output = '') { return `\`\`\`console\n$ ${command}\n${output === '' ? '' : output + '\n'}\`\`\`\n`; }
 function cloneSubject(s, name = 'subject') {
   const folder = join(s.dir, name); mkdirSync(folder);
-  for (const path of ['src', 'recipes', 'scripts', 'bin', 'skills', 'README.md', 'package.json']) {
+  for (const path of ['src', 'recipes', 'scripts', 'bin', 'skills', 'README.md', 'package.json', 'eval/score.txt']) {
     cpSync(join(h.subject, path), join(folder, path), { recursive: true, verbatimSymlinks: true });
   }
   symlinkSync(join(h.root, 'node_modules'), join(folder, 'node_modules'));

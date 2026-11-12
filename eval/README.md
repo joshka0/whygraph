@@ -215,6 +215,26 @@ paired differences `graph - none` and `graph - stub` (per-task rate
 differences, averaged over tasks) with a bootstrap 95% interval over tasks, the
 false-objection rate on controls, and the tokens.
 
+## Post hoc analysis
+
+Added after the results were seen, and marked so in the scorer's output: the
+same rates and paired differences without the three fixture tasks whose
+records exist only outside the repo (`fixture-conflict-format-separators`,
+`fixture-conflict-tax-per-line`, `fixture-impact-note-1-reversed`), once with
+and once without the task that shaped the tool. No agent without the graph can
+name those records, so these tasks score 0/100/0 by design and carry much of
+the headline; the block shows what remains without them. It changes no task,
+pass rule or verdict.
+
+## The committed score
+
+`score.txt` is the output of `node eval/score.mjs` for the full run (the
+results themselves are git-ignored). The section "What a trial measured" of
+the root README quotes it, and `node scripts/readme-check.mjs` fails when a
+quoted line differs from it or when that section holds a number outside the
+quote. Regenerate it with `node eval/score.mjs > eval/score.txt` only from a
+complete results folder.
+
 ## What the numbers can and cannot show
 
 They can show whether, on these 14 requests with this model, an agent with the
