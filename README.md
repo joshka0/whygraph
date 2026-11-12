@@ -107,7 +107,8 @@ Exit: 0 answer, 1 failure, 2 usage, 3 target not in the graph.
 
 `scripts/fixture.sh` builds a small shop repo with eight commits, three ADRs
 and a file of design notes. The commit ids are the same on every machine.
-Run it from the whygraph folder; it prints the history:
+Run it from the whygraph folder, with a target folder that does not exist yet;
+it prints the history:
 
 ```console
 $ scripts/fixture.sh ~/try/shop
