@@ -14,7 +14,7 @@ console.log(`TAP report: ${report}\nRetained scratch: ${scratch}`);
 const child = spawn(process.execPath, [
   '--test', '--test-reporter=spec', '--test-reporter-destination=stdout',
   '--test-reporter=tap', `--test-reporter-destination=${report}`,
-  ...process.argv.slice(2), resolve(root, 'test/contracts.test.mjs'),
+  ...process.argv.slice(2), resolve(root, 'test/contracts.test.mjs'), resolve(root, 'test/docs.test.mjs'),
 ], {
   cwd: root, stdio: 'inherit',
   env: { ...process.env, RELATE_TELEMETRY: '0', DO_NOT_TRACK: '1', WHYGRAPH_TEST_RUN_DIR: scratch },

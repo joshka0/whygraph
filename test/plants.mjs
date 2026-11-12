@@ -75,12 +75,24 @@ const plants = [
       'const viaCommit = records.filter((r) => Array.isArray(r.via) && r.via.length > 0);',
     ]],
   },
+  {
+    name: 'readme-output-drift-ignored', pattern: '^(R2|R3) ',
+    edits: [['scripts/readme-check.mjs', 'const drifted = commands.filter((c, i) => c.expected !== actual[i]);', 'const drifted = [];']],
+  },
+  {
+    name: 'readme-command-omitted', pattern: '^R1 ',
+    edits: [['scripts/readme-check.mjs', 'const commands = readCommands(text);', 'const commands = readCommands(text).filter(c => c.command !== "whygraph help");']],
+  },
+  {
+    name: 'skill-names-unknown-command', pattern: '^S2 ',
+    edits: [['skills/whygraph/SKILL.md', 'whygraph carry <file>:<symbol>', 'whygraph nonexistent <file>:<symbol>']],
+  },
 ];
 const table = [];
 for (const plant of plants) {
   const subject = join(outside, plant.name);
   mkdirSync(subject);
-  for (const path of ['src', 'recipes', 'package.json']) cpSync(join(root, path), join(subject, path), { recursive: true });
+  for (const path of ['src', 'recipes', 'package.json', 'README.md', 'scripts', 'skills', 'bin']) cpSync(join(root, path), join(subject, path), { recursive: true, verbatimSymlinks: true });
   for (const [file, before, after, all] of plant.edits) {
     const path = join(subject, file);
     const text = readFileSync(path, 'utf8');

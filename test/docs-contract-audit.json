@@ -1,0 +1,107 @@
+{
+  "base": "464d168",
+  "contractHead": "97936fcf35ee29bcc9c7c6c2705f8d4a39e85d2c",
+  "groundTruth": "git diff 464d168 HEAD -- docs/failures.md README.md; R1-R8 and S1-S7",
+  "entries": [
+    {
+      "id": "R1",
+      "contract": "| R1 | The README as committed | Exit 0; stdout `<n> commands, 0 drifted`. |",
+      "verification": "Run a copied committed README through the actual checker and independently count every console command, including previews. An omitted command cannot silently reduce the asserted count.",
+      "automated": true
+    },
+    {
+      "id": "R2",
+      "contract": "| R2 | One output line of a console block edited, or a command whose output changed (a fixture answer, a usage line) | Exit 1; stderr `drifted: $ <command>` with the README line and the line the run printed; stdout counts the drifted commands. |",
+      "verification": "Corrupt the committed help output and independently change a small command output; retain exit 1, the command name, both differing lines and drift counts.",
+      "automated": true
+    },
+    {
+      "id": "R3",
+      "contract": "| R3 | A command that exits non-zero (`whygraph carry src/money.ts:cent`) | Its output ends with `[exit 3]`; a README without that line drifts. |",
+      "verification": "Remove the committed near-miss command exit marker; require a drift containing the observed exit 3.",
+      "automated": true
+    },
+    {
+      "id": "R4",
+      "contract": "| R4 | A console block after `<!-- readme-check: preview -->` | Not run. Its output must equal the first later run of the same command; when no later block runs that command, exit 1 naming it, before anything runs. |",
+      "verification": "Run a preview plus two identical later commands with first/second outputs; only two executions occur and preview matches the first. A marker before an orphan preview proves preflight failure runs nothing.",
+      "automated": true
+    },
+    {
+      "id": "R5",
+      "contract": "| R5 | Any run | HOME is a fresh folder, shown as `~` in outputs and removed afterwards, also when a command fails; the user's HOME and git config are not read or written. Every `relate` call sees `RELATE_TELEMETRY=0` and `DO_NOT_TRACK=1`. |",
+      "verification": "Supply a surrogate caller HOME and invalid git config; check fresh empty HOME, path normalization, ignored caller config, both relate environment flags, unchanged caller files and cleanup after a successful check and a drift caused by a failing command.",
+      "automated": true
+    },
+    {
+      "id": "R6",
+      "contract": "| R6 | `--write` | Rewrites every console block's output from the run, keeping commands and preview markers; a check right after exits 0. |",
+      "verification": "Corrupt preview/carry and why output in a copy, run --write, compare the repaired README byte-for-byte with its original and rerun the check. Commands and preview markers remain.",
+      "automated": true
+    },
+    {
+      "id": "R7",
+      "contract": "| R7 | An argument other than `--write` | Exit 2 with the usage. |",
+      "verification": "Reject three unsupported arguments with exit 2 and usage.",
+      "automated": true
+    },
+    {
+      "id": "R8",
+      "contract": "| R8 | A console block whose first line is not a `$ ` command | The check fails with \"a console block starts with output\". |",
+      "verification": "Reject a console block beginning with output.",
+      "automated": true
+    },
+    {
+      "id": "S1",
+      "contract": "| S1 | The skill file | Starts with YAML front matter holding `name: whygraph` (equal to its folder name) and a one-line `description` under 1024 characters that names carry, impact and why. |",
+      "verification": "Check leading YAML front matter, folder/name agreement, one-line description under 1024 characters and the three command names.",
+      "automated": true
+    },
+    {
+      "id": "S2",
+      "contract": "| S2 | Every `whygraph ...` command in the skill file | A command `whygraph help` lists, with arguments it accepts (exit 0, 1 or 3 on the fixture, never 2). |",
+      "verification": "Extract inline command examples and fenced shell commands; instantiate placeholders against the fixture; compare command names with real help and execute with exit restricted to 0, 1 or 3.",
+      "automated": true
+    },
+    {
+      "id": "S3",
+      "contract": "| S3 | The rule | The skill says: before you change a symbol, `carry`; when a decision changes, `impact`; when you wonder why, `why`. |",
+      "verification": "Check the skill and startup rule text for each trigger and its corresponding question; this does not prove that an agent will obey the rule.",
+      "automated": true
+    },
+    {
+      "id": "S4",
+      "contract": "| S4 | README install for Claude Code: `cp -r \"$WHYGRAPH/skills/whygraph\" .claude/skills/` in a repo | `.claude/skills/whygraph/SKILL.md` exists and Claude Code lists the skill `whygraph` in that repo. |",
+      "verification": "Execute the actual README Claude install line in a scratch repo; initialize the installed Claude CLI stream protocol and require whygraph in its discovered command/skill list. No user message or model request is sent.",
+      "automated": true
+    },
+    {
+      "id": "S5",
+      "contract": "| S5 | README install for Codex: `cp -r \"$WHYGRAPH/skills/whygraph\" .agents/skills/` in a repo | `.agents/skills/whygraph/SKILL.md` exists and Codex lists the skill `whygraph` in that repo. |",
+      "verification": "Execute the actual README Codex install line; initialize a scratch-home Codex app-server and call skills/list for the repo; require the enabled whygraph entry at the installed path. No model request is sent.",
+      "automated": true
+    },
+    {
+      "id": "S6",
+      "contract": "| S6 | README `claude mcp add` and `codex mcp add` lines | Each writes a `whygraph` server entry that runs `relate serve --mcp stdio --database <absolute store> --read-only` with `RELATE_TELEMETRY=0` and `DO_NOT_TRACK=1`. |",
+      "verification": "Execute each actual README MCP add command with isolated CLI configuration and retrieve the persisted entry in another CLI process. Require the exact read-only relate stdio arguments, absolute store and both telemetry environment values.",
+      "automated": true
+    },
+    {
+      "id": "S7",
+      "contract": "| S7 | `WHYGRAPH` unset; or the skill installed a second time | Unset: `cp` exits 1, \"cannot stat '/skills/whygraph'\", and installs nothing. Again: the folder's `SKILL.md` is overwritten in place, no nested `whygraph/whygraph`. |",
+      "verification": "Fully scriptable. For each documented client destination, explicitly unset WHYGRAPH, assert cp exit 1 and the missing source path with no installed skill; then install, replace installed content with an outdated marker, reinstall and require original SKILL.md restored without a nested whygraph directory.",
+      "automated": true
+    }
+  ],
+  "S7": "The stated shell/filesystem behavior can be checked by a script; no by-hand exception is needed on this Linux host. The committed failure-list entry itself has no explicit manual-only annotation.",
+  "agentDiscovery": "Installed local CLI discovery protocols are used rather than model prompts, guessed skill paths alone, or UI automation. No external messages or model calls.",
+  "scratch": "Each test gets its own retained directory under test-results/scratch/<run id>. README subjects run in copies; their own temporary HOME cleanup is observed. The harness never deletes files. Caller configurations are scratch-only.",
+  "findings": [],
+  "limits": [
+    "Discovery and correct instructions do not establish that an agent will follow the rule during a real edit.",
+    "These tests exercise installed Linux Claude/Codex versions; shell error wording and CLI protocols on other versions/platforms are not established.",
+    "R5 exercises environment isolation and surrogate caller files, rather than proving every filesystem access through a system-call trace.",
+    "The pre-existing B6 synthetic pure-unit collision exception remains unchanged."
+  ]
+}
