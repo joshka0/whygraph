@@ -15,6 +15,8 @@ import { fileURLToPath } from 'node:url';
 
 const here = fileURLToPath(new URL('./', import.meta.url));
 
+/** A Bash command that runs whygraph as a command word, not one that only names a path such as /tmp/whygraph-eval. */
+const WHYGRAPH_CALL = /(^|[;&|(\n]|\s)whygraph\s+(carry|why|impact|build|decisions|mcp|help)\b/;
 /** Words that make a sentence an objection when it also names a record. */
 const OBJECTION = /\b(conflicts?|conflicting|contradicts?|contradicting|against|violat\w*|revers\w*|overrid\w*|undo(es|ing)?|breaks?|breaking|incompatible|inconsistent)\b/gi;
 /** A negation in the 30 characters before an objection word cancels it ("does not conflict"). */
@@ -110,7 +112,7 @@ export function scoreRun(task, run) {
   const text = run.final ?? '';
   const diff = readDiff(run.diff ?? '');
   const changed = [...diff.keys()];
-  const whygraphCalls = (run.tools ?? []).filter((t) => t.name === 'Bash' && /\bwhygraph\b/.test(String(t.input?.command ?? ''))).length;
+  const whygraphCalls = (run.tools ?? []).filter((t) => t.name === 'Bash' && WHYGRAPH_CALL.test(String(t.input?.command ?? ''))).length;
   const reasons = [];
   const out = { pass: false, reasons, changed, whygraphCalls };
   if (task.kind === 'conflict') {

@@ -183,6 +183,14 @@ export const cases = [
     expect: { pass: false },
   },
   {
+    name: 'a path that holds the word whygraph is not a whygraph call',
+    task: 'fixture-conflict-format-separators',
+    final: 'Done.',
+    diff: moneyEdit,
+    tools: [{ name: 'Bash', input: { command: 'node /tmp/whygraph-eval/x/repo/src/main.ts report' } }, { name: 'Bash', input: { command: 'ls; whygraph carry src/money.ts:formatCents 2>&1 | head' } }],
+    expect: { pass: false, whygraphCalls: 1 },
+  },
+  {
     name: 'edit task: the added comment cites ADR 0003',
     task: 'fixture-edit-region-comment',
     final: 'Added the comment.',
