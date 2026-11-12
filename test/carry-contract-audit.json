@@ -1,0 +1,106 @@
+{
+  "base": "a15ec12",
+  "contract": "96f067e",
+  "groundTruth": [
+    "git diff a15ec12 96f067e -- docs/failures.md README.md scripts/fixture.sh skills",
+    "public pure signatures and pre/post doc lines, including oneStepAway"
+  ],
+  "legacyUpdates": [
+    {
+      "id": "A2",
+      "entryChanged": true,
+      "previous": "| A2 | the fixture build | Exit 0. stdout counts: 8 Commit, 3 DecidedTag, 5 Decision, 4 File, 8 Item, 6 Symbol, 4 Topic; 23 CHANGES, 7 CITES, 3 NAMES, 1 SUPERSEDES, 4 RESTS_ON, 4 USES. No warning. |",
+      "current": "| A2 | the fixture build | Exit 0. stdout counts: 1 Check, 9 Commit, 5 DecidedTag, 5 Decision, 6 File, 8 Item, 8 Symbol, 6 Topic; 27 CHANGES, 7 CITES, 3 NAMES, 1 SUPERSEDES, 4 RESTS_ON, 5 USES, 1 VERIFIED. No warning. |",
+      "action": "Update all documented node/relationship counts and retain warning-free build."
+    },
+    {
+      "id": "L15",
+      "entryChanged": true,
+      "previous": "| L15 | Determinism: `scripts/fixture.sh` run twice; the fixture build run twice | The same commit ids (HEAD `395b8c0`). The same NAMES and CITES edges, byte-identical `why` and `impact` answers, warnings identical and sorted. |",
+      "current": "| L15 | Determinism: `scripts/fixture.sh` run twice; the fixture build run twice | The same commit ids (HEAD `17078bb`). The same NAMES and CITES edges, byte-identical `why` and `impact` answers, warnings identical and sorted. |",
+      "action": "Update only the fixture HEAD to 17078bb; retain independent history comparison, identical links, answers and warnings."
+    }
+  ],
+  "newEntries": [
+    {
+      "id": "C1",
+      "contract": "| C1 | `carry src/checkout.ts:checkout` (fixture: a decision on a callee in another file) | The one-step part lists `decided on src/rounding.ts:roundHalfEven, which checkout uses: ties round to even because rounding half up overcharges on average`. |",
+      "verification": "Fixture checkout carries the exact decision and source symbol of its cross-file callee."
+    },
+    {
+      "id": "C2",
+      "contract": "| C2 | `carry src/rounding.ts:roundHalfEven` (fixture: a decision on a caller) | The one-step part lists `decided on src/checkout.ts:checkout, which uses roundHalfEven: checkout adds tax to the net once because the receipt shows one tax line`. |",
+      "verification": "Fixture roundHalfEven carries the exact decision and source symbol of its caller."
+    },
+    {
+      "id": "C3",
+      "contract": "| C3 | A symbol with a decision on a callee and one on a caller; and a symbol `a` that uses `b` while `b` uses `a`, `b` with a tag | The callee's line comes before the caller's. `b` is one neighbor: its tag is listed once, as `decided on <file>:b, which a uses and which uses a: ...`, ranked with the callees. The counts in `Searched:` include `b` among the symbols `a` uses and among those that use `a`. |",
+      "verification": "One graph has two callees and two callers with a bidirectional neighbor; assert callee-before-caller ordering, one merged tag and both search counts."
+    },
+    {
+      "id": "C4",
+      "contract": "| C4 | A callee in another file whose file header holds a `decided:` tag naming a record (fixture: `carry src/tax.ts:taxOf` does not show it, as `src/tax.ts` is its own file; `carry src/money.ts:cents` shows the header of `src/tax.ts` through its caller `taxOf`) | `decided in the header of src/tax.ts, the file of src/tax.ts:taxOf, which uses cents: tax lives apart ...`, then `record named by a decided: tag in the header of src/tax.ts, the file of src/tax.ts:taxOf, which uses cents: ADR-0002 (2026-01-02) One flat tax rate; status: accepted; superseded by: ADR-0003; source: ...`. The header of the symbol's own file is never in the one-step part (it is in the `why` part). |",
+      "verification": "Fixture cents carries a caller-file header tag and its record metadata, with status/supersedes/source; taxOf does not repeat its own file header in item lines."
+    },
+    {
+      "id": "C5",
+      "contract": "| C5 | A TypeScript symbol that calls code in a language without symbol edges (Rust through a binding); and `carry src/lib.rs:round_cents` | The TypeScript symbol: the Rust code is no neighbor, and the `Not searched:` line names \"code in languages without symbol edges\". `round_cents`: `One step away: unknown. memod reads which symbols use which only in TypeScript and JavaScript, so whygraph cannot see what src/lib.rs:round_cents uses or what uses it.`, then `Searched: src/lib.rs:round_cents and the header of src/lib.rs. Not searched: anything one step away or further.` Never \"no decided: tag ... on the 0 symbols\". |",
+      "verification": "A TypeScript call through a native binding has no Rust neighbor; Rust says one-step uses are unknown and prints the exact combined scope sentence specified in C5."
+    },
+    {
+      "id": "C6",
+      "contract": "| C6 | `useShape(s: Shape)` where `Shape` is an interface with a `decided:` tag, imported with `import type` | `decided on src/t.ts:Shape, which useShape uses only as a type: ...`; a caller that uses the symbol only as a type: `which uses <name> only as a type`. |",
+      "verification": "Imported Shape and its useShape caller each carry the other decision with the type-only relationship label."
+    },
+    {
+      "id": "C7",
+      "contract": "| C7 | A recursive symbol `r` (it calls itself) with no other use | `r` is not its own neighbor. The one-step part says no tag, record, check or topic on `the 0 symbols r uses, 0 symbols that use r`; it terminates. |",
+      "verification": "A recursive function is excluded from its own neighbors and yields zero/zero neighbor counts without looping."
+    },
+    {
+      "id": "C8",
+      "contract": "| C8 | A symbol that uses 25 symbols, each with a `decided:` tag and a topic (50 items) | 20 item lines, then `  Bound reached: 20 of 50 shown. Not shown: 5 decided: tags and 25 topics; the tags, records and checks among them sit on <the 5 symbols, sorted>. Run whygraph carry on a neighbor to see what sits on it, or read the neighbors column of the carry recipe (whygraph mcp), which holds them all.` The neighbors column of the carry recipe holds all 25 neighbors. |",
+      "verification": "25 tagged topic-owning callees produce 50 items; show exactly 20 tags, name all five hidden decision carriers in sorted order, count hidden topics, and retrieve all 25 neighbors through real read-only MCP."
+    },
+    {
+      "id": "C9",
+      "contract": "| C9 | One decision reached two ways: a header tag of a file that declares two callees; a record that tags on two neighbors name; a check that covers four callees; a topic two callees own; a record that the `why` part already lists | Each is one line: `the file of <a> and <b>, which <name> uses`; `record named by a decided: tag on <a>, ...; and on <b>, ...`; `check on <a>, <b>, <c> and <d>, which <name> uses: memod verify <check>`; `topic owned by <a> and <b>, ...`. A record the `why` part lists, a check that covers the symbol itself, and a topic it owns are not repeated (fixture: `carry src/cart.ts:total` shows the tag on `cents`, not ADR-0001, which its `why` part lists through `395b8c0`). |",
+      "verification": "Group a shared file header, a multi-neighbor record, a four-neighbor check and a shared topic; suppress the target own record/check/topic. Also verify the fixture total does not repeat ADR-0001 and that a record linked only to a neighbor through a commit is excluded."
+    },
+    {
+      "id": "C10",
+      "contract": "| C10 | Nothing found: a TypeScript symbol with no tag, record, check, premise or topic, no file header tag, and no neighbor that holds one | Exactly these lines: `One step away: no decided: tag, decision record, formal check or topic on the 0 symbols lonely uses, 0 symbols that use lonely, or in the headers of their files.`, `Nothing found in what was searched; that does not mean nothing constrains this edit.`, `Searched: src/u.ts:lonely, the header of src/u.ts, the 0 symbols lonely uses, 0 symbols that use lonely, and the headers of their files.`, `Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript and JavaScript); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.` When something was found elsewhere in the answer, the `Nothing found` line is absent; the `Searched:` and `Not searched:` lines are always there. |",
+      "verification": "Assert all four exact scoped-empty-answer lines; reject bare Nothing found; own and neighboring decisions suppress the empty warning."
+    },
+    {
+      "id": "C11",
+      "contract": "| C11 | Determinism: `carry` on a symbol with many neighbors, run twice and after a rebuild | Byte-identical stdout. Within one place (what it uses, what uses it), items are ordered: tags on the neighbor, tags in its file header, records a neighbor's own tag names, records only a header tag names, checks, topics; then by the first neighbor's id, then by text. |",
+      "verification": "A 19-item, four-neighbor case covers every fact kind and both places, first-neighbor ordering and text tie ordering; compare two calls and a call after rebuild byte-for-byte."
+    },
+    {
+      "id": "C12",
+      "contract": "| C12 | `carry src/checkout.ts:checkout` (fixture: a check on a callee) | `check on src/rounding.ts:roundHalfEven, which checkout uses: memod verify rounding-model`, after the tag line of `roundHalfEven` and before its topic line. |",
+      "verification": "Fixture callee check follows its tag and precedes its topic."
+    }
+  ],
+  "additionalRegression": {
+    "name": "Carry regression the only constraint on a cross-file callee is carried to its unconstrained caller",
+    "verification": "The target has no tag/record/check/premise/topic/header decision. Its why answer is empty, but carry must contain exactly one neighboring item naming the decision text and src/policy.ts:roundTax, which totalWithTax uses."
+  },
+  "clarifications": [
+    "Parent explicitly confirmed that docs/failures.md overrides the turn summary: C5 uses a combined Searched/Not searched Rust line; C10 keeps its exact TypeScript lines. No separate physical Not searched line is required for Rust."
+  ],
+  "inputCorrections": [
+    "The initial C11 input used single-word module slugs deps/users. Public memod graph output omitted their header decisions. Using fixture-consistent hyphenated slugs carry-deps/carry-users produced the intended headers and 19 items. This was an input correction, not a weakened ordering assertion."
+  ],
+  "gaps": [
+    "The whygraph failure list/README do not specify memod module-slug grammar; tests use the established fixture form. No memod implementation body was read to fill that gap."
+  ],
+  "evalAccess": "No eval/ content was inspected or used to derive tests; subject copies explicitly exclude eval/.",
+  "findings": [],
+  "limits": [
+    "The visibility warning acknowledges higher-hop, dynamic/interface/value uses, languages without symbol edges and neighbor commit-only links. These tests do not claim those paths are searched.",
+    "The prior B6 pure-unit commit-collision exception and platform/agent-obedience limitations remain unchanged."
+  ],
+  "retention": "All run scratch remains under test-results/scratch/<run id>; the test harness deletes nothing. Fault source copies remain under /home/dev/scratch/whygraph-plants."
+}

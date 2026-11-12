@@ -87,6 +87,22 @@ const plants = [
     name: 'skill-names-unknown-command', pattern: '^S2 ',
     edits: [['skills/whygraph/SKILL.md', 'whygraph carry <file>:<symbol>', 'whygraph nonexistent <file>:<symbol>']],
   },
+  {
+    name: 'carry-ignores-callees', pattern: '^(C1|C3|C8|C12|Carry regression) ',
+    edits: [['recipes/carry.cypher', 'OPTIONAL MATCH (s)-[:USES]-(n:Symbol) WHERE n <> s', 'OPTIONAL MATCH (n:Symbol)-[:USES]->(s) WHERE n <> s']],
+  },
+  {
+    name: 'carry-ignores-callers', pattern: '^(C2|C3|C4) ',
+    edits: [['recipes/carry.cypher', 'OPTIONAL MATCH (s)-[:USES]-(n:Symbol) WHERE n <> s', 'OPTIONAL MATCH (s)-[:USES]->(n:Symbol) WHERE n <> s']],
+  },
+  {
+    name: 'carry-bound-hides-decisions-silently', pattern: '^C8 ',
+    edits: [['src/answers.pure.ts', 'if (hidden.length > 0) {', 'if (false) {']],
+  },
+  {
+    name: 'carry-bare-nothing-found', pattern: '^C10 ',
+    edits: [['src/answers.pure.ts', 'const nothing = "Nothing found in what was searched; that does not mean nothing constrains this edit.";', 'const nothing = "Nothing found.";']],
+  },
 ];
 const table = [];
 for (const plant of plants) {

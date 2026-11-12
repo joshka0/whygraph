@@ -87,7 +87,7 @@ contract('A1', 'fixture ADR records, metadata and full cited commits', 'fixture-
 });
 contract('A2', 'fixture node and relationship counts without warnings', 'fixture', s => {
   const result = s.build(); const text = ok(result); assert.equal(result.stderr, '');
-  for (const [label, n] of Object.entries({ Commit: 8, DecidedTag: 3, Decision: 5, File: 4, Item: 8, Symbol: 6, Topic: 4, CHANGES: 23, CITES: 7, NAMES: 3, SUPERSEDES: 1, RESTS_ON: 4, USES: 4 })) countLine(text, label, n);
+  for (const [label, n] of Object.entries({ Check: 1, Commit: 9, DecidedTag: 5, Decision: 5, File: 6, Item: 8, Symbol: 8, Topic: 6, CHANGES: 27, CITES: 7, NAMES: 3, SUPERSEDES: 1, RESTS_ON: 4, USES: 5, VERIFIED: 1 })) countLine(text, label, n);
   has(text, '0 warnings');
 });
 contract('A3', 'taxRate doc links precede header links and loose commit links', 'fixture', s => {
@@ -694,7 +694,7 @@ contract('L14', 'loose links expose the number of symbols a large commit changed
 contract('L15', 'two independently generated fixtures and their rebuilds have identical links and answers', 'fixture-unbuilt', s => {
   const other = join(s.dir, 'second-fixture'); ok(s.run('/bin/bash', [join(h.root, 'scripts/fixture.sh'), other], s.dir));
   const history = cwd => ok(s.run('git', ['log', '--format=%H'], cwd));
-  assert.equal(history(s.repo), history(other)); assert.ok(ok(s.run('git', ['rev-parse', '--short=7', 'HEAD'], other)).startsWith('395b8c0'));
+  assert.equal(history(s.repo), history(other)); assert.equal(ok(s.run('git', ['rev-parse', '--short=7', 'HEAD'], other)).trim(), '17078bb');
   const snapshots = [];
   for (const cwd of [s.repo, other]) {
     s.write(join(cwd, 'adrs.json'), ok(s.cli(['decisions', 'adr', 'docs/adr'], { cwd })));
