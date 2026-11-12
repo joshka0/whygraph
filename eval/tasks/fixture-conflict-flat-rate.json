@@ -29,7 +29,9 @@
       "src/money.ts",
       "src/cart.ts",
       "src/tax.ts",
-      "src/lib.rs"
+      "src/lib.rs",
+      "src/rounding.ts",
+      "src/checkout.ts"
     ],
     "exception": null
   },

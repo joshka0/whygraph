@@ -206,28 +206,11 @@ function pct(x) {
   return x === undefined ? '   -' : `${Math.round(x * 100)}%`.padStart(4);
 }
 
-function main(argv) {
-  const resultsAt = argv.indexOf('--results');
-  const results = resultsAt >= 0 ? argv[resultsAt + 1] : join(here, 'results');
-  const tasks = readTasks();
-  const rows = [];
-  for (const id of existsSync(results) ? readdirSync(results).sort() : []) {
-    const dir = join(results, id);
-    if (!existsSync(join(dir, 'meta.json'))) continue;
-    const run = readRun(dir);
-    if (run.meta.status !== 'done') continue;
-    const task = tasks.get(run.meta.task);
-    if (task === undefined) throw new Error(`${id}: no task ${run.meta.task}`);
-    rows.push({ id, task, meta: run.meta, verdict: scoreRun(task, run) });
-  }
-  if (argv.includes('--json')) {
-    console.log(JSON.stringify(rows.map((r) => ({ id: r.id, task: r.task.id, condition: r.meta.condition, ...r.verdict, tokens: r.meta.tokens })), null, 2));
-    return 0;
-  }
+/** Prints the rates of `rows`: per condition, per task, paired differences, false objections. */
+function rates(rows, tasks, title) {
   const conditions = ['none', 'graph', 'stub'];
   const rate = (rs) => (rs.length === 0 ? undefined : rs.filter((r) => r.verdict.pass).length / rs.length);
-  console.log(`${rows.length} finished runs\n\nRuns:`);
-  for (const r of rows) console.log(`  ${r.verdict.pass ? 'PASS' : 'FAIL'}  ${r.id}  whygraph calls: ${r.verdict.whygraphCalls}${r.verdict.reasons.length ? `  (${r.verdict.reasons.join('; ')})` : ''}`);
+  console.log(`\n=== ${title}`);
   console.log('\nPass rate per condition:');
   for (const c of conditions) {
     const rs = rows.filter((r) => r.meta.condition === c);
@@ -253,6 +236,31 @@ function main(argv) {
     const rs = rows.filter((r) => r.meta.condition === c && r.task.kind === 'control');
     console.log(`  ${c.padEnd(6)} ${rs.length === 0 ? '   -' : pct(rs.filter((r) => r.verdict.objection).length / rs.length)}  (${rs.length} runs)`);
   }
+}
+
+function main(argv) {
+  const resultsAt = argv.indexOf('--results');
+  const results = resultsAt >= 0 ? argv[resultsAt + 1] : join(here, 'results');
+  const tasks = readTasks();
+  const rows = [];
+  for (const id of existsSync(results) ? readdirSync(results).sort() : []) {
+    const dir = join(results, id);
+    if (!existsSync(join(dir, 'meta.json'))) continue;
+    const run = readRun(dir);
+    if (run.meta.status !== 'done') continue;
+    const task = tasks.get(run.meta.task);
+    if (task === undefined) throw new Error(`${id}: no task ${run.meta.task}`);
+    rows.push({ id, task, meta: run.meta, verdict: scoreRun(task, run) });
+  }
+  if (argv.includes('--json')) {
+    console.log(JSON.stringify(rows.map((r) => ({ id: r.id, task: r.task.id, condition: r.meta.condition, ...r.verdict, tokens: r.meta.tokens })), null, 2));
+    return 0;
+  }
+  console.log(`${rows.length} finished runs\n\nRuns:`);
+  for (const r of rows) console.log(`  ${r.verdict.pass ? 'PASS' : 'FAIL'}  ${r.id}  whygraph calls: ${r.verdict.whygraphCalls}${r.verdict.reasons.length ? `  (${r.verdict.reasons.join('; ')})` : ''}`);
+  const shaped = [...tasks.values()].filter((t) => t.shaped_tool !== undefined).map((t) => t.id);
+  rates(rows, tasks, 'All tasks');
+  if (shaped.length > 0) rates(rows.filter((r) => !shaped.includes(r.task.id)), tasks, `Without the tasks that shaped the tool (${shaped.join(', ')})`);
   const total = rows.reduce((a, r) => a + (r.meta.tokens?.total ?? 0), 0);
   console.log(`\nTotal tokens: ${total}`);
   return 0;

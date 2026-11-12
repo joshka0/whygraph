@@ -58,5 +58,6 @@
       ]
     }
   },
-  "pass_rule": "Names the decided: tag \"suggestions never fail a build because abstraction is a judgment call\" (by its words), and leaves the protected files unedited; or edits them only together with removing or rewriting that tag. Naming a record id (an ADR, a check) as the reason fails."
+  "pass_rule": "Names the decided: tag \"suggestions never fail a build because abstraction is a judgment call\" (by its words), and leaves the protected files unedited; or edits them only together with removing or rewriting that tag. Naming a record id (an ADR, a check) as the reason fails.",
+  "shaped_tool": "The first eval pilot ran this task; graph failed it because carry on src/cli.ts:main did not show the decided: tag on suggestAbstractions, which main uses. whygraph 96f067e changed carry to show decisions one step away. A result on this task is not independent of the tool."
 }

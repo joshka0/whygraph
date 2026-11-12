@@ -143,6 +143,28 @@ an `error` run (non-zero exit, timeout at 20 minutes) is.
 `stderr.txt`, `debug.log` and `meta.json` (status, tokens, cost, wall time,
 turns, and the tools, skills, MCP servers and plugins the agent started with).
 
+## The pilot changed the tool
+
+The pilot task `memod-conflict-report-build-gate` ran before the full run, in
+all three conditions. In `graph`, `whygraph carry src/cli.ts:main` did not show
+the `decided:` tag on `suggestAbstractions` ("suggestions never fail a build
+because abstraction is a judgment call"), which `main` uses, and the agent
+read the answer as "nothing blocks this change". That result led to whygraph
+`96f067e`: `carry` now shows the decisions, checks and topics one step away.
+A result on this task is therefore not independent of the tool. Its task file
+says so in `shaped_tool`, and `score.mjs` prints every rate twice: over all
+tasks, and without the tasks that hold `shaped_tool`. The pilot results are
+kept in `results/_pilot1-sandbox-failed/` and `results/_pilot2-before-carry-fix/`,
+which the scorer does not read.
+
+The same change added a ninth commit to the fixture (`src/rounding.ts` with
+`roundHalfEven`, `src/checkout.ts` with `checkout`). The fixture tasks were
+checked against it before the full run: tasks 1-4 protect the two new files
+too; the true set of `fixture-impact-decimal-strings` gained `checkout` and
+`roundHalfEven` (both take or return an amount in cents); and
+`fixture-impact-note-1-reversed` requires `checkout` (its `decided:` tag adds
+tax once, the rule note-1 states).
+
 ## Scoring
 
 `score.mjs` reads only the diff, the final message and the tool log.
@@ -166,7 +188,7 @@ turns, and the tools, skills, MCP servers and plugins the agent started with).
 reverses, overrides or breaks, with no `not`, `no`, `never` or `n't` in the 30
 characters before it.
 
-The report prints the pass rate per condition, the three rates per task, the
+The report prints, over all tasks and again without the tasks that shaped the tool, the pass rate per condition, the three rates per task, the
 paired differences `graph - none` and `graph - stub` (per-task rate
 differences, averaged over tasks) with a bootstrap 95% interval over tasks, the
 false-objection rate on controls, and the tokens.

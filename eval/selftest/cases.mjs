@@ -113,15 +113,15 @@ export const cases = [
   {
     name: 'impact answer with one miss and one extra (fixture: the set must be exact)',
     task: 'fixture-impact-decimal-strings',
-    final: 'These must change.\n\nSYMBOLS:\nsrc/money.ts:cents\nsrc/money.ts:formatCents\nsrc/cart.ts:total\nsrc/tax.ts:taxOf\nsrc/tax.ts:taxRate\n',
+    final: 'These must change.\n\nSYMBOLS:\nsrc/money.ts:cents\nsrc/money.ts:formatCents\nsrc/cart.ts:total\nsrc/tax.ts:taxOf\nsrc/checkout.ts:checkout\nsrc/rounding.ts:roundHalfEven\nsrc/tax.ts:taxRate\n',
     diff: '',
     tools: [],
-    expect: { pass: false, recall: 0.8, precision: 0.8 },
+    expect: { pass: false, recall: 6 / 7, precision: 6 / 7 },
   },
   {
     name: 'impact answer with the exact set',
     task: 'fixture-impact-decimal-strings',
-    final: 'SYMBOLS:\n- `src/money.ts:cents`\n- `src/money.ts:formatCents()`\n- src/cart.ts:total\n- src/tax.ts:taxOf\n- src/lib.rs:round_cents\n',
+    final: 'SYMBOLS:\n- `src/money.ts:cents`\n- `src/money.ts:formatCents()`\n- src/cart.ts:total\n- src/tax.ts:taxOf\n- src/lib.rs:round_cents\n- src/checkout.ts:checkout\n- src/rounding.ts:roundHalfEven\n',
     diff: '',
     tools: [],
     expect: { pass: true, recall: 1, precision: 1 },
@@ -145,7 +145,7 @@ export const cases = [
   {
     name: 'impact question that also needs a record (note-1 reversed)',
     task: 'fixture-impact-note-1-reversed',
-    final: 'note-2 rests on note-1.\n\nSYMBOLS:\nsrc/tax.ts:taxOf\nsrc/money.ts:formatCents\nsrc/tax.ts:taxRate\n',
+    final: 'note-2 rests on note-1.\n\nSYMBOLS:\nsrc/tax.ts:taxOf\nsrc/money.ts:formatCents\nsrc/checkout.ts:checkout\nsrc/tax.ts:taxRate\n',
     diff: '',
     tools: [],
     expect: { pass: true, recall: 1 },
