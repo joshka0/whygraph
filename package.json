@@ -1,0 +1,21 @@
+{
+  "name": "whygraph",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=26"
+  },
+  "bin": {
+    "whygraph": "src/main.ts"
+  },
+  "scripts": {
+    "check": "tsrs -p tsconfig.json",
+    "lint": "memod lint"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "memod": "git+file:///home/dev/repos/personal/memod#b78ab9c2cfa42bd8a6d26179a557c22f12708e05",
+    "tsrs": "0.23.0-ts7.1.0-beta"
+  }
+}

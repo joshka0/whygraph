@@ -1,0 +1,3 @@
+# Only these packages may run install scripts. memod builds its dist/ on install.
+allowBuilds:
+  memod: true
