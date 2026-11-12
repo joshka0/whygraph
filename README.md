@@ -17,7 +17,9 @@ Here is the question an agent asks before it edits `formatCents` in the small
 shop repo that comes with whygraph. The code of `formatCents` mentions no
 decision. The graph finds two: ADR-0001 through the commits that changed it,
 and the design note `note-2` ("Show thousands separators in totals") through
-the commit that added the separators. It also lists who calls it.
+the commit that added the separators. It also lists what sits one step away
+(the decisions, checks and topics of the symbols it uses and of those that use
+it), who calls it, and the commits that changed it.
 
 <!-- readme-check: preview -->
 ```console
@@ -41,6 +43,11 @@ Decision records linked only through a commit that cites them and changed its co
   2026-01-04  note-2  Show thousands separators in totals
       source: decisions/notes.json
       changed by: 73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001); that commit changed 1 symbol
+
+One step away, most binding first (what formatCents uses, then what uses formatCents):
+  - topic owned by src/cart.ts:total, which uses formatCents: fx-cart
+Searched: src/money.ts:formatCents, the header of src/money.ts, the 0 symbols formatCents uses, 1 symbol that uses formatCents, and the headers of their files.
+Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript and JavaScript); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.
 
 1 symbol uses it directly, 1 in all (distance n: through n-1 other symbols; type: only a type use):
    1  src/cart.ts:total
@@ -105,13 +112,14 @@ Exit: 0 answer, 1 failure, 2 usage, 3 target not in the graph.
 
 ## Try it on the fixture
 
-`scripts/fixture.sh` builds a small shop repo with eight commits, three ADRs
+`scripts/fixture.sh` builds a small shop repo with nine commits, three ADRs
 and a file of design notes. The commit ids are the same on every machine.
 Run it from the whygraph folder, with a target folder that does not exist yet;
 it prints the history:
 
 ```console
 $ scripts/fixture.sh ~/try/shop
+* 17078bb 2026-01-09 Add checkout with tax rounded half to even
 * 395b8c0 2026-01-08 Name every amount by its unit
 * 6bed2fd 2026-01-07 Record notes from the design review
 * f85c3a6 2026-01-06 Add Rust rounding
@@ -129,7 +137,8 @@ The shop keeps money in cents (ADR 0001). Tax got one flat rate (ADR 0002),
 then a rate by region on a branch (ADR 0003 replaces ADR 0002). `decided:`
 tags in the code name some of these ADRs, and two commits name ADR-0001 in a
 `Decision:` trailer. `decisions/notes.json` holds two design notes that cite
-commits.
+commits. The last commit adds a checkout that rounds tax with
+`roundHalfEven`, which carries a `decided:` tag and a formal check.
 
 Turn the ADRs into a decisions file, then build the graph from the code, its
 history and both decisions files:
@@ -138,28 +147,30 @@ history and both decisions files:
 $ whygraph decisions adr docs/adr > ../adrs.json
 $ whygraph build --decisions ../adrs.json --decisions decisions/notes.json
 Built ~/try/shop/.git/whygraph/store
-from ~/try/shop: 8 commits, 5 decision records from 2 decisions files, 0 warnings.
-38 nodes:
-  Commit       8
-  DecidedTag   3
+from ~/try/shop: 9 commits, 5 decision records from 2 decisions files, 0 warnings.
+48 nodes:
+  Check        1
+  Commit       9
+  DecidedTag   5
   Decision     5
-  File         4
+  File         6
   Item         8
-  Symbol       6
-  Topic        4
-76 relationships:
+  Symbol       8
+  Topic        6
+91 relationships:
   ABOUT        5
-  CHANGES      23
+  CHANGES      27
   CITES        7
-  DECIDED      3
-  DECLARES     6
-  IMPORTS      2
+  DECIDED      5
+  DECLARES     8
+  IMPORTS      3
   NAMES        3
-  OWNS         10
+  OWNS         14
   RESTS_ON     4
   STATES       8
   SUPERSEDES   1
-  USES         4
+  USES         5
+  VERIFIED     1
 ```
 
 The store lives in `.git/whygraph/store`, where git ignores it. (Paths in
@@ -246,6 +257,11 @@ Decision records linked only through a commit that cites them and changed its co
       source: decisions/notes.json
       changed by: 73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001); that commit changed 1 symbol
 
+One step away, most binding first (what formatCents uses, then what uses formatCents):
+  - topic owned by src/cart.ts:total, which uses formatCents: fx-cart
+Searched: src/money.ts:formatCents, the header of src/money.ts, the 0 symbols formatCents uses, 1 symbol that uses formatCents, and the headers of their files.
+Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript and JavaScript); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.
+
 1 symbol uses it directly, 1 in all (distance n: through n-1 other symbols; type: only a type use):
    1  src/cart.ts:total
 
@@ -253,6 +269,38 @@ Decision records linked only through a commit that cites them and changed its co
   395b8c0 2026-01-08 Name every amount by its unit
   73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001)
   dfb4ff8 2026-01-01 Add money and cart in cents
+```
+
+A decision can sit on the code that a symbol uses. `checkout` holds its own
+tag, and `carry` also shows the tag and the formal check of `roundHalfEven`,
+which it uses:
+
+```console
+$ whygraph carry src/checkout.ts:checkout
+Before you edit src/checkout.ts:checkout
+
+Topics it owns (keep its job inside these; another file that owns one and does not import this one is a duplicate):
+  - fx-checkout: no other file owns it
+No formal check covers it.
+Its doc comment names no premise memo.
+
+Decided in its doc comment:
+  - decided: checkout adds tax to the net once because the receipt shows one tax line
+The header of src/checkout.ts holds no decided: tag.
+No decided: tag names a decision record.
+No decision record cites a commit that changed its code or tags.
+
+One step away, most binding first (what checkout uses, then what uses checkout):
+  - decided on src/rounding.ts:roundHalfEven, which checkout uses: ties round to even because rounding half up overcharges on average
+  - check on src/rounding.ts:roundHalfEven, which checkout uses: memod verify rounding-model
+  - topic owned by src/rounding.ts:roundHalfEven, which checkout uses: fx-rounding
+Searched: src/checkout.ts:checkout, the header of src/checkout.ts, the 1 symbol checkout uses, 0 symbols that use checkout, and the headers of their files.
+Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript and JavaScript); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.
+
+No symbol uses it.
+
+1 commit changed its code or tags, newest first:
+  17078bb 2026-01-09 Add checkout with tax rounded half to even
 ```
 
 A name the graph does not hold exits 3 and lists close names:
@@ -413,7 +461,7 @@ jq '{records: (.items | group_by(.memo) | map({
 | `whygraph decisions adr <folder>` | Prints a decisions file made from the ADRs in the folder. |
 | `whygraph why <file>:<symbol>` | The `decided:` tags on the symbol and on its file header; the records those tags name; then the records linked only through a commit that cites them and changed the symbol, oldest first, each commit with how many symbols it changed. |
 | `whygraph impact <decision id>` | The record and every record that rests on it, directly or through others; for each, the symbols and files whose `decided:` tags name it, then the commits that cite it and the other symbols those commits changed, with how many symbols use each directly. |
-| `whygraph carry <file>:<symbol>` | Before an edit: the topics the symbol owns and their other owners, the formal checks that cover it, its premise memos, its decisions (as `why`), its direct and transitive users, and the commits that changed it. |
+| `whygraph carry <file>:<symbol>` | Before an edit: the topics the symbol owns and their other owners, the formal checks that cover it, its premise memos, its decisions (as `why`); then one step away, the `decided:` tags, the records they name, the checks and the topics of the symbols it uses and of the symbols that use it, most binding first, each line naming where it sits; then its direct and transitive users, and the commits that changed it. |
 | `whygraph mcp` | The MCP server config that serves the store read-only through `relate serve --mcp stdio`, and every recipe. |
 | `whygraph help` | The usage. |
 
@@ -551,7 +599,15 @@ store rather than merging into it.
 ## Limits
 
 - memod reads which symbols use which only in TypeScript and JavaScript. For
-  a symbol in another language, `carry` says its users are unknown.
+  a symbol in another language, `carry` says its users and what sits one step
+  away are unknown.
+- `carry` looks one step away and no further, and only along uses the graph
+  holds: a function passed as a value or called through an interface is not
+  a neighbor. It shows the first 20 lines one step away and says what it left
+  out; it lists a neighbor's records only when a tag names them, not when a
+  commit links them. Each answer ends with what was searched and what was not.
+- `why` does not look one step away: a reason that sits on a symbol this one
+  uses appears in `carry`, not in `why`.
 - A link through a commit ties every symbol the commit changed to the record.
   Answers give the commit's symbol count so you can weigh it.
 - A tag links by the record's id only, whatever the sentence says. A tag that

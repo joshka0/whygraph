@@ -131,11 +131,132 @@ export function impactAnswer(decision: string, rows: readonly Row[]): string {
   return out.join("\n");
 }
 
+/** Items shown one step away before the answer says the rest are not shown. */
+const NEIGHBOR_BOUND = 20;
+
+/** Code-unit order, the same on every machine (localeCompare follows the machine's locale). */
+const cmp = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
+/**
+ * One thing to carry from the neighbors, listed once with every neighbor it was reached through.
+ * kind, in listing order within a place: 0 a decided: tag on a neighbor, 1 one in a neighbor's file header, 2 a record that a neighbor's own tag names, 3 a record that only a header tag names, 4 a formal check, 5 a topic.
+ */
+interface NeighborItem {
+  kind: number;
+  readonly id: string;
+  readonly text: string;
+  readonly file: string;
+  readonly carriers: Row[];
+  /** For a record: where a tag names it, `on <symbol id>` or `in <file>`, with the neighbors it is reached through there. */
+  readonly places: Map<string, Row[]>;
+}
+
+/**
+ * What sits one step away from the symbol: the decided: tags, the records they name, the formal checks and the owned topics of the symbols it uses and of the symbols that use it, from the `neighbors` column of the carry recipe.
+ * decided: the order is the symbol's own tags, its file header (both in the why part above), then what it uses, then what uses it, and within each: tags on the neighbor, tags in its file header, the records those tags name (a neighbor's own tag first), checks, topics, then by neighbor id and text; because an edit of a symbol must keep the contracts of what it relies on, while a caller relies on it and adapts through its own edit, and a tag states a decision where a topic only states a job
+ * decided: at most NEIGHBOR_BOUND (20) lines, then one line that counts what is not shown by kind and names every neighbor that holds a hidden tag, record or check, because an answer longer than a screen is skimmed and a decision past the bound must still be findable
+ * post: a neighbor that is both used and using is one neighbor, ranked as used; each tag, record, check and topic is listed once, at its most binding place, naming every neighbor it was reached through; what the upper part of the answer lists (its own header, its own checks and topics, the records `why` lists) is not repeated.
+ * post: always ends with what was searched (the symbol, its file header, N symbols it uses, M symbols that use it, their file headers) and what was not; when the answer found nothing at all, says that nothing was found in those places, not that nothing constrains the edit.
+ */
+function oneStepAway(symbolId: string, carry: Row, why: readonly Row[], foundAbove: boolean): string[] {
+  const file = str(carry.file);
+  const name = symbolId.slice(symbolId.lastIndexOf("#") + 1);
+  const nothing = "Nothing found in what was searched; that does not mean nothing constrains this edit.";
+  if (!hasSymbolEdges(file)) {
+    return [
+      `One step away: unknown. memod reads which symbols use which only in TypeScript and JavaScript, so whygraph cannot see what ${shown(symbolId)} uses or what uses it.`,
+      ...(foundAbove ? [] : [nothing]),
+      `Searched: ${shown(symbolId)} and the header of ${file}. Not searched: anything one step away or further.`,
+    ];
+  }
+  const neighbors = (Array.isArray(carry.neighbors) ? (carry.neighbors as Row[]) : []).filter((n) => n !== null);
+  const relation = (n: Row): string =>
+    n.uses === true && n.usedBy === true
+      ? `which ${name} uses and which uses ${name}`
+      : n.uses === true
+        ? `which ${name} uses${n.usesTypeOnly === true ? " only as a type" : ""}`
+        : `which uses ${name}${n.usedByTypeOnly === true ? " only as a type" : ""}`;
+  const rankOf = (n: Row): number => (n.uses === true ? 0 : 1);
+  const bySymbol = (a: Row, b: Row): number => rankOf(a) - rankOf(b) || cmp(str(a.symbol), str(b.symbol));
+  const and = (xs: readonly string[]): string => (xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`);
+  /** `a and b, which main uses, and c, which uses main`: neighbors grouped by how they relate, most binding first. */
+  const whom = (carriers: readonly Row[]): string => {
+    const groups = new Map<string, string[]>();
+    for (const n of [...carriers].sort(bySymbol)) groups.set(relation(n), [...(groups.get(relation(n)) ?? []), shown(str(n.symbol))]);
+    return [...groups].map(([rel, syms]) => `${and(syms)}, ${rel}`).join(", and ");
+  };
+  const rowsOf = (v: unknown): readonly Row[] => (Array.isArray(v) ? (v as Row[]).filter((x) => x !== null) : []);
+  const ownTopics = new Set(rowsOf(carry.topics).map((t) => str(t.topic)));
+  const ownChecks = new Set(list(carry.checks));
+  const listedRecords = new Set(why.filter((r) => r.kind === "record").map((r) => str(r.id)));
+  const items = new Map<string, NeighborItem>();
+  const add = (kind: number, id: string, text: string, n: Row, place = ""): void => {
+    const key = `${kind >= 2 && kind <= 3 ? "record" : kind}\u0000${id}`;
+    const item = items.get(key) ?? { kind, id, text, file: str(n.file), carriers: [], places: new Map<string, Row[]>() };
+    item.kind = Math.min(item.kind, kind);
+    if (!item.carriers.some((c) => c.symbol === n.symbol)) item.carriers.push(n);
+    if (place !== "") item.places.set(place, [...(item.places.get(place) ?? []).filter((c) => c.symbol !== n.symbol), n]);
+    items.set(key, item);
+  };
+  const tagText = (t: Row): string => `${str(t.what)}${str(t.because) === "" ? "" : ` because ${str(t.because)}`}`;
+  const recordText = (d: Row): string => {
+    const by = sorted(list(d.supersededBy));
+    return `${str(d.id)} (${str(d.date) || "undated"}) ${str(d.title) || "(no title)"}${str(d.status) === "" ? "" : `; status: ${str(d.status)}`}${by.length === 0 ? "" : `; superseded by: ${by.join(", ")}`}; source: ${str(d.source) || "(not stated)"}`;
+  };
+  for (const n of neighbors) {
+    for (const [onHeader, tags] of [[false, rowsOf(n.tags)], [true, rowsOf(n.header)]] as const) {
+      for (const t of tags) {
+        add(onHeader ? 1 : 0, str(t.hash), tagText(t), n);
+        const place = onHeader ? `in ${str(n.file)}` : `on ${str(n.symbol)}`;
+        for (const d of rowsOf(t.records)) if (!listedRecords.has(str(d.id))) add(onHeader ? 3 : 2, str(d.id), recordText(d), n, place);
+      }
+    }
+    for (const c of list(n.checks)) if (!ownChecks.has(c)) add(4, c, `memod verify ${c}`, n);
+    for (const t of list(n.topics)) if (!ownTopics.has(t)) add(5, t, t, n);
+  }
+  const line = (i: NeighborItem): string => {
+    const at = whom(i.carriers);
+    if (i.kind === 0) return `decided on ${at}: ${i.text}`;
+    if (i.kind === 1) return `decided in the header of ${i.file}, the file of ${at}: ${i.text}`;
+    if (i.kind <= 3) {
+      const onSymbol = (p: string): number => (p.startsWith("on ") ? 0 : 1);
+      const places = [...i.places].sort(([a], [b]) => onSymbol(a) - onSymbol(b) || cmp(a, b));
+      return `record named by a decided: tag ${places.map(([p, ns]) => (p.startsWith("on ") ? `on ${whom(ns)}` : `in the header of ${p.slice(3)}, the file of ${whom(ns)}`)).join("; and ")}: ${i.text}`;
+    }
+    return `${i.kind === 4 ? "check on" : "topic owned by"} ${at}: ${i.text}`;
+  };
+  const rank = (i: NeighborItem): number => Math.min(...i.carriers.map(rankOf)) * 10 + i.kind;
+  const first = (i: NeighborItem): string => str([...i.carriers].sort(bySymbol)[0]?.symbol);
+  const ordered = [...items.values()].sort((a, b) => rank(a) - rank(b) || cmp(first(a), first(b)) || cmp(a.text, b.text) || cmp(a.id, b.id));
+  const used = neighbors.filter((n) => n.uses === true).length;
+  const using = neighbors.filter((n) => n.usedBy === true).length;
+  const around = `${plural(used, "symbol")} ${name} uses, ${plural(using, "symbol")} that use${using === 1 ? "s" : ""} ${name}`;
+  const out: string[] = [];
+  if (ordered.length === 0) out.push(`One step away: no decided: tag, decision record, formal check or topic on the ${around}, or in the headers of their files.`);
+  else {
+    out.push(`One step away, most binding first (what ${name} uses, then what uses ${name}):`);
+    for (const i of ordered.slice(0, NEIGHBOR_BOUND)) out.push(`  - ${line(i)}`);
+    const hidden = ordered.slice(NEIGHBOR_BOUND);
+    if (hidden.length > 0) {
+      const count = (...kinds: number[]) => hidden.filter((i) => kinds.includes(i.kind)).length;
+      const counts = [plural(count(0, 1), "decided: tag"), plural(count(2, 3), "record"), plural(count(4), "check"), plural(count(5), "topic")].filter((c) => !c.startsWith("0 "));
+      const holders = sorted([...new Set(hidden.filter((i) => i.kind < 5).flatMap((i) => i.carriers.map((c) => shown(str(c.symbol)))))]);
+      out.push(`  Bound reached: ${NEIGHBOR_BOUND} of ${ordered.length} shown. Not shown: ${and(counts)}${holders.length === 0 ? "" : `; the tags, records and checks among them sit on ${and(holders)}`}. Run whygraph carry on a neighbor to see what sits on it, or read the neighbors column of the carry recipe (whygraph mcp), which holds them all.`);
+    }
+  }
+  if (!foundAbove && ordered.length === 0) out.push(nothing);
+  out.push(
+    `Searched: ${shown(symbolId)}, the header of ${file}, the ${around}, and the headers of their files.`,
+    "Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript and JavaScript); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.",
+  );
+  return out;
+}
+
 /**
  * The answer of `whygraph carry`.
  * owns: [[whygraph-answers]]
- * post: in order: owned topics with their other owning files; formal checks that cover it with the command that re-runs each; premise memos; the decisions as `whyAnswer` lists them; direct and transitive users with distance; the commits that changed it, newest first.
- * post: for a symbol in a language whose uses memod does not read, the users part says they are unknown instead of none.
+ * post: in order: owned topics with their other owning files; formal checks that cover it with the command that re-runs each; premise memos; the decisions as `whyAnswer` lists them; what sits one step away (`oneStepAway`); direct and transitive users with distance; the commits that changed it, newest first.
+ * post: for a symbol in a language whose uses memod does not read, the one-step part and the users part say they are unknown instead of none.
  */
 export function carryAnswer(symbolId: string, carry: Row, why: readonly Row[], users: readonly Row[]): string {
   const file = str(carry.file);
@@ -154,6 +275,7 @@ export function carryAnswer(symbolId: string, carry: Row, why: readonly Row[], u
   const premises = sorted(list(carry.premises));
   out.push(premises.length === 0 ? "Its doc comment names no premise memo." : "Premise memos it rests on:", ...premises.map((p) => `  - ${p}`));
   out.push("", ...whyAnswer(symbolId, why).split("\n").slice(2), "");
+  out.push(...oneStepAway(symbolId, carry, why, why.length > 0 || topics.length > 0 || checks.length > 0 || premises.length > 0), "");
   if (!hasSymbolEdges(file)) out.push(`Its users are unknown: memod reads which symbols use which only in TypeScript and JavaScript, not in ${file}.`);
   else if (users.length === 0) out.push("No symbol uses it.");
   else {

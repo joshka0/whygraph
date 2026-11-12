@@ -13,6 +13,8 @@
 #   c6 main     lib.rs: a Rust symbol (memod reads no symbol uses in Rust); trailer "Decision: ADR-0001"
 #   c7 main     decisions/notes.json: a second decisions source citing c2 and c4 by short id
 #   c8 main     renames the amount parameter of five symbols: a large commit with trailer "Decision: ADR-0001"
+#   c9 main     rounding.ts (roundHalfEven: a decided: tag and verified: rounding-model) and checkout.ts (checkout:
+#               a decided: tag; uses roundHalfEven): decisions and a check one step away; no older symbol gains a user
 # Tests and the demo share this fixture; change it only with docs/failures.md.
 set -euo pipefail
 dir=${1:?usage: fixture.sh <folder>}
@@ -290,4 +292,37 @@ pub fn round_cents(units: f64) -> i64 {
 }
 EOF
 commit "Name every amount by its unit" "Decision: ADR-0001"
+
+at 9
+cat > src/rounding.ts <<'EOF'
+/**
+ * module: [[fx-rounding]]
+ */
+
+/**
+ * owns: [[fx-rounding]]
+ * verified: rounding-model
+ * decided: ties round to even because rounding half up overcharges on average
+ */
+export function roundHalfEven(inCents: number): number {
+  const floor = Math.floor(inCents);
+  const rest = inCents - floor;
+  return rest > 0.5 || (rest === 0.5 && floor % 2 === 1) ? floor + 1 : floor;
+}
+EOF
+cat > src/checkout.ts <<'EOF'
+/**
+ * module: [[fx-checkout]]
+ */
+import { roundHalfEven } from "./rounding.ts";
+
+/**
+ * owns: [[fx-checkout]]
+ * decided: checkout adds tax to the net once because the receipt shows one tax line
+ */
+export function checkout(netCents: number, rate: number): number {
+  return netCents + roundHalfEven(netCents * rate);
+}
+EOF
+commit "Add checkout with tax rounded half to even"
 git log --format='%h %ad %s' --date=short --graph

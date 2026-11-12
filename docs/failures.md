@@ -20,6 +20,7 @@ are fixed (fixed author, committer and dates):
 | `f85c3a6` | main | `src/lib.rs` with `round_cents` (Rust: no symbol uses); trailer `Decision: ADR-0001` |
 | `6bed2fd` | main | `decisions/notes.json`: `note-1` (rests on ADR-0002, cites `2a59506`), `note-2` (rests on `note-1`, cites `73ebd46`) |
 | `395b8c0` | main | renames the amount parameter of `cents`, `formatCents`, `total`, `taxOf` and `round_cents`: a large commit (5 symbols) with trailer `Decision: ADR-0001` |
+| `17078bb` | main | `src/rounding.ts` (`roundHalfEven` with a `decided:` tag naming no record and `verified: rounding-model`), `src/checkout.ts` (`checkout` with a `decided:` tag naming no record; uses `roundHalfEven`). No older symbol gains a user, so no `why` or `impact` answer changes. |
 
 "The fixture build" below means, in the fixture:
 `whygraph decisions adr docs/adr > adrs.json` then
@@ -30,7 +31,7 @@ are fixed (fixed author, committer and dates):
 | ID | Input | Required result |
 | --- | --- | --- |
 | A1 | `decisions adr docs/adr` | Exit 0. Records `ADR-0001`..`ADR-0003` in that order. ADR-0001 commits: `[dfb4ff8...]` only (full id; `73ebd46` names it in free text and is not cited). ADR-0002: restsOn `[ADR-0001]`, commits `[2a59506...]`. ADR-0003: supersedes `[ADR-0002]`, restsOn `[ADR-0001]`, commits `[78884f0...]`. Each has status `accepted`, its date, topic, and items `context` and `choice`. |
-| A2 | the fixture build | Exit 0. stdout counts: 8 Commit, 3 DecidedTag, 5 Decision, 4 File, 8 Item, 6 Symbol, 4 Topic; 23 CHANGES, 7 CITES, 3 NAMES, 1 SUPERSEDES, 4 RESTS_ON, 4 USES. No warning. |
+| A2 | the fixture build | Exit 0. stdout counts: 1 Check, 9 Commit, 5 DecidedTag, 5 Decision, 6 File, 8 Item, 8 Symbol, 6 Topic; 27 CHANGES, 7 CITES, 3 NAMES, 1 SUPERSEDES, 4 RESTS_ON, 5 USES, 1 VERIFIED. No warning. |
 | A3 | `why src/tax.ts:taxRate` | Exit 0. The doc-comment tag "the rate depends on the region ...", the header tag "tax lives apart from the cart ... (ADR-0002)". Records its tags name, in this order: ADR-0003 ("named by: a decided: tag in its doc comment", also cited by `78884f0`, "that commit changed 1 symbol"), then ADR-0002 (superseded by ADR-0003, "named by: a decided: tag in the header of src/tax.ts", also cited by `2a59506`, 2 symbols). Records linked only through a commit: note-1 (changed by `2a59506`; 2 symbols). Each record appears once. |
 | A4 | `why src/tax.ts:taxOf` | Named by a tag: ADR-0002 (header). Linked only through a commit: ADR-0001 (`395b8c0`, 5 symbols), then note-1 (`2a59506`). Not ADR-0003: `78884f0` did not change `taxOf`'s code, and no tag of `taxOf` names it. |
 | A5 | `impact ADR-0002` | Exit 0. ADR-0002 itself (superseded by ADR-0003): no symbol tag names it, the file `src/tax.ts` whose header tag names it; commit `2a59506` ("it changed 2 symbols") and its symbols `taxRate` 1 user, `taxOf` 0 users. note-1 directly (no tag; `2a59506`, the same 2 symbols), note-2 through 1 other record (`73ebd46`, `formatCents` 1 user). "3 distinct symbols in all: 0 named by a decided: tag, 3 reached only through a commit." |
@@ -114,6 +115,29 @@ are fixed (fixed author, committer and dates):
 | W14 | A uses cycle (a uses b, b uses a) | `carry a` lists b at distance 1 and never lists a itself; it terminates. |
 | W15 | A record with a `status` and one superseded | `why` prints `status:` and `superseded by:` lines for it. |
 
+## carry: one step away
+
+A neighbor of a symbol is a symbol it uses or a symbol that uses it (a `USES`
+edge either way). "The one-step part" is the part of a `carry` answer that
+starts with `One step away` and ends with the `Not searched:` line. Each item
+line starts with `  - ` and says where it sits and how it relates, such as
+`decided on src/rounding.ts:roundHalfEven, which checkout uses: ...`.
+
+| ID | Input | Required result |
+| --- | --- | --- |
+| C1 | `carry src/checkout.ts:checkout` (fixture: a decision on a callee in another file) | The one-step part lists `decided on src/rounding.ts:roundHalfEven, which checkout uses: ties round to even because rounding half up overcharges on average`. |
+| C2 | `carry src/rounding.ts:roundHalfEven` (fixture: a decision on a caller) | The one-step part lists `decided on src/checkout.ts:checkout, which uses roundHalfEven: checkout adds tax to the net once because the receipt shows one tax line`. |
+| C3 | A symbol with a decision on a callee and one on a caller; and a symbol `a` that uses `b` while `b` uses `a`, `b` with a tag | The callee's line comes before the caller's. `b` is one neighbor: its tag is listed once, as `decided on <file>:b, which a uses and which uses a: ...`, ranked with the callees. The counts in `Searched:` include `b` among the symbols `a` uses and among those that use `a`. |
+| C4 | A callee in another file whose file header holds a `decided:` tag naming a record (fixture: `carry src/tax.ts:taxOf` does not show it, as `src/tax.ts` is its own file; `carry src/money.ts:cents` shows the header of `src/tax.ts` through its caller `taxOf`) | `decided in the header of src/tax.ts, the file of src/tax.ts:taxOf, which uses cents: tax lives apart ...`, then `record named by a decided: tag in the header of src/tax.ts, the file of src/tax.ts:taxOf, which uses cents: ADR-0002 (2026-01-02) One flat tax rate; status: accepted; superseded by: ADR-0003; source: ...`. The header of the symbol's own file is never in the one-step part (it is in the `why` part). |
+| C5 | A TypeScript symbol that calls code in a language without symbol edges (Rust through a binding); and `carry src/lib.rs:round_cents` | The TypeScript symbol: the Rust code is no neighbor, and the `Not searched:` line names "code in languages without symbol edges". `round_cents`: `One step away: unknown. memod reads which symbols use which only in TypeScript and JavaScript, so whygraph cannot see what src/lib.rs:round_cents uses or what uses it.`, then `Searched: src/lib.rs:round_cents and the header of src/lib.rs. Not searched: anything one step away or further.` Never "no decided: tag ... on the 0 symbols". |
+| C6 | `useShape(s: Shape)` where `Shape` is an interface with a `decided:` tag, imported with `import type` | `decided on src/t.ts:Shape, which useShape uses only as a type: ...`; a caller that uses the symbol only as a type: `which uses <name> only as a type`. |
+| C7 | A recursive symbol `r` (it calls itself) with no other use | `r` is not its own neighbor. The one-step part says no tag, record, check or topic on `the 0 symbols r uses, 0 symbols that use r`; it terminates. |
+| C8 | A symbol that uses 25 symbols, each with a `decided:` tag and a topic (50 items) | 20 item lines, then `  Bound reached: 20 of 50 shown. Not shown: 5 decided: tags and 25 topics; the tags, records and checks among them sit on <the 5 symbols, sorted>. Run whygraph carry on a neighbor to see what sits on it, or read the neighbors column of the carry recipe (whygraph mcp), which holds them all.` The neighbors column of the carry recipe holds all 25 neighbors. |
+| C9 | One decision reached two ways: a header tag of a file that declares two callees; a record that tags on two neighbors name; a check that covers four callees; a topic two callees own; a record that the `why` part already lists | Each is one line: `the file of <a> and <b>, which <name> uses`; `record named by a decided: tag on <a>, ...; and on <b>, ...`; `check on <a>, <b>, <c> and <d>, which <name> uses: memod verify <check>`; `topic owned by <a> and <b>, ...`. A record the `why` part lists, a check that covers the symbol itself, and a topic it owns are not repeated (fixture: `carry src/cart.ts:total` shows the tag on `cents`, not ADR-0001, which its `why` part lists through `395b8c0`). |
+| C10 | Nothing found: a TypeScript symbol with no tag, record, check, premise or topic, no file header tag, and no neighbor that holds one | Exactly these lines: `One step away: no decided: tag, decision record, formal check or topic on the 0 symbols lonely uses, 0 symbols that use lonely, or in the headers of their files.`, `Nothing found in what was searched; that does not mean nothing constrains this edit.`, `Searched: src/u.ts:lonely, the header of src/u.ts, the 0 symbols lonely uses, 0 symbols that use lonely, and the headers of their files.`, `Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript and JavaScript); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.` When something was found elsewhere in the answer, the `Nothing found` line is absent; the `Searched:` and `Not searched:` lines are always there. |
+| C11 | Determinism: `carry` on a symbol with many neighbors, run twice and after a rebuild | Byte-identical stdout. Within one place (what it uses, what uses it), items are ordered: tags on the neighbor, tags in its file header, records a neighbor's own tag names, records only a header tag names, checks, topics; then by the first neighbor's id, then by text. |
+| C12 | `carry src/checkout.ts:checkout` (fixture: a check on a callee) | `check on src/rounding.ts:roundHalfEven, which checkout uses: memod verify rounding-model`, after the tag line of `roundHalfEven` and before its topic line. |
+
 ## impact
 
 | ID | Input | Required result |
@@ -156,7 +180,7 @@ commit). Unless the entry says otherwise, the repo has records `ADR-0004`
 | L12 | A commit message naming `ADR 0004`, `ADR-0004` or `0004-x.md` in free text, with no trailer, that does not add the ADR's file (fixture: `73ebd46`) | No record cites it; `why` on the symbols it changed lists no record through it. |
 | L13 | A commit listed in a record's `commits` and also naming that record in a trailer | One CITES edge. |
 | L14 | A record cited by a commit that changed many symbols (fixture: ADR-0001 and `395b8c0`) | `why` on any of those symbols: "changed by: 395b8c0 2026-01-08 Name every amount by its unit; that commit changed 5 symbols". `impact ADR-0001`: "395b8c0 2026-01-08 Name every amount by its unit; it changed 5 symbols". |
-| L15 | Determinism: `scripts/fixture.sh` run twice; the fixture build run twice | The same commit ids (HEAD `395b8c0`). The same NAMES and CITES edges, byte-identical `why` and `impact` answers, warnings identical and sorted. |
+| L15 | Determinism: `scripts/fixture.sh` run twice; the fixture build run twice | The same commit ids (HEAD `17078bb`). The same NAMES and CITES edges, byte-identical `why` and `impact` answers, warnings identical and sorted. |
 
 ## Every command
 

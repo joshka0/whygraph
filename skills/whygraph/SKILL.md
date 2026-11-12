@@ -27,6 +27,10 @@ exactly, such as `ADR-0003` or `note-2`.
    `impact` on it, and treat every symbol it lists as possibly affected.
 3. When you wonder why code is the way it is, run `why` before you guess.
 4. If an answer lists users of the symbol, check each of them after the edit.
+5. `carry` also lists the decisions, records, checks and topics one step away
+   (on the symbols it uses, then on the symbols that use it): treat a decision
+   there as binding on your edit too, and read its last lines for what it did
+   not search, since an empty part never means nothing constrains the change.
 
 ## Reading an answer
 
