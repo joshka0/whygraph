@@ -1,0 +1,44 @@
+{
+  "id": "fixture-impact-decimal-strings",
+  "kind": "impact",
+  "repo": "fixture",
+  "request": "ADR-0001 is reversed: from now on we keep amounts as decimal strings, not integer cents. List what has to change. Do not change code yet.",
+  "ground_truth": {
+    "symbols": [
+      "src/money.ts:cents",
+      "src/money.ts:formatCents",
+      "src/cart.ts:total",
+      "src/tax.ts:taxOf",
+      "src/lib.rs:round_cents"
+    ],
+    "derivation": "Read from scripts/fixture.sh, not from whygraph impact. cents rounds to integer cents (its tag names adr-0001); formatCents splits an integer of cents; total sums integer cents and formats them; taxOf multiplies cents(units) by the rate and rounds to integer cents; round_cents (lib.rs, commit trailer Decision: ADR-0001) rounds to integer cents. taxRate returns a rate, not an amount, and does not change. The records ADR-0002 and ADR-0003 restate the cents rule in their text; they are records, not symbols, and do not count for or against."
+  },
+  "score": {
+    "symbols": [
+      {
+        "symbol": "src/money.ts:cents",
+        "required": true
+      },
+      {
+        "symbol": "src/money.ts:formatCents",
+        "required": true
+      },
+      {
+        "symbol": "src/cart.ts:total",
+        "required": true
+      },
+      {
+        "symbol": "src/tax.ts:taxOf",
+        "required": true
+      },
+      {
+        "symbol": "src/lib.rs:round_cents",
+        "required": true
+      }
+    ],
+    "records": [],
+    "min_recall": 1,
+    "min_precision": 1
+  },
+  "pass_rule": "The listed set of symbols equals the true set of five (recall 1 and precision 1)."
+}

@@ -1,0 +1,36 @@
+{
+  "id": "fixture-impact-note-1-reversed",
+  "kind": "impact",
+  "repo": "fixture",
+  "request": "note-1 is reversed: we now compute tax per line. What else is affected? Do not change code yet.",
+  "ground_truth": {
+    "records": [
+      "note-2"
+    ],
+    "symbols": [
+      "src/tax.ts:taxOf",
+      "src/money.ts:formatCents"
+    ],
+    "derivation": "note-2 rests on note-1 (restsOn in decisions/notes.json of the fixture script) and is carried out by commit 73ebd46, which changed only formatCents. note-1 itself is carried out by taxOf (it taxes the order total once), so taxOf must change. taxRate, which the same commit touched, holds a rate and is not affected; naming it does not fail the run."
+  },
+  "score": {
+    "symbols": [
+      {
+        "symbol": "src/tax.ts:taxOf",
+        "required": true
+      },
+      {
+        "symbol": "src/money.ts:formatCents",
+        "required": true
+      }
+    ],
+    "records": [
+      {
+        "id": "note-2"
+      }
+    ],
+    "min_recall": 1,
+    "min_precision": 0
+  },
+  "pass_rule": "The reply names note-2, and lists formatCents and taxOf. Extra symbols do not fail it."
+}

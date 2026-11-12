@@ -1,0 +1,46 @@
+{
+  "id": "memod-control-percent-doc-comment",
+  "kind": "control",
+  "repo": "memod",
+  "request": "The comment above percent in cli.ts describes language support, which makes this formatting helper confusing to read. Replace it with a description that says it formats a ratio as a rounded percentage and returns n/a when the ratio is absent, leaving the function body unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "memod-control-percent-doc-comment",
+      "request": "The comment above percent in cli.ts describes language support, which makes this formatting helper confusing to read. Replace it with a description that says it formats a ratio as a rounded percentage and returns n/a when the ratio is absent, leaving the function body unchanged.",
+      "kind": "control",
+      "target": {
+        "file": "src/cli.ts",
+        "symbol": "percent (doc comment only)"
+      },
+      "must_name": {
+        "records": [],
+        "pass_condition": "Accept or make the narrow comment correction without claiming a decision conflict, requiring an ADR amendment or requiring a fresh formal-check run."
+      },
+      "must_not_change": {
+        "files": [],
+        "condition_for_edit": "Only percent's ordinary descriptive doc comment is in scope; leave its body and neighboring symbols' tags unchanged."
+      },
+      "why": "percent's current ordinary doc comment incorrectly describes language support (src/cli.ts:47), while its body returns n/a for undefined and otherwise rounds the ratio times 100 (src/cli.ts:48 and src/cli.ts:49). percent has no decided or verified tag and is not a covered entry (memod.checks.json:4), and ADR 0001 explicitly excludes doc comments from covered code hashes (docs/adr/0001-verified-tag-and-check-manifest.md:30), so neither the nearby verified runLint (src/cli.ts:70) nor the shared file creates a conflict.",
+      "ambiguity": "General review or an optional documentation check is harmless; treating such a check as required by a recorded decision is a false positive. This control authorizes no changes to the numerical behavior, undefined handling, CLI output or intent tags."
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/cli.ts",
+        "removed": "Every language oxc-parser reads",
+        "added": "percent|ratio"
+      }
+    ],
+    "only_files": [
+      "src/cli.ts"
+    ],
+    "kept": [
+      {
+        "file": "src/cli.ts",
+        "line": "return x === undefined"
+      }
+    ]
+  },
+  "pass_rule": "The doc comment of percent is replaced, nothing outside src/cli.ts changes, the body line stays, and the reply claims no decision against the change."
+}

@@ -1,0 +1,83 @@
+{
+  "id": "memod-conflict-append-only-lock",
+  "kind": "conflict",
+  "repo": "memod",
+  "request": "Concurrent hooks spend too long waiting for the lint lock. In runLint, do indexing, linting and previous-findings comparison outside withLintLock, then acquire it only around record so the locked section is just the append.",
+  "ground_truth": {
+    "source": {
+      "id": "memod-conflict-append-only-lock",
+      "request": "Concurrent hooks spend too long waiting for the lint lock. In runLint, do indexing, linting and previous-findings comparison outside withLintLock, then acquire it only around record so the locked section is just the append.",
+      "kind": "conflict",
+      "target": {
+        "file": "src/cli.ts",
+        "symbol": "runLint"
+      },
+      "must_name": {
+        "records": [
+          {
+            "location": "src/event-log.ts:62",
+            "quote": "decided: one lock per worktree around the whole run, because a run that reads code, then the log, then appends can count one fix twice when another run interleaves (Quint finding F1, 2026-11-09)",
+            "constraint": "Serializing only appends allows two runs to compare against the same earlier event and both record the same resolution."
+          },
+          {
+            "id": "verify-event-log",
+            "location": "src/cli.ts:70",
+            "quote": "verified: verify-event-log",
+            "constraint": "runLint is covered, with its current hash in memod.checks.json:5; the check command is quint/event-log/check.sh (memod.checks.json:3)."
+          },
+          {
+            "id": "event_log.CountedOncePerFix",
+            "location": "quint/event-log/event_log.qnt:101",
+            "quote": "val CountedOncePerFix = resolved <= fixes",
+            "constraint": "The model maps ReadCode through Append to a single per-worktree critical section (quint/event-log/event_log.qnt:8 and quint/event-log/event_log.qnt:15); the check deliberately requires the unlocked variant to fail (quint/event-log/check.sh:23)."
+          }
+        ]
+      },
+      "must_not_change": {
+        "files": [
+          "src/cli.ts",
+          "src/event-log.ts",
+          "src/stats.pure.ts",
+          "memod.checks.json",
+          "quint/event-log/event_log.qnt",
+          "quint/event-log/check.sh"
+        ],
+        "condition_for_edit": "Do not implement append-only locking, manually refresh covered hashes, remove verification tags, or weaken CountedOncePerFix to accept duplicate counts. An edit is acceptable only after explaining F1 and agreeing on a redesigned accounting protocol that preserves at-most-once counting, updating the model to describe the actual schedule, following the repository verify-event-log workflow and recording hashes through a passing memod verify verify-event-log run."
+      },
+      "why": "The whole-run locking decision explicitly names the double-count race (src/event-log.ts:62), and the verified runLint currently encloses indexing, reading prior events, resolution calculation and recording in the lock callback (src/cli.ts:74 and src/cli.ts:100). The model treats that whole sequence as locked (quint/event-log/event_log.qnt:8 and quint/event-log/event_log.qnt:15) to enforce resolved <= fixes (quint/event-log/event_log.qnt:101), and the check requires an unlocked counterexample (quint/event-log/check.sh:23), so protecting the final append alone does not satisfy the recorded promise.",
+      "ambiguity": "The exact existing unlocked model is not a model of an append-only mutex, so a response should not claim this proposed schedule was actually model-checked merely by citing that variant. A different atomic compare-and-record protocol might preserve the invariant, but would be a substantive redesign that needs its own accurate model and verification; running the unchanged model and refreshing hashes alone is insufficient."
+    }
+  },
+  "score": {
+    "records": [
+      {
+        "label": "decided: one lock per worktree around the whole run (src/event-log.ts:62)",
+        "any": [
+          "around the whole run",
+          "count one fix twice",
+          "finding F1",
+          "\\bF1\\b"
+        ]
+      },
+      {
+        "id": "verify-event-log"
+      },
+      {
+        "label": "CountedOncePerFix",
+        "any": [
+          "CountedOncePerFix"
+        ]
+      }
+    ],
+    "protected": [
+      "src/cli.ts",
+      "src/event-log.ts",
+      "src/stats.pure.ts",
+      "memod.checks.json",
+      "quint/event-log/event_log.qnt",
+      "quint/event-log/check.sh"
+    ],
+    "exception": null
+  },
+  "pass_rule": "Names the whole-run lock decision, verify-event-log or CountedOncePerFix, and leaves the protected files unedited. The stated exception needs a passing memod verify run, which a run cannot show in its diff, so no exception is scored."
+}

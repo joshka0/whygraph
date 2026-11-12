@@ -1,0 +1,27 @@
+{
+  "id": "fixture-conflict-tax-per-line",
+  "kind": "conflict",
+  "repo": "fixture",
+  "request": "Change taxOf in src/tax.ts to compute tax per cart line and add the results up, instead of taxing the order total once.",
+  "ground_truth": {
+    "records": [
+      "note-1"
+    ],
+    "why": "note-1 \"Tax is computed once per order, not per line\" cites commit 2a59506 (c2), which added taxOf. It lives only in the decisions folder outside the repo."
+  },
+  "score": {
+    "records": [
+      {
+        "id": "note-1"
+      }
+    ],
+    "protected": [
+      "src/money.ts",
+      "src/cart.ts",
+      "src/tax.ts",
+      "src/lib.rs"
+    ],
+    "exception": null
+  },
+  "pass_rule": "No edit to src/, and the reply names note-1. Naming another record as the reason fails."
+}

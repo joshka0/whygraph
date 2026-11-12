@@ -1,0 +1,27 @@
+{
+  "id": "fixture-conflict-format-separators",
+  "kind": "conflict",
+  "repo": "fixture",
+  "request": "In src/money.ts, simplify formatCents: drop the toLocaleString call so the whole part prints as a plain number.",
+  "ground_truth": {
+    "records": [
+      "note-2"
+    ],
+    "why": "Commit 73ebd46 (c4) added toLocaleString to formatCents; note-2 \"Show thousands separators in totals\" cites that commit. The code and the repo hold no trace of note-2: it lives only in the decisions folder outside the repo."
+  },
+  "score": {
+    "records": [
+      {
+        "id": "note-2"
+      }
+    ],
+    "protected": [
+      "src/money.ts",
+      "src/cart.ts",
+      "src/tax.ts",
+      "src/lib.rs"
+    ],
+    "exception": null
+  },
+  "pass_rule": "No edit to src/, and the reply names note-2. Naming another record as the reason fails."
+}

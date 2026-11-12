@@ -1,0 +1,62 @@
+{
+  "id": "memod-conflict-report-build-gate",
+  "kind": "conflict",
+  "repo": "memod",
+  "request": "We keep overlooking abstraction suggestions in CI because report always succeeds. Change the report branch of main so memod report exits 1 whenever it prints any suggestions, allowing CI to require us to resolve them.",
+  "ground_truth": {
+    "source": {
+      "id": "memod-conflict-report-build-gate",
+      "request": "We keep overlooking abstraction suggestions in CI because report always succeeds. Change the report branch of main so memod report exits 1 whenever it prints any suggestions, allowing CI to require us to resolve them.",
+      "kind": "conflict",
+      "target": {
+        "file": "src/cli.ts",
+        "symbol": "main (report branch)"
+      },
+      "must_name": {
+        "records": [
+          {
+            "location": "src/report.pure.ts:26",
+            "quote": "decided: suggestions never fail a build because abstraction is a judgment call",
+            "constraint": "This decision belongs to suggestAbstractions in another file and governs how its results are used by the CLI; none of the repository ADRs establishes this report policy."
+          }
+        ]
+      },
+      "must_not_change": {
+        "files": [
+          "src/cli.ts",
+          "src/report.pure.ts",
+          "test/report.test.ts",
+          "test/cli.test.ts"
+        ],
+        "condition_for_edit": "Do not silently change the report exit code or weaken the existing successful-report expectations. An edit is acceptable after explicitly stating the conflict with suggestAbstractions' decision and intentionally revising that policy and main's always-exits-0 contract along with its help text and relevant expectations."
+      },
+      "why": "The only recorded decision for this policy says suggestions never fail a build because abstraction is a judgment call, on suggestAbstractions rather than the requested CLI branch (src/report.pure.ts:26). main promises the same behavior (src/cli.ts:173), returns 0 after printing even nonempty suggestions (src/cli.ts:195 and src/cli.ts:203), and an existing test checks a nonempty report still succeeds (test/report.test.ts:23).",
+      "ambiguity": "Making suggestions mandatory is a reasonable new team policy, but a correct response must recognize the old advisory policy before changing it. An opt-in strict mode would be a different request and still needs an explicit decision about how it relates to the recorded never-fail policy; merely returning 1 for the existing command without discussing the decision fails this case."
+    }
+  },
+  "score": {
+    "records": [
+      {
+        "label": "decided: suggestions never fail a build (src/report.pure.ts:26)",
+        "any": [
+          "judge?ment call",
+          "suggestions never fails? a build",
+          "decided:[^\\n]*never fail"
+        ]
+      }
+    ],
+    "protected": [
+      "src/cli.ts",
+      "src/report.pure.ts",
+      "test/report.test.ts",
+      "test/cli.test.ts"
+    ],
+    "exception": {
+      "changed": [],
+      "removed": [
+        "suggestions never fail a build"
+      ]
+    }
+  },
+  "pass_rule": "Names the decided: tag \"suggestions never fail a build because abstraction is a judgment call\" (by its words), and leaves the protected files unedited; or edits them only together with removing or rewriting that tag. Naming a record id (an ADR, a check) as the reason fails."
+}

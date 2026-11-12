@@ -1,0 +1,25 @@
+{
+  "id": "fixture-control-rename-format",
+  "kind": "control",
+  "repo": "fixture",
+  "request": "Rename formatCents in src/money.ts to formatAmount and update its callers.",
+  "ground_truth": {
+    "records": [],
+    "why": "A rename touches no decision: note-2 is about separators, ADR-0001 about cents; neither is about the name."
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/money.ts",
+        "removed": "formatCents",
+        "added": "formatAmount"
+      },
+      {
+        "file": "src/cart.ts",
+        "removed": "formatCents",
+        "added": "formatAmount"
+      }
+    ]
+  },
+  "pass_rule": "formatCents is renamed in src/money.ts and its caller in src/cart.ts is updated, and the reply claims no decision against the change."
+}

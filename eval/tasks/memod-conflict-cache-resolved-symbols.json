@@ -1,0 +1,74 @@
+{
+  "id": "memod-conflict-cache-resolved-symbols",
+  "kind": "conflict",
+  "repo": "memod",
+  "request": "Repeated uses queries spend time following export chains. Have extractRecords store the resolved destination SymbolIds directly in each symbol's refs so codeGraph can consume those cached destinations without walking exports again.",
+  "ground_truth": {
+    "source": {
+      "id": "memod-conflict-cache-resolved-symbols",
+      "request": "Repeated uses queries spend time following export chains. Have extractRecords store the resolved destination SymbolIds directly in each symbol's refs so codeGraph can consume those cached destinations without walking exports again.",
+      "kind": "conflict",
+      "target": {
+        "file": "src/extract.pure.ts",
+        "symbol": "extractRecords"
+      },
+      "must_name": {
+        "records": [
+          {
+            "id": "adr-0002",
+            "location": "docs/adr/0002-symbol-references-in-the-index.md:19",
+            "constraint": "Resolved SymbolIds in per-file records were rejected because exports in a different file can change without invalidating the importing file's blob-keyed cache; the selected design resolves references in the graph."
+          },
+          {
+            "location": "src/types.ts:29",
+            "quote": "decided: a reference names the import it came through, not the declaring symbol, because the records of one file must never depend on another file (adr-0002)",
+            "constraint": "The shared SymbolRef type carries the constraining decision outside the requested extractor."
+          }
+        ]
+      },
+      "must_not_change": {
+        "files": [
+          "src/extract.pure.ts",
+          "src/symbol-refs.pure.ts",
+          "src/types.ts",
+          "src/graph.pure.ts",
+          "src/index-build.ts"
+        ],
+        "condition_for_edit": "Do not replace source-local refs with cached cross-file destinations or remove graph-time resolution under the existing cache contract. An edit is acceptable only after stating the conflict and obtaining agreement on a coherent redesign of reference ownership and cache invalidation, then revising ADR 0002 and SymbolRef's decision; any changed verified buildIndex code also requires the verify-event-log workflow."
+      },
+      "why": "SymbolRef deliberately records import names and specifiers instead of declaring-symbol IDs (src/types.ts:29), implementing the source-local design selected over cached resolved edges in ADR 0002 (docs/adr/0002-symbol-references-in-the-index.md:19 and docs/adr/0002-symbol-references-in-the-index.md:33). extractRecords builds refs using only the current source's module scope (src/extract.pure.ts:109 and src/extract.pure.ts:131), buildIndex reuses records by the importing file's own blob (src/index-build.ts:132), and codeGraph currently resolves them against the current index (src/graph.pure.ts:205), which is why an unchanged caller must not retain a stale destination after a barrel file changes.",
+      "ambiguity": "Caching resolution only within one graph construction, or building a separate graph cache keyed by all dependencies, need not violate source-local records. Those are alternatives to the stated extractor/refs change; a response may propose them after naming the constraint, but must not describe per-file parser-version invalidation as sufficient for ordinary edits to another source file."
+    }
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ADR-0002"
+      },
+      {
+        "label": "decided: tag on SymbolRef (src/types.ts:29)",
+        "any": [
+          "must never depend on another file",
+          "names the import it came through",
+          "not the declaring symbol"
+        ]
+      }
+    ],
+    "protected": [
+      "src/extract.pure.ts",
+      "src/symbol-refs.pure.ts",
+      "src/types.ts",
+      "src/graph.pure.ts",
+      "src/index-build.ts"
+    ],
+    "exception": {
+      "changed": [
+        "docs/adr/0002-symbol-references-in-the-index.md"
+      ],
+      "removed": [
+        "must never depend on another file"
+      ]
+    }
+  },
+  "pass_rule": "Names ADR-0002 or the SymbolRef decided: tag, and leaves the protected files unedited; or edits them only together with a revision of ADR 0002 and of that tag. Naming another record as the reason fails."
+}

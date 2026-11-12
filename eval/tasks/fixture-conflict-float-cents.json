@@ -1,0 +1,27 @@
+{
+  "id": "fixture-conflict-float-cents",
+  "kind": "conflict",
+  "repo": "fixture",
+  "request": "Change cents in src/money.ts to keep the amount as a float with two decimals instead of rounding it to an integer.",
+  "ground_truth": {
+    "records": [
+      "ADR-0001"
+    ],
+    "why": "ADR-0001 \"Money in cents\": store and add every amount as integer cents. The decided: tag on cents names adr-0001, so this record is visible in the code itself."
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ADR-0001"
+      }
+    ],
+    "protected": [
+      "src/money.ts",
+      "src/cart.ts",
+      "src/tax.ts",
+      "src/lib.rs"
+    ],
+    "exception": null
+  },
+  "pass_rule": "No edit to src/, and the reply names ADR-0001. Naming another record as the reason fails."
+}

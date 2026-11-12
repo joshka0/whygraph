@@ -1,0 +1,21 @@
+{
+  "id": "fixture-edit-region-comment",
+  "kind": "edit",
+  "repo": "fixture",
+  "request": "Add a comment above taxRate in src/tax.ts that explains why it takes a region.",
+  "ground_truth": {
+    "records": [
+      "ADR-0003"
+    ],
+    "why": "ADR-0003 \"Tax rate by region\" is why taxRate takes a region; its decided: tag already names ADR 0003."
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/tax.ts",
+        "added": "\\badr[- ]?0*3\\b"
+      }
+    ]
+  },
+  "pass_rule": "A line added to src/tax.ts cites ADR-0003 (any of the spellings ADR-0003, ADR 0003, adr-0003, ADR 3)."
+}

@@ -1,0 +1,126 @@
+{
+  "id": "memod-impact-types-require-topics",
+  "kind": "impact",
+  "repo": "memod",
+  "request": "For TypeScript and JavaScript source only, we've decided exported interfaces, type aliases and enums should require owns topics just like exported values, so coverage includes our public data API. Which production symbols need changes to keep linting, skipped-rule carry-forward and logged coverage consistent, while retaining the existing file exemptions and other languages' behavior?",
+  "ground_truth": {
+    "source": {
+      "id": "memod-impact-types-require-topics",
+      "request": "For TypeScript and JavaScript source only, we've decided exported interfaces, type aliases and enums should require owns topics just like exported values, so coverage includes our public data API. Which production symbols need changes to keep linting, skipped-rule carry-forward and logged coverage consistent, while retaining the existing file exemptions and other languages' behavior?",
+      "kind": "impact",
+      "target": {
+        "file": "src/lint.pure.ts",
+        "symbol": "lint",
+        "scope": "Impact analysis only: name production symbols whose implementations or contracts must change; no implementation requested."
+      },
+      "must_name": {
+        "records": [
+          {
+            "location": "src/lint.pure.ts:66",
+            "quote": "decided: exported types need no owns tag because a topic on every props or options type pushes agents to write filler topics; an owns tag on a type still counts"
+          },
+          {
+            "id": "verify-event-log",
+            "location": "memod.checks.json:5",
+            "constraint": "runLint and lint are covered (memod.checks.json:5 and memod.checks.json:13), so implementing this reversal requires the formal-check workflow; changed contracts must also be reconciled with the covered carrying and resolution functions."
+          }
+        ],
+        "symbols_that_must_change": [
+          "src/lint.pure.ts:lint",
+          "src/stats.pure.ts:holdsInCode",
+          "src/cli.ts:runLint",
+          "src/stats.pure.ts:carriedFindings",
+          "src/stats.pure.ts:resolveFindings"
+        ],
+        "smallest_passing_subset": [
+          "src/lint.pure.ts:lint",
+          "src/stats.pure.ts:holdsInCode",
+          "src/cli.ts:runLint"
+        ],
+        "roles": [
+          {
+            "symbol": "src/lint.pure.ts:lint",
+            "change": "Change its untagged-export eligibility for the specified source languages and revise the exported-types decision and exported-value contract; retain requiresTags exemptions and the current changed-file restriction.",
+            "evidence": [
+              "src/lint.pure.ts:65",
+              "src/lint.pure.ts:66",
+              "src/lint.pure.ts:160",
+              "src/lint.pure.ts:162"
+            ]
+          },
+          {
+            "symbol": "src/stats.pure.ts:holdsInCode",
+            "change": "An untagged exported TS/JS interface, alias or enum must continue to hold its untagged-export finding when lint skips the rule; otherwise carry-forward and resolution incorrectly treat becoming type-only as a fix.",
+            "evidence": [
+              "src/stats.pure.ts:65",
+              "src/stats.pure.ts:68",
+              "src/stats.pure.ts:80",
+              "src/stats.pure.ts:97",
+              "test/code-state-resolution.test.ts:65"
+            ]
+          },
+          {
+            "symbol": "src/cli.ts:runLint",
+            "change": "Update the exported-symbol population used for the event's exports denominator and tagged numerator, including these TS/JS types while retaining scope, requiresTags and other-language behavior.",
+            "evidence": [
+              "src/cli.ts:93",
+              "src/cli.ts:111",
+              "src/cli.ts:112"
+            ]
+          },
+          {
+            "symbol": "src/stats.pure.ts:carriedFindings",
+            "change": "Revise the contract that restricts carried untagged-export findings to exported values; implementation already delegates to holdsInCode and need not otherwise change.",
+            "evidence": [
+              "src/stats.pure.ts:74",
+              "src/stats.pure.ts:80"
+            ]
+          },
+          {
+            "symbol": "src/stats.pure.ts:resolveFindings",
+            "change": "Revise the contract that restricts unresolved untagged-export findings to exported values; implementation already delegates to holdsInCode and need not otherwise change.",
+            "evidence": [
+              "src/stats.pure.ts:88",
+              "src/stats.pure.ts:97"
+            ]
+          }
+        ],
+        "pass_condition": "The list must identify all three implementation symbols in smallest_passing_subset and explain the rule, carried-finding and coverage consequences. Naming only the exported lint function and exported stats wrappers misses the private semantic guard; the two contract-only wrapper edits are additional complete-answer items rather than mandatory pass items."
+      },
+      "must_not_change": {
+        "files": [],
+        "condition_for_edit": "This is an analysis question; no edits are requested. The existing file-exemption function requiresTags, source readers' typeOnly classification, graph typeOnly edges and other-language exemptions should retain their behavior."
+      },
+      "why": "The reversed policy is explicit on lint (src/lint.pure.ts:66), whose untagged-export guard excludes typeOnly symbols (src/lint.pure.ts:162), while the same exclusion independently determines whether skipped findings still hold (src/stats.pure.ts:68) and which exports enter logged coverage (src/cli.ts:93). The carrying and resolution wrappers both delegate to that private guard (src/stats.pure.ts:80 and src/stats.pure.ts:97) but their comments still promise exported-value-only behavior (src/stats.pure.ts:74 and src/stats.pure.ts:88), so three implementation symbols plus two contracts cover the stated impact without changing the readers' classification (src/extract.pure.ts:130).",
+      "ambiguity": "A reasonable engineer may list only implementation edits; that is why the three-symbol subset passes without the two comment-only wrapper entries. A refactor can centralize eligibility in a new helper but still needs these three current implementation sites updated; retaining other-language behavior means blindly removing every typeOnly guard globally is not an acceptable implementation plan."
+    }
+  },
+  "score": {
+    "symbols": [
+      {
+        "symbol": "src/lint.pure.ts:lint",
+        "required": true
+      },
+      {
+        "symbol": "src/stats.pure.ts:holdsInCode",
+        "required": true
+      },
+      {
+        "symbol": "src/cli.ts:runLint",
+        "required": true
+      },
+      {
+        "symbol": "src/stats.pure.ts:carriedFindings",
+        "required": false
+      },
+      {
+        "symbol": "src/stats.pure.ts:resolveFindings",
+        "required": false
+      }
+    ],
+    "records": [],
+    "min_recall": 1,
+    "min_precision": 0.6
+  },
+  "pass_rule": "Lists all three of smallest_passing_subset (recall 1 over it); of the symbols listed, at least 60% are in symbols_that_must_change."
+}

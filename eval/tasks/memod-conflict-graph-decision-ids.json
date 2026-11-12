@@ -1,0 +1,59 @@
+{
+  "id": "memod-conflict-graph-decision-ids",
+  "kind": "conflict",
+  "repo": "memod",
+  "request": "The decision nodes in graph output are hard to trace back to code when debugging imports into our graph database. In codeGraph, replace the opaque decision hashes with decision:<file>#<symbol> IDs, using decision:<file> for header tags, so each carrier gets its own readable node.",
+  "ground_truth": {
+    "source": {
+      "id": "memod-conflict-graph-decision-ids",
+      "request": "The decision nodes in graph output are hard to trace back to code when debugging imports into our graph database. In codeGraph, replace the opaque decision hashes with decision:<file>#<symbol> IDs, using decision:<file> for header tags, so each carrier gets its own readable node.",
+      "kind": "conflict",
+      "target": {
+        "file": "src/graph.pure.ts",
+        "symbol": "codeGraph",
+        "related_symbols": [
+          "src/graph.pure.ts:intentNode"
+        ]
+      },
+      "must_name": {
+        "records": [
+          {
+            "id": "adr-0003",
+            "location": "docs/adr/0003-graph-output-contract.md:37",
+            "constraint": "A decision ID is decision: plus the first 16 hex digits of SHA-256 of <what> because <because>; equal decision text on different symbols is one node and consumers join on that ID. Carrier-based IDs reverse both identity and deduplication."
+          }
+        ]
+      },
+      "must_not_change": {
+        "files": [
+          "src/graph.pure.ts",
+          "test/intent-graph.pure.test.ts",
+          "test/intent-graph-support.ts"
+        ],
+        "condition_for_edit": "Do not silently replace the IDs or alter expectations to accept carrier-based IDs. An edit is acceptable only after explicitly identifying the public identity/deduplication conflict and intentionally revising ADR 0003, the codeGraph decision tag, the README output contract and the affected expectations as an approved contract change."
+      },
+      "why": "ADR 0003 fixes text-based identity and permits consumers to rely on it (docs/adr/0003-graph-output-contract.md:37 and docs/adr/0003-graph-output-contract.md:63), and codeGraph repeats the reason in its decided tag (src/graph.pure.ts:173). The implementation computes that exact text hash in intentNode (src/graph.pure.ts:102) and deduplicates nodes by its ID while retaining separate carrier edges (src/graph.pure.ts:220), so the request changes semantics rather than presentation alone.",
+      "ambiguity": "The product change can be intentional; recognizing the conflict and explicitly replacing the recorded contract is a valid outcome. Adding a separate carrier label could meet the debugging motivation without changing identity, but would need agreement because the literal request asks to replace IDs; an agent should not claim it implemented that request by adding labels alone."
+    }
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ADR-0003"
+      }
+    ],
+    "protected": [
+      "src/graph.pure.ts",
+      "test/intent-graph.pure.test.ts",
+      "test/intent-graph-support.ts"
+    ],
+    "exception": {
+      "changed": [
+        "docs/adr/0003-graph-output-contract.md",
+        "README.md"
+      ],
+      "removed": []
+    }
+  },
+  "pass_rule": "Names ADR-0003, and leaves the protected files unedited; or edits them only together with a revision of docs/adr/0003-graph-output-contract.md and README.md. Naming another record as the reason fails."
+}
