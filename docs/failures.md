@@ -12,13 +12,14 @@ are fixed (fixed author, committer and dates):
 
 | Commit | Branch | What |
 | --- | --- | --- |
-| `b8dc7c9` | main | `src/money.ts` (`cents` with a `decided:` tag, `formatCents`), `src/cart.ts` (`total` uses both), ADR 0001 |
-| `1c8e848` | main | `src/tax.ts` (header `decided:` tag; `taxRate`, `taxOf` uses `cents` and `taxRate`), ADR 0002 (cites ADR 0001) |
-| `d6d2473` | regional | `taxRate` takes a region and gets a `decided:` tag, ADR 0003 (supersedes ADR 0002, cites ADR 0001) |
-| `21c643d` | main | `formatCents` with separators; message names ADR 0001 |
-| `81ce56b` | main | merge of `regional` |
-| `5292faa` | main | `src/lib.rs` with `round_cents` (Rust: no symbol uses) |
-| `6821866` | main | `decisions/notes.json`: `note-1` (rests on ADR-0002, cites `1c8e848`), `note-2` (rests on `note-1`, cites `21c643d`) |
+| `dfb4ff8` | main | `src/money.ts` (`cents` with a `decided:` tag naming `adr-0001`, `formatCents`), `src/cart.ts` (`total` uses both), ADR 0001 |
+| `2a59506` | main | `src/tax.ts` (header `decided:` tag naming `ADR-0002`; `taxRate`, `taxOf` uses `cents` and `taxRate`), ADR 0002 (cites ADR 0001) |
+| `78884f0` | regional | `taxRate` takes a region and gets a `decided:` tag naming `ADR 0003`, ADR 0003 (supersedes ADR 0002, cites ADR 0001) |
+| `73ebd46` | main | `formatCents` with separators; the message names ADR 0001 in free text only, so it links to nothing |
+| `13d52e8` | main | merge of `regional` |
+| `f85c3a6` | main | `src/lib.rs` with `round_cents` (Rust: no symbol uses); trailer `Decision: ADR-0001` |
+| `6bed2fd` | main | `decisions/notes.json`: `note-1` (rests on ADR-0002, cites `2a59506`), `note-2` (rests on `note-1`, cites `73ebd46`) |
+| `395b8c0` | main | renames the amount parameter of `cents`, `formatCents`, `total`, `taxOf` and `round_cents`: a large commit (5 symbols) with trailer `Decision: ADR-0001` |
 
 "The fixture build" below means, in the fixture:
 `whygraph decisions adr docs/adr > adrs.json` then
@@ -28,14 +29,14 @@ are fixed (fixed author, committer and dates):
 
 | ID | Input | Required result |
 | --- | --- | --- |
-| A1 | `decisions adr docs/adr` | Exit 0. Records `ADR-0001`..`ADR-0003` in that order. ADR-0001 commits: `21c643d...`, `b8dc7c9...` (full ids). ADR-0002: restsOn `[ADR-0001]`, commits `[1c8e848...]`. ADR-0003: supersedes `[ADR-0002]`, restsOn `[ADR-0001]`, commits `[d6d2473...]`. Each has status `accepted`, its date, topic, and items `context` and `choice`. |
-| A2 | the fixture build | Exit 0. stdout counts: 7 Commit, 3 DecidedTag, 5 Decision, 4 File, 8 Item, 6 Symbol, 4 Topic; 14 CHANGES, 6 CITES, 1 SUPERSEDES, 4 RESTS_ON, 4 USES. No warning. |
-| A3 | `why src/tax.ts:taxRate` | Exit 0. The doc-comment tag "the rate depends on the region ...", the header tag "tax lives apart from the cart ...", then records in this order: ADR-0002 (superseded by ADR-0003, changed by `1c8e848`), note-1 (changed by `1c8e848`), ADR-0003 (changed by `d6d2473`). |
-| A4 | `why src/tax.ts:taxOf` | ADR-0002 and note-1 only: `d6d2473` did not change `taxOf`'s code. |
-| A5 | `impact ADR-0002` | Exit 0. ADR-0002 itself (superseded by ADR-0003; `taxRate` 1 user, `taxOf` 0 users), note-1 directly, note-2 through 1 other record (`formatCents`, 1 user). "3 distinct symbols in all." |
-| A6 | `impact ADR-0001` | ADR-0001 with the symbols `b8dc7c9` and `21c643d` changed; ADR-0002, ADR-0003 rest on it directly; note-1 and note-2 through others. ADR-0003 is listed although it supersedes ADR-0002. |
-| A7 | `carry src/money.ts:cents` | Topic `fx-money`, no other owner; no check; users: `src/cart.ts:total` and `src/tax.ts:taxOf` at distance 1. |
-| A8 | `carry src/money.ts:formatCents` | Commits `21c643d` then `b8dc7c9` (newest first); records ADR-0001 (changed by both) and note-2. |
+| A1 | `decisions adr docs/adr` | Exit 0. Records `ADR-0001`..`ADR-0003` in that order. ADR-0001 commits: `[dfb4ff8...]` only (full id; `73ebd46` names it in free text and is not cited). ADR-0002: restsOn `[ADR-0001]`, commits `[2a59506...]`. ADR-0003: supersedes `[ADR-0002]`, restsOn `[ADR-0001]`, commits `[78884f0...]`. Each has status `accepted`, its date, topic, and items `context` and `choice`. |
+| A2 | the fixture build | Exit 0. stdout counts: 8 Commit, 3 DecidedTag, 5 Decision, 4 File, 8 Item, 6 Symbol, 4 Topic; 23 CHANGES, 7 CITES, 3 NAMES, 1 SUPERSEDES, 4 RESTS_ON, 4 USES. No warning. |
+| A3 | `why src/tax.ts:taxRate` | Exit 0. The doc-comment tag "the rate depends on the region ...", the header tag "tax lives apart from the cart ... (ADR-0002)". Records its tags name, in this order: ADR-0003 ("named by: a decided: tag in its doc comment", also cited by `78884f0`, "that commit changed 1 symbol"), then ADR-0002 (superseded by ADR-0003, "named by: a decided: tag in the header of src/tax.ts", also cited by `2a59506`, 2 symbols). Records linked only through a commit: note-1 (changed by `2a59506`; 2 symbols). Each record appears once. |
+| A4 | `why src/tax.ts:taxOf` | Named by a tag: ADR-0002 (header). Linked only through a commit: ADR-0001 (`395b8c0`, 5 symbols), then note-1 (`2a59506`). Not ADR-0003: `78884f0` did not change `taxOf`'s code, and no tag of `taxOf` names it. |
+| A5 | `impact ADR-0002` | Exit 0. ADR-0002 itself (superseded by ADR-0003): no symbol tag names it, the file `src/tax.ts` whose header tag names it; commit `2a59506` ("it changed 2 symbols") and its symbols `taxRate` 1 user, `taxOf` 0 users. note-1 directly (no tag; `2a59506`, the same 2 symbols), note-2 through 1 other record (`73ebd46`, `formatCents` 1 user). "3 distinct symbols in all: 0 named by a decided: tag, 3 reached only through a commit." |
+| A6 | `impact ADR-0001` | ADR-0001: the symbol whose tag names it, `cents` (2 users); 3 commits cite it, oldest first: `dfb4ff8` (3 symbols), `f85c3a6` (1 symbol), `395b8c0` (5 symbols); 4 other symbols they changed: `formatCents` (1 user; `395b8c0, dfb4ff8`), `total`, `round_cents`, `taxOf`; `cents` is not repeated among them. ADR-0002, ADR-0003 rest on it directly (ADR-0003: its tag names `taxRate`; "That commit changed no other symbol that exists now."); note-1 and note-2 through others. ADR-0003 is listed although it supersedes ADR-0002. `73ebd46` is not among ADR-0001's commits. "6 distinct symbols in all: 2 named by a decided: tag, 4 reached only through a commit." |
+| A7 | `carry src/money.ts:cents` | Topic `fx-money`, no other owner; no check; ADR-0001 named by its doc-comment tag; users: `src/cart.ts:total` and `src/tax.ts:taxOf` at distance 1; commits `395b8c0` then `dfb4ff8`. |
+| A8 | `carry src/money.ts:formatCents` | Commits `395b8c0`, `73ebd46`, `dfb4ff8` (newest first); no tag names a record; records linked only through a commit: ADR-0001 (changed by `dfb4ff8`, 3 symbols, and `395b8c0`, 5 symbols) and note-2 (`73ebd46`, 1 symbol). |
 
 ## build
 
@@ -44,7 +45,7 @@ are fixed (fixed author, committer and dates):
 | B1 | A repo with no commits and one `.ts` file; `build` | Exit 0. stderr: "the repo has no commits". Symbols and files load; 0 Commit nodes; `why` on the symbol says no record cites a commit; `carry` says no commit changed it. |
 | B2 | A repo with no commits and a decisions file citing `abcd` | Exit 0; warning names the record and `abcd`; no CITES edge. |
 | B3 | An empty repo (no files, no commits) | Exit 0; "0 nodes", "(none)". A later `why x.ts:f` exits 3 and says no file `x.ts`. |
-| B4 | `build` without `--decisions` | Exit 0; 0 Decision nodes. `impact X` exits 3 and says the store holds no decision records. |
+| B4 | `build` without `--decisions` | Exit 0; 0 Decision nodes; 0 NAMES and 0 CITES. `impact X` exits 3 and says the store holds no decision records. On the fixture, stderr warns once for each tag that names an ADR (L4) and each trailer (L8): 5 warnings, sorted. |
 | B5 | A record citing a commit id that is not in the history of HEAD (also: a commit only on an unmerged branch) | Exit 0. One stderr warning per id: `record <id>: commit "<c>" matches no commit reachable from HEAD; the link is dropped`. The record loads without that CITES edge. |
 | B6 | A record citing a short id that prefixes two commits | Exit 0. Warning names the record, the short id, and both full ids sorted; no CITES edge to either. |
 | B7 | A record citing `123` (fewer than 4 hex digits) or `HEAD` or a branch name | Treated as unknown (B5): whygraph never resolves refs. |
@@ -68,7 +69,7 @@ are fixed (fixed author, committer and dates):
 | B25 | `--store` naming an existing regular directory or file that whygraph did not create | Exit 1; stderr says it is not a whygraph store. The path is not touched. |
 | B26 | `--repo` naming a folder outside any git repo, or run outside a repo | Exit 2: "... is not in a git repo". |
 | B27 | Two worktrees of one clone | Each has its own default store (`<git dir>/whygraph/store`). |
-| B28 | A merge commit (`81ce56b`) | Gets the CHANGES edges memod gives it (usually none); it is never cited unless a record names it. |
+| B28 | A merge commit (`13d52e8`) | Gets the CHANGES edges memod gives it (usually none); it is never cited unless a record names it. |
 | B29 | A symbol deleted in a later commit | Has no node; commits that changed it give no edge; a record citing only those commits has no CHANGES path, and `impact` says its commits changed no symbol that exists now. |
 
 ## decisions adr
@@ -87,8 +88,9 @@ are fixed (fixed author, committer and dates):
 | D10 | A folder with no `NNNN-*.md` file, or a path that is not a folder | Exit 1, naming the folder. |
 | D11 | A folder outside any git repo | Exit 0; stderr: not in a git repo; every record cites no commit. |
 | D12 | A repo with no commits | Exit 0; stderr says so; no commits. |
-| D13 | A renamed ADR file | The commits before the rename are cited too (`--follow`). |
-| D14 | A commit message "see ADR 4" and one naming `0004-x.md` | Both cited by ADR-0004. "ADR 40" is not cited by ADR-0004. |
+| D13 | An ADR file added, edited, renamed, edited again | The record cites only the commit that added the original file (`--follow`): not the edits, not the rename. |
+| D14 | A commit message "see ADR 4", one naming `0004-x.md`, one "See ADR 40", none changing the ADR file | None is cited by ADR-0004: `decisions adr` cites only the commit that added the ADR's file (a commit names a record with a trailer, L8-L12). |
+| D16 | A later commit that edits ADR 0003's file (a note that ADR 0004 replaces part of it) and changes code, with no trailer | Not cited by ADR-0003 (memod: `1fa2df7` edits `0003-graph-output-contract.md` and is cited only by ADR-0004, which it added). With a trailer `Decision: ADR-0003` it is cited. |
 | D15 | Running twice | Byte-identical stdout. |
 
 ## why, carry
@@ -107,6 +109,7 @@ are fixed (fixed author, committer and dates):
 | W10 | `carry src/lib.rs:round_cents` (Rust) | Exit 0. Says its users are unknown because memod reads uses only in TypeScript and JavaScript; never "No symbol uses it". |
 | W11 | `carry` on a TypeScript symbol no one uses | "No symbol uses it." |
 | W12 | `why` on a symbol with no tag and no record | Exit 0 with each part empty and the last line "No decision is recorded for it ...". |
+| W16 | `why` on a symbol whose `decided:` tag names no record, and no commit links a record | Exit 0. The tag's text and reason under "Decided in its doc comment:"; "No decided: tag names a decision record."; no "No decision is recorded" line, because the tag is the decision. |
 | W13 | A symbol used only in types | Its users carry the `type` mark. |
 | W14 | A uses cycle (a uses b, b uses a) | `carry a` lists b at distance 1 and never lists a itself; it terminates. |
 | W15 | A record with a `status` and one superseded | `why` prints `status:` and `superseded by:` lines for it. |
@@ -117,8 +120,9 @@ are fixed (fixed author, committer and dates):
 | --- | --- | --- |
 | I1 | An unknown id `ADR-4` | Exit 3; stderr lists `ADR-0004` as close. |
 | I2 | An id with different case (`adr-0004`) | Exit 3 with `ADR-0004` as close: ids match exactly. |
-| I3 | A record that cites no commit, or whose commits changed no symbol | Exit 0; "Its cited commits changed no symbol that exists now, or it cites no commit in this repo's history." |
+| I3 | A record that cites no commit, or whose commits changed no symbol | Exit 0. No commit: "No commit in this repo's history cites it (a `Decision:` trailer, or a commit the record lists)." Commits that changed no symbol: the commits with "it changed 0 symbols", then "That commit changed no symbol that exists now." (or "Those commits ..."). |
 | I4 | A symbol reached through two records | Listed under each record, counted once in "distinct symbols in all". |
+| I5 | A symbol whose tag names the record and that a citing commit also changed | Listed once, among the symbols whose tag names it; not among the other symbols the commits changed. Counted as named by a tag. |
 
 ## mcp
 
@@ -126,8 +130,33 @@ are fixed (fixed author, committer and dates):
 | --- | --- | --- |
 | M1 | `mcp` with a store | Exit 0. stdout holds a JSON `mcpServers.whygraph` entry: `relate serve --mcp stdio --database <absolute store> --read-only` with env `RELATE_TELEMETRY=0`, `DO_NOT_TRACK=1`, then each recipe under `== <name>`. |
 | M2 | Start the printed server; `tools/list` | Exactly `read_cypher` and `get_schema` (no `write_cypher`). |
-| M3 | `read_cypher` with the `why` recipe and `{"symbol": "src/tax.ts#taxRate"}` | The rows that `whygraph why src/tax.ts:taxRate` renders (A3). |
+| M3 | `read_cypher` with the `why` recipe and `{"symbol": "src/tax.ts#taxRate"}` | The rows that `whygraph why src/tax.ts:taxRate` renders (A3): kinds `tag`, `file tag`, then `record` ADR-0003 (`named: ["doc comment"]`), ADR-0002 (`named: ["file header"]`), note-1 (`named: []`, `via` one commit with `symbols: 2`). |
+| M5 | `read_cypher` with each printed recipe (`why`, `impact`, `carry`, `users`, `names`) | Accepted (no "Only MATCH queries are allowed" error): a recipe holds no `CALL { }` subquery. |
 | M4 | `mcp` with no store | Exit 1, as W1. |
+
+## Links between records and code
+
+"Links" means a NAMES edge (tag to record) or a CITES edge (record to
+commit). Unless the entry says otherwise, the repo has records `ADR-0004`
+(from `docs/adr/0004-x.md`) and `note-1`.
+
+| ID | Input | Required result |
+| --- | --- | --- |
+| L1 | A `decided:` tag whose text holds `adr-0004`, one with `ADR-0004`, one with `ADR 0004` (fixture: `cents` names `adr-0001`, the `src/tax.ts` header names `ADR-0002`, `taxRate` names `ADR 0003`) | Each tag NAMES the record. `why` lists it with "named by: a decided: tag in its doc comment" (or "in the header of <file>"). |
+| L2 | Tags with near misses: `ADR 4`, `Adr-0004`, `ADR  0004` (two spaces), `ADR_0004`, `ADR-00041`, `ADR-0004x`, `xADR-0004` | No NAMES edge, no warning. |
+| L3 | A tag naming `note-1` as `(note-1)` or `note-1.`; tags with `note-10`, `Note-1`, `pre-note-1`, `note-1-a` | The first two NAME note-1; the others link nothing: any id other than `ADR-NNNN` matches exactly, case included, and not next to a letter, digit, `_` or `-`. |
+| L4 | A tag naming `ADR-0009`, which no record has | Build exit 0; no link; stderr `warning: decided tag on src/a.ts:f names ADR-0009, which no record has; no link` (the carrier is `<file>` for a header tag). A non-ADR id that no record has is not detected, so it does not warn. |
+| L5 | Two tags on one symbol naming two records (`adr-0004`; `note-1`), and one tag naming both | Both records under "Decision records that its decided: tags name:", each once, oldest first, then by id. |
+| L6 | A file header tag naming `ADR-0004` | Every symbol of the file: `why` lists ADR-0004 as named by "a decided: tag in the header of <file>", after records its own doc-comment tags name. `impact ADR-0004`: "1 file whose header decided: tag names it: <file>". |
+| L7 | A record named by a symbol's tag and also cited by a commit that changed the symbol (fixture: `taxRate` and ADR-0003) | `why` lists it once, among the records the tags name, with "also cited by:" and that commit; not again among the records linked through commits. |
+| L8 | A commit whose last paragraph is `Decision: note-9` (no such record) | Build exit 0; no link; stderr `warning: commit <short>: trailer "Decision: note-9" names no record; no link`. |
+| L9 | A commit with two trailers `Decision: ADR-0004` and `Decision: note-1` | Both records cite the commit. |
+| L10 | Trailers `Decision: ADR-4`, `Decision: ADR 0004`, `Decision: adr-0004`, `Decision: 0004` | No link; one warning per value (L8 wording). The trailer key is read in any case (`decision: ADR-0004` links): git reads trailers. |
+| L11 | `Decision: ADR-0004` in a paragraph that is not the message's last | Not a trailer: no link, no warning. |
+| L12 | A commit message naming `ADR 0004`, `ADR-0004` or `0004-x.md` in free text, with no trailer, that does not add the ADR's file (fixture: `73ebd46`) | No record cites it; `why` on the symbols it changed lists no record through it. |
+| L13 | A commit listed in a record's `commits` and also naming that record in a trailer | One CITES edge. |
+| L14 | A record cited by a commit that changed many symbols (fixture: ADR-0001 and `395b8c0`) | `why` on any of those symbols: "changed by: 395b8c0 2026-01-08 Name every amount by its unit; that commit changed 5 symbols". `impact ADR-0001`: "395b8c0 2026-01-08 Name every amount by its unit; it changed 5 symbols". |
+| L15 | Determinism: `scripts/fixture.sh` run twice; the fixture build run twice | The same commit ids (HEAD `395b8c0`). The same NAMES and CITES edges, byte-identical `why` and `impact` answers, warnings identical and sorted. |
 
 ## Every command
 

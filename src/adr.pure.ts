@@ -12,12 +12,6 @@ export interface AdrFile {
   readonly text: string;
 }
 
-/** A commit as the ADR reader sees it: full id and message. */
-export interface MessageCommit {
-  readonly sha: string;
-  readonly message: string;
-}
-
 /**
  * owns: [[whygraph-adr-reader]]
  * post: the ADR number of a file named `NNNN-<title>.md` (four digits), else undefined.
@@ -90,20 +84,14 @@ export function adrRecord(file: AdrFile, commits: readonly string[]): DecisionRe
  * Reads every ADR of a folder into records.
  * owns: [[whygraph-adr-reader]]
  * post: one record per file named `NNNN-<title>.md`, sorted by number; other files are returned in `skipped`.
- * post: a record's commits are the commits that changed its file (`changedBy[path]`) and the commits whose message names its number as `ADR <n>` or names its file name, without repeats, in the order of `commits` (newest first, as git lists them), then any changing commit not in `commits`.
+ * post: a record's commits are the commits that added its file (`addedBy[path]`, renames followed), without repeats, in the order given.
+ * decided: an ADR cites only the commit that added its file, not a later commit that edits it or a commit whose message mentions it, because such a commit (a note that a later ADR replaces part of it) tied the ADR to every symbol it changed; every later link is a `Decision:` trailer, which the build reads
  * post: `Superseded by ADR <n>` in ADR m adds m to ADR n's supersedes when ADR n is in the folder.
  */
-export function adrRecords(files: readonly AdrFile[], commits: readonly MessageCommit[], changedBy: ReadonlyMap<string, readonly string[]>): { readonly records: readonly DecisionRecord[]; readonly skipped: readonly string[] } {
+export function adrRecords(files: readonly AdrFile[], addedBy: ReadonlyMap<string, readonly string[]>): { readonly records: readonly DecisionRecord[]; readonly skipped: readonly string[] } {
   const adrs = files.filter((f) => adrNumber(f.name) !== undefined).sort((a, b) => adrNumber(a.name)! - adrNumber(b.name)!);
   const skipped = files.filter((f) => adrNumber(f.name) === undefined).map((f) => f.name).sort();
-  const records = adrs.map((f) => {
-    const n = adrNumber(f.name)!;
-    const changed = new Set(changedBy.get(f.path) ?? []);
-    const naming = new RegExp(`\\bADR[ -]?0*${n}\\b|${f.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "i");
-    const cited = commits.filter((c) => changed.has(c.sha) || naming.test(c.message)).map((c) => c.sha);
-    const rest = [...changed].filter((s) => !cited.includes(s)).sort();
-    return adrRecord(f, [...cited, ...rest]);
-  });
+  const records = adrs.map((f) => adrRecord(f, [...new Set(addedBy.get(f.path) ?? [])]));
   const ids = new Set(records.map((r) => r.id));
   const lateSupersedes = new Map<string, Set<string>>();
   for (const f of adrs) {

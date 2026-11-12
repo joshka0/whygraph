@@ -45,8 +45,8 @@ whygraph mcp
 | --- | --- |
 | `whygraph build [--repo <path>] [--store <path>] [--decisions <file>]...` | Runs `memod graph --history` in the repo, reads the decisions files, and writes a new store. Prints the node and relationship counts; warnings go to stderr. |
 | `whygraph decisions adr <folder>` | Prints a decisions file made from the ADRs in the folder. |
-| `whygraph why <file>:<symbol>` | The `decided:` tags on the symbol and on its file header, then the decision records whose cited commits changed the symbol, oldest first, each with its source. |
-| `whygraph impact <decision id>` | The record and every record that rests on it, directly or through others; for each, the symbols its cited commits changed, and how many symbols use each directly. |
+| `whygraph why <file>:<symbol>` | The `decided:` tags on the symbol and on its file header; the decision records those tags name; then the records linked only through a commit that cites them and changed the symbol, oldest first, each commit with how many symbols it changed. |
+| `whygraph impact <decision id>` | The record and every record that rests on it, directly or through others; for each, the symbols and files whose `decided:` tags name it, then the commits that cite it and the other symbols those commits changed, with how many symbols use each directly. |
 | `whygraph carry <file>:<symbol>` | Before an edit: the topics the symbol owns and their other owners, the formal checks that cover it, its premise memos, its decisions, its direct and transitive users, and the commits that changed it. |
 | `whygraph mcp` | The MCP server config that serves the store read-only through `relate serve --mcp stdio`, and every recipe. |
 
@@ -139,9 +139,9 @@ dropped).
 - `restsOn` holds the other ADRs that the text names (`ADR 3`, `ADR 0003`,
   `ADR-0003`) with a smaller number. A mention of a later ADR is a note added
   afterwards, so it does not count.
-- `commits` holds the commits of `HEAD` that changed the file (following
-  renames) and the commits whose message names the ADR (`ADR 4`, `ADR 0004`)
-  or its file name.
+- `commits` holds the commit of `HEAD` that added the file, following
+  renames. A later commit that edits the file, or whose message mentions the
+  ADR, does not count: every later link is a `Decision:` trailer (see below).
 
 ### From other sources
 
@@ -159,6 +159,44 @@ jq '{records: (.items | group_by(.memo) | map({
   supersedes: (map(.supersedes[] | "memo-" + .) | unique),
   commits: (map(.commits[]) | unique)}))}' memos.json > memos.decisions.json
 ```
+
+## How a record links to code
+
+A record links to code only where someone named it on purpose. There are two
+ways, and every answer says which one it used.
+
+**A `decided:` tag names it (direct).** A tag on a symbol or in a file header
+names a record when its text holds:
+
+- for an ADR id `ADR-NNNN`: `adr-NNNN`, `ADR-NNNN` or `ADR NNNN`. The letters
+  are all lower or all upper case, then one `-` or one space, then exactly four
+  digits;
+- for any other id: the id exactly, case included.
+
+In both cases the name must not touch a letter, digit, `_` or `-` on either
+side. A near match links nothing: `ADR 4`, `Adr-0004`, `ADR  0004` (two
+spaces), `ADR-00041`, `note-10` or `Note-1` for `note-1`. A tag that names an
+ADR id no record has is a build warning. A tag with no record name still
+shows in `why`, as the decision it is.
+
+**A commit cites it (loose).** A record cites the commits it lists in its
+`commits` field (for an ADR, the commit that added its file) and every
+commit of `HEAD` whose message ends with a trailer:
+
+```
+Decision: ADR-0004
+Decision: note-1
+```
+
+git reads the trailers (the last paragraph of the message; the key in any
+case). The value must equal a record id exactly; a short or differently cased
+id links nothing and is a build warning. A commit ties every symbol it changed
+to the record, so answers give each commit's symbol count: a link through a
+commit that changed one symbol is strong, one through a commit that changed
+sixty is weak.
+
+`why` lists a record once: under the tags when a tag names it (with the
+commits that also cite it), else under the commits.
 
 ## The graph
 
@@ -182,13 +220,16 @@ jq '{records: (.items | group_by(.memo) | map({
 | `OWNS` | File -> Topic, and each Symbol that the tag names -> Topic |
 | `USES` (`typeOnly`) | Symbol -> Symbol (TypeScript and JavaScript only) |
 | `DECIDED`, `VERIFIED`, `PREMISE` | Symbol or File -> DecidedTag, Check, Memo |
+| `NAMES` | DecidedTag -> Decision (the tag's text names the record) |
 | `CHANGES` | Commit -> File or Symbol (a changed code hash or tag, by memod's rule) |
 | `STATES`, `ABOUT` | Decision -> Item, Topic |
 | `RESTS_ON`, `SUPERSEDES` | Decision -> Decision |
 | `CITES` | Decision -> Commit |
 
-`why` joins a symbol to a decision through `(:Decision)-[:CITES]->(:Commit)-[:CHANGES]->(:Symbol)`:
-a record explains the code its commits changed.
+`why` joins a symbol to a decision directly through
+`(:Symbol)-[:DECIDED]->(:DecidedTag)-[:NAMES]->(:Decision)` (or the same from
+its File), and loosely through
+`(:Decision)-[:CITES]->(:Commit)-[:CHANGES]->(:Symbol)`.
 
 ## Recipes and MCP
 
@@ -199,8 +240,8 @@ queries the store over MCP gets the same answers.
 
 | Recipe | Parameter | Answers |
 | --- | --- | --- |
-| `why` | `symbol` | decided tags and decision records behind a symbol |
-| `impact` | `decision` | records that rest on a decision, and the symbols their commits changed |
+| `why` | `symbol` | decided tags and decision records behind a symbol, with how each record links |
+| `impact` | `decision` | records that rest on a decision; for each, the code whose tags name it, and the commits that cite it with the symbols they changed |
 | `carry` | `symbol` | topics, checks, premises and commits of a symbol |
 | `users` | `symbol` | symbols that use it, with distance |
 | `names` | | every file, symbol and record id |
@@ -212,9 +253,17 @@ Over MCP, call `read_cypher` with the recipe as `statement` and
 
 - memod reads symbol uses only in TypeScript and JavaScript. For a symbol in
   another language, `carry` says its users are unknown.
-- A record links to code only through its commits. A commit that changed
-  many symbols ties all of them to the record, and a commit whose message
-  only mentions an ADR in passing ties its changes to that ADR.
+- A link through a commit ties every symbol the commit changed to the record;
+  answers give the commit's symbol count so a reader can weigh it.
+- A tag links by the record's id only, whatever the sentence says. A tag that
+  names an ADR to say what the ADR leaves open still links to it.
+- memod reads no `decided:` tag on an interface member, so a record named
+  there gets no direct link.
+- `impact` lists a file whose header tag names the record, and still lists
+  that file's symbols among the symbols the record's commits changed (as
+  loose links), although the header tag covers them directly.
+- The recipes use no `CALL { }` subquery: relate's read-only MCP tool rejects
+  one ("Only MATCH queries are allowed"), though `relate query` runs it.
 - `CHANGES` reaches only files and symbols that exist now; memod does not
   index Markdown, so an ADR file has no node.
 

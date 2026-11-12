@@ -36,26 +36,46 @@ function recordLines(r: Row, extra: readonly string[] = []): string[] {
   return out;
 }
 
+const plural = (n: number, word: string): string => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+/** `<short> <date> <subject>; that commit changed n symbols`, from a `via` entry of the why recipe. */
+function viaLine(v: unknown): string {
+  const r = (v ?? {}) as Row;
+  return `${str(r.commit)}; that commit changed ${plural(Number(r.symbols), "symbol")}`;
+}
+
 /**
  * The answer of `whygraph why`.
  * owns: [[whygraph-answers]]
- * post: three parts in order: decided tags in the symbol's doc comment, decided tags in its file's header, and decision records whose cited commits changed the symbol, oldest first with undated records last, each with date, id, title, status when stated, the records that supersede it, its source and the commits that link it.
- * post: an empty part says it is empty; when all three are empty a last line says no decision is recorded and how one gets recorded.
+ * post: four parts in order: decided tags in the symbol's doc comment; decided tags in its file's header; the decision records that those tags name (doc comment first), each saying which tag names it; the other records, linked only through a commit that changed the symbol, oldest first with undated records last.
+ * post: each record shows date, id, title, status when stated, the records that supersede it, its source, and every commit that cites it and changed the symbol, with how many symbols that commit changed, so a reader can weigh the link; a record is listed once.
+ * post: an empty part says it is empty; when nothing at all links, a last line says no decision is recorded and how one gets recorded.
  */
 export function whyAnswer(symbolId: string, rows: readonly Row[]): string {
   const tags = rows.filter((r) => r.kind === "tag");
   const fileTags = rows.filter((r) => r.kind === "file tag");
   const records = rows.filter((r) => r.kind === "record");
+  const named = records.filter((r) => list(r.named).length > 0);
+  const viaCommit = records.filter((r) => list(r.named).length === 0);
   const file = symbolId.slice(0, symbolId.lastIndexOf("#"));
   const out = [`Why ${shown(symbolId)} is the way it is`, ""];
   out.push(tags.length === 0 ? "Its doc comment holds no decided: tag." : "Decided in its doc comment:", ...tagLines(tags));
   out.push(fileTags.length === 0 ? `The header of ${file} holds no decided: tag.` : `Decided in the header of ${file}:`, ...tagLines(fileTags));
-  if (records.length === 0) out.push("No decision record cites a commit that changed its code or tags.");
+  if (named.length === 0) out.push("No decided: tag names a decision record.");
   else {
-    out.push("Decision records that cite a commit that changed its code or tags, oldest first:");
-    for (const r of records) out.push(...recordLines(r, list(r.via).map((v, i) => `      ${i === 0 ? "changed by:" : "           "} ${v}`)));
+    out.push("Decision records that its decided: tags name:");
+    for (const r of named) {
+      const where = list(r.named).map((w) => (w === "doc comment" ? "its doc comment" : `the header of ${file}`));
+      const via = Array.isArray(r.via) ? r.via : [];
+      out.push(...recordLines(r, [`      named by: a decided: tag in ${where.join(" and in ")}`, ...via.map((v, i) => `      ${i === 0 ? "also cited by:" : "              "} ${viaLine(v)}`)]));
+    }
   }
-  if (rows.length === 0) out.push("", "No decision is recorded for it. Record one with a decided: tag in its doc comment, or a decision record that cites the commit that made it.");
+  if (viaCommit.length === 0) out.push(`No ${named.length === 0 ? "" : "other "}decision record cites a commit that changed its code or tags.`);
+  else {
+    out.push(`Decision records linked only through a commit that cites them and changed its code or tags, oldest first (a commit that changed many symbols links each of them loosely):`);
+    for (const r of viaCommit) out.push(...recordLines(r, (Array.isArray(r.via) ? r.via : []).map((v, i) => `      ${i === 0 ? "changed by:" : "           "} ${viaLine(v)}`)));
+  }
+  if (rows.length === 0) out.push("", "No decision is recorded for it. Record one with a decided: tag in its doc comment (naming the record's id links it), or a `Decision: <id>` trailer on the commit that made it.");
   return out.join("\n");
 }
 
@@ -63,34 +83,51 @@ export function whyAnswer(symbolId: string, rows: readonly Row[]): string {
  * The answer of `whygraph impact`.
  * owns: [[whygraph-answers]]
  * post: names the decision with its date and title, then each record that rests on it (the decision first, depth 0), in depth then id order, with the records that supersede it.
- * post: under each record: the symbols its cited commits changed, most used first, with direct user count and the commits; or a sentence that its commits changed no symbol that exists now, or that it cites no commit the graph has.
- * post: a total line counts distinct symbols across records.
+ * post: under each record, first the direct links: the symbols whose decided: tags name it, most used first with direct user count, and the files whose header tags name it; then the commits that cite it, each with how many symbols it changed, and the other symbols those commits changed, most used first with user count and commits; each empty part says so.
+ * post: a total line counts distinct symbols across records, and how many of them a tag names and how many only a commit reaches.
  */
 export function impactAnswer(decision: string, rows: readonly Row[]): string {
-  const byRecord = new Map<string, Row[]>();
-  for (const r of rows) byRecord.set(str(r.record), [...(byRecord.get(str(r.record)) ?? []), r]);
   const base = rows.find((r) => r.record === decision);
   const out = [`What rests on ${decision}${base !== undefined ? ` (${str(base.date) || "undated"}) ${str(base.title)}` : ""}`, ""];
-  const others = [...byRecord.keys()].filter((k) => k !== decision);
-  out.push(others.length === 0 ? "No other record rests on it." : `${others.length} record${others.length === 1 ? "" : "s"} rest${others.length === 1 ? "s" : ""} on it, directly or through others.`);
-  const symbols = new Set<string>();
-  for (const [id, rs] of byRecord) {
-    const head = rs[0]!;
+  const others = rows.filter((r) => r.record !== decision).length;
+  out.push(others === 0 ? "No other record rests on it." : `${others} record${others === 1 ? "" : "s"} rest${others === 1 ? "s" : ""} on it, directly or through others.`);
+  const tagged = new Set<string>();
+  const loose = new Set<string>();
+  const symbolLine = (r: Row, commits: readonly string[]) => `    ${String(r.users).padStart(4)} user${Number(r.users) === 1 ? " " : "s"}  ${shown(str(r.symbol))}${commits.length === 0 ? "" : `  (${commits.join(", ")})`}`;
+  const rowsOf = (v: unknown): readonly Row[] => (Array.isArray(v) ? (v as Row[]).filter((x) => x !== null) : []);
+  for (const head of rows) {
     const depth = Number(head.depth);
-    out.push("", `${depth === 0 ? "The decision itself" : depth === 1 ? "Rests on it directly" : `Rests on it through ${depth - 1} other record${depth === 2 ? "" : "s"}`}: ${id} (${str(head.date) || "undated"}) ${str(head.title)}`);
+    out.push("", `${depth === 0 ? "The decision itself" : depth === 1 ? "Rests on it directly" : `Rests on it through ${depth - 1} other record${depth === 2 ? "" : "s"}`}: ${str(head.record)} (${str(head.date) || "undated"}) ${str(head.title)}`);
     const by = sorted(list(head.supersededBy));
     if (by.length > 0) out.push(`  superseded by: ${by.join(", ")}`);
-    const changed = rs.filter((r) => r.symbol !== null && r.symbol !== undefined);
-    if (changed.length === 0) out.push("  Its cited commits changed no symbol that exists now, or it cites no commit in this repo's history.");
+    const tags = rowsOf(head.tagged);
+    const files = list(head.files);
+    if (tags.length === 0 && files.length === 0) out.push("  No decided: tag names it.");
+    if (tags.length > 0) {
+      out.push(`  ${plural(tags.length, "symbol")} whose decided: tag names it, most used first (users = symbols whose code names it directly):`);
+      for (const r of tags) {
+        tagged.add(str(r.symbol));
+        out.push(symbolLine(r, []));
+      }
+    }
+    if (files.length > 0) out.push(`  ${plural(files.length, "file")} whose header decided: tag names it: ${files.join(", ")}`);
+    const cites = rowsOf(head.cites);
+    const changed = rowsOf(head.changed);
+    if (cites.length === 0) out.push("  No commit in this repo's history cites it (a `Decision:` trailer, or a commit the record lists).");
     else {
-      out.push(`  ${changed.length} symbol${changed.length === 1 ? "" : "s"} its cited commits changed, most used first (users = symbols whose code names it directly):`);
-      for (const r of changed) {
-        symbols.add(str(r.symbol));
-        out.push(`    ${String(r.users).padStart(4)} user${r.users === 1 ? " " : "s"}  ${shown(str(r.symbol))}  (${sorted(list(r.commits)).join(", ")})`);
+      out.push(`  ${cites.length === 1 ? "1 commit cites" : `${cites.length} commits cite`} it:`, ...cites.map((c) => `    ${str(c.commit)} ${str(c.date)} ${str(c.subject)}; it changed ${plural(Number(c.symbols), "symbol")}`));
+      if (changed.length === 0) out.push(`  ${cites.length === 1 ? "That commit changed" : "Those commits changed"} no ${tags.length === 0 ? "" : "other "}symbol that exists now.`);
+      else {
+        out.push(`  ${plural(changed.length, tags.length === 0 ? "symbol" : "other symbol")} ${cites.length === 1 ? "that commit" : "those commits"} changed, most used first (a loose link: a commit ties every symbol it changed):`);
+        for (const r of changed) {
+          loose.add(str(r.symbol));
+          out.push(symbolLine(r, sorted(list(r.commits))));
+        }
       }
     }
   }
-  out.push("", `${symbols.size} distinct symbol${symbols.size === 1 ? "" : "s"} in all.`);
+  const onlyLoose = [...loose].filter((s) => !tagged.has(s)).length;
+  out.push("", `${plural(tagged.size + onlyLoose, "distinct symbol")} in all: ${tagged.size} named by a decided: tag, ${onlyLoose} reached only through a commit.`);
   return out.join("\n");
 }
 

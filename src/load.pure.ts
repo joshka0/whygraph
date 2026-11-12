@@ -1,9 +1,10 @@
 /**
  * module: [[whygraph-store-load]]
  * boundary: pure
- * imports: ./code-graph.pure.ts, ./records.pure.ts
+ * imports: ./code-graph.pure.ts, ./links.pure.ts, ./records.pure.ts
  */
 import { symbolParts, type CodeGraph } from "./code-graph.pure.ts";
+import type { TagLink } from "./links.pure.ts";
 import type { CheckedRecords } from "./records.pure.ts";
 
 /** One load statement; when it reads rows, it reads them as the parameter `param`. */
@@ -94,12 +95,12 @@ function grouped(rows: readonly { readonly from: string; readonly to: string; re
  * owns: [[whygraph-store-load]]
  * post: indexes on every node key come first, then every node, then every relationship, so each MATCH of an edge statement finds its ends by index.
  * post: each memod node kind maps to one label (file File, package Package, symbol Symbol, topic Topic, decision DecidedTag, check Check, memo Memo, commit Commit); a kind memod adds later is skipped.
- * post: relationships: File DECLARES Symbol; File IMPORTS File or Package; File OWNS Topic and each named Symbol OWNS Topic; Symbol USES Symbol; Symbol or File DECIDED DecidedTag, VERIFIED Check, PREMISE Memo; Commit CHANGES File or Symbol; Decision STATES Item, ABOUT Topic, RESTS_ON and SUPERSEDES Decision, CITES Commit.
+ * post: relationships: File DECLARES Symbol; File IMPORTS File or Package; File OWNS Topic and each named Symbol OWNS Topic; Symbol USES Symbol; Symbol or File DECIDED DecidedTag, VERIFIED Check, PREMISE Memo; Commit CHANGES File or Symbol; DecidedTag NAMES Decision (one per `names` link); Decision STATES Item, ABOUT Topic, RESTS_ON and SUPERSEDES Decision, CITES Commit (one per commit in `checked.cites`).
  * post: a record topic that no code owns still gets a Topic node; a Decision's `source` is its own source or else the decisions file it came from.
  * post: no statement holds more than 5000 rows; statement i that reads rows reads them as `$p<i>`, and a statement without rows has no parameter.
  * decided: the store is built with CREATE into an empty directory, not MERGE into an old one, because a rebuild must never keep a node that the repo no longer has
  */
-export function loadPlan(graph: CodeGraph, checked: CheckedRecords, recordFiles: ReadonlyMap<string, string>): readonly LoadStep[] {
+export function loadPlan(graph: CodeGraph, checked: CheckedRecords, names: readonly TagLink[], recordFiles: ReadonlyMap<string, string>): readonly LoadStep[] {
   const steps: Draft[] = (Object.entries(NODE_KEYS) as [Label, string][]).map(([label, key]) => ({ cypher: `CREATE INDEX ${label.toLowerCase()}_${key} IF NOT EXISTS FOR (n:${label}) ON (n.${key})`, rows: [] }));
   const of = (kind: string) => graph.nodes.filter((n) => n.kind === kind);
   steps.push(...nodeStep("File", ["path"], of("file").map((n) => ({ path: n.name }))));
@@ -150,6 +151,7 @@ export function loadPlan(graph: CodeGraph, checked: CheckedRecords, recordFiles:
   for (const c of chunks(items)) {
     steps.push({ cypher: "UNWIND $rows AS r MATCH (d:Decision {id: r.id}) CREATE (d)-[:STATES]->(:Item {ord: r.ord, label: r.label, text: r.text})", rows: c });
   }
+  steps.push(...edgeStep("NAMES", "DecidedTag", "Decision", [], names.map((l) => ({ from: l.hash, to: l.id }))));
   steps.push(...edgeStep("ABOUT", "Decision", "Topic", [], checked.records.flatMap((r) => r.topics.map((t) => ({ from: r.id, to: t })))));
   steps.push(...edgeStep("RESTS_ON", "Decision", "Decision", [], checked.records.flatMap((r) => r.restsOn.map((t) => ({ from: r.id, to: t })))));
   steps.push(...edgeStep("SUPERSEDES", "Decision", "Decision", [], checked.records.flatMap((r) => r.supersedes.map((t) => ({ from: r.id, to: t })))));
