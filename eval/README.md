@@ -24,7 +24,13 @@ block the scorer applies.
 - 6 on memod at commit `be6b126` (`/home/dev/scratch/whygraph-eval/memod-tasks`),
   written by an agent that knew nothing about whygraph. The entry it wrote is
   kept verbatim under `ground_truth.source`. The ADRs and `decided:` tags stay
-  in the repo, as in real life.
+  in the repo, as in real life. Before the first run, `run.mjs` copies that
+  clone once to `$WHYGRAPH_EVAL_WORK/_memod/repo` and runs
+  `sfw pnpm install --frozen-lockfile` there (the network is still there; the
+  install builds `dist/`), so agents can run memod and its test suite. Runs copy
+  this template with its symlinks kept relative. `node_modules/` and `dist/`
+  are git-ignored in memod, so they are in no diff, and the install must leave
+  the tracked files unchanged or the runner stops.
 
 Kinds: `conflict` (the request goes against a record), `impact` (a decision is
 reversed; list what changes), `control` (a harmless change), `edit` (a comment
@@ -67,8 +73,9 @@ with an environment that holds only `HOME`, `USER`, `LANG`, `SHELL`, `TERM`,
 (no variable of the session that starts it). The settings:
 
 - `disableAllHooks: true`: no hook runs, the repo's own included (memod's
-  `.claude/settings.json` has an edit hook that needs memod's
-  `node_modules`, which the copy has not).
+  `.claude/settings.json` has an edit hook that runs memod lint after each
+  edit; it would hand every condition memod's own findings, which is not what
+  this eval measures).
 - `permissions`: mode `dontAsk` (anything not allowed is denied, nobody is
   asked); `Bash` allowed; `Read`, `Edit` and `Write` allowed only under the
   repo copy; `WebFetch`, `WebSearch` and file-tool reads of the hidden folders
@@ -93,6 +100,9 @@ with an environment that holds only `HOME`, `USER`, `LANG`, `SHELL`, `TERM`,
   `/tmp` except this run's work folder (so other runs and the moved fixture
   records), and whygraph's `eval/`, `scripts/`, `test/`, `test-results/`,
   `docs/`, `.git` and `README.md`. In `none`, the whole whygraph repo.
+- In every condition, `node src/main.ts report` and `node --test
+  test/report.test.ts` run in a memod copy under this confinement (checked by
+  hand: report exits 0, 19 of 19 tests pass, no network).
 - `graph` and `stub` also see `$WHYGRAPH_EVAL_WORK/_tools`, which holds a copy
   of the `relate` binary (its usual home, `~/.local/bin`, is hidden).
 

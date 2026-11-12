@@ -87,6 +87,26 @@ export function fixtureTemplate() {
   return { repo, decisions };
 }
 
+/**
+ * The memod task repo with its dependencies installed, made once from the read-only clone: a copy
+ * that `sfw pnpm install --frozen-lockfile` fills before any run starts, while the network is still
+ * there, so agents can run memod and its test suite. node_modules/ and dist/ are git-ignored in
+ * memod, so they stay out of every run's diff.
+ * owns: [[whygraph-eval-runner]]
+ */
+export function memodTemplate() {
+  const base = join(WORK, '_memod');
+  const repo = join(base, 'repo');
+  if (existsSync(join(base, 'ready'))) return repo;
+  rmSync(base, { recursive: true, force: true });
+  mkdirSync(base, { recursive: true });
+  cpSync(MEMOD_REPO, repo, { recursive: true, verbatimSymlinks: true });
+  sh('bash', ['-lc', 'sfw pnpm install --frozen-lockfile'], { cwd: repo });
+  if (sh('git', ['status', '--porcelain'], { cwd: repo }).trim() !== '') throw new Error(`installing memod's dependencies changed tracked files in ${repo}`);
+  writeFileSync(join(base, 'ready'), '');
+  return repo;
+}
+
 /** An executable shell script at `path`. */
 function wrapper(path, body) {
   writeFileSync(path, `#!/bin/sh\n${body}\n`);
@@ -145,7 +165,7 @@ export function prepare(task, condition, work) {
   mkdirSync(join(work, 'tmp'), { recursive: true });
   const repo = join(work, 'repo');
   const fixture = task.repo === 'fixture' ? fixtureTemplate() : undefined;
-  cpSync(fixture?.repo ?? MEMOD_REPO, repo, { recursive: true });
+  cpSync(fixture?.repo ?? memodTemplate(), repo, { recursive: true, verbatimSymlinks: true });
   const bin = join(work, 'bin');
   if (condition !== 'none') {
     // graph and stub share every tool and every line of instructions; only `whygraph` differs.
