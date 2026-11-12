@@ -206,6 +206,28 @@ function pct(x) {
   return x === undefined ? '   -' : `${Math.round(x * 100)}%`.padStart(4);
 }
 
+/** The lines `graph - none` and `graph - stub` from per-task pass rates. */
+function differences(perTask) {
+  return ['none', 'stub'].map((other) => {
+    const diffs = [...perTask.values()].filter((r) => r.graph !== undefined && r[other] !== undefined).map((r) => r.graph - r[other]);
+    const d = pairedDifference(diffs);
+    return `graph - ${other}: ${d === undefined ? 'no task has both' : `${d.mean.toFixed(2)} [${d.low.toFixed(2)}, ${d.high.toFixed(2)}] over ${d.tasks} tasks`}`;
+  });
+}
+
+/** The paired differences of `rows`, on one line. */
+function headline(rows, tasks) {
+  const perTask = new Map();
+  for (const t of tasks.values()) {
+    const r = Object.fromEntries(['none', 'graph', 'stub'].map((c) => {
+      const rs = rows.filter((x) => x.task.id === t.id && x.meta.condition === c);
+      return [c, rs.length === 0 ? undefined : rs.filter((x) => x.verdict.pass).length / rs.length];
+    }));
+    perTask.set(t.id, r);
+  }
+  return differences(perTask).join('; ');
+}
+
 /** Prints the rates of `rows`: per condition, per task, paired differences, false objections. */
 function rates(rows, tasks, title) {
   const conditions = ['none', 'graph', 'stub'];
@@ -226,11 +248,7 @@ function rates(rows, tasks, title) {
     console.log(`  ${pct(r.none)} ${pct(r.graph)} ${pct(r.stub)}  ${t.id}`);
   }
   console.log('\nPaired difference, mean over tasks, bootstrap 95% interval over tasks:');
-  for (const other of ['none', 'stub']) {
-    const diffs = [...perTask.values()].filter((r) => r.graph !== undefined && r[other] !== undefined).map((r) => r.graph - r[other]);
-    const d = pairedDifference(diffs);
-    console.log(`  graph - ${other}: ${d === undefined ? 'no task has both' : `${d.mean.toFixed(2)} [${d.low.toFixed(2)}, ${d.high.toFixed(2)}] over ${d.tasks} tasks`}`);
-  }
+  for (const line of differences(perTask)) console.log(`  ${line}`);
   console.log('\nFalse-objection rate on control tasks:');
   for (const c of conditions) {
     const rs = rows.filter((r) => r.meta.condition === c && r.task.kind === 'control');
@@ -243,13 +261,17 @@ function main(argv) {
   const results = resultsAt >= 0 ? argv[resultsAt + 1] : join(here, 'results');
   const tasks = readTasks();
   const rows = [];
+  const unscored = [];
   for (const id of existsSync(results) ? readdirSync(results).sort() : []) {
     const dir = join(results, id);
     if (!existsSync(join(dir, 'meta.json'))) continue;
     const run = readRun(dir);
-    if (run.meta.status !== 'done') continue;
     const task = tasks.get(run.meta.task);
     if (task === undefined) throw new Error(`${id}: no task ${run.meta.task}`);
+    if (run.meta.status !== 'done') {
+      unscored.push({ id, task, meta: run.meta, verdict: { pass: false, reasons: ['unscored'], whygraphCalls: 0 } });
+      continue;
+    }
     rows.push({ id, task, meta: run.meta, verdict: scoreRun(task, run) });
   }
   if (argv.includes('--json')) {
@@ -261,6 +283,14 @@ function main(argv) {
   const shaped = [...tasks.values()].filter((t) => t.shaped_tool !== undefined).map((t) => t.id);
   rates(rows, tasks, 'All tasks');
   if (shaped.length > 0) rates(rows.filter((r) => !shaped.includes(r.task.id)), tasks, `Without the tasks that shaped the tool (${shaped.join(', ')})`);
+  console.log(`\n=== Unscored runs (an agent timed out twice; not in any rate above): ${unscored.length}`);
+  for (const r of unscored) console.log(`  ${r.id}  (exit ${r.meta.exit}, ${Math.round(r.meta.wall_ms / 1000)} s)`);
+  if (unscored.length > 0) {
+    console.log('\nSensitivity: the same paired differences with every unscored run counted as FAIL:');
+    const all = [...rows, ...unscored];
+    console.log(`  All tasks: ${headline(all, tasks)}`);
+    if (shaped.length > 0) console.log(`  Without the tasks that shaped the tool: ${headline(all.filter((r) => !shaped.includes(r.task.id)), tasks)}`);
+  }
   const total = rows.reduce((a, r) => a + (r.meta.tokens?.total ?? 0), 0);
   console.log(`\nTotal tokens: ${total}`);
   return 0;

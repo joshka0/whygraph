@@ -191,6 +191,18 @@ export const cases = [
     expect: { pass: false, whygraphCalls: 1 },
   },
   {
+    name: 'two replies: the answer comes first, a note on a background test run second; both are the final message',
+    task: 'memod-impact-types-require-topics',
+    events: [
+      { type: 'result', subtype: 'success', result: 'These must change.\n\nSYMBOLS:\nsrc/lint.pure.ts:lint\nsrc/stats.pure.ts:holdsInCode\nsrc/cli.ts:runLint\n', num_turns: 8, total_cost_usd: 0.1, duration_api_ms: 1000, usage: { input_tokens: 10, output_tokens: 100, cache_read_input_tokens: 1000, cache_creation_input_tokens: 50 } },
+      { type: 'result', subtype: 'success', result: 'The background test run finished: one test in test/gaps.test.ts fails, as expected.', num_turns: 2, total_cost_usd: 0.15, duration_api_ms: 1500, usage: { input_tokens: 5, output_tokens: 20, cache_read_input_tokens: 500, cache_creation_input_tokens: 10 } },
+    ],
+    diff: '',
+    tools: [],
+    expect: { pass: true, recall: 1 },
+    session: { replies: 2, turns: 10, cost_usd: 0.15, api_ms: 1500, tokens: { input: 15, output: 120, cache_read: 1500, cache_creation: 60, total: 1695 } },
+  },
+  {
     name: 'edit task: the added comment cites ADR 0003',
     task: 'fixture-edit-region-comment',
     final: 'Added the comment.',

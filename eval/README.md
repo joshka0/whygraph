@@ -135,6 +135,25 @@ node eval/score.mjs                     # the verdicts and the rates
 node eval/score.mjs --json              # one verdict per run, as JSON
 ```
 
+**Final message, tokens, cost.** A session can end more than once: in the full
+run's first pass an agent could start a Bash command in the background, and
+when it finished the agent was woken and replied again (21 of 209 scored
+runs, all on memod). The final message is every reply of the session in
+order. Tokens and turns are summed over the session's `result` events (each
+counts its own part); cost and API time are those of the last event, which
+`claude` already gives as the session total. `node eval/run.mjs --reextract`
+rewrites `final.txt` and `meta.json` of every saved run from its
+`output.jsonl` by this rule; it was applied to all runs before the final
+scoring. Runs started after that pass set `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1`,
+so their session ends at its answer; no run was redone for it.
+
+**Timeouts.** A run is stopped at 20 minutes. A run whose agent caused the
+timeout (not the harness) is started again once; if it times out again it is
+excluded from every rate and listed as unscored, and the scorer prints the
+headline differences once more with it counted as FAIL. A run that failed for
+a harness reason is invalid, is set aside in `results/_invalid/` and runs
+again.
+
 `--only <id>[,<id>]` picks tasks, `--conditions none,graph,stub` picks
 conditions, `--repeats` sets the repeats, `--jobs` lowers the 3 parallel
 agents. A run whose `results/<id>/meta.json` says `done` is not started again;
@@ -144,7 +163,7 @@ an `error` run (non-zero exit, timeout at 20 minutes) is.
 `output.jsonl` (the agent's full stream), `final.txt` (its final message),
 `diff.patch`, `tools.json` (each tool call with its input and result),
 `stderr.txt`, `debug.log` and `meta.json` (status, tokens, cost, wall time,
-turns, and the tools, skills, MCP servers and plugins the agent started with).
+turns, replies, and the tools, skills, MCP servers and plugins the agent started with).
 
 ## The pilot changed the tool
 

@@ -5,13 +5,14 @@
  * of its task repo, and saves what it did under eval/results/<run id>/.
  *
  *   node eval/run.mjs [--only <task id>[,<task id>...]] [--conditions none,graph,stub] [--repeats 5] [--jobs 3] [--plan]
+ *   node eval/run.mjs --reextract   # rewrites final.txt and meta.json of every saved run from its output.jsonl
  *
  * --plan prints the runs it would start and starts none. A run whose results/<id>/meta.json says
  * "done" is not started again. At most 3 agents run at once. Work folders live under
  * $WHYGRAPH_EVAL_WORK (default /tmp/whygraph-eval) and are deleted after each run.
  */
 import { spawn, spawnSync } from 'node:child_process';
-import { appendFileSync, chmodSync, cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { appendFileSync, chmodSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readTasks } from './score.mjs';
@@ -244,6 +245,8 @@ function agentEnv(bin, confine, tmp) {
     CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY: '1',
     CLAUDE_CODE_SHELL_PREFIX: confine,
     CLAUDE_CODE_TMPDIR: tmp,
+    // A background command wakes the agent again after its answer; runs after the full run's first pass have none.
+    CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: '1',
   };
 }
 
@@ -265,6 +268,41 @@ function toolCalls(events) {
     }
   }
   return calls;
+}
+
+/**
+ * What a session told the user and what it cost, from its stream-json events. A session can end more
+ * than once: a background command that finishes wakes the agent, which replies again. The final
+ * message is every reply, in order; tokens and turns are summed over the result events (each counts
+ * its own part); cost and API time are the last event's, which already total the session.
+ * owns: [[whygraph-eval-runner]]
+ */
+export function sessionSummary(events) {
+  const results = events.filter((e) => e.type === 'result');
+  const last = results.at(-1);
+  const tokens = { input: 0, output: 0, cache_read: 0, cache_creation: 0 };
+  for (const r of results) {
+    const u = r.usage ?? {};
+    tokens.input += u.input_tokens ?? 0;
+    tokens.output += u.output_tokens ?? 0;
+    tokens.cache_read += u.cache_read_input_tokens ?? 0;
+    tokens.cache_creation += u.cache_creation_input_tokens ?? 0;
+  }
+  tokens.total = tokens.input + tokens.output + tokens.cache_read + tokens.cache_creation;
+  return {
+    final: results.map((r) => r.result ?? '').join('\n\n'),
+    replies: results.length,
+    success: last !== undefined && last.subtype === 'success',
+    tokens,
+    cost_usd: last?.total_cost_usd,
+    api_ms: last?.duration_api_ms,
+    turns: results.reduce((a, r) => a + (r.num_turns ?? 0), 0),
+    model_usage: last?.modelUsage,
+  };
+}
+
+function readEvents(text) {
+  return text.split('\n').filter((l) => l.trim() !== '').flatMap((l) => { try { return [JSON.parse(l)]; } catch { return []; } });
 }
 
 function runAgent(args, cwd, env, outFile) {
@@ -307,27 +345,20 @@ export async function runOne(task, condition, repeat, allIds) {
   const args = agentCommand(prompt, repo, denyRead, join(out, 'debug.log'));
   writeFileSync(join(out, 'command.json'), JSON.stringify({ cwd: repo, args, env, confine: readFileSync(confine, 'utf8') }, null, 2));
   const r = await runAgent(args, repo, env, join(out, 'output.jsonl'));
-  const events = r.stdout.split('\n').filter((l) => l.trim() !== '').flatMap((l) => { try { return [JSON.parse(l)]; } catch { return []; } });
-  const result = events.findLast((e) => e.type === 'result');
+  const events = readEvents(r.stdout);
+  const session = sessionSummary(events);
   const init = events.find((e) => e.type === 'system' && e.subtype === 'init');
   const tools = toolCalls(events);
   sh('git', [...base, 'add', '-A'], { env: GIT_ENV });
   const diff = sh('git', [...base, 'diff', '--cached', 'HEAD'], { env: GIT_ENV });
-  writeFileSync(join(out, 'final.txt'), result?.result ?? '');
+  writeFileSync(join(out, 'final.txt'), session.final);
   writeFileSync(join(out, 'diff.patch'), diff);
   writeFileSync(join(out, 'tools.json'), JSON.stringify(tools, null, 2));
   writeFileSync(join(out, 'stderr.txt'), r.stderr);
-  const u = result?.usage ?? {};
-  const tokens = {
-    input: u.input_tokens ?? 0, output: u.output_tokens ?? 0,
-    cache_read: u.cache_read_input_tokens ?? 0, cache_creation: u.cache_creation_input_tokens ?? 0,
-  };
-  tokens.total = tokens.input + tokens.output + tokens.cache_read + tokens.cache_creation;
-  const ok = r.code === 0 && result !== undefined && result.subtype === 'success';
   const meta = {
-    id, task: task.id, condition, repeat, model: MODEL, status: ok ? 'done' : 'error',
-    exit: r.code, signal: r.signal, wall_ms: r.wallMs, api_ms: result?.duration_api_ms, turns: result?.num_turns,
-    cost_usd: result?.total_cost_usd, tokens, model_usage: result?.modelUsage,
+    id, task: task.id, condition, repeat, model: MODEL, status: r.code === 0 && session.success ? 'done' : 'error',
+    exit: r.code, signal: r.signal, wall_ms: r.wallMs, api_ms: session.api_ms, turns: session.turns, replies: session.replies,
+    cost_usd: session.cost_usd, tokens: session.tokens, model_usage: session.model_usage,
     init: init && { model: init.model, tools: init.tools, mcp_servers: init.mcp_servers, skills: init.skills, slash_commands: init.slash_commands, plugins: init.plugins, agents: init.agents, permissionMode: init.permissionMode, cwd: init.cwd },
   };
   writeFileSync(join(out, 'meta.json'), JSON.stringify(meta, null, 2));
@@ -352,6 +383,26 @@ async function main(argv) {
   for (const t of tasks.values()) {
     if (only && !only.includes(t.id)) continue;
     for (let r = 1; r <= repeats; r++) for (const c of conditions) plan.push({ task: t, condition: c, repeat: r, id: `${t.id}__${c}__r${r}` });
+  }
+  if (argv.includes('--reextract')) {
+    // Rewrites final.txt and the session fields of meta.json of every saved run from its output.jsonl.
+    let n = 0;
+    for (const id of readdirSync(RESULTS)) {
+      const dir = join(RESULTS, id);
+      if (!existsSync(join(dir, 'output.jsonl')) || !existsSync(join(dir, 'meta.json'))) continue;
+      const meta = JSON.parse(readFileSync(join(dir, 'meta.json'), 'utf8'));
+      const session = sessionSummary(readEvents(readFileSync(join(dir, 'output.jsonl'), 'utf8')));
+      writeFileSync(join(dir, 'final.txt'), session.final);
+      Object.assign(meta, {
+        status: meta.exit === 0 && session.success ? 'done' : 'error',
+        api_ms: session.api_ms, turns: session.turns, replies: session.replies,
+        cost_usd: session.cost_usd, tokens: session.tokens, model_usage: session.model_usage,
+      });
+      writeFileSync(join(dir, 'meta.json'), JSON.stringify(meta, null, 2));
+      n++;
+    }
+    console.log(`re-extracted ${n} runs`);
+    return 0;
   }
   const isDone = (p) => {
     const m = join(RESULTS, p.id, 'meta.json');
