@@ -10,6 +10,7 @@
     "whygraph": "src/main.ts"
   },
   "scripts": {
+    "test": "RELATE_TELEMETRY=0 DO_NOT_TRACK=1 node test/run.mjs",
     "check": "tsrs -p tsconfig.json",
     "lint": "memod lint"
   },
