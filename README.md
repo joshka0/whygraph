@@ -602,6 +602,29 @@ What this shows and what it does not:
   cannot rerun the check from it. The numbers come from the tool as it is in
   this repo.
 
+## What a ticket test measured
+
+The checks above use private notes. This one uses public data, so you can
+rerun it: the 3,042 issues and pull requests of ripgrep, loaded as records
+and linked to the commits that cite their numbers. A model that knew nothing
+about whygraph wrote 30 change requests that each go against what one ticket
+settled; a second model, which saw only the requests and the code, named the
+lines. `eval/tickets/` holds the scripts, the requests, the lines, the counts
+and the limits.
+
+| Request wording | `search` | `carry` term section | `carry` link through a commit | Any |
+| --- | --- | --- | --- | --- |
+| Same words | 10 of 10 | 3 of 10 | 7 of 10 | 10 of 10 |
+| One shared term | 7 of 10 | 1 of 10 | 9 of 10 | 10 of 10 |
+| Other words | 5 of 10 | 3 of 10 | 8 of 10 | 9 of 10 |
+| All | 22 of 30 | 7 of 30 | 24 of 30 | 29 of 30 |
+
+Here the graph's own edges do the work: a ticket reaches the lines through
+the commit that cites it, whatever words the request uses, and six requests
+were found in no other way. The sample holds only tickets that a commit
+cites; in ripgrep that is about one ticket in seven. And it is again a list,
+not an agent acting on it.
+
 ## Your own repo
 
 whygraph runs on any git repo that memod reads (TypeScript, JavaScript,

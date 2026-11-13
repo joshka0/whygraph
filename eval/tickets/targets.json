@@ -1,0 +1,559 @@
+[
+  {
+    "id": "rg-01",
+    "targets": [
+      {
+        "file": "crates/globset/src/glob.rs",
+        "symbol": "Parser::parse_class (unclosed-class branch)",
+        "start_line": 1014,
+        "end_line": 1026
+      },
+      {
+        "file": "crates/globset/src/glob.rs",
+        "symbol": "GlobBuilder::allow_unclosed_class",
+        "start_line": 684,
+        "end_line": 687
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Searching unclosed-class handling found the allow_unclosed_class option and the parser branch that rewinds and emits a literal opening bracket.",
+    "not_found": false
+  },
+  {
+    "id": "rg-02",
+    "targets": [
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "symbol": "Walk::skip_entry",
+        "start_line": 1149,
+        "end_line": 1185
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Following max_filesize in the sequential walker found the size check immediately before the filter_entry callback.",
+    "not_found": false
+  },
+  {
+    "id": "rg-03",
+    "targets": [
+      {
+        "file": "crates/ignore/src/pathutil.rs",
+        "symbol": "is_hidden_path_only",
+        "start_line": 85,
+        "end_line": 91
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Following hidden-file detection found the shared filename predicate that treats every leading dot as hidden, including names ending in a dot.",
+    "not_found": false
+  },
+  {
+    "id": "rg-04",
+    "targets": [
+      {
+        "file": "crates/ignore/src/gitignore.rs",
+        "symbol": "gitconfig_excludes_path",
+        "start_line": 586,
+        "end_line": 605
+      },
+      {
+        "file": "crates/ignore/src/gitignore.rs",
+        "symbol": "gitconfig_global_env_contents",
+        "start_line": 609,
+        "end_line": 617
+      },
+      {
+        "file": "crates/ignore/src/gitignore.rs",
+        "symbol": "gitconfig_system_contents",
+        "start_line": 622,
+        "end_line": 630
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Searching both Git configuration environment variables found their readers and the excludes-path resolution chain that invokes them.",
+    "not_found": false
+  },
+  {
+    "id": "rg-05",
+    "targets": [
+      {
+        "file": "crates/ignore/src/dir.rs",
+        "symbol": "Ignore::add_parents",
+        "start_line": 195,
+        "end_line": 262
+      },
+      {
+        "file": "crates/ignore/src/dir.rs",
+        "symbol": "Ignore::add_child_path_with_found_ignore_files (Git ignore-file loaders)",
+        "start_line": 434,
+        "end_line": 470
+      }
+    ],
+    "confidence": "medium",
+    "how_found": "Reading ancestor setup found that it already loads ancestors without stopping at Git boundaries and delegates parsing of their Git ignore files to the child loader.",
+    "not_found": false
+  },
+  {
+    "id": "rg-06",
+    "targets": [
+      {
+        "file": "crates/ignore/src/gitignore.rs",
+        "symbol": "parse_excludes_file",
+        "start_line": 667,
+        "end_line": 690
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Searching excludesFile parsing found the regular expression that removes optional surrounding double quotes before constructing the path.",
+    "not_found": false
+  },
+  {
+    "id": "rg-07",
+    "targets": [
+      {
+        "file": "crates/ignore/src/dir.rs",
+        "symbol": "resolve_git_commondir",
+        "start_line": 1092,
+        "end_line": 1136
+      },
+      {
+        "file": "crates/ignore/src/dir.rs",
+        "symbol": "Ignore::add_child_path_with_found_ignore_files (info/exclude loader)",
+        "start_line": 449,
+        "end_line": 470
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Following info/exclude resolution found the linked-worktree gitdir parser and its subsequent commondir lookup.",
+    "not_found": false
+  },
+  {
+    "id": "rg-08",
+    "targets": [
+      {
+        "file": "crates/printer/src/util.rs",
+        "symbol": "Replacer::replace_all",
+        "start_line": 51,
+        "end_line": 109
+      },
+      {
+        "file": "crates/printer/src/util.rs",
+        "symbol": "replace_with_captures_in_context",
+        "start_line": 557,
+        "end_line": 589
+      },
+      {
+        "file": "crates/printer/src/util.rs",
+        "symbol": "trim_line_terminator",
+        "start_line": 535,
+        "end_line": 552
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Tracing replacement output found that it saves the actual input terminator, strips it for matching, and appends those same bytes after replacement.",
+    "not_found": false
+  },
+  {
+    "id": "rg-09",
+    "targets": [
+      {
+        "file": "crates/core/flags/hiargs.rs",
+        "symbol": "HiArgs::printer (quiet summary-kind selection)",
+        "start_line": 566,
+        "end_line": 576
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Following quiet and FilesWithoutMatch found the branch that selects QuietWithoutMatch instead of QuietWithMatch and thereby determines search success.",
+    "not_found": false
+  },
+  {
+    "id": "rg-10",
+    "targets": [
+      {
+        "file": "crates/core/flags/defs.rs",
+        "symbol": "HyperlinkFormat::update",
+        "start_line": 3041,
+        "end_line": 3047
+      },
+      {
+        "file": "crates/core/flags/hiargs.rs",
+        "symbol": "take_hyperlink_config",
+        "start_line": 1272,
+        "end_line": 1290
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Following hyperlink-format found the flag update method that accepts templates and the configuration builder that installs the chosen format.",
+    "not_found": false
+  },
+  {
+    "id": "rg-11",
+    "targets": [
+      {
+        "file": "crates/ignore/src/dir.rs",
+        "symbol": "Ignore::add_child_path_with_found_ignore_files (VCS discovery)",
+        "start_line": 374,
+        "end_line": 386
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Searching Jujutsu metadata found the .jj probe gated by require_git and enabled Git exclusion options.",
+    "not_found": false
+  },
+  {
+    "id": "rg-12",
+    "targets": [
+      {
+        "file": "crates/ignore/src/incremental.rs",
+        "symbol": "IncrementalIgnore",
+        "start_line": 58,
+        "end_line": 70
+      },
+      {
+        "file": "crates/ignore/src/incremental.rs",
+        "symbol": "IncrementalIgnore::matched_with_errors_ignore",
+        "start_line": 353,
+        "end_line": 436
+      },
+      {
+        "file": "crates/ignore/src/incremental.rs",
+        "symbol": "parent_key",
+        "start_line": 112,
+        "end_line": 146
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Following cached directory keys found an OsString-keyed map, direct parent lookup, and component traversal where segmented keys and per-level hashing would be introduced.",
+    "not_found": false
+  },
+  {
+    "id": "rg-13",
+    "targets": [
+      {
+        "file": "crates/ignore/src/dir.rs",
+        "symbol": "Ignore::add_parents (ancestor setup)",
+        "start_line": 241,
+        "end_line": 250
+      },
+      {
+        "file": "crates/ignore/src/dir.rs",
+        "symbol": "Ignore::add_child_path_with_found_ignore_files (VCS discovery)",
+        "start_line": 374,
+        "end_line": 386
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Reading ancestor setup found that add_parents reuses the has_git answer computed by add_child_path instead of probing repository metadata a second time.",
+    "not_found": false
+  },
+  {
+    "id": "rg-14",
+    "targets": [
+      {
+        "file": "crates/ignore/src/dir.rs",
+        "symbol": "Ignore::add_child_with_possible_reuse",
+        "start_line": 289,
+        "end_line": 309
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Searching matcher reuse found the early return that shares the existing matcher when the child has no rules or repository boundary.",
+    "not_found": false
+  },
+  {
+    "id": "rg-15",
+    "targets": [
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "symbol": "Worker::run_one (directory read and visitor reporting)",
+        "start_line": 1809,
+        "end_line": 1841
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Tracing parallel directory reads found the successful directory callback emitted before a failed read_dir result is delivered to the visitor.",
+    "not_found": false
+  },
+  {
+    "id": "rg-16",
+    "targets": [
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "symbol": "WalkParallel::run",
+        "start_line": 1430,
+        "end_line": 1435
+      },
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "symbol": "ParallelVisitorBuilder",
+        "start_line": 1355,
+        "end_line": 1358
+      },
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "symbol": "FnVisitor",
+        "start_line": 1392,
+        "end_line": 1393
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Following concurrent visitor lifetimes found the public run method, builder trait, and callback alias that currently permit state borrowed for the caller-selected lifetime.",
+    "not_found": false
+  },
+  {
+    "id": "rg-17",
+    "targets": [
+      {
+        "file": "crates/globset/src/serde_impl.rs",
+        "symbol": "GlobVisitor::visit_str",
+        "start_line": 29,
+        "end_line": 34
+      },
+      {
+        "file": "crates/globset/src/serde_impl.rs",
+        "symbol": "Glob::deserialize",
+        "start_line": 38,
+        "end_line": 42
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Following glob deserialization found visit_str and deserialize_str, which currently accept text without requiring a borrow lasting for the input lifetime.",
+    "not_found": false
+  },
+  {
+    "id": "rg-18",
+    "targets": [
+      {
+        "file": "crates/globset/Cargo.toml",
+        "symbol": "dependencies.log",
+        "start_line": 26,
+        "end_line": 26
+      },
+      {
+        "file": "crates/globset/Cargo.toml",
+        "symbol": "features",
+        "start_line": 43,
+        "end_line": 49
+      },
+      {
+        "file": "crates/globset/src/lib.rs",
+        "symbol": "debug macro feature branches",
+        "start_line": 145,
+        "end_line": 153
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Searching optional diagnostic dependencies found globset makes log optional, enables it by default, and substitutes a no-op debug macro when disabled.",
+    "not_found": false
+  },
+  {
+    "id": "rg-19",
+    "targets": [
+      {
+        "file": "crates/core/flags/hiargs.rs",
+        "symbol": "State::new",
+        "start_line": 950,
+        "end_line": 960
+      },
+      {
+        "file": "crates/cli/src/wtr.rs",
+        "symbol": "stdout",
+        "start_line": 23,
+        "end_line": 29
+      },
+      {
+        "file": "crates/cli/src/lib.rs",
+        "symbol": "is_tty_stdout",
+        "start_line": 279,
+        "end_line": 282
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Searching IsTerminal found the runtime stdout checks used for argument defaults, output buffering, and the CLI terminal helper.",
+    "not_found": false
+  },
+  {
+    "id": "rg-20",
+    "targets": [
+      {
+        "file": "crates/searcher/src/searcher/mmap.rs",
+        "symbol": "MmapChoice::open (successful mapping arm)",
+        "start_line": 84,
+        "end_line": 101
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Following memory-map creation found the Unix-only Advice::Sequential call immediately after a successful mapping.",
+    "not_found": false
+  },
+  {
+    "id": "rg-21",
+    "targets": [
+      {
+        "file": "crates/ignore/src/gitignore.rs",
+        "symbol": "GitignoreBuilder::add_line (glob compilation)",
+        "start_line": 531,
+        "end_line": 540
+      },
+      {
+        "file": "crates/globset/src/glob.rs",
+        "symbol": "Parser::parse_backslash",
+        "start_line": 907,
+        "end_line": 919
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Tracing filename-rule compilation found backslash_escape(true) and the parser branch that consumes the following character as a literal.",
+    "not_found": false
+  },
+  {
+    "id": "rg-22",
+    "targets": [
+      {
+        "file": "crates/ignore/src/gitignore.rs",
+        "symbol": "GitignoreBuilder::add_line (basename rule normalization and compilation)",
+        "start_line": 515,
+        "end_line": 540
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Reading exclusion-rule compilation found slash detection, the automatic double-star prefix, and unconditional literal_separator(true).",
+    "not_found": false
+  },
+  {
+    "id": "rg-23",
+    "targets": [
+      {
+        "file": "crates/globset/src/glob.rs",
+        "symbol": "GlobMatcher::glob",
+        "start_line": 155,
+        "end_line": 158
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Searching GlobMatcher accessors found glob(), which returns the original Glob used to compile the matcher.",
+    "not_found": false
+  },
+  {
+    "id": "rg-24",
+    "targets": [
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "symbol": "WalkBuilder::from_iter",
+        "start_line": 582,
+        "end_line": 590
+      },
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "symbol": "Walk::from_iter",
+        "start_line": 1143,
+        "end_line": 1147
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Searching from_iter found that the builder starts empty and that the iterator constructor delegates directly to it.",
+    "not_found": false
+  },
+  {
+    "id": "rg-25",
+    "targets": [
+      {
+        "file": "crates/cli/src/decompress.rs",
+        "symbol": "default_decompression_commands",
+        "start_line": 490,
+        "end_line": 532
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Searching archive decompression found the uncompress command definition and its default association with the .Z extension.",
+    "not_found": false
+  },
+  {
+    "id": "rg-26",
+    "targets": [
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "symbol": "Worker::get_work (Quit arm)",
+        "start_line": 1952,
+        "end_line": 1962
+      },
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "symbol": "Worker::get_work (idle receive loop)",
+        "start_line": 1974,
+        "end_line": 1990
+      }
+    ],
+    "confidence": "medium",
+    "how_found": "Following Quit dispatch found its immediate return and the separate polling loop that currently sleeps between attempts to receive work.",
+    "not_found": false
+  },
+  {
+    "id": "rg-27",
+    "targets": [],
+    "confidence": "high",
+    "how_found": "Searching the Rust sources and manifests found no num_pending counter; parallel traversal instead counts active_workers rather than queued or completed tasks.",
+    "not_found": true
+  },
+  {
+    "id": "rg-28",
+    "targets": [
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "symbol": "Worker::deactivate_worker",
+        "start_line": 2022,
+        "end_line": 2024
+      },
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "symbol": "Worker::activate_worker",
+        "start_line": 2027,
+        "end_line": 2029
+      },
+      {
+        "file": "crates/core/messages.rs",
+        "symbol": "set_errored",
+        "start_line": 137,
+        "end_line": 139
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Searching atomic operations found Acquire and Release worker counters and Relaxed diagnostic flags among the sites that would need SeqCst ordering.",
+    "not_found": false
+  },
+  {
+    "id": "rg-29",
+    "targets": [
+      {
+        "file": "crates/core/flags/complete/fish.rs",
+        "symbol": "TEMPLATE_NEGATED",
+        "start_line": 8,
+        "end_line": 8
+      },
+      {
+        "file": "crates/core/flags/complete/fish.rs",
+        "symbol": "generate (negated switch emission)",
+        "start_line": 60,
+        "end_line": 72
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Reading the fish generator found the -l marker in TEMPLATE_NEGATED and the branch that substitutes each disabling switch into that template.",
+    "not_found": false
+  },
+  {
+    "id": "rg-30",
+    "targets": [
+      {
+        "file": "crates/ignore/src/default_types.rs",
+        "symbol": "DEFAULT_TYPES (Python aliases)",
+        "start_line": 221,
+        "end_line": 221
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Searching language selectors found the default file-type entry that registers both py and python for Python files.",
+    "not_found": false
+  }
+]

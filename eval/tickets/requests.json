@@ -1,0 +1,370 @@
+[
+  {
+    "id": "rg-01",
+    "request": "Can we make GlobBuilder reject an unclosed class even when literal_unclosed_class is enabled, so malformed patterns always fail validation?",
+    "wording": "same-words",
+    "record": "3145",
+    "settled": "Enabling literal_unclosed_class makes GlobBuilder treat unclosed character classes as literal text instead of returning an error.",
+    "shared_terms": [
+      "GlobBuilder",
+      "literal_unclosed_class",
+      "unclosed class"
+    ],
+    "also": [],
+    "why": "Rejecting those patterns even with the option enabled removes the literal treatment the ticket added."
+  },
+  {
+    "id": "rg-02",
+    "request": "When max_filesize is set on the sequential walker, let every file under the limit bypass filter_entry so our size-only scans avoid callback overhead.",
+    "wording": "same-words",
+    "record": "3599",
+    "settled": "The sequential walker applies filter_entry to files that pass max_filesize, matching the parallel walker.",
+    "shared_terms": [
+      "max_filesize",
+      "sequential walker",
+      "filter_entry"
+    ],
+    "also": [],
+    "why": "Bypassing the callback would again include files that the custom filter rejects whenever a size limit is set."
+  },
+  {
+    "id": "rg-03",
+    "request": "Please make rg --files include dotfiles ending in a dot without --hidden, since our generated .cache. directories should be searchable by default.",
+    "wording": "same-words",
+    "record": "3564",
+    "settled": "On Unix, names that start and end with a dot are hidden unless hidden entries are explicitly included.",
+    "shared_terms": [
+      "rg --files",
+      "dotfiles",
+      "--hidden"
+    ],
+    "also": [],
+    "why": "Including these names by default reverses the corrected hidden-file classification."
+  },
+  {
+    "id": "rg-04",
+    "request": "Ignore GIT_CONFIG_GLOBAL and GIT_CONFIG_SYSTEM when resolving core.excludesFile and use only the usual home-directory config locations, so our managed environment cannot redirect search exclusions.",
+    "wording": "same-words",
+    "record": "3276",
+    "settled": "Global exclusion lookup honors GIT_CONFIG_GLOBAL and GIT_CONFIG_SYSTEM, with system configuration as a lowest-priority source.",
+    "shared_terms": [
+      "GIT_CONFIG_GLOBAL",
+      "GIT_CONFIG_SYSTEM",
+      "core.excludesFile"
+    ],
+    "also": [
+      "3275"
+    ],
+    "why": "Ignoring the override variables removes the configuration sources and precedence implemented by the ticket."
+  },
+  {
+    "id": "rg-05",
+    "request": "Always open and parse parent .gitignore and .git/info/exclude files above the nearest Git boundary, even if their rules will not apply, so --debug shows our entire ancestor configuration.",
+    "wording": "same-words",
+    "record": "3451",
+    "settled": "Parent loading skips Git-specific ignore files above the nearest repository boundary while continuing to read general ignore files.",
+    "shared_terms": [
+      ".gitignore",
+      ".git/info/exclude",
+      "Git boundary",
+      "--debug"
+    ],
+    "also": [],
+    "why": "Opening those files restores the unnecessary ancestor reads the ticket explicitly eliminated."
+  },
+  {
+    "id": "rg-06",
+    "request": "Treat surrounding double quotes in a .gitconfig core.excludesFile value as part of the path, so our configuration validator can flag quoted paths as invalid.",
+    "wording": "same-words",
+    "record": "2629",
+    "settled": "The global exclusion configuration parser accepts paths surrounded by double quotes.",
+    "shared_terms": [
+      "double quotes",
+      ".gitconfig",
+      "core.excludesFile"
+    ],
+    "also": [],
+    "why": "Keeping the quotes as filename characters prevents valid quoted exclusion paths from being loaded."
+  },
+  {
+    "id": "rg-07",
+    "request": "For a linked worktree, look for .git/info/exclude only in that worktree's own git dir and stop following commondir, so each checkout has independent exclusions.",
+    "wording": "same-words",
+    "record": "1446",
+    "settled": "Linked worktrees locate the shared info/exclude file through the git directory's commondir file.",
+    "shared_terms": [
+      "linked worktree",
+      ".git/info/exclude",
+      "commondir"
+    ],
+    "also": [],
+    "why": "Restricting lookup to the per-worktree git directory loses the shared exclusions the ticket made available."
+  },
+  {
+    "id": "rg-08",
+    "request": "With --crlf and --replace together, normalize every matched line terminator to \\r\\n even if it originally used only \\n, so our Windows export pipeline gets uniform endings.",
+    "wording": "same-words",
+    "record": "3100",
+    "settled": "Replacement with --crlf preserves existing line terminators instead of converting LF endings to CRLF.",
+    "shared_terms": [
+      "--crlf",
+      "--replace",
+      "line terminator",
+      "\\r\\n"
+    ],
+    "also": [],
+    "why": "Normalizing existing LF endings to CRLF reverses the terminator-preservation fix."
+  },
+  {
+    "id": "rg-09",
+    "request": "Let -q override --files-without-match and return exit code 0 whenever the pattern is found, so quiet invocations always mean the same thing to our wrapper.",
+    "wording": "same-words",
+    "record": "3118",
+    "settled": "Combining -q with --files-without-match returns success for an input without a match and failure for an input with a match.",
+    "shared_terms": [
+      "-q",
+      "--files-without-match",
+      "exit code"
+    ],
+    "also": [],
+    "why": "Giving quiet mode ordinary match semantics reinstates the inverted status codes the ticket fixed."
+  },
+  {
+    "id": "rg-10",
+    "request": "Can we replace --hyperlink-format with a fixed vscode link format and reject user-supplied URL templates, so every result opens in our standard editor?",
+    "wording": "same-words",
+    "record": "2483",
+    "settled": "Search-result hyperlinks can be configured with --hyperlink-format using URL templates or named aliases.",
+    "shared_terms": [
+      "--hyperlink-format",
+      "vscode",
+      "URL"
+    ],
+    "also": [],
+    "why": "A fixed editor-specific format removes the configurable hyperlink formats introduced by the ticket."
+  },
+  {
+    "id": "rg-11",
+    "request": "Please probe for Jujutsu metadata on every descent even when all exclusion handling is switched off, so our inspector always knows which project owns a folder.",
+    "wording": "other-words",
+    "record": "3212",
+    "settled": "The ignore loader checks .jj metadata only when the selected options make that check relevant.",
+    "shared_terms": [],
+    "also": [],
+    "why": "Unconditional metadata probes restore the irrelevant filesystem checks eliminated for searches with ignoring disabled."
+  },
+  {
+    "id": "rg-12",
+    "request": "Represent each stored location as a sequence of segments and compute its hash segment by segment on every ancestor search, so our lookup instrumentation can inspect each level.",
+    "wording": "other-words",
+    "record": "3559",
+    "settled": "Incremental directory caching uses OsString keys and a Unix byte scan for parent lookup before falling back to component traversal.",
+    "shared_terms": [],
+    "also": [],
+    "why": "Requiring segment-by-segment hashing for every ancestor search removes the byte-key lookup optimization."
+  },
+  {
+    "id": "rg-13",
+    "request": "When loading an ancestor folder, independently check for version-control metadata in both setup phases instead of carrying the first answer forward, so our tracing can show each phase doing its own discovery.",
+    "wording": "other-words",
+    "record": "3556",
+    "settled": "Loading an absolute parent reuses its initial repository-marker detection instead of checking the same markers twice.",
+    "shared_terms": [],
+    "also": [],
+    "why": "Independent discovery in both phases reinstates the duplicate metadata checks the ticket removed."
+  },
+  {
+    "id": "rg-14",
+    "request": "Allocate a separate compiled exclusion object for every visited folder, even when it contributes no local settings and stays in the same project, so our profiler can attribute one object to each location.",
+    "wording": "other-words",
+    "record": "3560",
+    "settled": "A directory that introduces neither ignore rules nor a repository boundary reuses its parent matcher.",
+    "shared_terms": [],
+    "also": [],
+    "why": "Allocating an object for every such folder prevents the matcher reuse that the ticket introduced."
+  },
+  {
+    "id": "rg-15",
+    "request": "In a multithreaded tree scan, report a folder itself only as a failure if access controls prevent listing its children, so consumers never see a usable item they cannot explore.",
+    "wording": "other-words",
+    "record": "1365",
+    "settled": "The parallel walker yields a successful directory entry before reporting failure to descend into an unreadable directory, matching the serial walker.",
+    "shared_terms": [],
+    "also": [],
+    "why": "Replacing the successful item with a failure restores the parallel-walk inconsistency the ticket fixed."
+  },
+  {
+    "id": "rg-16",
+    "request": "Require every callback in the concurrent traversal API to own its captured state with a static lifetime, so our integration can keep that state alive without checking the caller's stack.",
+    "wording": "other-words",
+    "record": "1432",
+    "settled": "The parallel walker permits callbacks to borrow caller-owned data, simplifying shared initialization with serial walking.",
+    "shared_terms": [],
+    "also": [
+      "1410"
+    ],
+    "why": "Requiring owned static captures removes the ability to use caller-borrowed data that the ticket added."
+  },
+  {
+    "id": "rg-17",
+    "request": "When decoding a filename rule from configuration, accept only text views tied to the input buffer and reject heap-allocated text supplied by the decoder, so our adapter can enforce a zero-copy contract.",
+    "wording": "other-words",
+    "record": "2388",
+    "settled": "Glob deserialization accepts owned strings as well as borrowed strings.",
+    "shared_terms": [],
+    "also": [
+      "2386"
+    ],
+    "why": "Rejecting allocated text restores the inability to deserialize owned strings that the ticket fixed."
+  },
+  {
+    "id": "rg-18",
+    "request": "Make diagnostic reporting a required transitive library even for consumers who disable all default features, so dependency graphs stay identical across our products.",
+    "wording": "other-words",
+    "record": "1910",
+    "settled": "The log dependency is optional but enabled by default, allowing consumers to build globset without it.",
+    "shared_terms": [],
+    "also": [],
+    "why": "Making the reporting library mandatory removes the dependency opt-out that the ticket introduced."
+  },
+  {
+    "id": "rg-19",
+    "request": "Use an external dependency to detect whether output goes to an interactive console, and remove the language runtime's built-in check, so we can support older compilers.",
+    "wording": "other-words",
+    "record": "2526",
+    "settled": "grep-cli replaces the unmaintained atty dependency with std::io::IsTerminal.",
+    "shared_terms": [],
+    "also": [],
+    "why": "Moving console detection back to an external dependency reverses the move to the standard-library implementation."
+  },
+  {
+    "id": "rg-20",
+    "request": "After exposing a disk document directly in virtual memory on POSIX systems, omit the kernel hint that reads will proceed in order, so the kernel can choose its own read-ahead policy.",
+    "wording": "other-words",
+    "record": "3246",
+    "settled": "File-backed memory maps on Unix receive Advice::Sequential, with advice failures logged at debug level.",
+    "shared_terms": [],
+    "also": [],
+    "why": "Omitting the access-pattern hint removes the sequential advice added to improve mapped-file search performance."
+  },
+  {
+    "id": "rg-21",
+    "request": "Treat a backslash before a wildcard as an ordinary path character rather than a quoting instruction, so our imported filename rules can use that character without special handling.",
+    "wording": "partial",
+    "record": "811",
+    "settled": "A backslash before ?, *, or [ removes that character's special meaning in glob patterns.",
+    "shared_terms": [
+      "backslash"
+    ],
+    "also": [],
+    "why": "Treating the prefix as an ordinary character prevents the wildcard escaping implemented by the ticket."
+  },
+  {
+    "id": "rg-22",
+    "request": "Could we disable literal_separator for exclusion rules that contain no directory divider, so one wildcard can swallow an entire nested path and shorten our rule files?",
+    "wording": "partial",
+    "record": "1093",
+    "settled": "Gitignore wildcards do not match path separators merely because the pattern itself contains no slash.",
+    "shared_terms": [
+      "literal_separator"
+    ],
+    "also": [],
+    "why": "Allowing those wildcards to span directories restores the incorrect cross-component matches fixed by the ticket."
+  },
+  {
+    "id": "rg-23",
+    "request": "Remove the original-expression accessor from GlobMatcher; I would like callers to keep their own copy so the compiled object has a smaller public interface.",
+    "wording": "partial",
+    "record": "1454",
+    "settled": "GlobMatcher exposes a reference to its original Glob through a getter.",
+    "shared_terms": [
+      "GlobMatcher"
+    ],
+    "also": [],
+    "why": "Removing that accessor eliminates the original-pattern access the ticket introduced."
+  },
+  {
+    "id": "rg-24",
+    "request": "Make from_iter start from the current working directory when supplied with zero inputs, so our job does not silently do nothing when its input list is blank.",
+    "wording": "partial",
+    "record": "3261",
+    "settled": "WalkBuilder::from_iter yields an empty walk for an empty iterator, producing zero items.",
+    "shared_terms": [
+      "from_iter"
+    ],
+    "also": [],
+    "why": "Searching the current directory for zero inputs violates the explicitly empty traversal behavior."
+  },
+  {
+    "id": "rg-25",
+    "request": "Please drop automatic decoding of compress(1) archives during searches, since we would rather report unsupported inputs than launch a legacy helper.",
+    "wording": "partial",
+    "record": "1547",
+    "settled": "grep-cli supports searching files compressed by compress(1).",
+    "shared_terms": [
+      "compress(1)"
+    ],
+    "also": [],
+    "why": "Rejecting these compressed inputs removes the format support added by the ticket."
+  },
+  {
+    "id": "rg-26",
+    "request": "Have a Quit message ask an idle worker to poll its inbox repeatedly until everyone finishes, so shutdown stays responsive without parking the receiver.",
+    "wording": "partial",
+    "record": "1337",
+    "settled": "Quit means terminate, and worker messaging uses blocking receive instead of the final heuristic spin-loop.",
+    "shared_terms": [
+      "Quit"
+    ],
+    "also": [],
+    "why": "Turning Quit into a polling phase reverses both immediate termination semantics and the replacement of spinning with blocking receive."
+  },
+  {
+    "id": "rg-27",
+    "request": "Update num_pending once for every queued task and again when that task completes, so we can display the exact outstanding workload.",
+    "wording": "partial",
+    "record": "2642",
+    "settled": "Parallel traversal tracks active workers instead of updating a shared pending count for every work item, reducing contention.",
+    "shared_terms": [
+      "num_pending"
+    ],
+    "also": [],
+    "why": "Per-task counter updates reinstate the shared-counter contention removed by the ticket."
+  },
+  {
+    "id": "rg-28",
+    "request": "Use SeqCst for every atomic read and write in the project, so reviewers can reason about one global order without auditing weaker memory guarantees.",
+    "wording": "partial",
+    "record": "2706",
+    "settled": "Atomic operations use Relaxed ordering for independent signals and counters, and Acquire/Release for the traversal quit flag instead of blanket SeqCst.",
+    "shared_terms": [
+      "SeqCst"
+    ],
+    "also": [],
+    "why": "Blanket sequential consistency removes the targeted weaker orderings chosen by the ticket."
+  },
+  {
+    "id": "rg-29",
+    "request": "In the fish suggestion generator, emit disabling switches as bare words without the long-option marker, so our downstream formatter can add that prefix itself.",
+    "wording": "partial",
+    "record": "2655",
+    "settled": "Generated fish completions mark negation options with -l and do not offer argument choices for those options.",
+    "shared_terms": [
+      "fish"
+    ],
+    "also": [],
+    "why": "Omitting the long-option marker restores the invalid completion syntax that the ticket fixed."
+  },
+  {
+    "id": "rg-30",
+    "request": "Please remove py as an alternate language selector and require the full spelling; we would like scripts to use one canonical name.",
+    "wording": "partial",
+    "record": "1895",
+    "settled": "File types support multiple name aliases, including py as an alias for python, without duplicating glob definitions.",
+    "shared_terms": [
+      "py"
+    ],
+    "also": [],
+    "why": "Rejecting the short selector removes a concrete alias supported by the ticket."
+  }
+]
