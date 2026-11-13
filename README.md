@@ -318,7 +318,8 @@ No symbol uses it.
 A record can govern a change with no tag or commit that links it to the code.
 `search` ranks the records by their text and shows the candidates; the reader
 judges whether one governs the change. Each line says how it matched: by
-words, by meaning, or by both.
+words, by meaning, or by both. The `statement:` line holds the first line of
+the record's first statement, and is left out when it repeats the title.
 
 ```console
 $ whygraph search "round tax half to even"

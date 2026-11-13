@@ -48,6 +48,7 @@ function candidate(r: Row, match: string): Candidate {
  * The answer of `whygraph search`.
  * owns: [[whygraph-search]]
  * post: when `candidates` is empty, `No record matches "<request>".`; else a heading that says a listed record is a candidate, not a link, then one block per record: date, id, title, the first line of its statement, its source, and, when `meaning` is true, a `matched:` line naming `words`, `meaning` or `words and meaning`.
+ * post: the `statement:` line is printed only when that line adds text the title line does not show; a statement whose first line equals the title is omitted.
  * post: always ends with `Searched:` naming the words and, when `meaning` is true, the meaning search, then `Not searched:`.
  */
 export function searchAnswer(request: string, words: string, meaning: boolean, candidates: readonly Candidate[]): string {
@@ -57,9 +58,11 @@ export function searchAnswer(request: string, words: string, meaning: boolean, c
   else {
     out.push(`Decision records that match "${query}", best match first (a candidate, not a link: read the record and judge whether it governs your change):`);
     for (const c of candidates) {
-      out.push(`  ${c.date || "undated   "}  ${c.id}  ${c.title || "(no title)"}`);
+      const title = c.title || "(no title)";
+      const statement = c.statement || "(none)";
+      out.push(`  ${c.date || "undated   "}  ${c.id}  ${title}`);
       if (meaning) out.push(`      matched: ${c.match}`);
-      out.push(`      statement: ${c.statement || "(none)"}`);
+      if (statement.trim() !== title.trim()) out.push(`      statement: ${statement}`);
       out.push(`      source: ${c.source || "(not stated)"}`);
     }
   }
