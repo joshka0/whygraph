@@ -5,23 +5,37 @@
  */
 import { posix } from "node:path";
 
-/** A command target read from `<file>:<symbol>`. */
+/** A command target read from `<file>:<symbol>` or `<file>:<start>-<end>`. */
 export type SymbolTarget =
-  | { readonly path: string; readonly symbol: string }
+  | { readonly kind: "symbol"; readonly path: string; readonly symbol: string }
+  | { readonly kind: "range"; readonly path: string; readonly start: number; readonly end: number }
   | { readonly usage: string };
 
 /**
  * owns: [[whygraph-targets]]
- * post: splits at the last `:` into a file and a symbol; the file is read from the repo root, an absolute path inside `root` is made relative to it, and `\` is not a separator.
- * post: returns a usage message for no `:` or an empty side, and for a file that lies outside `root` (`..` above it, or an absolute path elsewhere).
+ * post: splits at the last `:` into a file and a symbol or a line range; the file is read from the repo root, an absolute path inside `root` is made relative to it, and `\` is not a separator.
+ * post: `<start>-<end>` is a 1-based inclusive range when both sides are digits; a symbol part that holds a `-` but is not such a range is a usage error, because no language memod reads allows `-` in an identifier.
+ * post: returns a usage message for no `:` or an empty side, a file that lies outside `root` (`..` above it, or an absolute path elsewhere), a range that starts below 1, and a range whose start is after its end.
  */
 export function readSymbolTarget(arg: string, root: string): SymbolTarget {
+  const usage = `"${arg}" is not <file>:<symbol> or <file>:<start>-<end>, such as src/main.ts:run or src/main.ts:10-20`;
   const colon = arg.lastIndexOf(":");
-  if (colon <= 0 || colon === arg.length - 1) return { usage: `"${arg}" is not <file>:<symbol>, such as src/main.ts:run` };
+  if (colon <= 0 || colon === arg.length - 1) return { usage };
   const file = arg.slice(0, colon);
   const rel = posix.isAbsolute(file) ? posix.relative(root, file) : posix.normalize(file);
   if (rel === "" || rel === "." || rel === ".." || rel.startsWith("../") || posix.isAbsolute(rel)) return { usage: `"${file}" is outside the repo ${root}` };
-  return { path: rel.replace(/^\.\//, ""), symbol: arg.slice(colon + 1) };
+  const path = rel.replace(/^\.\//, "");
+  const right = arg.slice(colon + 1);
+  const range = /^(\d+)-(\d+)$/.exec(right);
+  if (range !== null) {
+    const start = Number(range[1]);
+    const end = Number(range[2]);
+    if (start < 1) return { usage: `"${arg}" starts at line ${start}; a line range is 1-based` };
+    if (start > end) return { usage: `"${arg}" starts at line ${start} and ends at ${end}; a range's start must not be after its end` };
+    return { kind: "range", path, start, end };
+  }
+  if (right.includes("-")) return { usage };
+  return { kind: "symbol", path, symbol: right };
 }
 
 /** Levenshtein distance, capped work for long strings is not needed at name lengths. */

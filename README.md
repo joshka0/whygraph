@@ -121,7 +121,7 @@ whygraph: why the code is the way it is, as a relate graph
   whygraph decisions adr <folder>
   whygraph why <file>:<symbol> [--repo <path>] [--store <path>]
   whygraph impact <decision id> [--repo <path>] [--store <path>]
-  whygraph carry <file>:<symbol> [--repo <path>] [--store <path>]
+  whygraph carry <file>:<symbol>|<file>:<start>-<end> [--repo <path>] [--store <path>]
   whygraph search "<text>" [--repo <path>] [--store <path>]
   whygraph mcp [--repo <path>] [--store <path>]
 
@@ -335,6 +335,34 @@ No symbol uses it.
 
 1 commit changed its code or tags, newest first:
   17078bb 2026-01-09 Add checkout with tax rounded half to even
+```
+
+`carry` also takes an explicit 1-based line range, `<file>:<start>-<end>`. Use
+it for a long symbol (a class or a big function) whose whole span spreads its
+terms thin: a symbol longer than 40 lines gets a one-line term section that
+names the range form. The term section then ranks the records against exactly
+those lines, and the linked decisions, checks and topics come from every symbol
+whose stored range overlaps them, each symbol named with its span. A file the
+graph holds no symbol for, such as a config file or a shell script, still gets
+the term section, and the output says no symbol covers the lines.
+
+```console
+$ whygraph carry src/tax.ts:1-8
+Before you edit src/tax.ts:1-8
+
+No symbol's stored range overlaps these lines; the graph holds no symbol for src/tax.ts.
+
+Decision records that share the most distinctive terms with these lines (candidates, not links: a shared word does not mean the record governs these lines):
+  2026-01-03  ADR-0003  Tax rate by region
+      shared terms: the, adr, cents, tax
+  2026-01-02  note-1  Tax is computed once per order, not per line
+      shared terms: not, because, tax
+  2026-01-02  ADR-0002  One flat tax rate
+      shared terms: adr, tax, cents
+  2026-01-01  ADR-0001  Money in cents
+      shared terms: money, cents
+  2026-01-04  note-2  Show thousands separators in totals
+      shared terms: because, the
 ```
 
 A record can govern a change with no tag or commit that links it to the code.
@@ -637,7 +665,7 @@ jq '{records: (.items | group_by(.memo) | map({
 | `whygraph decisions adr <folder>` | Prints a decisions file made from the ADRs in the folder. |
 | `whygraph why <file>:<symbol>` | The `decided:` tags on the symbol and on its file header; the records those tags name; then the records linked only through a commit that cites them and changed the symbol, oldest first, each commit with how many symbols it changed. |
 | `whygraph impact <decision id>` | The record and every record that rests on it, directly or through others; for each, the symbols and files whose `decided:` tags name it, then the commits that cite it and the other symbols those commits changed, with how many symbols use each directly. |
-| `whygraph carry <file>:<symbol>` | Before an edit: the topics the symbol owns and their other owners, the formal checks that cover it, its premise memos, its decisions (as `why`); then one step away, the `decided:` tags, the records they name, the checks and the topics of the symbols it uses and of the symbols that use it, most binding first, each line naming where it sits; then the decision records that share the most distinctive terms with its code (candidates, not links), each naming its shared terms; then its direct and transitive users, and the commits that changed it. |
+| `whygraph carry <file>:<symbol>\|<file>:<start>-<end>` | Before an edit: the topics the symbol owns and their other owners, the formal checks that cover it, its premise memos, its decisions (as `why`); then one step away, the `decided:` tags, the records they name, the checks and the topics of the symbols it uses and of the symbols that use it, most binding first, each line naming where it sits; then the decision records that share the most distinctive terms with its code (candidates, not links), each naming its shared terms; then its direct and transitive users, and the commits that changed it. The range form reads exactly those lines for the term section and takes the linked parts from every symbol whose stored range overlaps them. |
 | `whygraph search "<text>"` | The five decision records that best match the text: the word search and the meaning search each rank at most five, fused by reciprocal rank, each line saying how it matched (`words`, `meaning` or `words and meaning`), each a candidate to judge, not a link; then what was searched and what was not. |
 | `whygraph mcp` | The MCP server config that serves the store read-only through `relate serve --mcp stdio`, and every recipe. |
 | `whygraph help` | The usage. |
@@ -830,6 +858,11 @@ store rather than merging into it.
   the ASCII tokenizer cannot read gives one line saying so instead. The doc
   comment above the declaration is not read: on the memoryd check it ranked the
   wanted record worse than the declaration alone (ADR 0002).
+- `carry` takes a range, `<file>:<start>-<end>`, for a long symbol. The term
+  section then reads exactly those lines, with no symbol name or file path
+  added, and a range that overlaps several symbols renders one body per symbol.
+  A bad range exits 2 and a missing file exits 1, each naming the problem. The
+  range form is `carry` only.
 - The recipes use no `CALL { }` subquery: relate's read-only MCP tool rejects
   one.
 - `search` reads only a record's title and statements. It ranks by words

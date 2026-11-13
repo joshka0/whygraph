@@ -49,7 +49,7 @@ export function readArgs(argv: readonly string[]): Args | { readonly usage: stri
     case "impact":
     case "carry":
     case "search":
-      if (positional[0] === undefined) return { usage: `${command} needs a ${command === "impact" ? "decision id" : command === "search" ? "request" : "<file>:<symbol>"}` };
+      if (positional[0] === undefined) return { usage: `${command} needs a ${command === "impact" ? "decision id" : command === "search" ? "request" : command === "carry" ? "<file>:<symbol> or <file>:<start>-<end>" : "<file>:<symbol>"}` };
       return noDecisions ?? extra(1) ?? { command, target: positional[0], repo, store };
     case "mcp":
       return noDecisions ?? extra(0) ?? { command, repo, store };

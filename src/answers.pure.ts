@@ -269,28 +269,32 @@ export type TermSection =
   | { readonly kind: "note"; readonly note: string };
 
 /**
- * The term-bridge lines of a carry answer: the records that share the most distinctive terms with the symbol's code, or one line saying why none.
- * decided: a record the answer already lists as a decision of the symbol is left out, because a candidate the reader has already read is noise, and the term part is for records the graph does not link
+ * The term-bridge lines of a carry answer: the records that share the most distinctive terms with the subject, or one line saying why none.
+ * decided: a record the answer already lists as a decision of the subject is left out, because a candidate the reader has already read is noise, and the term part is for records the graph does not link
  */
-function termLines(section: TermSection, linked: ReadonlySet<string>): string[] {
+function termLines(section: TermSection, linked: ReadonlySet<string>, heading: string, empty: string): string[] {
   if (section.kind === "note") return [section.note];
   const rows = section.rows.filter((r) => !linked.has(r.id));
-  if (rows.length === 0) return ["No decision record other than those above shares a distinctive term with its code."];
-  return [
-    "Decision records that share the most distinctive terms with its code (candidates, not links: a shared word does not mean the record governs this symbol):",
-    ...rows.map((r) => `  ${str(r.date) || "undated   "}  ${r.id}  ${str(r.title) || "(no title)"}\n      shared terms: ${r.shared.join(", ")}`),
-  ];
+  if (rows.length === 0) return [empty];
+  return [heading, ...rows.map((r) => `  ${str(r.date) || "undated   "}  ${r.id}  ${str(r.title) || "(no title)"}\n      shared terms: ${r.shared.join(", ")}`)];
 }
 
+/** The heading of the symbol form's term section. */
+const TERM_HEADING = "Decision records that share the most distinctive terms with its code (candidates, not links: a shared word does not mean the record governs this symbol):";
+/** The empty line of the symbol form's term section. */
+const TERM_EMPTY = "No decision record other than those above shares a distinctive term with its code.";
+/** The heading of the range form's term section. */
+const RANGE_TERM_HEADING = "Decision records that share the most distinctive terms with these lines (candidates, not links: a shared word does not mean the record governs these lines):";
+/** The empty line of the range form's term section. */
+const RANGE_TERM_EMPTY = "No decision record other than those above shares a distinctive term with these lines.";
+
 /**
- * The answer of `whygraph carry`.
+ * Every section of one symbol's carry answer after its title: owned topics, formal checks, premise memos, the decisions, what sits one step away, the term section when given (not for the range form, which appends it once), the users, and the commits.
  * owns: [[whygraph-answers]]
- * post: in order: owned topics with their other owning files; formal checks that cover it with the command that re-runs each; premise memos; the decisions as `whyAnswer` lists them; what sits one step away (`oneStepAway`); the term-bridge records that share the most distinctive terms with its code (`TermSection`), a record already listed as a decision of the symbol left out; direct and transitive users with distance; the commits that changed it, newest first.
- * post: for a symbol in a language whose uses memod does not read, the one-step part and the users part say they are unknown instead of none.
  */
-export function carryAnswer(symbolId: string, carry: Row, why: readonly Row[], users: readonly Row[], terms: TermSection): string {
+function carrySections(symbolId: string, carry: Row, why: readonly Row[], users: readonly Row[], terms: TermSection | undefined): string[] {
   const file = str(carry.file);
-  const out = [`Before you edit ${shown(symbolId)}`, ""];
+  const out: string[] = [];
   const topics = (Array.isArray(carry.topics) ? (carry.topics as Row[]) : []).filter((t) => t !== null);
   if (topics.length === 0) out.push("It owns no topic.");
   else {
@@ -306,7 +310,7 @@ export function carryAnswer(symbolId: string, carry: Row, why: readonly Row[], u
   out.push(premises.length === 0 ? "Its doc comment names no premise memo." : "Premise memos it rests on:", ...premises.map((p) => `  - ${p}`));
   out.push("", ...whyAnswer(symbolId, why).split("\n").slice(2), "");
   out.push(...oneStepAway(symbolId, carry, why, why.length > 0 || topics.length > 0 || checks.length > 0 || premises.length > 0), "");
-  out.push(...termLines(terms, new Set(why.filter((r) => r.kind === "record").map((r) => str(r.id)))), "");
+  if (terms !== undefined) out.push(...termLines(terms, new Set(why.filter((r) => r.kind === "record").map((r) => str(r.id))), TERM_HEADING, TERM_EMPTY), "");
   if (!hasSymbolEdges(file)) out.push(`Its users are unknown: memod reads which symbols use which only in TypeScript and JavaScript, not in ${file}.`);
   else if (users.length === 0) out.push("No symbol uses it.");
   else {
@@ -316,5 +320,46 @@ export function carryAnswer(symbolId: string, carry: Row, why: readonly Row[], u
   }
   const commits = list(carry.commits);
   out.push("", commits.length === 0 ? "No commit changed it (the repo has no history for it)." : `${commits.length} commit${commits.length === 1 ? "" : "s"} changed its code or tags, newest first:`, ...commits.map((c) => `  ${c}`));
+  return out;
+}
+
+/**
+ * The answer of `whygraph carry <file>:<symbol>`.
+ * owns: [[whygraph-answers]]
+ * post: in order: owned topics with their other owning files; formal checks that cover it with the command that re-runs each; premise memos; the decisions as `whyAnswer` lists them; what sits one step away (`oneStepAway`); the term-bridge records that share the most distinctive terms with its code (`TermSection`), a record already listed as a decision of the symbol left out; direct and transitive users with distance; the commits that changed it, newest first.
+ * post: for a symbol in a language whose uses memod does not read, the one-step part and the users part say they are unknown instead of none.
+ */
+export function carryAnswer(symbolId: string, carry: Row, why: readonly Row[], users: readonly Row[], terms: TermSection): string {
+  return [`Before you edit ${shown(symbolId)}`, "", ...carrySections(symbolId, carry, why, users, terms)].join("\n");
+}
+
+/** One symbol whose stored range overlaps a target range, with its carry data. */
+export interface RangeSymbol {
+  readonly id: string;
+  readonly line: number;
+  readonly endLine: number;
+  readonly carry: Row;
+  readonly why: readonly Row[];
+  readonly users: readonly Row[];
+}
+
+/**
+ * The answer of `whygraph carry <file>:<start>-<end>`.
+ * owns: [[whygraph-answers]]
+ * post: names the range; names every symbol whose stored range overlaps the lines, or says the graph holds no symbol for the file; then, for each named symbol, its full carry body (topics, checks, premises, decisions, what sits one step away, users and commits) under its own name; then the term section over exactly the target lines, with a record any body already lists left out.
+ * decided: the range form renders one body per overlapping symbol rather than merging them, because a neighbour's relation ("which X uses") is relative to one symbol and merging would make it ambiguous
+ */
+export function carryRangeAnswer(path: string, start: number, end: number, symbols: readonly RangeSymbol[], terms: TermSection): string {
+  const out = [`Before you edit ${path}:${start}-${end}`, ""];
+  const linked = new Set<string>();
+  if (symbols.length === 0) out.push(`No symbol's stored range overlaps these lines; the graph holds no symbol for ${path}.`, "");
+  else {
+    out.push(`Symbols whose stored range overlaps these lines: ${symbols.map((s) => `${s.id} (${s.line}-${s.endLine})`).join(", ")}`, "");
+    for (const s of symbols) {
+      out.push(`Symbol ${shown(s.id)} (${s.line}-${s.endLine})`, "", ...carrySections(s.id, s.carry, s.why, s.users, undefined), "");
+      for (const r of s.why) if (r.kind === "record") linked.add(str(r.id));
+    }
+  }
+  out.push(...termLines(terms, linked, RANGE_TERM_HEADING, RANGE_TERM_EMPTY));
   return out.join("\n");
 }

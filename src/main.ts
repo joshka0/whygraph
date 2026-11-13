@@ -16,7 +16,7 @@ const USAGE = `whygraph: why the code is the way it is, as a relate graph
   whygraph decisions adr <folder>
   whygraph why <file>:<symbol> [--repo <path>] [--store <path>]
   whygraph impact <decision id> [--repo <path>] [--store <path>]
-  whygraph carry <file>:<symbol> [--repo <path>] [--store <path>]
+  whygraph carry <file>:<symbol>|<file>:<start>-<end> [--repo <path>] [--store <path>]
   whygraph search "<text>" [--repo <path>] [--store <path>]
   whygraph mcp [--repo <path>] [--store <path>]
 

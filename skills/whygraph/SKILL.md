@@ -10,14 +10,20 @@ graph. Four questions, four commands:
 
 | When | Ask | Command |
 | --- | --- | --- |
-| Before you change a symbol | carry | `whygraph carry <file>:<symbol>` |
+| Before you change a symbol | carry | `whygraph carry <file>:<symbol>` or `<file>:<start>-<end>` |
 | When a decision changes | impact | `whygraph impact <decision id>` |
 | When you wonder why code is the way it is | why | `whygraph why <file>:<symbol>` |
 | When no link answers | search | `whygraph search "<the change in your own words>"` |
 
 `<file>` is the path from the repo root; `<symbol>` is the exported name, such
 as `whygraph carry src/money.ts:formatCents`. A decision id is the record's id
-exactly, such as `ADR-0003` or `note-2`.
+exactly, such as `ADR-0003` or `note-2`. `carry` also takes a 1-based inclusive
+line range, such as `whygraph carry src/money.ts:9-19`, for a long symbol: the
+term section then reads exactly those lines, and the linked decisions, checks
+and topics come from every symbol whose stored range overlaps them, each
+symbol named. A symbol longer than 40 lines gives a one-line term section that
+names the range form. A file the graph holds no symbol for still gets the term
+section, and the answer says no symbol covers the lines.
 
 ## Rules
 
@@ -39,7 +45,9 @@ exactly, such as `ADR-0003` or `note-2`.
 7. `carry` ends with the decision records that share the most distinctive
    terms with the symbol's code. That part is a term match, not a link: no tag
    or commit ties those records to the code. Read each shared term and the
-   record, and judge whether it governs your change.
+   record, and judge whether it governs your change. When the symbol is longer
+   than 40 lines the part is one line that names the range form instead; ask
+   again with the lines you will touch, `<file>:<start>-<end>`.
 
 ## Reading an answer
 
@@ -61,12 +69,16 @@ exactly, such as `ADR-0003` or `note-2`.
   why each record is there. A record the answer already lists as a decision of
   the symbol is not repeated. With no readable code or no shared term, the part
   is one line saying so.
+- A range answer (`carry <file>:<start>-<end>`) names every symbol whose stored
+  range overlaps the lines, then repeats the `carry` body for each. Its term
+  heading says `with these lines`; the candidates come from exactly those
+  lines, without the symbol name or file path.
 
 ## Exit status
 
 - 0: an answer (an empty one too).
 - 1 with "no store at ...; run whygraph build first": build it (below).
-- 2: the target is not `<file>:<symbol>`; fix the argument.
+- 2: the target is not `<file>:<symbol>` (or, for `carry`, `<file>:<start>-<end>`), or a range is bad (a start after the end, below 1, or past the end of the file), or a range was given to `why` or `impact`; fix the argument.
 - 3: the graph has no such symbol or record; stderr lists close names, so
   retry with one of them.
 
@@ -91,5 +103,8 @@ network and no cache, the build exits 1 and names the model.
 server, call `read_cypher` with a recipe's text as `statement` and its
 parameters as `parameters`: `{"symbol": "src/money.ts#formatCents"}` for
 `why`, `carry` and `users` (a symbol id is `<file>#<symbol>`),
-`{"decision": "ADR-0003"}` for `impact`, and `{"text": "plain words"}` for
-`search` (the words of the change; `search` over MCP is the word search only).
+`{"decision": "ADR-0003"}` for `impact`, `{"text": "plain words"}` for
+`search` (the words of the change; `search` over MCP is the word search only),
+and `{"terms": ["cents", "tax"]}` for `terms` (the records that share the
+most distinctive terms with a list of terms; `carry` builds that list from the
+code).

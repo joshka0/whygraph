@@ -12,7 +12,8 @@ distinctive terms of the code the request would touch finds it 5 times in the
 9 cases that had code. The record and the code share the project's jargon;
 the request does not. `carry` already takes `<file>:<symbol>`, so it stands in
 the code and needs no request text. `whygraph search` is the request-side
-tool; this record adds the code-side one.
+tool; this record adds the code-side one. A symbol's stored range can also be a
+whole class, so `carry` takes an explicit 1-based line range as well.
 
 ## Options
 
@@ -59,8 +60,23 @@ those lines of the file from the working tree. A symbol with no span, a file
 that is gone, and a span that no longer fits the file each give a one-line
 note instead of wrong lines.
 
-**Query side.** `carry` adds the symbol's name and file path to its source
-lines, tokenizes that with the same tokenizer, and runs one recipe,
+**The two targets.** `carry <file>:<symbol>` reads the symbol's stored
+`line`..`endLine` and adds its name and file path to the tokenized text; the
+linked decisions, checks and topics come from that one symbol.
+`carry <file>:<start>-<end>` reads exactly those lines of the working-tree file
+(no name or path added) and takes the linked decisions, checks and topics from
+every symbol whose stored range overlaps the lines, naming each symbol and its
+span in the output; a file with no symbol still gets the term section, and the
+output says that no symbol covers the lines. A symbol longer than
+`LONG_SYMBOL` (40 lines) gets a one-line term section naming the range form
+instead of candidates, because the check below shows a wide span drowns the
+shared terms. The range form is `carry` only; `why` and `impact` keep their
+targets. A bad range (not two digits, a start below 1, a start after the end,
+past the end of the file, a file outside the repo) exits 2; a missing file
+exits 1; each names the problem.
+
+**Query side.** `carry` tokenizes the source text with the same tokenizer and
+runs one recipe,
 `recipes/terms.cypher`: BM25 with `k1` 1.2 and `b` 0.75 (as the reference),
 `idf = ln(1 + (N - df + 0.5) / (df + 0.5))`, where `Term.records` is `df`,
 `MENTIONS.count` is the term frequency in the record, and `Decision.termCount`
@@ -108,27 +124,34 @@ can, and a test may exercise that, but the caller passes false.
   Cypher recipe.
 - A shared term is not a link. The section says so, prints no score, and lists
   candidates to read, exactly as `search` does.
-- The product's span is coarser than a person's. The reference measurement
-  chose a narrow line range around the statement a request would touch; a
-  memoryd symbol can be a whole class. Re-run on the product, the wanted
-  record is in the top five for one of the six targets:
+- A symbol's span can be a whole class, and that is why the range form
+exists. On the six memoryd targets that name a graph symbol, the symbol form's
+full rank of the wanted record is 1, 83, 40, 580, 65 and 92 where the reference
+(an agent's narrow range) got 1, 141, 3, 3, 111 and 59; only memoryd-01 lands
+in the top five. `FolderIndex` (362 lines) and `Transcript` (329 lines) dwarf
+the constructor and the `read` fallback a person pointed at.
+- The range form is much closer to the reference. `carry <file>:<start>-<end>`
+on the first target of each memoryd entry with a target:
 
-  | Entry | Symbol the product reads | Span | Reference by code | Product, full rank |
+  | Entry | First target | Reference by code | Shown rank | Full rank |
   | --- | --- | --- | --- | --- |
-  | memoryd-01 | `src/central/store/modes.ts#privateFiles` (the second target; the first, a module-level `process.umask`, has no symbol) | 18-30 | 1 | 1 |
-  | memoryd-02 | `src/central/sources/sourcePaths.ts#folderResolver` | 125-171 | 141 | 83 |
-  | memoryd-06 | `mem/src/memoIndex.ts#FolderIndex` | 77-437 | 3 | 40 |
-  | memoryd-07 | `src/central/sources/Transcript.ts#Transcript` | 51-379 | 3 | 580 |
-  | memoryd-08 | none (`bin/install` is a shell script; memod indexes no symbol) | - | 7 | not run |
-  | memoryd-10 | `src/central/store/Store.ts#makeStore` | 147-286 | 111 | 65 |
-  | memoryd-11 | `src/central/realPath.ts#realPath` | 19-31 | 59 | 92 |
+  | memoryd-01 | `src/central/main.ts:38-39` | 1 | 1 | 1 |
+  | memoryd-02 | `src/central/sources/sourcePaths.ts:125-149` | 141 | not shown | 40 |
+  | memoryd-06 | `mem/src/memoIndex.ts:89-99` | 3 | 1 | 1 |
+  | memoryd-07 | `src/central/sources/Transcript.ts:127-133` | 3 | not shown | 92 |
+  | memoryd-08 | `bin/install:151-169` | 7 | not shown | 9 |
+  | memoryd-10 | `src/central/store/Store.ts:199-233` | 111 | not shown | 153 |
+  | memoryd-11 | `src/central/realPath.ts:11-30` | 59 | not shown | 218 |
 
-  The product agrees on memoryd-01 (rank 1). It differs on memoryd-06 and
-  memoryd-07 because the reference read the 11-line constructor and the 7-line
-  `read` fallback that an agent pointed at, while the symbol's range is the
-  362-line and 329-line class; the terms of the whole class drown the shared
-  ones. It cannot run on memoryd-08 at all. On -02, -10 and -11 neither finds
-  the top five.
+  Two of seven land in the top five against the reference's three. The product
+  agrees on memoryd-01 and beats it on memoryd-06, because those first targets
+  hold the record's vocabulary. It loses on memoryd-07, -10 and -11 because the
+  reference concatenated up to three targets (the `read` fallback with its
+  `StartFolderMissing` handler, the backfill and `Exclusion` spans, the
+  `pathCounts` counter) and added each target's file and symbol text; the
+  operator's check uses the first target's lines alone, by design. On
+  memoryd-02 the extra reference targets are noise, so the product ranks better
+  (40 against 141) without reaching the top five.
 
 ## Limits
 
@@ -141,7 +164,20 @@ can, and a test may exercise that, but the caller passes false.
 - A symbol is as wide as memod says. A method, a constructor or a branch is
   not its own symbol, so the code text can be a whole class and the ranking
   can miss a record a narrow range would find (the memoryd-06 and -07 cases
-  above).
+  above). The range form is the answer: give the lines you will touch.
+- A symbol longer than 40 lines gets the range-form note instead of
+  candidates, so a long symbol's term section is not a candidate list. Read the
+  note and ask with a range.
+- A range takes exactly its lines, with no symbol name or file path added. A
+  record that names the file or the symbol but shares no line of the range will
+  not match it; the symbol form adds both and would. The reference measurement
+  added them too, so the range ranks can differ from its numbers.
+- A range needs the file in the working tree. A file that is gone exits 1, and
+  a range past the end of the file exits 2, each naming the problem; the term
+  section never reads a wrong range.
+- A range that overlaps several symbols renders one body per symbol. A record
+  linked to two of them appears under each, and the term section still lists it
+  only once (or not at all, if a body already lists it).
 - The code must exist in the working tree and be readable. A symbol whose file
   is gone, whose span no longer fits the file, or whose language the tokenizer
   cannot read has a one-line note, not a term section.

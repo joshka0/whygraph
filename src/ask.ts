@@ -5,7 +5,7 @@
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { carryAnswer, impactAnswer, shown, whyAnswer, type Row, type TermSection } from "./answers.pure.ts";
+import { carryAnswer, carryRangeAnswer, impactAnswer, shown, whyAnswer, type RangeSymbol, type Row, type TermCandidate, type TermSection } from "./answers.pure.ts";
 import { fail, type Exit } from "./build.ts";
 import { fuse, searchAnswer, searchWords } from "./search.pure.ts";
 import { closest, missingSymbol, readSymbolTarget } from "./target.pure.ts";
@@ -38,7 +38,7 @@ function noStore(store: string): Exit {
 /**
  * Answers `why`, `impact` or `carry` from the store.
  * owns: [[whygraph-questions]]
- * post: exit 0 with the answer on stdout; exit 2 for a target that is not `<file>:<symbol>` or lies outside the repo; exit 3 when the store has no such symbol or decision, with a message that names it and close names; exit 1 when there is no store.
+ * post: exit 0 with the answer on stdout; exit 2 for a target that is not `<file>:<symbol>` (or, for carry, `<file>:<start>-<end>`) or lies outside the repo, and for a line range on why or impact; exit 3 when the store has no such symbol or decision, with a message that names it and close names; exit 1 when there is no store.
  */
 export function ask(command: "why" | "impact" | "carry", target: string, root: string, store: string): Exit {
   if (!existsSync(store)) return noStore(store);
@@ -56,6 +56,10 @@ export function ask(command: "why" | "impact" | "carry", target: string, root: s
   }
   const t = readSymbolTarget(target, root);
   if ("usage" in t) return fail(t.usage, 2);
+  if (t.kind === "range") {
+    if (command !== "carry") return fail(`${command} takes <file>:<symbol>, not a line range; the range form is for carry`, 2);
+    return askRange(store, root, t, names);
+  }
   const id = `${t.path}#${t.symbol}`;
   if (!of("symbol").includes(id)) return fail(missingSymbol(t, of("file"), of("symbol")), 3);
   const why = readQuery(store, recipe("why"), { symbol: id });
@@ -68,10 +72,63 @@ export function ask(command: "why" | "impact" | "carry", target: string, root: s
 }
 
 /**
+ * Answers `carry <file>:<start>-<end>`: the term section over exactly those lines, plus every symbol whose stored range overlaps them.
+ * owns: [[whygraph-questions]]
+ * post: exit 0 with the answer; exit 1 when the working-tree file cannot be read; exit 2 when the range is past the end of the file.
+ * post: a file with no symbol still gets the term section; the answer says no symbol covers the lines.
+ */
+function askRange(store: string, root: string, t: { readonly path: string; readonly start: number; readonly end: number }, names: readonly Row[]): Exit {
+  let text: string;
+  try {
+    text = readFileSync(join(root, t.path), "utf8");
+  } catch (e) {
+    return fail(`cannot read ${t.path}: ${(e as Error).message}`, 1);
+  }
+  const lines = text.split("\n");
+  if (t.end > lines.length) return fail(`${t.path} has ${lines.length} line${lines.length === 1 ? "" : "s"}, so ${t.start}-${t.end} is past its end`, 2);
+  const overlapping = names
+    .filter((n) => n.kind === "symbol" && n.path === t.path && Number.isInteger(n.line) && Number.isInteger(n.endLine) && Number(n.line) <= t.end && Number(n.endLine) >= t.start)
+    .map((n) => ({ id: String(n.name), line: Number(n.line), endLine: Number(n.endLine) }))
+    .sort((a, b) => a.line - b.line || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  const symbols: RangeSymbol[] = overlapping.map((s) => ({
+    ...s,
+    carry: readQuery(store, recipe("carry"), { symbol: s.id })[0]!,
+    why: readQuery(store, recipe("why"), { symbol: s.id }),
+    users: readQuery(store, recipe("users"), { symbol: s.id }),
+  }));
+  console.log(carryRangeAnswer(t.path, t.start, t.end, symbols, termSectionForLines(store, lines, t.start, t.end)));
+  return 0;
+}
+
+/** The candidate records of a terms-recipe result, as the answer prints them. */
+function termCandidates(rows: readonly Row[]): readonly TermCandidate[] {
+  return rows.map((r) => ({ id: String(r.id), date: r.date === null || r.date === undefined ? "" : String(r.date), title: r.title === null || r.title === undefined ? "" : String(r.title), shared: Array.isArray(r.shared) ? r.shared.map(String) : [] }));
+}
+
+/**
+ * The term section over exactly `lines[start-1..end-1]` of one file, for the range form.
+ * owns: [[whygraph-questions]]
+ * post: tokenizes those lines alone, with no symbol name or file path added, runs the terms recipe, and returns its rows or a one-line note when the lines hold no term or no record shares one.
+ */
+function termSectionForLines(store: string, lines: readonly string[], start: number, end: number): TermSection {
+  const terms = [...new Set(termsOf(lines.slice(start - 1, end).join("\n")))];
+  if (terms.length === 0) return { kind: "note", note: "No term section: these lines hold no term of three or more characters." };
+  const rows = readQuery(store, recipe("terms"), { terms });
+  if (rows.length === 0) return { kind: "note", note: "No decision record shares a distinctive term with these lines." };
+  return { kind: "records", rows: termCandidates(rows) };
+}
+
+/**
  * Whether carry also reads the comment lines directly above a symbol's declaration.
  * decided: carry does not read the comment block above a symbol because the memoryd check ranks the wanted record better without it (full-rank sum 861 against 1,035 over the six targets that name a graph symbol, the same one in the top five; ADR 0002).
  */
 const READ_COMMENT = false;
+
+/**
+ * The longest symbol, in source lines, whose term section still lists candidates.
+ * decided: a symbol longer than LONG_SYMBOL lines gets a one-line note naming the range form instead, because the memoryd check (ADR 0002) shows a wide span drowns the shared terms: FolderIndex (362 lines) ranked the wanted record 40 and Transcript (329 lines) 580, against 1 for the 13-line privateFiles.
+ */
+const LONG_SYMBOL = 40;
 
 /**
  * The term section of a carry answer: the record candidates from `recipes/terms.cypher`, or one line saying why there are none.
@@ -94,14 +151,13 @@ function termSection(store: string, root: string, carry: Row): TermSection {
   const lines = text.split("\n");
   const source = symbolSource(lines, line, endLine, READ_COMMENT);
   if (source === undefined) return { kind: "note", note: `No term section: ${file} has ${lines.length} lines, so the stored range ${line}-${endLine} no longer fits; rebuild the store for the file as it is now.` };
+  const span = endLine - line + 1;
+  if (span > LONG_SYMBOL) return { kind: "note", note: `This symbol spans ${span} lines; a long symbol gives weak term candidates. Ask with a range: whygraph carry ${file}:<start>-<end>.` };
   const terms = [...new Set(termsOf([...source, symbol.slice(symbol.lastIndexOf("#") + 1), file].join("\n")))];
   if (terms.length === 0) return { kind: "note", note: "No term section: its code holds no term of three or more characters." };
   const rows = readQuery(store, recipe("terms"), { terms });
   if (rows.length === 0) return { kind: "note", note: "No decision record shares a distinctive term with its code." };
-  return {
-    kind: "records",
-    rows: rows.map((r) => ({ id: String(r.id), date: r.date === null || r.date === undefined ? "" : String(r.date), title: r.title === null || r.title === undefined ? "" : String(r.title), shared: Array.isArray(r.shared) ? r.shared.map(String) : [] })),
-  };
+  return { kind: "records", rows: termCandidates(rows) };
 }
 
 /**
