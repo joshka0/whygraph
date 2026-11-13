@@ -24,6 +24,12 @@ const RESULTS = join(EVAL, 'results');
 const WORK = process.env.WHYGRAPH_EVAL_WORK ?? '/var/tmp/whygraph-eval';
 const MEMOD_REPO = '/home/dev/scratch/whygraph-eval/tasks2/memod';
 const MEMORYD_REPO = '/home/dev/scratch/whygraph-eval/tasks2/memoryd';
+/**
+ * ADR files left out of a repo's decisions file. memoryd numbers two test contracts like the ADRs they
+ * test (0038, 0039); `whygraph decisions adr` makes both files of a number one id, and `build` rejects
+ * the duplicates (docs/failures.md D17, open). They are failure lists, not decisions, and no task cites them.
+ */
+const LEFT_OUT_ADRS = { memoryd: ['docs/adr/0038-mem-recap-failures.md', 'docs/adr/0039-layer2-failures.md'] };
 const MODEL = 'sonnet';
 const TIMEOUT_MS = 20 * 60 * 1000;
 const QUIET = { RELATE_TELEMETRY: '0', DO_NOT_TRACK: '1' };
@@ -215,7 +221,9 @@ export function prepare(task, condition, work) {
       sh(join(bin, 'whygraph'), ['build', '--decisions', join(fixture.decisions, 'adrs.json'), '--decisions', join(fixture.decisions, 'notes.json')], { cwd: repo, env });
     } else {
       const adrs = join(repo, '.git/whygraph-adrs.json');
-      writeFileSync(adrs, sh(join(bin, 'whygraph'), ['decisions', 'adr', 'docs/adr'], { cwd: repo, env }));
+      const made = JSON.parse(sh(join(bin, 'whygraph'), ['decisions', 'adr', 'docs/adr'], { cwd: repo, env }));
+      const records = made.records.filter((r) => !(LEFT_OUT_ADRS[task.repo] ?? []).includes(r.source));
+      writeFileSync(adrs, JSON.stringify({ ...made, records }, null, 2));
       sh(join(bin, 'whygraph'), ['build', '--decisions', adrs], { cwd: repo, env });
     }
   }

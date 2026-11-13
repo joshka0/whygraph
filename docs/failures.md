@@ -93,6 +93,7 @@ are fixed (fixed author, committer and dates):
 | D14 | A commit message "see ADR 4", one naming `0004-x.md`, one "See ADR 40", none changing the ADR file | None is cited by ADR-0004: `decisions adr` cites only the commit that added the ADR's file (a commit names a record with a trailer, L8-L12). |
 | D16 | A later commit that edits ADR 0003's file (a note that ADR 0004 replaces part of it) and changes code, with no trailer | Not cited by ADR-0003 (memod: `1fa2df7` edits `0003-graph-output-contract.md` and is cited only by ADR-0004, which it added). With a trailer `Decision: ADR-0003` it is cited. |
 | D15 | Running twice | Byte-identical stdout. |
+| D17 | Two files with one number, an ADR and a companion (memoryd at `109d1a6`: `0038-mem-recap.md` and `0038-mem-recap-failures.md`, `0039-confirmed-closures.md` and `0039-layer2-failures.md`) | **Open, not met yet.** Today each file becomes a record `ADR-0038`, and `build` rejects the decisions file under B8, so the README's two commands build no store for such a repo. The required result is still to be decided; until then the eval leaves the two companion files out of memoryd's decisions file (`eval/README.md`). |
 
 ## why, carry
 
