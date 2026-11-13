@@ -122,7 +122,7 @@ whygraph: why the code is the way it is, as a relate graph
   whygraph why <file>:<symbol> [--repo <path>] [--store <path>]
   whygraph impact <decision id> [--repo <path>] [--store <path>]
   whygraph carry <file>:<symbol>|<file>:<start>-<end> [--repo <path>] [--store <path>]
-  whygraph search "<text>" [--repo <path>] [--store <path>]
+  whygraph search "<text>" [--at <file>:<start>-<end>] [--repo <path>] [--store <path>]
   whygraph mcp [--repo <path>] [--store <path>]
 
 Exit: 0 answer, 1 failure, 2 usage, 3 target not in the graph.
@@ -753,7 +753,7 @@ jq '{records: (.items | group_by(.memo) | map({
 | `whygraph why <file>:<symbol>` | The `decided:` tags on the symbol and on its file header; the records those tags name; then the records linked only through a commit that cites them and changed the symbol, oldest first, each commit with how many symbols it changed. |
 | `whygraph impact <decision id>` | The record and every record that rests on it, directly or through others; for each, the symbols and files whose `decided:` tags name it, then the commits that cite it and the other symbols those commits changed, with how many symbols use each directly. |
 | `whygraph carry <file>:<symbol>\|<file>:<start>-<end>` | Before an edit: the topics the symbol owns and their other owners, the formal checks that cover it, its premise memos, its decisions (as `why`); then one step away, the `decided:` tags, the records they name, the checks and the topics of the symbols it uses and of the symbols that use it, most binding first, each line naming where it sits; then the decision records that share the most distinctive terms with its code (candidates, not links), each naming its shared terms; then its direct and transitive users, and the commits that changed it. The range form reads exactly those lines for the term section and takes the linked parts from every symbol whose stored range overlaps them. |
-| `whygraph search "<text>"` | Up to twenty decision records that best match the text: the word search and the meaning search each rank at most ten, fused by reciprocal rank; each candidate takes two lines, its date, id and title, then `matched: <words\|meaning\|words and meaning>; source: <source>`, each a candidate to pick from, not a link; then what was searched and what was not. |
+| `whygraph search "<text>" [--at <file>:<start>-<end>]` | Up to twenty decision records that best match the text: the word search and the meaning search each rank at most ten, fused by reciprocal rank; each candidate takes two lines, its date, id and title, then `matched: <words\|meaning\|words and meaning>; source: <source>`, each a candidate to pick from, not a link; then what was searched and what was not. `--at` adds the term list of those lines (the same terms `carry` uses for a range) as further candidates, under the term section's heading. When `WHYGRAPH_RERANK` names a model, a reranker cuts the candidates to five instead (below). |
 | `whygraph mcp` | The MCP server config that serves the store read-only through `relate serve --mcp stdio`, and every recipe. |
 | `whygraph help` | The usage. |
 
@@ -762,9 +762,35 @@ absolute path inside the repo also works). `--repo` defaults to the current
 folder. `--store` defaults to `<git dir>/whygraph/store`, one per worktree.
 
 Exit status: 0 an answer (an empty one too), 1 a failure (a missing tool, no
-store, a rejected decisions file, a failed load), 2 a usage error (a target
-that is not `<file>:<symbol>` or lies outside the repo), 3 a target that the
-graph does not hold.
+store, a rejected decisions file, a failed load, an `--at` file that cannot be
+read), 2 a usage error (a target that is not `<file>:<symbol>` or lies outside
+the repo, a bad `--at` range), 3 a target that the graph does not hold.
+
+### The reranker (optional)
+
+`search` shows the wide candidate list by default. A hosted reranker can cut it
+to five for a calling agent that would rather read less, and it stays off
+until you ask for it. Set `WHYGRAPH_RERANK` to a model id:
+
+```sh
+export WHYGRAPH_RERANK="cohere/rerank-5-fast"
+```
+
+Then `search` sends one `POST` to `${WHYGRAPH_RERANK_URL}` (default
+`https://openrouter.ai/api/v1/rerank`) with `{model, query, documents, top_n:
+5}`. The query is your request, and with `--at`, a blank line, `Code it would
+change:` and those lines (at most 3,000 characters). Each document is one
+candidate's title, then ` | ` and its first statement when that adds text (at
+most 600 characters). When `OPENROUTER_API_KEY` is set, the call carries
+`Authorization: Bearer <key>`; without it, no authorization header is sent, so
+a proxy can add one. The answer then lists the five records the reranker kept,
+in its order, with the same two lines per record and a last line that says what
+was sent and to which host. Nothing is retried, the timeout is ten seconds,
+and any failure (a network error, a timeout, a non-200, an unusable body, an
+index out of range, too few results) prints the wide answer with one line
+naming the failure and exits 0. With fewer than six candidates the call is
+skipped. Unset or empty `WHYGRAPH_RERANK` means no such call is ever made: the
+request and the records stay on the machine.
 
 ## How an agent uses it
 
@@ -961,6 +987,17 @@ store rather than merging into it.
   it and judge. A record with an empty title and no statements matches no
   word and embeds its empty text. `search` over MCP is the word search only:
   an MCP host has no local model to embed the request.
+- `search --at` adds the term list of those lines to the candidates. That list
+  is the same term match `carry` makes, not a link, and it is capped at ten.
+  The range rules are `carry`'s: a bad range exits 2 and a missing file exits
+  1, each naming the problem.
+- The reranker is off unless `WHYGRAPH_RERANK` names a model. When it is on,
+  the request, the `--at` lines and each candidate's title and first statement
+  leave the machine for the endpoint host. It is a second network dependency
+  with a cost per call that grows with the candidates and the query length, and
+  the five it keeps are not measured better than the wide list for an agent
+  mid-edit (ADR 0004). Any failure falls back to the wide list, and a key never
+  reaches the output.
 - `build` embeds one record text per model call, so its peak memory does not
   grow with the record count: on this box, under a 6 GB memory and 4-CPU
   limit, a 2,662-record build stayed at about 0.44 GB and took 304 s, about

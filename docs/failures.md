@@ -270,6 +270,53 @@ search candidate takes exactly two lines: date, id and title, then
 | K13 | `LIST_SIZE`, and the recipes' row cap | `LIST_SIZE` in `src/search.pure.ts` is 10; `recipes/search.cypher` and `recipes/terms.cypher` say `LIMIT 10`, and `recipes/meaning.cypher` passes `10` as the vector query's `k`. A `search` answer holds at most `2 * LIST_SIZE` candidates. |
 | K14 | A term section with fewer than ten matches (the fixture: `carry src/money.ts:formatCents` lists 2) | Every match is listed; the list is not padded to ten and there is no note about the count. |
 
+## The optional reranker
+
+`whygraph search "<text>" [--at <file>:<start>-<end>]` runs the two searches
+and fuses them as Q1-Q26 say. With `--at` it adds the records of the term list
+for exactly those lines (the `terms` recipe, the same terms `carry` uses for a
+range, at most ten) as candidates, each record once. When the environment
+variable `WHYGRAPH_RERANK` holds a model id, `search` sends one `POST` to
+`${WHYGRAPH_RERANK_URL}` (default `https://openrouter.ai/api/v1/rerank`) with
+`{model, query, documents, top_n: 5}` and lists the five records the response's
+`results` keeps, in their order. A fake endpoint on localhost stands in for the
+service: a test sets `WHYGRAPH_RERANK` and `WHYGRAPH_RERANK_URL` to it and
+asserts what it received. The call carries `Authorization: Bearer <key>` only
+when `OPENROUTER_API_KEY` is set. Any failure of the call prints the wide
+answer and one extra line `Rerank failed (<kind>); showing every candidate.`
+and exits 0; the failure kinds are `network error`, `timeout`, `HTTP <status>`,
+`unexpected response`, `index out of range` and `too few results`. Unset or
+empty `WHYGRAPH_RERANK` means no such call is made.
+
+| ID | Input | Required result |
+| --- | --- | --- |
+| N1 | `WHYGRAPH_RERANK` unset, a request whose fused-plus-term candidate list holds at least six records, and a listening fake endpoint | Exit 0. The wide answer only: no `Reranked` line, no `Sent to` line, no `Rerank failed` line. The fake endpoint receives no request. |
+| N2 | `WHYGRAPH_RERANK` empty (`""`), the same store and fake | As N1: exit 0, the wide answer, the fake receives nothing. An empty value is not a model id. |
+| N3 | `WHYGRAPH_RERANK` names a model, and the candidate list holds exactly five records (the fixture build holds 5; `search "round tax half to even" --at src/tax.ts:11-20`) | Exit 0. The wide answer; the fake receives nothing, so no `Reranked`, `Sent to` or `Rerank failed` line. Five candidates are not worth a call. |
+| N4 | The same with exactly six candidates (the fixture build plus one extra record) | Exit 0. One `POST` reaches the fake and the answer is the reranked answer of N5: six is the first count that calls. |
+| N5 | A fake that answers 200 with `{"results": [{"index": i, "relevance_score": s}, ...]}` holding five indexes, best first | Exit 0. The first line is `Reranked <N> candidates with <model>, best first (the five it kept; a candidate, not a link: read the record and judge whether it governs your change):`, where `<N>` is the candidate count and `<model>` is `WHYGRAPH_RERANK`; then exactly five records, two lines each (`  <date>  <id>  <title>`, then `      matched: <label>; source: <source>`), in the response's index order; then the last line of N6. No score and no `statement:` line. |
+| N6 | The last line of a reranked answer | Without `--at`: `Sent to <host>: the request and the title and first statement of each of the <N> candidates.` With `--at <file>:<start>-<end>`: `Sent to <host>: the request, the lines of <file>:<start>-<end>, and the title and first statement of each of the <N> candidates.` `<host>` is the host (and port) of `WHYGRAPH_RERANK_URL`, never its path and never a header. |
+| N7 | `OPENROUTER_API_KEY` set to a value, the fake records its request headers | The fake sees `Authorization: Bearer <key>`. Neither stdout nor stderr holds the key's value, and the `Sent to` line names only the host. |
+| N8 | `OPENROUTER_API_KEY` unset or empty | The fake sees no `authorization` header; the call still succeeds. |
+| N9 | The request body the fake receives | `POST`, JSON, with `model` equal to `WHYGRAPH_RERANK`, `top_n` 5, `documents` one entry per candidate in the candidate order (the fused order first, then term-only records in term order), and `query` equal to the request, or, with `--at`, `<request>\n\nCode it would change:\n<the lines>`. |
+| N10 | One document | The candidate's title, then ` \| ` and its first statement when the statement is non-empty and the title does not already hold it; at most 600 characters. A candidate with an empty title gets the first statement alone; a candidate with no statement gets the title alone. |
+| N11 | The `query` with `--at` over a range of more than 3,000 characters | The request, a blank line, `Code it would change:`, then the lines joined by `\n` and cut at 3,000 characters. The code part never holds more than 3,000 characters. |
+| N12 | A record the fused list and the term list both hold | It is one candidate: one document and one possible result. Its `matched:` label in a reranked answer names every list that held it, in the order words, meaning, terms, joined by ` and ` (for example `words and meaning and terms`); a term-only record is `terms`. |
+| N13 | `search "<request>" --at <file>:<start>-<end>` with `WHYGRAPH_RERANK` unset | Exit 0. The fused answer as Q1 (heading, two lines per fused candidate), then, before the `Searched:` line, the range form's term section: the heading `Decision records that share the most distinctive terms with these lines (candidates to pick from one list; not links: a shared word does not mean the record governs these lines):` and the term candidates not already listed, each `  <date>  <id>  <title>` then `      shared terms: <terms>`. When every term candidate is already listed the section is the one line `No decision record other than those above shares a distinctive term with these lines.`; when the lines hold no kept term it is `No term section: these lines hold no term of three or more characters.`; when no record shares a term it is `No decision record shares a distinctive term with these lines.` The `Searched:` and `Not searched:` lines stay last, unchanged. |
+| N14 | `search "x" --at src/tax.ts:taxRate` (a symbol, not a range) | Exit 2; stderr names `--at takes <file>:<start>-<end>, not a symbol`; the model is not loaded and no query runs. |
+| N15 | `search "x" --at src/tax.ts:20-10`, `--at src/tax.ts:0-3`, `--at src/tax.ts:abc-def`, `--at ../x.ts:1-5` | Exit 2, each with `carry`'s range message: the start-after-end message, the 1-based message, `"<arg>" is not <file>:<symbol> or <file>:<start>-<end>, such as src/main.ts:run or src/main.ts:10-20`, and `"../x.ts" is outside the repo <root>`. The model is not loaded. |
+| N16 | `search "x" --at src/missing.ts:1-5` and `--at src/tax.ts:1-200` | Exit 1 with `cannot read src/missing.ts: ...`; exit 2 with `src/tax.ts has 21 lines, so 1-200 is past its end`. The model is not loaded. |
+| N17 | `search "x" --at` (no value), `--at` twice, and `--at` on `why`, `impact`, `carry`, `build`, `decisions`, `mcp` | Exit 2; stderr names `--at needs a value`, `--at given twice`, or `--at is a search option`, with the usage. |
+| N18 | `search --at src/tax.ts:1-5` with no request | Exit 2; stderr `search needs a request`; the model is not loaded. |
+| N19 | A fake that answers any non-200 (for example 500) | Exit 0. The wide answer, then the last line `Rerank failed (HTTP 500); showing every candidate.` No `Reranked` or `Sent to` line. |
+| N20 | A fake that answers a body that is not JSON, or JSON without a `results` array, or with `results` entries that are not objects, or with a non-integer `index`, or with a repeated `index` | Exit 0. The wide answer, then `Rerank failed (unexpected response); showing every candidate.` |
+| N21 | A fake that answers an integer `index` outside `0..candidates-1` | Exit 0. The wide answer, then `Rerank failed (index out of range); showing every candidate.` |
+| N22 | A fake that answers fewer than five results while more than five candidates exist | Exit 0. The wide answer, then `Rerank failed (too few results); showing every candidate.` |
+| N23 | A fake that reads the request and never answers | Exit 0 after about ten seconds. The wide answer, then `Rerank failed (timeout); showing every candidate.` No retry. |
+| N24 | `WHYGRAPH_RERANK_URL` pointing at a closed port, or a host that does not resolve | Exit 0. The wide answer, then `Rerank failed (network error); showing every candidate.` No retry. |
+| N25 | The same fake answer twice, and a reranked answer after a rebuild | Byte-identical stdout (E1): the candidate order, the documents and the mapped five are functions of the store and the response; ties keep the fused order, then the term order. |
+| N26 | Any reranked or failed answer, with a key set | Holds no score, no similarity number and no authorization header or key. A reranked answer holds exactly five records and no `statement:` line; a failed answer is exactly the wide answer plus one `Rerank failed` line. |
+
 ## mcp
 
 | ID | Input | Required result |

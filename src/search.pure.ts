@@ -52,6 +52,17 @@ function candidate(r: Row, match: string): Candidate {
 }
 
 /**
+ * The two lines of one search candidate: its date, id and title, then how it matched and its source.
+ * owns: [[whygraph-search]]
+ */
+export function candidateLines(c: Candidate): readonly string[] {
+  const out: string[] = [];
+  out.push(`  ${c.date || "undated   "}  ${c.id}  ${c.title || "(no title)"}`);
+  out.push(`      matched: ${c.match}; source: ${c.source || "(not stated)"}`);
+  return out;
+}
+
+/**
  * The answer of `whygraph search`.
  * owns: [[whygraph-search]]
  * post: when `candidates` is empty, `No record matches "<request>".`; else a heading that says these are candidates to pick from two lists (words and meaning) and that a listed record is a candidate, not a link, then two lines per candidate: date, id and title, then `matched: <label>; source: <source>`.
@@ -63,11 +74,7 @@ export function searchAnswer(request: string, words: string, meaning: boolean, c
   if (candidates.length === 0) out.push(`No record matches "${query}".`);
   else {
     out.push(`Decision records that match "${query}", best match first (candidates to pick from two lists, words and meaning; a candidate, not a link: read the record and judge whether it governs your change):`);
-    for (const c of candidates) {
-      const title = c.title || "(no title)";
-      out.push(`  ${c.date || "undated   "}  ${c.id}  ${title}`);
-      out.push(`      matched: ${c.match}; source: ${c.source || "(not stated)"}`);
-    }
+    for (const c of candidates) out.push(...candidateLines(c));
   }
   out.push(`Searched: the title and statement of every decision record in the store, for the words: ${words}${meaning ? ", and for the meaning of the request" : ""}.`);
   out.push("Not searched: the code, the commits and the tags (run whygraph why or carry on a symbol for the links the graph holds); a record's id, date, status, topics and source (only its title and statement are indexed).");

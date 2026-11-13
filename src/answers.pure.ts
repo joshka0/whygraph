@@ -257,6 +257,7 @@ export interface TermCandidate {
   readonly id: string;
   readonly date: string;
   readonly title: string;
+  readonly source: string;
   readonly shared: readonly string[];
 }
 
@@ -287,6 +288,14 @@ const TERM_EMPTY = "No decision record other than those above shares a distincti
 const RANGE_TERM_HEADING = "Decision records that share the most distinctive terms with these lines (candidates to pick from one list; not links: a shared word does not mean the record governs these lines):";
 /** The empty line of the range form's term section. */
 const RANGE_TERM_EMPTY = "No decision record other than those above shares a distinctive term with these lines.";
+
+/**
+ * The term-bridge lines over a set of lines, for `carry`'s range form and `search --at`: the heading and the candidates not already listed, or one line saying why none.
+ * owns: [[whygraph-answers]]
+ */
+export function rangeTermLines(section: TermSection, linked: ReadonlySet<string>): readonly string[] {
+  return termLines(section, linked, RANGE_TERM_HEADING, RANGE_TERM_EMPTY);
+}
 
 /**
  * Every section of one symbol's carry answer after its title: owned topics, formal checks, premise memos, the decisions, what sits one step away, the term section when given (not for the range form, which appends it once), the users, and the commits.
