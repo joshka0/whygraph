@@ -9,8 +9,8 @@ import { harness as h } from './support.mjs';
 const { ok, has, failure, record, ids } = h;
 const preload = join(h.root, 'test/search-offline.mjs');
 h.env.NODE_OPTIONS = `${h.env.NODE_OPTIONS ?? ''} --import=${preload}`.trim();
-const heading = 'Decision records that share the most distinctive terms with its code (candidates, not links: a shared word does not mean the record governs this symbol):';
-const rangeHeading = 'Decision records that share the most distinctive terms with these lines (candidates, not links: a shared word does not mean the record governs these lines):';
+const heading = 'Decision records that share the most distinctive terms with its code (candidates to pick from one list; not links: a shared word does not mean the record governs this symbol):';
+const rangeHeading = 'Decision records that share the most distinctive terms with these lines (candidates to pick from one list; not links: a shared word does not mean the record governs these lines):';
 function contract(id, description, mode, body) {
   test(`${id} ${description}`, { timeout: 120_000 }, async t => body(h.state(t, mode), t));
 }
@@ -151,12 +151,12 @@ contract('T15', 'ASCII token filtering handles tiny and non-ASCII identifiers wi
     assert.ok(!text.includes('Decision records that share'));
   }
 });
-contract('T16', 'ties, strongest-term ordering and five-row bounds survive repeated carries and a rebuild', 'empty', async (s, t) => {
+contract('T16', 'ties, strongest-term ordering and ten-row bounds survive repeated carries and a rebuild', 'empty', async (s, t) => {
   const words = 'alpha bravo charlie delta echo foxtrot golf';
   s.write(join(s.repo, 'a.ts'), `export function f() { return "${words}"; }\n`);
   const files = custom(s, Array.from({ length: 8 }, (_, i) => record(`r${7-i}`, { title: words })));
-  const first = section(carry(s, 'a.ts:f')); assert.deepEqual(ids(first), ['r0', 'r1', 'r2', 'r3', 'r4']);
-  assert.equal((first.match(/shared terms: alpha, bravo, charlie, delta, echo$/gm) ?? []).length, 5);
+  const first = section(carry(s, 'a.ts:f')); assert.deepEqual(ids(first), ['r0', 'r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7']);
+  assert.equal((first.match(/shared terms: alpha, bravo, charlie, delta, echo$/gm) ?? []).length, 8);
   assert.equal(section(carry(s, 'a.ts:f')), first); ok(s.build([files])); assert.equal(section(carry(s, 'a.ts:f')), first);
   const client = await h.mcp(t, s); const rows = await client.rows(client.recipes.get('terms'), { terms: words.split(' ') });
   assert.deepEqual(rows.map(r => r.id), ids(first)); assert.ok(rows.every(r => r.shared.length === 5)); noScores(first);
@@ -241,13 +241,14 @@ contract('BM25 rarity', 'one rare word outranks several common words of equal re
 });
 contract('Range behavior', 'ten relevant lines recover a record hidden by a three-hundred-line symbol', 'empty', s => {
   const narrow = Array(10).fill('  "quartz zircon";');
-  const lines = ['export function container() {', ...Array(144).fill('  "amber bronze copper delta echo foxtrot golf";'), ...narrow, ...Array(144).fill('  "amber bronze copper delta echo foxtrot golf";'), '}'];
+  const lines = ['export function container() {', ...Array(144).fill('  "amber bronze copper delta echo foxtrot golf hotel india juliet kilo lima";'), ...narrow, ...Array(144).fill('  "amber bronze copper delta echo foxtrot golf hotel india juliet kilo lima";'), '}'];
   assert.equal(lines.length, 300); s.write(join(s.repo, 'public.ts'), lines.join('\n'));
-  custom(s, [record('wanted', { title: 'quartz zircon' }), ...Array.from({ length: 7 }, (_, i) => record(`noise-${i}`, { title: 'amber bronze copper delta echo foxtrot golf' })), ...Array.from({ length: 32 }, (_, i) => record(`other-${i}`, { title: 'neutral filler neutral filler neutral filler neutral filler neutral filler' }))]);
+  custom(s, [record('wanted', { title: 'quartz zircon' }), ...Array.from({ length: 12 }, (_, i) => record(`noise-${String(i).padStart(2, '0')}`, { title: 'amber bronze copper delta echo foxtrot golf hotel india juliet kilo lima' })), ...Array.from({ length: 27 }, (_, i) => record(`other-${i}`, { title: 'neutral filler neutral filler neutral filler neutral filler neutral filler' }))]);
   assert.ok(ids(section(carry(s, 'public.ts:146-155'))).includes('wanted'));
   // The product intentionally suppresses >40-line symbols (T26). Querying
   // the full explicit span additionally demonstrates the underlying ranking
-  // effect, rather than satisfying the behavior only via that suppression.
+  // effect with enough noise records to fill T16's ten slots, rather than
+  // satisfying the behavior only via that suppression.
   assert.ok(!ids(section(carry(s, 'public.ts:1-300'))).includes('wanted'));
   const symbol = carry(s, 'public.ts:container'); has(symbol, 'This symbol spans 300 lines;'); assert.ok(!ids(symbol).includes('wanted'));
 });

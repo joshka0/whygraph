@@ -53,27 +53,28 @@ async function wordRows(t, s, text) {
 contract('Q1', 'fixture ranking, matching paths and candidate details', 'fixture', s => {
   const result = search(s, 'round tax half to even'); const text = ok(result);
   assert.equal(result.stderr, ''); assert.deepEqual(ids(text), fixtureOrder);
-  assert.match(text, /^Decision records that match "round tax half to even", best match first \(a candidate, not a link: /);
-  assert.equal((text.match(/^      statement: /gm) ?? []).length, 5);
-  assert.equal((text.match(/^      source: /gm) ?? []).length, 5);
+  assert.match(text, /^Decision records that match "round tax half to even", best match first \(candidates to pick from two lists, words and meaning; a candidate, not a link: /);
+  assert.doesNotMatch(text, /^      statement: /m);
+  assert.equal(text.trimEnd().split('\n').length, 13);
   for (const file of s.files) for (const r of JSON.parse(read(file)).records) {
-    has(text, `  ${r.date}  ${r.id}  ${r.title}\n`, `      statement: ${r.items[0].text.split(/\r\n|\r|\n/)[0]}\n`, `      source: ${r.source ?? file}\n`);
+    has(text, `  ${r.date}  ${r.id}  ${r.title}\n`, `      matched: ${['note-1', 'ADR-0002', 'ADR-0003'].includes(r.id) ? 'words and meaning' : 'meaning'}; source: ${r.source ?? file}\n`);
   }
   scope(text); noScores(text);
-  assert.deepEqual([...text.matchAll(/^      matched: (.+)$/gm)].map(m => m[1]), ['words and meaning', 'words and meaning', 'words and meaning', 'meaning', 'meaning']);
+  assert.deepEqual([...text.matchAll(/^      matched: (.+); source: .+$/gm)].map(m => m[1]), ['words and meaning', 'words and meaning', 'words and meaning', 'meaning', 'meaning']);
 });
-contract('Q1 multiline', 'only the first line of the first statement is printed', 'code', s => {
+contract('Q1 multiline', 'statements are omitted even when their first line matched', 'code', s => {
   custom(s, [record('multiline', { title: 'Multiline notes', source: 'public fixture', items: [{ label: 'first', text: 'firstvisible\nsecondhidden' }, { label: 'second', text: 'thirdhidden' }] })]);
-  const text = ok(search(s, 'firstvisible')); has(text, 'statement: firstvisible\n', 'source: public fixture');
-  assert.doesNotMatch(text, /secondhidden|thirdhidden/);
+  const text = ok(search(s, 'firstvisible')); has(text, 'matched: words and meaning; source: public fixture');
+  const candidates = text.slice(text.indexOf('\n'), text.lastIndexOf('\nSearched:'));
+  assert.doesNotMatch(candidates, /statement:|firstvisible|secondhidden|thirdhidden/);
+  assert.equal(candidates.trim().split('\n').length, 2);
 });
 contract('Q1 repeated-title', 'a statement repeating its title is omitted without revealing further lines', 'code', s => {
   custom(s, [record('repeated-title', {
     title: 'Tax policy', source: 'public repeated-title fixture',
     items: [{ label: 'choice', text: 'Tax policy\nhiddencontinuation' }],
   })]);
-  // Even when the request matches the continuation, only the first item line
-  // is eligible for display, and that line already appears as the title.
+  // Even when the request matches the continuation, Q1 displays no statement.
   const text = ok(search(s, 'hiddencontinuation'));
   assert.deepEqual(ids(text), ['repeated-title']);
   has(text, '  2026-01-01  repeated-title  Tax policy\n', 'matched: words and meaning', 'source: public repeated-title fixture');
@@ -88,7 +89,7 @@ contract('Q2', 'a word miss still returns meaning candidates', 'fixture', async 
   assert.deepEqual(await wordRows(t, s, request), []);
   const text = ok(search(s, request)); assert.equal(ids(text).length, 5);
   assert.doesNotMatch(text, /No record matches/);
-  assert.deepEqual([...text.matchAll(/^      matched: (.+)$/gm)].map(m => m[1]), Array(5).fill('meaning'));
+  assert.deepEqual([...text.matchAll(/^      matched: (.+); source: .+$/gm)].map(m => m[1]), Array(5).fill('meaning'));
 });
 contract('Q3', 'empty record stores return the scoped empty answer', 'code', s => {
   s.commit('Add code without decisions'); ok(s.build([]));
@@ -118,7 +119,7 @@ contract('Q4', 'punctuation preserves plain word queries and word-matched record
   for (const answer of answers) {
     has(answer, `for the words: ${words},`);
     const blocks = answer.split(/(?=^  \d{4}-\d{2}-\d{2}  )/m);
-    const matched = blocks.filter(block => /^      matched: words(?: and meaning)?$/m.test(block)).flatMap(ids).sort();
+    const matched = blocks.filter(block => /^      matched: words(?: and meaning)?; source: /m.test(block)).flatMap(ids).sort();
     assert.deepEqual(matched, expected);
   }
 });
@@ -163,7 +164,8 @@ contract('Q9', 'an empty record embeds empty text and never word-matches', 'code
   assert.ok(stored[0].vector.every(Number.isFinite));
   assert.deepEqual(await wordRows(t, s, 'empty'), []);
   const text = ok(search(s, 'empty')); assert.deepEqual(ids(text), ['empty']);
-  has(text, '(no title)', 'matched: meaning', 'statement: (none)');
+  has(text, '(no title)', 'matched: meaning; source: ');
+  assert.doesNotMatch(text, /^\s+statement:/m);
 });
 for (const index of ['decision_search', 'decision_search_vector']) {
   contract('Q10', `missing ${index} fails without a partial answer`, 'fixture', s => {
@@ -206,7 +208,7 @@ contract('Q15 Q16', 'printed word and vector recipes work over read-only MCP and
   }
   const words = await client.rows(client.recipes.get('search'), { text: 'money cents' });
   assert.equal(words[0].id, 'ADR-0001');
-  assert.ok(words.length > 0 && words.length <= 5);
+  assert.ok(words.length > 0 && words.length <= 10);
   const vector = rows(s, "MATCH (d:Decision {id: 'ADR-0001'}) RETURN d.vector AS vector")[0].vector;
   const meaning = await client.rows(client.recipes.get('meaning'), { vector });
   assert.equal(meaning.length, 5); assert.equal(meaning[0].id, 'ADR-0001');
@@ -219,14 +221,14 @@ contract('Q17', 'search is byte-identical twice and after rebuilding', 'fixture'
   const first = ok(search(s, 'round tax half to even')); assert.equal(ok(search(s, 'round tax half to even')), first);
   ok(s.build()); assert.equal(ok(search(s, 'round tax half to even')), first);
 });
-test('Q17 fusion ranks by reciprocal rank, breaks ties by id, caps at five and labels both paths', async () => {
+test('Q17 fusion ranks by reciprocal rank, breaks ties by id and labels every path', async () => {
   const { fuse } = await import(pathToFileURL(join(h.subject, 'src/search.pure.ts')));
   // Reversed ranks tie a and b exactly; c is present in words alone, d in
   // meaning alone. Deliberate irrelevant raw scores must not affect fusion.
   const words = [{ id: 'b', score: -999 }, { id: 'a', score: 999 }, { id: 'c' }, { id: 'e' }, { id: 'f' }];
   const meaning = [{ id: 'a' }, { id: 'b' }, { id: 'd' }, { id: 'g' }, { id: 'h' }];
   const result = fuse(words, meaning);
-  assert.deepEqual(result.map(r => [r.id, r.match]), [['a', 'words and meaning'], ['b', 'words and meaning'], ['c', 'words'], ['d', 'meaning'], ['e', 'words']]);
+  assert.deepEqual(result.map(r => [r.id, r.match]), [['a', 'words and meaning'], ['b', 'words and meaning'], ['c', 'words'], ['d', 'meaning'], ['e', 'words'], ['g', 'meaning'], ['f', 'words'], ['h', 'meaning']]);
   // An overlap at rank five beats either disjoint rank one under RRF(60).
   assert.equal(fuse(['x', 'p', 'q', 'r', 'shared'].map(id => ({ id })), ['y', 's', 't', 'u', 'shared'].map(id => ({ id })))[0].id, 'shared');
   // RRF(60) puts ranks (2,3) before (1,5); using 1/rank reverses them.
@@ -310,7 +312,7 @@ contract('Q22', 'each stored record has its public text and a finite 384-float v
 contract('Q23', 'answers expose order and matching paths without numeric scores', 'fixture', s => {
   for (const request of ['money cents', 'quasarzeppelin', 'round tax half to even']) {
     const text = ok(search(s, request)); noScores(text);
-    assert.equal((text.match(/^      matched: (words|meaning|words and meaning)$/gm) ?? []).length, ids(text).length);
+    assert.equal((text.match(/^      matched: (words|meaning|words and meaning); source: .+$/gm) ?? []).length, ids(text).length);
   }
 });
 

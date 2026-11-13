@@ -28,13 +28,13 @@ const plants = [
   {
     name: 'candidate-prints-score', pattern: '^Q23 ',
     file: 'src/search.pure.ts',
-    before: 'out.push(`      matched: ${c.match}`)', after: 'out.push(`      matched: ${c.match}\\n      score: 0.99`)',
+    before: 'out.push(`      matched: ${c.match}; source: ${c.source || "(not stated)"}`)', after: 'out.push(`      matched: ${c.match}; source: ${c.source || "(not stated)"}\\n      score: 0.99`)',
   },
   {
     name: 'repeated-title-prints-statement', pattern: '^Q1 repeated-title ',
     file: 'src/search.pure.ts',
-    before: 'if (statement.trim() !== title.trim()) out.push(`      statement: ${statement}`);',
-    after: 'out.push(`      statement: ${statement}`);',
+    before: 'out.push(`      matched: ${c.match}; source: ${c.source || "(not stated)"}`);',
+    after: 'out.push(`      matched: ${c.match}; source: ${c.source || "(not stated)"}`); out.push(`      statement: ${c.statement}`);',
   },
 ];
 const outcomes = [];

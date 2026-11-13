@@ -1,0 +1,237 @@
+{
+  "contract": "docs/adr/0003-candidate-lists.md; docs/failures.md K1-K14 and changed Q1/T8/T16/T21; git diff main -- docs/failures.md",
+  "scope": "Tests only on wider-candidates; no production edits, delegation, installations, task worktree, push or publication.",
+  "addedGroups": [
+    {
+      "items": "K1 K14",
+      "check": "Five fixture search candidates and two symbol term matches, exact two-line shapes, no padding or count notes."
+    },
+    {
+      "items": "K2 K3",
+      "check": "Public pure fusion checks RRF(60), mixed-case code-unit ties, repeats, overlap labels and rank-ten overlap dominance."
+    },
+    {
+      "items": "K4 K5 K11",
+      "check": "22-record store with controlled distinct vector cosines: 10 word plus 10 meaning rows give 20 CLI candidates; tenth retained, eleventh excluded unless meaning holds it; overlap gives 19; actual MCP word/meaning recipes each return ten with no CALL subquery."
+    },
+    {
+      "items": "K6 K7 K12",
+      "check": "40-record store has 13 term matches: one rare term beats 12 tied common-term matches. Symbol and range list exactly the best ten, preserve two-line output and shared-term bounds, repeat identically after rebuilding, forbid model loading, and match read-only MCP terms rows."
+    },
+    {
+      "items": "K7",
+      "check": "24-record real-model search fills the ten-row inputs and is byte-identical twice and after a rebuild."
+    },
+    {
+      "items": "K8 K9 K10",
+      "check": "Empty store prints the three-line scoped answer; separately dropping either index gives the exact named error with no partial stdout."
+    },
+    {
+      "items": "K13",
+      "check": "Public LIST_SIZE is ten, executable recipes carry ten-row limits/k with no CALL subquery, and fusion never exceeds twenty even with oversize inputs."
+    }
+  ],
+  "changedTests": [
+    {
+      "test": "Q1 fixture ranking, matching paths and candidate details",
+      "contract": "Q1",
+      "change": "Exact new heading, combined matched/source line, no statements, 13 total lines for five candidates; original ids and labels retained."
+    },
+    {
+      "test": "Q1 multiline",
+      "contract": "Q1",
+      "change": "No statement text appears, including the first line; the matched/source line and two candidate lines remain."
+    },
+    {
+      "test": "Q1 repeated-title",
+      "contract": "Q1",
+      "change": "Comment updated to explain unconditional statement omission; assertions retained."
+    },
+    {
+      "test": "Q2",
+      "contract": "Q1 formatting",
+      "change": "Parse the unchanged meaning labels before the new semicolon/source suffix."
+    },
+    {
+      "test": "Q4",
+      "contract": "Q1 formatting",
+      "change": "Parse word labels before the new semicolon/source suffix; punctuation assertions retained."
+    },
+    {
+      "test": "Q9",
+      "contract": "Q1 formatting",
+      "change": "Empty record still embeds and matches by meaning; obsolete statement: (none) expectation replaced by the new combined line and no statement."
+    },
+    {
+      "test": "Q15 Q16",
+      "contract": "ADR 0003 and K5",
+      "change": "Word row upper bound becomes ten; fixture meaning count remains five and parameter/read-only checks remain."
+    },
+    {
+      "test": "Q17 fusion",
+      "contract": "ADR 0003 and K4",
+      "change": "All eight distinct ids from the two short lists remain, retaining rank, tie, label and raw-score independence assertions."
+    },
+    {
+      "test": "Q23",
+      "contract": "Q1 formatting",
+      "change": "Count combined matched/source lines; no-score assertion retained."
+    },
+    {
+      "test": "T8 T20",
+      "contract": "T8",
+      "change": "Shared heading constant uses the exact one-list wording; linked ids and shared terms unchanged."
+    },
+    {
+      "test": "T16",
+      "contract": "T16",
+      "change": "All eight tied records remain instead of five; five shared terms per record and repeat/rebuild/MCP checks retained."
+    },
+    {
+      "test": "T21",
+      "contract": "T21",
+      "change": "Shared range heading constant uses the exact one-list wording; all fixture ids and shared terms unchanged."
+    },
+    {
+      "test": "Range behavior",
+      "contract": "T16",
+      "change": "Fixture previously had eight total matches, so the target now fit within ten. Retain all assertions and forty records; use twelve noise records with twelve shared noise terms and 27 neutral records so the long range again fills the ten slots ahead of the wanted record."
+    }
+  ],
+  "supportChanges": [
+    "test/run.mjs includes wider.test.mjs in every full suite.",
+    "test/search-plants.mjs updates the score and reintroduced-statement anchors to the Q1 combined matched/source line; all five existing plants still detected."
+  ],
+  "plants": {
+    "command": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node test/wider-plants.mjs",
+    "exitCode": 0,
+    "detected": 7,
+    "total": 7,
+    "evidence": "test-results/scratch/wider-plants-2026-11-13T21-29-28-173Z-3778849/summary.json",
+    "outcomes": [
+      {
+        "name": "candidate-label",
+        "group": "K1 K14",
+        "subject": "/home/dev/repos/personal/whygraph/test-results/scratch/wider-plants-2026-11-13T21-29-28-173Z-3778849/candidate-label",
+        "exitCode": 1,
+        "red": [
+          "K1 K14 short fixture lists retain every candidate without padding or count notes"
+        ]
+      },
+      {
+        "name": "rrf-constant",
+        "group": "K2 K3",
+        "subject": "/home/dev/repos/personal/whygraph/test-results/scratch/wider-plants-2026-11-13T21-29-28-173Z-3778849/rrf-constant",
+        "exitCode": 1,
+        "red": [
+          "K2 K3 fusion uses RRF(60), code-unit ties and one label per overlapping id"
+        ]
+      },
+      {
+        "name": "word-list-nine",
+        "group": "K4 K5 K11",
+        "subject": "/home/dev/repos/personal/whygraph/test-results/scratch/wider-plants-2026-11-13T21-29-28-173Z-3778849/word-list-nine",
+        "exitCode": 1,
+        "red": [
+          "K4 K5 K11 full disjoint and overlapping lists reach CLI and read-only MCP with exact tenth-row cuts"
+        ]
+      },
+      {
+        "name": "term-list-nine",
+        "group": "K6 K7 K12",
+        "subject": "/home/dev/repos/personal/whygraph/test-results/scratch/wider-plants-2026-11-13T21-29-28-173Z-3778849/term-list-nine",
+        "exitCode": 1,
+        "red": [
+          "K6 K7 K12 symbol and range terms select the best ten by BM25 then id and remain stable after rebuild"
+        ]
+      },
+      {
+        "name": "unstable-answer",
+        "group": "K7",
+        "subject": "/home/dev/repos/personal/whygraph/test-results/scratch/wider-plants-2026-11-13T21-29-28-173Z-3778849/unstable-answer",
+        "exitCode": 1,
+        "red": [
+          "K7 a wide real-model search is byte-identical on repeat and after rebuild"
+        ]
+      },
+      {
+        "name": "empty-answer-text",
+        "group": "K8 K9 K10",
+        "subject": "/home/dev/repos/personal/whygraph/test-results/scratch/wider-plants-2026-11-13T21-29-28-173Z-3778849/empty-answer-text",
+        "exitCode": 1,
+        "red": [
+          "K8 K9 K10 empty stores print the scoped answer and either missing index fails without a partial list"
+        ]
+      },
+      {
+        "name": "list-size-nine",
+        "group": "K13",
+        "subject": "/home/dev/repos/personal/whygraph/test-results/scratch/wider-plants-2026-11-13T21-29-28-173Z-3778849/list-size-nine",
+        "exitCode": 1,
+        "red": [
+          "K13 the shared list size, recipe caps and fused upper bound agree at ten"
+        ]
+      }
+    ],
+    "realCodeGreen": [
+      "K1 K14 short fixture lists retain every candidate without padding or count notes",
+      "K2 K3 fusion uses RRF(60), code-unit ties and one label per overlapping id",
+      "K4 K5 K11 full disjoint and overlapping lists reach CLI and read-only MCP with exact tenth-row cuts",
+      "K6 K7 K12 symbol and range terms select the best ten by BM25 then id and remain stable after rebuild",
+      "K7 a wide real-model search is byte-identical on repeat and after rebuild",
+      "K8 K9 K10 empty stores print the scoped answer and either missing index fails without a partial list",
+      "K13 the shared list size, recipe caps and fused upper bound agree at ten"
+    ]
+  },
+  "existingSearchPlants": {
+    "exitCode": 0,
+    "detected": 5,
+    "total": 5,
+    "evidence": "test-results/scratch/search-plants-2026-11-13T21-30-17-806Z-3827666/summary.json"
+  },
+  "validation": {
+    "check": {
+      "command": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% pnpm check",
+      "exitCode": 0
+    },
+    "lint": {
+      "command": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node_modules/.bin/memod lint",
+      "exitCode": 0
+    },
+    "readme": {
+      "command": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% env RELATE_TELEMETRY=0 DO_NOT_TRACK=1 NODE_OPTIONS=--import=/home/dev/repos/personal/whygraph/test/search-offline.mjs WHYGRAPH_TEST_MODEL_FIXTURE_CACHE=/home/dev/.cache/whygraph TMPDIR=/home/dev/repos/personal/whygraph/test-results/scratch/wider-tmp node scripts/readme-check.mjs",
+      "exitCode": 0,
+      "commands": 14,
+      "drifted": 0,
+      "offlineFixtureTransport": true
+    },
+    "suite": {
+      "command": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% env TMPDIR=/home/dev/repos/personal/whygraph/test-results/scratch/wider-tmp node test/run.mjs",
+      "exitCode": 0,
+      "tests": 187,
+      "pass": 187,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "addedGroups": 7,
+      "addedGroupsPassed": 7,
+      "report": "/home/dev/repos/personal/whygraph/test-results/2026-11-13T21-30-16-166Z-3825358.tap",
+      "scratch": "/home/dev/repos/personal/whygraph/test-results/scratch/2026-11-13T21-30-16-166Z-3825358",
+      "wallSeconds": 380.397728175
+    }
+  },
+  "execution": [
+    "All test suites, plants and gates run inside systemd user scopes with MemoryMax=6G and CPUQuota=400%. All relate descendants inherit RELATE_TELEMETRY=0 and DO_NOT_TRACK=1.",
+    "The sandbox blocks the systemd user bus, so the authorized commands ran through the approved escalation path.",
+    "Initial targeted runs found an E2BIG test setup error (fixed by loading vector JSON through relate --fetch-params), and the obsolete eight-match range fixture. These were test issues, not code-versus-list conflicts.",
+    "The first wider plant run detected five faults then stopped on a nonunique empty-answer anchor. The final run used an exact executable anchor and detected all seven.",
+    "The required existing full-suite B27 test invokes git worktree add inside its own retained scratch fixture repository. No worktree was created for the task workspace, and B27 was not changed or skipped."
+  ],
+  "limits": [
+    "The 22-record disjoint-list test pins stored vectors to known cosines to make exact list boundaries observable; it tests query/fusion/output behavior, not semantic retrieval quality.",
+    "A separate 24-record test uses unmodified real-model embeddings for repeat/rebuild determinism. No live model download or external endpoint availability is measured."
+  ],
+  "codeVersusListConflicts": [],
+  "couldNotDo": []
+}
