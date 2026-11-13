@@ -1,0 +1,293 @@
+{
+  "contract": "docs/failures.md T1-T28; docs/adr/0002-term-bridge.md",
+  "scope": "Tests only; production code and recipes are unchanged. No delegation, push or worktree. All generated subjects and temporary files are under test-results/scratch/.",
+  "safety": {
+    "commandPrefix": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400%",
+    "newFixtureMaximumRecords": 40,
+    "existingSuiteMaximumRecords": 128,
+    "offline": "search-offline.mjs rejects external fetch; build uses cached public model bytes; carry is checked with model loading forbidden"
+  },
+  "alignment": {
+    "A7": "Linked ids remain exactly ADR-0001; term candidates separately equal ADR-0002, ADR-0003. Topic, check, users and commit assertions remain.",
+    "A8": "Linked ids remain exactly ADR-0001, note-2, with original commit counts and newest-first order; term candidates separately equal ADR-0002, ADR-0003.",
+    "M1": "The exact read-only server configuration and complete recipe list remain pinned, with terms added between search and users."
+  },
+  "coverage": [
+    {
+      "id": "T1",
+      "test": "T1",
+      "check": "Exact graph terms for formatCents tax_rate the x 42.",
+      "result": "FAIL: unexpected tax_rate term"
+    },
+    {
+      "id": "T2",
+      "test": "T2",
+      "check": "Frequency counts across title and statement; labels, topics and source excluded; totals 3 and 2. The second record is alpha gamma, so alpha occurs once and its specified total is two.",
+      "result": "PASS"
+    },
+    {
+      "id": "T3",
+      "test": "T3 T10 T17",
+      "check": "Ten-of-eleven alpha documents drop its node and edges; nine-of-eleven keep both; dropped terms still count toward length.",
+      "result": "PASS"
+    },
+    {
+      "id": "T4",
+      "test": "T4",
+      "check": "Empty record length zero, zero mentions; subsequent zero-record build has zero terms and mentions.",
+      "result": "PASS"
+    },
+    {
+      "id": "T5",
+      "test": "T5 T6; T12",
+      "check": "Fixture has 45 Term nodes and 57 MENTIONS edges; every Decision has a length; old store shape tested separately.",
+      "result": "PASS"
+    },
+    {
+      "id": "T6",
+      "test": "T5 T6",
+      "check": "Serialized graph data equal across reads and rebuild; producer node/edge order independently checked with deliberately reversed input.",
+      "result": "PASS"
+    },
+    {
+      "id": "T7",
+      "test": "T7 T18",
+      "check": "Printed recipe order, exact MCP rows and shared terms, exact result field set without score, no CALL subquery.",
+      "result": "PASS"
+    },
+    {
+      "id": "T8",
+      "test": "T8 T20",
+      "check": "Exact formatCents candidates and shared words, position after scope, linked records occur once overall.",
+      "result": "PASS"
+    },
+    {
+      "id": "T9",
+      "test": "T9",
+      "check": "Only ADR-0003 remains for taxOf, sharing rate, cents, tax in that order.",
+      "result": "PASS"
+    },
+    {
+      "id": "T10",
+      "test": "T3 T10 T17",
+      "check": "A query using only a dropped common term returns zero rows without error.",
+      "result": "PASS"
+    },
+    {
+      "id": "T11",
+      "test": "T11",
+      "check": "Separate unmatched and already-linked-only notes; neither emits an empty heading.",
+      "result": "PASS"
+    },
+    {
+      "id": "T12",
+      "test": "T12",
+      "check": "Legacy-shaped Decision added without terms or termCount; Symbol range then made absent. Both carry forms return required notes.",
+      "result": "PASS"
+    },
+    {
+      "id": "T13",
+      "test": "T13 T24",
+      "check": "Shortened working-tree file preserves original bytes via rename; stored span produces exact stale-range note with counts.",
+      "result": "PASS"
+    },
+    {
+      "id": "T14",
+      "test": "T14",
+      "check": "Renamed-away source gives exact missing-file note and retains linked decisions.",
+      "result": "PASS"
+    },
+    {
+      "id": "T15",
+      "test": "T15",
+      "check": "Tiny Rust declaration and naïve declaration contain no kept term; pinned memod stores the latter under its ASCII prefix na.",
+      "result": "PASS"
+    },
+    {
+      "id": "T16",
+      "test": "T16; BM25 rarity",
+      "check": "Eight tied candidates yield first five by id, seven tied shared terms yield first five by text, read/rebuild stable; unequal rarity checked separately.",
+      "result": "PASS"
+    },
+    {
+      "id": "T17",
+      "test": "T3 T10 T17",
+      "check": "CLI symbol matching only dropped alpha gives no-match note and no candidate heading.",
+      "result": "PASS"
+    },
+    {
+      "id": "T18",
+      "test": "T7 T18; T16",
+      "check": "Real read_cypher on printed recipe; missing terms is an error naming it; only read tools exposed; carry has no model load or network; MCP candidate ids match CLI.",
+      "result": "PASS"
+    },
+    {
+      "id": "T19",
+      "test": "T19",
+      "check": "Name/path terms match even after working-tree lines contain digits alone; doc-comment-only term does not; explicit range has no augmentation.",
+      "result": "PASS"
+    },
+    {
+      "id": "T20",
+      "test": "T8 T20; T21; T16",
+      "check": "Symbol and range headings identify candidates, not links; no numeric score or similarity.",
+      "result": "PASS"
+    },
+    {
+      "id": "T21",
+      "test": "T21",
+      "check": "Exact pre-symbol range heading, no-overlap message, five fixture ids and strongest ADR-0003 shared terms.",
+      "result": "PASS"
+    },
+    {
+      "id": "T22",
+      "test": "T22 T28",
+      "check": "Both tax symbols appear in line order with separate links, topics, checks, neighbors, users and commits; all linked candidates suppressed.",
+      "result": "PASS"
+    },
+    {
+      "id": "T23",
+      "test": "T23",
+      "check": "Markdown range returns expected ids; unindexed shell/config ranges also produce candidates without symbols.",
+      "result": "PASS"
+    },
+    {
+      "id": "T24",
+      "test": "T13 T24",
+      "check": "Explicit out-of-file range exits two with current line count; stale symbol instead exits zero with note.",
+      "result": "PASS"
+    },
+    {
+      "id": "T25",
+      "test": "T25; Range boundaries",
+      "check": "All seven listed invalid/lone-number cases and why restriction, plus inclusive single-line first/middle/last boundaries.",
+      "result": "PASS"
+    },
+    {
+      "id": "T26",
+      "test": "T26; Range behavior",
+      "check": "Forty-line symbol keeps candidates, forty-one and three-hundred-line symbols recommend a range.",
+      "result": "PASS"
+    },
+    {
+      "id": "T27",
+      "test": "T27; T25",
+      "check": "why rejects a range correctly; impact must also reject with exit two and carry-specific usage.",
+      "result": "FAIL: impact returns exit 3, no decision record"
+    },
+    {
+      "id": "T28",
+      "test": "T22 T28",
+      "check": "ADR-0002 and note-1 occur independently in both overlapping bodies; neither repeats as a term candidate.",
+      "result": "PASS"
+    }
+  ],
+  "untestedItems": [],
+  "limits": [
+    "Legacy stores are constructed with the pre-feature property/relationship shape; no earlier relate binary or historical binary store is executed.",
+    "The public 40-record behavior fixture is synthetic and built by the test; it does not claim an outcome for private memoryd text.",
+    "The 300-line symbol intentionally prints no candidates under T26; the behavior test additionally queries all 300 explicit lines to demonstrate actual ranking dilution."
+  ],
+  "behavior": {
+    "test": "Range behavior",
+    "recordCount": 40,
+    "sourceSpan": "public.ts:146-155, contained in public.ts:container (1-300)",
+    "wanted": "wanted: quartz zircon",
+    "checks": "Wanted is among five for ten lines; absent for all 300 lines; absent for symbol form, which gives the range hint.",
+    "observedCandidates": {
+      "public.ts:146-155": [
+        "wanted"
+      ],
+      "public.ts:1-300": [
+        "noise-0",
+        "noise-1",
+        "noise-2",
+        "noise-3",
+        "noise-4"
+      ],
+      "public.ts:container": []
+    }
+  },
+  "contractFailures": [
+    {
+      "id": "T1",
+      "actual": "Term list also contains tax_rate",
+      "repro": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node test/run.mjs --test-name-pattern='^T1 '",
+      "state": "Left failing, not skipped; no production fix."
+    },
+    {
+      "id": "T27",
+      "actual": "impact src/tax.ts:1-5 exits 3 with no decision record instead of exit 2 usage",
+      "repro": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node test/run.mjs --test-name-pattern='^T27 '",
+      "state": "Left failing, not skipped; no production fix."
+    }
+  ],
+  "plants": [
+    {
+      "name": "linked-record-repeated",
+      "mutation": "Remove filtering of already linked ids from termLines",
+      "red": "T8 T20",
+      "exitCode": 1
+    },
+    {
+      "name": "range-start-off-by-one",
+      "mutation": "Read slice(start, end) instead of slice(start - 1, end)",
+      "red": "Range boundaries",
+      "exitCode": 1
+    },
+    {
+      "name": "range-reads-whole-file",
+      "mutation": "Tokenize all file lines for an explicit range",
+      "red": "Range boundaries",
+      "exitCode": 1
+    },
+    {
+      "name": "common-term-weighted-as-rare",
+      "mutation": "Replace BM25 idf with constant 1.0",
+      "red": "BM25 rarity",
+      "exitCode": 1
+    }
+  ],
+  "plantEvidence": "test-results/scratch/terms-plants-2026-11-13T17-52-58-479Z-2519512/summary.json",
+  "memo": "[[whygraph-relate-loader]] Term/range tests cover T1-T28; T1 retains tax_rate and T27 impact ranges return 3 instead of 2. Four isolated fault plants are detected; public 40-record fixture demonstrates narrow-span ranking.",
+  "validation": {
+    "check": {
+      "command": "pnpm check",
+      "exitCode": 0
+    },
+    "lint": {
+      "command": "pnpm lint",
+      "exitCode": 0
+    },
+    "readme": {
+      "command": "node scripts/readme-check.mjs (offline preload, TMPDIR in scratch)",
+      "exitCode": 0,
+      "commands": 14,
+      "drifted": 0,
+      "log": "test-results/scratch/terms-readme.log"
+    },
+    "focused": {
+      "tests": 27,
+      "pass": 25,
+      "fail": 2,
+      "note": "Node also reports four empty test-file workers as passes: overall focused runner totals 31/29/2."
+    },
+    "suite": {
+      "command": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% env TMPDIR=/home/dev/repos/personal/whygraph/test-results/scratch/terms-tmp node test/run.mjs",
+      "exitCode": 1,
+      "tests": 180,
+      "pass": 178,
+      "fail": 2,
+      "skipped": 0,
+      "wallSeconds": 264.895,
+      "tap": "test-results/2026-11-13T17-54-05-553Z-2568587.tap",
+      "log": "test-results/scratch/terms-suite.log"
+    },
+    "plants": {
+      "command": "node test/terms-plants.mjs (inside limited systemd scope)",
+      "exitCode": 0,
+      "detected": 4,
+      "total": 4
+    }
+  }
+}

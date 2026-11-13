@@ -128,16 +128,20 @@ contract('A6', 'a superseding record still rests on ADR-0001', 'fixture', s => {
   assert.equal((base.match(/src\/money.ts:cents/g) ?? []).length, 1); assert.ok(!base.includes('73ebd46'));
 });
 contract('A7', 'carry cents has its topic, no check and two direct users', 'fixture', s => {
-  const text = ok(s.cli(['carry', money]));
-  has(text, 'fx-money: no other file owns it', 'No formal check covers it.');
+  const output = ok(s.cli(['carry', money]));
+  const text = output.split('Decision records that share the most distinctive terms')[0];
+  assert.deepEqual(ids(output.slice(text.length)), ['ADR-0002', 'ADR-0003']);
+  has(output, 'fx-money: no other file owns it', 'No formal check covers it.');
   assert.deepEqual(ids(text), ['ADR-0001']); has(text, 'named by: a decided: tag in its doc comment');
-  ordered(text.slice(text.indexOf('2 commits changed')), ['395b8c0', 'dfb4ff8']);
-  assert.match(text, /^\s+1\s+src\/cart.ts:total$/m); assert.match(text, /^\s+1\s+src\/tax.ts:taxOf$/m);
+  ordered(output.slice(output.indexOf('2 commits changed')), ['395b8c0', 'dfb4ff8']);
+  assert.match(output, /^\s+1\s+src\/cart.ts:total$/m); assert.match(output, /^\s+1\s+src\/tax.ts:taxOf$/m);
 });
 contract('A8', 'carry formatCents lists newest commits and both records', 'fixture', s => {
-  const text = ok(s.cli(['carry', 'src/money.ts:formatCents']));
+  const output = ok(s.cli(['carry', 'src/money.ts:formatCents']));
+  const text = output.split('Decision records that share the most distinctive terms')[0];
+  assert.deepEqual(ids(output.slice(text.length)), ['ADR-0002', 'ADR-0003']);
   assert.deepEqual(ids(text), ['ADR-0001', 'note-2']);
-  const commits = text.slice(text.indexOf('3 commits changed'));
+  const commits = output.slice(output.indexOf('3 commits changed'));
   ordered(commits, ['395b8c0', '73ebd46', 'dfb4ff8']);
   has(text, 'No decided: tag names a decision record.');
   assert.deepEqual(ids(whyParts(text).loose), ['ADR-0001', 'note-2']);
@@ -539,7 +543,7 @@ contract('M1', 'printed MCP config is read-only and includes every recipe', 'fix
   assert.equal(server.command, 'relate');
   assert.deepEqual(server.args, ['serve', '--mcp', 'stdio', '--database', s.store, '--read-only']);
   assert.deepEqual(server.env, { RELATE_TELEMETRY: '0', DO_NOT_TRACK: '1' });
-  assert.deepEqual([...recipes.keys()].sort(), ['carry', 'impact', 'meaning', 'names', 'search', 'users', 'why']);
+  assert.deepEqual([...recipes.keys()].sort(), ['carry', 'impact', 'meaning', 'names', 'search', 'terms', 'users', 'why']);
   for (const text of recipes.values()) assert.match(text, /\bMATCH\b/);
 });
 contract('M2', 'the printed server exposes exactly two read-only tools and a schema', 'fixture', async (s, t) => {
