@@ -16,8 +16,8 @@
     {
       "id": "T1",
       "test": "T1",
-      "check": "Exact graph terms for formatCents tax_rate the x 42.",
-      "result": "FAIL: unexpected tax_rate term"
+      "check": "Exact graph terms for formatCents tax_rate the x 42, including both whole tax_rate and its tax/rate parts.",
+      "result": "PASS"
     },
     {
       "id": "T2",
@@ -172,8 +172,8 @@
     {
       "id": "T27",
       "test": "T27; T25",
-      "check": "why rejects a range correctly; impact must also reject with exit two and carry-specific usage.",
-      "result": "FAIL: impact returns exit 3, no decision record"
+      "check": "why rejects a range with exit two and carry-specific usage; impact treats it as an unknown decision id and exits three naming that id.",
+      "result": "PASS"
     },
     {
       "id": "T28",
@@ -208,20 +208,7 @@
       "public.ts:container": []
     }
   },
-  "contractFailures": [
-    {
-      "id": "T1",
-      "actual": "Term list also contains tax_rate",
-      "repro": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node test/run.mjs --test-name-pattern='^T1 '",
-      "state": "Left failing, not skipped; no production fix."
-    },
-    {
-      "id": "T27",
-      "actual": "impact src/tax.ts:1-5 exits 3 with no decision record instead of exit 2 usage",
-      "repro": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node test/run.mjs --test-name-pattern='^T27 '",
-      "state": "Left failing, not skipped; no production fix."
-    }
-  ],
+  "contractFailures": [],
   "plants": [
     {
       "name": "linked-record-repeated",
@@ -249,45 +236,42 @@
     }
   ],
   "plantEvidence": "test-results/scratch/terms-plants-2026-11-13T17-52-58-479Z-2519512/summary.json",
-  "memo": "[[whygraph-relate-loader]] Term/range tests cover T1-T28; T1 retains tax_rate and T27 impact ranges return 3 instead of 2. Four isolated fault plants are detected; public 40-record fixture demonstrates narrow-span ranking.",
+  "memo": "[[whygraph-relate-loader]] Tests aligned to parent rulings: T1 retains whole underscore identifiers; T27 impact ranges are unknown decision ids (exit 3), while why rejects ranges (exit 2). Check, lint and all 180 tests pass under 6 GB / four-CPU limits.",
+  "contractRevision": "20aafc3: parent ruled that T1 keeps the whole underscore identifier and T27 treats an impact range as an unknown decision id.",
   "validation": {
     "check": {
-      "command": "pnpm check",
+      "command": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% pnpm check",
       "exitCode": 0
     },
     "lint": {
-      "command": "pnpm lint",
+      "command": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% pnpm lint",
       "exitCode": 0
+    },
+    "suite": {
+      "command": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% env TMPDIR=/home/dev/repos/personal/whygraph/test-results/scratch/terms-tmp node test/run.mjs",
+      "exitCode": 0,
+      "tests": 180,
+      "pass": 180,
+      "fail": 0,
+      "skipped": 0,
+      "wallSeconds": 270.495,
+      "tap": "test-results/2026-11-13T18-01-36-188Z-2899847.tap",
+      "log": "test-results/scratch/terms-rulings-suite.log"
     },
     "readme": {
       "command": "node scripts/readme-check.mjs (offline preload, TMPDIR in scratch)",
       "exitCode": 0,
       "commands": 14,
       "drifted": 0,
-      "log": "test-results/scratch/terms-readme.log"
-    },
-    "focused": {
-      "tests": 27,
-      "pass": 25,
-      "fail": 2,
-      "note": "Node also reports four empty test-file workers as passes: overall focused runner totals 31/29/2."
-    },
-    "suite": {
-      "command": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% env TMPDIR=/home/dev/repos/personal/whygraph/test-results/scratch/terms-tmp node test/run.mjs",
-      "exitCode": 1,
-      "tests": 180,
-      "pass": 178,
-      "fail": 2,
-      "skipped": 0,
-      "wallSeconds": 264.895,
-      "tap": "test-results/2026-11-13T17-54-05-553Z-2568587.tap",
-      "log": "test-results/scratch/terms-suite.log"
+      "log": "test-results/scratch/terms-readme.log",
+      "note": "Passed in the original test task; README is unchanged by the contract alignment."
     },
     "plants": {
       "command": "node test/terms-plants.mjs (inside limited systemd scope)",
       "exitCode": 0,
       "detected": 4,
-      "total": 4
+      "total": 4,
+      "note": "All four plants were detected in the original test task; the tested plant contracts are unchanged."
     }
   }
 }

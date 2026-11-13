@@ -41,9 +41,9 @@ function graph(s) {
 }
 function recipe(s) { return h.config(ok(s.cli(['mcp']))).recipes.get('terms'); }
 
-contract('T1', 'tokenization keeps identifier parts and ordinary words, excludes underscore compounds', 'code', s => {
+contract('T1', 'tokenization keeps whole identifiers including underscores, their parts and ordinary words', 'code', s => {
   custom(s, [record('words', { title: 'formatCents tax_rate the x 42' })]);
-  assert.deepEqual(graph(s).terms.map(t => t.text), ['cents', 'format', 'formatcents', 'rate', 'tax', 'the']);
+  assert.deepEqual(graph(s).terms.map(t => t.text), ['cents', 'format', 'formatcents', 'rate', 'tax', 'tax_rate', 'the']);
 });
 contract('T2', 'term frequency, document frequency and total length are distinct', 'code', s => {
   custom(s, [record('one', { title: 'alpha', source: 'sourceignored', topics: ['topicignored'], items: [{ label: 'labelignored', text: 'alpha beta' }] }), record('two', { title: 'alpha gamma' })]);
@@ -224,8 +224,8 @@ contract('T26', 'the forty-line boundary keeps candidates at forty and recommend
   has(text, 'This symbol spans 41 lines; a long symbol gives weak term candidates. Ask with a range: whygraph carry fortyone.ts:<start>-<end>.');
   assert.ok(!text.includes('Decision records that share'));
 });
-contract('T27', 'impact rejects range targets with a carry-specific usage error', 'fixture', s => {
-  failure(s.cli(['impact', 'src/tax.ts:1-5']), 2, 'impact takes <file>:<symbol>, not a line range; the range form is for carry');
+contract('T27', 'impact treats a range target as an unknown decision id', 'fixture', s => {
+  failure(s.cli(['impact', 'src/tax.ts:1-5']), 3, 'no decision record src/tax.ts:1-5');
 });
 contract('Range boundaries', 'single-line inclusive ranges exclude both adjacent lines and all other file text', 'empty', s => {
   s.write(join(s.repo, 'public.txt'), 'amber\nquartz\nzircon\n');
