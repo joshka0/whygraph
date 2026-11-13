@@ -203,8 +203,11 @@ per kept term, holding `records` (the number of records that use it), and one
 `MENTIONS` edge from each record to each of its terms, holding how many times
 the record's text holds it; each `Decision` holds `termCount`, every term of
 its text. A term used by more than half of at least ten records makes no node
-(ADR 0002). The query side is blocked: `memod graph` gives no line range for a
-symbol, so `carry` cannot read the symbol's own code (ADR 0002, "Blocked").
+(ADR 0002). memod puts each symbol's `line` and `endLine` (1-based, inclusive,
+the declaration without its doc comment) on its node; `build` stores them on
+`Symbol`; `carry` reads those lines of the working tree, adds the symbol's name
+and file path, and runs `recipes/terms.cypher` to show the records that share
+the most distinctive terms with the code.
 
 | ID | Input | Required result |
 | --- | --- | --- |
@@ -214,10 +217,20 @@ symbol, so `carry` cannot read the symbol's own code (ADR 0002, "Blocked").
 | T4 | A record with no title and no statements; a build with no decision records | The record loads with `termCount` 0 and no `MENTIONS` edge; a build with no records has 0 `Term` nodes and 0 `MENTIONS` edges. |
 | T5 | The fixture build | The counts include 45 `Term` nodes and 57 `MENTIONS` edges; `Decision.termCount` is set on every record. A store built before this change has no `Term` nodes. |
 | T6 | The same decisions files built twice, and the same build read twice | Byte-identical `Term` nodes and `MENTIONS` edges: terms sorted by text, edges by record id then term. |
-| T7 | `recipes/terms.cypher` with a term list | **Open, not met yet.** The recipe is to return the best five records by BM25 over the stored counts (`k1` 1.2, `b` 0.75), each with its shared terms, no score; `whygraph mcp` prints it and it holds no `CALL { }` subquery. Blocked on a symbol line range (ADR 0002). |
-| T8 | `carry <file>:<symbol>` on a symbol whose code shares terms with records | **Open, not met yet.** A term section after the one-step part: the top five records by BM25 that share the most distinctive terms with the symbol's code, each line showing date, id, title and three to five strongest shared terms, no score; a record the answer already lists as linked is not repeated; the heading says a listed record is a candidate, not a link. Blocked on a symbol line range (ADR 0002). |
-| T9 | `carry` on a symbol whose file is gone, whose language the tokenizer cannot read, or whose terms match no record | **Open, not met yet.** The term section is one line saying why (no source lines to read, or no shared term), never an empty heading. Blocked on a symbol line range (ADR 0002). |
-| T10 | A query term that the common-term rule dropped | **Open, not met yet.** It contributes nothing and is not an error: the recipe matches no `Term` node for it. Blocked on a symbol line range (ADR 0002). |
+| T7 | `recipes/terms.cypher` with `{"terms": ["tax", "rounding"]}`, and `whygraph mcp` | Exit 0. On the fixture build the recipe returns 3 rows in this order: `note-1` (`shared` `["rounding", "tax"]`), `ADR-0002` (`shared` `["tax"]`), `ADR-0003` (`shared` `["tax"]`); each row holds `id`, `title`, `date`, `source`, `shared`, `termCount` and no score. `whygraph mcp` prints `== terms` (after `== search`, before `== users`), and the recipe holds no `CALL { }` subquery. |
+| T8 | `carry src/money.ts:formatCents` (fixture: its code shares `cents` with records) | Exit 0. After the one-step part's `Not searched:` line and a blank line: `Decision records that share the most distinctive terms with its code (candidates, not links: a shared word does not mean the record governs this symbol):`, then `ADR-0002` and `ADR-0003`, each as `  <date>  <id>  <title>` then `      shared terms: cents`; no score. `ADR-0001` and `note-2`, which the answer already lists as linked, are not repeated. |
+| T9 | `carry src/tax.ts:taxOf` (fixture: a record lists it) | The term section lists only `ADR-0003` (`shared terms: rate, cents, tax`); `ADR-0001`, `ADR-0002` and `note-1`, which its `why` part lists, are not repeated. |
+| T10 | A query term that the common-term rule dropped (T3: a term at least ten records use) | It contributes nothing and is not an error: no `Term` node exists for it, and a query of only that term gives an empty result. |
+| T11 | `carry` on a symbol whose code shares no kept term with any record | One line, never a heading with no rows: `No decision record shares a distinctive term with its code.`, or, when the only matches are records the answer already lists, `No decision record other than those above shares a distinctive term with its code.` |
+| T12 | `carry` on a store built before `Term` nodes exist, and one built before `line`/`endLine` exist | Exit 0, not a query error. No terms: `No decision record shares a distinctive term with its code.` No span: `No term section: the graph holds no source line range for <symbol>.` |
+| T13 | `carry` after the symbol's file changed so its stored span no longer fits | Exit 0. `No term section: <file> has <n> lines, so the stored range <line>-<endLine> no longer fits; rebuild the store for the file as it is now.` It reads no wrong range and throws nothing. |
+| T14 | `carry` on a symbol whose file is gone from the working tree | Exit 0. `No term section: its file <file> is not in the working tree.` |
+| T15 | A symbol whose code holds no term of three or more characters | Exit 0. `No term section: its code holds no term of three or more characters.` A non-ASCII identifier is cut at its first non-ASCII character, so `naïve` gives `na` and `ve`, both dropped. |
+| T16 | `carry` twice on the same symbol, and again after a rebuild | Byte-identical term section. At most five candidates (score then id) and at most five shared terms each (contribution then text); a record with one shared term shows one. |
+| T17 | A record whose only shared term the common-term rule dropped | No `Term` node exists, so it is no candidate and the section says no match rather than listing it. |
+| T18 | `read_cypher` with the `terms` recipe and a `{"terms": [...]}` parameter over MCP | The rows `whygraph carry` renders, with no model, no network and no `write_cypher`. A missing `terms` parameter is an error that names it, as `meaning` names `vector` (Q16). |
+| T19 | The symbol's name and file path are query terms | A record that names the symbol or its file but shares no line of code is still a candidate: the name and path feed the same tokenizer. |
+| T20 | Any `carry` term section | Holds no score and no similarity number, and its heading says a listed record is a candidate, not a link. |
 
 ## mcp
 

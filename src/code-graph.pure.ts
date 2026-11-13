@@ -13,6 +13,9 @@ export interface CodeNode {
   readonly because?: string;
   readonly date?: string;
   readonly subject?: string;
+  /** A symbol's first and last source line, 1-based and inclusive, without its doc comment (memod ADR 0003, amendment of 2026-11-13). */
+  readonly line?: number;
+  readonly endLine?: number;
 }
 
 /** An edge of `memod graph --history` output. Fields beyond `kind`, `from` and `to` depend on the kind. */

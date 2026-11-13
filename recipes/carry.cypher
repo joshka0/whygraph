@@ -1,7 +1,9 @@
 // carry: what an agent must know before it edits one symbol, besides its
 // decisions (why.cypher) and its users (users.cypher).
 // Parameter: $symbol, the symbol id "<file>#<name>".
-// One row: the topics the symbol owns, and the other files that own each
+// One row: the symbol's `file` and its 1-based inclusive source span `line`/`endLine`
+// (what terms.cypher needs to find the code text); the topics the symbol owns, and
+// the other files that own each
 // (a second owner is a duplicate unless one imports the other); the formal
 // checks that cover it (verified: tags, re-run them after a code change);
 // the fleet memos its premise: tags rest on; the commits that changed it,
@@ -36,7 +38,7 @@ WITH DISTINCT s, topics, checks, premises, commits, n
 OPTIONAL MATCH (f:File)-[:DECLARES]->(n)
 WITH s, topics, checks, premises, commits, n, f, [(s)-[r:USES]->(n) | r.typeOnly] AS out, [(n)-[r:USES]->(s) | r.typeOnly] AS inn
 ORDER BY n.id
-RETURN s.id AS symbol, s.path AS file, topics, checks, premises, commits,
+RETURN s.id AS symbol, s.path AS file, s.line AS line, s.endLine AS endLine, topics, checks, premises, commits,
   collect(CASE WHEN n IS NULL THEN null ELSE {
     symbol: n.id, file: f.path,
     uses: size(out) > 0, usesTypeOnly: size(out) > 0 AND all(x IN out WHERE x),

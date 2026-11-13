@@ -4,10 +4,12 @@
  * decided: the commands run the same recipe files that `whygraph mcp` prints, because an agent that queries the store itself must get the answer the CLI gives
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { carryAnswer, impactAnswer, whyAnswer } from "./answers.pure.ts";
+import { join } from "node:path";
+import { carryAnswer, impactAnswer, shown, whyAnswer, type Row, type TermSection } from "./answers.pure.ts";
 import { fail, type Exit } from "./build.ts";
 import { fuse, searchAnswer, searchWords } from "./search.pure.ts";
 import { closest, missingSymbol, readSymbolTarget } from "./target.pure.ts";
+import { symbolSource, termsOf } from "./terms.pure.ts";
 import { readQuery } from "./tools.ts";
 import { embedTexts, ModelUnavailable } from "./embed.ts";
 
@@ -58,8 +60,48 @@ export function ask(command: "why" | "impact" | "carry", target: string, root: s
   if (!of("symbol").includes(id)) return fail(missingSymbol(t, of("file"), of("symbol")), 3);
   const why = readQuery(store, recipe("why"), { symbol: id });
   if (command === "why") console.log(whyAnswer(id, why));
-  else console.log(carryAnswer(id, readQuery(store, recipe("carry"), { symbol: id })[0]!, why, readQuery(store, recipe("users"), { symbol: id })));
+  else {
+    const carry = readQuery(store, recipe("carry"), { symbol: id })[0]!;
+    console.log(carryAnswer(id, carry, why, readQuery(store, recipe("users"), { symbol: id }), termSection(store, root, carry)));
+  }
   return 0;
+}
+
+/**
+ * Whether carry also reads the comment lines directly above a symbol's declaration.
+ * decided: carry does not read the comment block above a symbol because the memoryd check ranks the wanted record better without it (full-rank sum 861 against 1,035 over the six targets that name a graph symbol, the same one in the top five; ADR 0002).
+ */
+const READ_COMMENT = false;
+
+/**
+ * The term section of a carry answer: the record candidates from `recipes/terms.cypher`, or one line saying why there are none.
+ * owns: [[whygraph-questions]]
+ * post: reads the symbol's `line`..`endLine` (and, when READ_COMMENT, the comment block above `line`) from the working tree at `root`, adds its name and file path, tokenizes that, and runs the terms recipe; a graph with no line range, a file that is gone, a span that no longer fits the file, and a symbol with no term each give a one-line note instead of a query.
+ * post: a symbol whose term list matches no kept term gives a one-line note, and never an empty heading.
+ */
+function termSection(store: string, root: string, carry: Row): TermSection {
+  const symbol = String(carry.symbol);
+  const file = String(carry.file);
+  const line = Number(carry.line);
+  const endLine = Number(carry.endLine);
+  if (!Number.isInteger(line) || line < 1 || !Number.isInteger(endLine) || endLine < line) return { kind: "note", note: `No term section: the graph holds no source line range for ${shown(symbol)}.` };
+  let text: string;
+  try {
+    text = readFileSync(join(root, file), "utf8");
+  } catch {
+    return { kind: "note", note: `No term section: its file ${file} is not in the working tree.` };
+  }
+  const lines = text.split("\n");
+  const source = symbolSource(lines, line, endLine, READ_COMMENT);
+  if (source === undefined) return { kind: "note", note: `No term section: ${file} has ${lines.length} lines, so the stored range ${line}-${endLine} no longer fits; rebuild the store for the file as it is now.` };
+  const terms = [...new Set(termsOf([...source, symbol.slice(symbol.lastIndexOf("#") + 1), file].join("\n")))];
+  if (terms.length === 0) return { kind: "note", note: "No term section: its code holds no term of three or more characters." };
+  const rows = readQuery(store, recipe("terms"), { terms });
+  if (rows.length === 0) return { kind: "note", note: "No decision record shares a distinctive term with its code." };
+  return {
+    kind: "records",
+    rows: rows.map((r) => ({ id: String(r.id), date: r.date === null || r.date === undefined ? "" : String(r.date), title: r.title === null || r.title === undefined ? "" : String(r.title), shared: Array.isArray(r.shared) ? r.shared.map(String) : [] })),
+  };
 }
 
 /**
@@ -107,7 +149,7 @@ export function mcp(store: string): Exit {
     JSON.stringify(config, null, 2),
     "",
     "Recipes: call read_cypher with a recipe as `statement` and its parameters as `parameters`, such as {\"symbol\": \"src/main.ts#run\"}. A symbol id is \"<file>#<name>\", the file path from the repo root.",
-    "To answer why: why. Before an edit: carry, why and users. When a decision changes: impact. To find a record by its text: search (words), and meaning (a 384-float vector the caller supplies). To check a name: names.",
+    "To answer why: why. Before an edit: carry, why and users. When a decision changes: impact. To find a record by its text: search (words), and meaning (a 384-float vector the caller supplies). To rank records by the terms of a symbol's code: terms (a list of the symbol's terms). To check a name: names.",
   ];
   for (const name of recipeNames()) out.push("", `== ${name}`, recipe(name).trimEnd());
   console.log(out.join("\n"));

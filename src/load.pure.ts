@@ -105,6 +105,7 @@ function grouped(rows: readonly { readonly from: string; readonly to: string; re
  * owns: [[whygraph-store-load]]
  * post: indexes on every node key come first, then a full-text index `decision_search` over `Decision.searchText` and a vector index `decision_search_vector` over `Decision.vector` (384 dimensions, cosine), then every node, then every relationship, so each MATCH of an edge statement finds its ends by index.
  * post: each memod node kind maps to one label (file File, package Package, symbol Symbol, topic Topic, decision DecidedTag, check Check, memo Memo, commit Commit); a kind memod adds later is skipped.
+ * post: a Symbol holds `line` and `endLine`, the 1-based inclusive source span memod gives it (without its doc comment), or null when memod gave no span.
  * post: relationships: File DECLARES Symbol; File IMPORTS File or Package; File OWNS Topic and each named Symbol OWNS Topic; Symbol USES Symbol; Symbol or File DECIDED DecidedTag, VERIFIED Check, PREMISE Memo; Commit CHANGES File or Symbol; DecidedTag NAMES Decision (one per `names` link); Decision STATES Item, ABOUT Topic, MENTIONS Term (one per kept term of the record's text, with how many times that text holds it), RESTS_ON and SUPERSEDES Decision, CITES Commit (one per commit in `checked.cites`).
  * post: a Term node per kept term (`termNodes`), keyed by its text, holding `records`, the number of records that use it; a record's `termCount` is every term of its text, before the common-term rule, so the average record length a BM25 query needs counts dropped terms too.
  * post: a record topic that no code owns still gets a Topic node; a Decision's `source` is its own source or else the decisions file it came from; a Decision's `searchText` is its title and the text of each of its statements, one per line, which the full-text index holds, and its `vector` is `vectors`' 384-float embedding of that text, which the vector index holds.
@@ -120,7 +121,7 @@ export function loadPlan(graph: CodeGraph, checked: CheckedRecords, names: reado
   const of = (kind: string) => graph.nodes.filter((n) => n.kind === kind);
   steps.push(...nodeStep("File", ["path"], of("file").map((n) => ({ path: n.name }))));
   steps.push(...nodeStep("Package", ["specifier"], of("package").map((n) => ({ specifier: n.name }))));
-  steps.push(...nodeStep("Symbol", ["id", "path", "name"], of("symbol").map((n) => ({ id: n.name, ...symbolParts(n.name) }))));
+  steps.push(...nodeStep("Symbol", ["id", "path", "name", "line", "endLine"], of("symbol").map((n) => ({ id: n.name, ...symbolParts(n.name), line: n.line ?? null, endLine: n.endLine ?? null }))));
   const codeTopics = new Set(of("topic").map((n) => n.name));
   const recordTopics = checked.records.flatMap((r) => r.topics).filter((t) => !codeTopics.has(t));
   steps.push(...nodeStep("Topic", ["slug"], [...codeTopics, ...new Set(recordTopics)].sort().map((slug) => ({ slug }))));

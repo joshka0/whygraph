@@ -36,6 +36,10 @@ exactly, such as `ADR-0003` or `note-2`.
    (on the symbols it uses, then on the symbols that use it): treat a decision
    there as binding on your edit too, and read its last lines for what it did
    not search, since an empty part never means nothing constrains the change.
+7. `carry` ends with the decision records that share the most distinctive
+   terms with the symbol's code. That part is a term match, not a link: no tag
+   or commit ties those records to the code. Read each shared term and the
+   record, and judge whether it governs your change.
 
 ## Reading an answer
 
@@ -51,6 +55,12 @@ exactly, such as `ADR-0003` or `note-2`.
   `words and meaning` means both. Neither score is a confidence, and the
   meaning search always returns its nearest records, so the list is
   candidates to judge, never links.
+- `Decision records that share the most distinctive terms with its code` (at
+  the end of a `carry` answer) is the same kind of candidate list: the symbol's
+  code and the record share jargon, not a link. The `shared terms:` line says
+  why each record is there. A record the answer already lists as a decision of
+  the symbol is not repeated. With no readable code or no shared term, the part
+  is one line saying so.
 
 ## Exit status
 

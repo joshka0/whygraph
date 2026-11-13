@@ -51,6 +51,12 @@ One step away, most binding first (what formatCents uses, then what uses formatC
 Searched: src/money.ts:formatCents, the header of src/money.ts, the 0 symbols formatCents uses, 1 symbol that uses formatCents, and the headers of their files.
 Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript and JavaScript); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.
 
+Decision records that share the most distinctive terms with its code (candidates, not links: a shared word does not mean the record governs this symbol):
+  2026-01-02  ADR-0002  One flat tax rate
+      shared terms: cents
+  2026-01-03  ADR-0003  Tax rate by region
+      shared terms: cents
+
 1 symbol uses it directly, 1 in all (distance n: through n-1 other symbols; type: only a type use):
    1  src/cart.ts:total
 
@@ -70,12 +76,12 @@ the change reverses `note-2`, instead of making it silently.
 - [relate](https://relatedb.ai) 1.0.1, an embedded Cypher graph database, as
   the `relate` CLI on `PATH`. whygraph stores and queries the graph with it.
   Check with `relate --version`.
-- memod, at commit `be6b126` of its `code-graph` branch. memod is a separate
+- memod, at commit `740ad96` of its `code-graph` branch. memod is a separate
   tool by the same author: it reads a repo's code, doc-comment tags and git
   history into a graph (`memod graph --history`), and whygraph loads that
   graph. memod has no public release. This repo gets it as a dev dependency
   pinned in `package.json` to a local clone:
-  `git+file:///home/dev/repos/personal/memod#be6b126...`. To install whygraph
+  `git+file:///home/dev/repos/personal/memod#740ad96...`. To install whygraph
   you need a memod clone that holds that commit, at that path or at a path
   you write into `package.json` instead.
 
@@ -276,6 +282,12 @@ One step away, most binding first (what formatCents uses, then what uses formatC
 Searched: src/money.ts:formatCents, the header of src/money.ts, the 0 symbols formatCents uses, 1 symbol that uses formatCents, and the headers of their files.
 Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript and JavaScript); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.
 
+Decision records that share the most distinctive terms with its code (candidates, not links: a shared word does not mean the record governs this symbol):
+  2026-01-02  ADR-0002  One flat tax rate
+      shared terms: cents
+  2026-01-03  ADR-0003  Tax rate by region
+      shared terms: cents
+
 1 symbol uses it directly, 1 in all (distance n: through n-1 other symbols; type: only a type use):
    1  src/cart.ts:total
 
@@ -310,6 +322,14 @@ One step away, most binding first (what checkout uses, then what uses checkout):
   - topic owned by src/rounding.ts:roundHalfEven, which checkout uses: fx-rounding
 Searched: src/checkout.ts:checkout, the header of src/checkout.ts, the 1 symbol checkout uses, 0 symbols that use checkout, and the headers of their files.
 Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript and JavaScript); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.
+
+Decision records that share the most distinctive terms with its code (candidates, not links: a shared word does not mean the record governs this symbol):
+  2026-01-02  ADR-0002  One flat tax rate
+      shared terms: rate, cents
+  2026-01-03  ADR-0003  Tax rate by region
+      shared terms: rate, cents
+  2026-01-01  ADR-0001  Money in cents
+      shared terms: cents
 
 No symbol uses it.
 
@@ -617,7 +637,7 @@ jq '{records: (.items | group_by(.memo) | map({
 | `whygraph decisions adr <folder>` | Prints a decisions file made from the ADRs in the folder. |
 | `whygraph why <file>:<symbol>` | The `decided:` tags on the symbol and on its file header; the records those tags name; then the records linked only through a commit that cites them and changed the symbol, oldest first, each commit with how many symbols it changed. |
 | `whygraph impact <decision id>` | The record and every record that rests on it, directly or through others; for each, the symbols and files whose `decided:` tags name it, then the commits that cite it and the other symbols those commits changed, with how many symbols use each directly. |
-| `whygraph carry <file>:<symbol>` | Before an edit: the topics the symbol owns and their other owners, the formal checks that cover it, its premise memos, its decisions (as `why`); then one step away, the `decided:` tags, the records they name, the checks and the topics of the symbols it uses and of the symbols that use it, most binding first, each line naming where it sits; then its direct and transitive users, and the commits that changed it. |
+| `whygraph carry <file>:<symbol>` | Before an edit: the topics the symbol owns and their other owners, the formal checks that cover it, its premise memos, its decisions (as `why`); then one step away, the `decided:` tags, the records they name, the checks and the topics of the symbols it uses and of the symbols that use it, most binding first, each line naming where it sits; then the decision records that share the most distinctive terms with its code (candidates, not links), each naming its shared terms; then its direct and transitive users, and the commits that changed it. |
 | `whygraph search "<text>"` | The five decision records that best match the text: the word search and the meaning search each rank at most five, fused by reciprocal rank, each line saying how it matched (`words`, `meaning` or `words and meaning`), each a candidate to judge, not a link; then what was searched and what was not. |
 | `whygraph mcp` | The MCP server config that serves the store read-only through `relate serve --mcp stdio`, and every recipe. |
 | `whygraph help` | The usage. |
@@ -722,7 +742,7 @@ build.
 | --- | --- | --- | --- |
 | `File` | `path` | | memod `file` |
 | `Package` | `specifier` | | memod `package` |
-| `Symbol` | `id` (`<file>#<name>`) | `path`, `name` | memod `symbol` |
+| `Symbol` | `id` (`<file>#<name>`) | `path`, `name`, `line`, `endLine` | memod `symbol` |
 | `Topic` | `slug` | | memod `topic`, record `topics` |
 | `DecidedTag` | `hash` | `what`, `because` | memod `decision` (a `decided:` tag) |
 | `Check` | `name` | | memod `check` |
@@ -763,7 +783,13 @@ half of at least ten records makes no node, because its BM25 weight is under
 0.7, near zero; on the 2,662-record memoryd file that rule leaves 6,754 of
 6,756 term nodes and 77,404 of 80,858 edges, and drops only `and` and `the`.
 The terms are not a link: a shared word is a candidate to read, never a
-reason the record governs the code.
+reason the record governs the code. memod records each symbol's `line` and
+`endLine` (1-based, inclusive, the declaration without its doc comment), and
+`carry` reads those lines, adds the symbol's name and file path, and shows the
+five records that share the most distinctive terms with them, each line naming
+the shared terms. A record the answer already lists as a decision of the
+symbol is left out, and the heading says a listed record is a candidate, not a
+link.
 
 The store is a relate directory store behind a symlink. A build loads into a
 new directory and swaps the link only when every statement succeeded, so a
@@ -794,10 +820,16 @@ store rather than merging into it.
 - The store is as of the last build. whygraph does not watch the repo.
 - `CHANGES` reaches only files and symbols that exist now; memod does not
   index Markdown, so an ADR file has no node.
-- `build` stores a record's terms (`Term` nodes and `MENTIONS` edges), but no
-  command reads them yet: `memod graph` gives no line range for a symbol, so
-  `carry` cannot read the symbol's own code to tokenize. The term bridge waits
-  on a symbol line range; the graph holds the other half.
+- The term section reads a symbol's whole span, which for a class or a large
+  function is many lines; a method, a constructor or one branch is not its own
+  symbol, so a narrow range a person would choose can rank a record higher than
+  the symbol's range does (ADR 0002). A term match is a candidate, not a link:
+  the section prints no score and common jargon over-links.
+- The term section needs the symbol's code in the working tree. A file that is
+  gone, a span that no longer fits the file, or a language whose identifiers
+  the ASCII tokenizer cannot read gives one line saying so instead. The doc
+  comment above the declaration is not read: on the memoryd check it ranked the
+  wanted record worse than the declaration alone (ADR 0002).
 - The recipes use no `CALL { }` subquery: relate's read-only MCP tool rejects
   one.
 - `search` reads only a record's title and statements. It ranks by words

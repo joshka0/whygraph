@@ -252,13 +252,43 @@ function oneStepAway(symbolId: string, carry: Row, why: readonly Row[], foundAbo
   return out;
 }
 
+/** A term-bridge candidate: a record and the terms its text shares with the symbol's code, strongest first. */
+export interface TermCandidate {
+  readonly id: string;
+  readonly date: string;
+  readonly title: string;
+  readonly shared: readonly string[];
+}
+
+/**
+ * The term section of a carry answer: the ranked candidate records, or one line saying why there are none.
+ * owns: [[whygraph-answers]]
+ */
+export type TermSection =
+  | { readonly kind: "records"; readonly rows: readonly TermCandidate[] }
+  | { readonly kind: "note"; readonly note: string };
+
+/**
+ * The term-bridge lines of a carry answer: the records that share the most distinctive terms with the symbol's code, or one line saying why none.
+ * decided: a record the answer already lists as a decision of the symbol is left out, because a candidate the reader has already read is noise, and the term part is for records the graph does not link
+ */
+function termLines(section: TermSection, linked: ReadonlySet<string>): string[] {
+  if (section.kind === "note") return [section.note];
+  const rows = section.rows.filter((r) => !linked.has(r.id));
+  if (rows.length === 0) return ["No decision record other than those above shares a distinctive term with its code."];
+  return [
+    "Decision records that share the most distinctive terms with its code (candidates, not links: a shared word does not mean the record governs this symbol):",
+    ...rows.map((r) => `  ${str(r.date) || "undated   "}  ${r.id}  ${str(r.title) || "(no title)"}\n      shared terms: ${r.shared.join(", ")}`),
+  ];
+}
+
 /**
  * The answer of `whygraph carry`.
  * owns: [[whygraph-answers]]
- * post: in order: owned topics with their other owning files; formal checks that cover it with the command that re-runs each; premise memos; the decisions as `whyAnswer` lists them; what sits one step away (`oneStepAway`); direct and transitive users with distance; the commits that changed it, newest first.
+ * post: in order: owned topics with their other owning files; formal checks that cover it with the command that re-runs each; premise memos; the decisions as `whyAnswer` lists them; what sits one step away (`oneStepAway`); the term-bridge records that share the most distinctive terms with its code (`TermSection`), a record already listed as a decision of the symbol left out; direct and transitive users with distance; the commits that changed it, newest first.
  * post: for a symbol in a language whose uses memod does not read, the one-step part and the users part say they are unknown instead of none.
  */
-export function carryAnswer(symbolId: string, carry: Row, why: readonly Row[], users: readonly Row[]): string {
+export function carryAnswer(symbolId: string, carry: Row, why: readonly Row[], users: readonly Row[], terms: TermSection): string {
   const file = str(carry.file);
   const out = [`Before you edit ${shown(symbolId)}`, ""];
   const topics = (Array.isArray(carry.topics) ? (carry.topics as Row[]) : []).filter((t) => t !== null);
@@ -276,6 +306,7 @@ export function carryAnswer(symbolId: string, carry: Row, why: readonly Row[], u
   out.push(premises.length === 0 ? "Its doc comment names no premise memo." : "Premise memos it rests on:", ...premises.map((p) => `  - ${p}`));
   out.push("", ...whyAnswer(symbolId, why).split("\n").slice(2), "");
   out.push(...oneStepAway(symbolId, carry, why, why.length > 0 || topics.length > 0 || checks.length > 0 || premises.length > 0), "");
+  out.push(...termLines(terms, new Set(why.filter((r) => r.kind === "record").map((r) => str(r.id)))), "");
   if (!hasSymbolEdges(file)) out.push(`Its users are unknown: memod reads which symbols use which only in TypeScript and JavaScript, not in ${file}.`);
   else if (users.length === 0) out.push("No symbol uses it.");
   else {
