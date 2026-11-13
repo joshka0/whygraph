@@ -1,6 +1,13 @@
-# Only these packages may run install scripts. memod builds its dist/ on install.
+# Which packages may run install scripts. pnpm keys a git dependency by its
+# full spec, so memod's entry names the pinned commit. `true` runs the script
+# (memod builds its dist/); `false` records a deliberate skip, so the default
+# strict mode does not fail the install for ignoring a build that is not needed.
 allowBuilds:
   "memod@git+file:///home/dev/repos/personal/memod#740ad96645c0a118b49634251bb5e023b7a71fa2": true
-# onnxruntime-node (its postinstall fetches CUDA binaries) and protobufjs (a version warning) are
-# deliberately left off; pnpm's strictDepBuilds would otherwise fail the install for ignoring them.
-strictDepBuilds: false
+  # Its postinstall fetches the CUDA/TensorRT provider binaries from NuGet;
+  # the CPU runtime the embedding model uses ships in the package, so none of
+  # those files is needed and the download is large.
+  onnxruntime-node: false
+  # Its postinstall only prints a version-scheme warning; dist/ and index.d.ts
+  # ship in the package.
+  protobufjs: false
