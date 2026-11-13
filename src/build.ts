@@ -7,6 +7,7 @@ import { readCodeGraph, graphCommits } from "./code-graph.pure.ts";
 import { tagLinks, trailerCites, type CommitTrailers } from "./links.pure.ts";
 import { loadPlan, recordText } from "./load.pure.ts";
 import { checkRecords, readDecisionsFile, type SourcedRecord } from "./records.pure.ts";
+import { termCounts } from "./terms.pure.ts";
 import { buildStore, foreignStore } from "./store.ts";
 import { embedTexts, ModelUnavailable } from "./embed.ts";
 import { git, readQuery, relate, run } from "./tools.ts";
@@ -20,6 +21,7 @@ export type Exit = number;
  * post: exit 0 and a summary of node and relationship counts by label and type, sorted by name; warnings go to stderr, one per line, sorted.
  * post: a record cites the commits it lists and the commits of HEAD whose `Decision:` trailers name its id; a decided: tag names the records `namedRecords` finds in its text.
  * post: every record's text is embedded once with the local model and stored on its node, which the vector index holds; the first build downloads the model.
+ * post: every record's text is tokenized once, and each kept term becomes a Term node with a MENTIONS edge from each record that uses it, holding how many times; the record holds its total term count.
  * post: exit 1, store unchanged, when relate or memod is missing, memod fails or prints no graph, a decisions file cannot be read or holds a bad record, two records share an id, or records supersede in a cycle, or a load statement fails, or the embedding model is unavailable.
  */
 export async function build(root: string, store: string, decisionFiles: readonly string[]): Promise<Exit> {
@@ -75,7 +77,8 @@ export async function build(root: string, store: string, decisionFiles: readonly
     if (e instanceof ModelUnavailable) return fail(e.message);
     throw e;
   }
-  const done = buildStore(store, loadPlan(graph, { ...checked, cites: trailers.cites }, tags.links, files, vectors));
+  const terms = termCounts(checked.records.map((r) => ({ id: r.id, text: recordText(r) })));
+  const done = buildStore(store, loadPlan(graph, { ...checked, cites: trailers.cites }, tags.links, files, vectors, terms));
   if ("status" in done) return fail(`relate failed while loading (exit ${done.status}); the store is unchanged:\n${done.message}`);
 
   const labels = readQuery(store, "MATCH (n) RETURN labels(n)[0] AS name, count(*) AS n ORDER BY name");

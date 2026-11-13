@@ -160,7 +160,7 @@ $ whygraph decisions adr docs/adr > ../adrs.json
 $ whygraph build --decisions ../adrs.json --decisions decisions/notes.json
 Built ~/try/shop/.git/whygraph/store
 from ~/try/shop: 9 commits, 5 decision records from 2 decisions files, 0 warnings.
-48 nodes:
+93 nodes:
   Check        1
   Commit       9
   DecidedTag   5
@@ -168,14 +168,16 @@ from ~/try/shop: 9 commits, 5 decision records from 2 decisions files, 0 warning
   File         6
   Item         8
   Symbol       8
+  Term         45
   Topic        6
-91 relationships:
+148 relationships:
   ABOUT        5
   CHANGES      27
   CITES        7
   DECIDED      5
   DECLARES     8
   IMPORTS      3
+  MENTIONS     57
   NAMES        3
   OWNS         14
   RESTS_ON     4
@@ -726,8 +728,9 @@ build.
 | `Check` | `name` | | memod `check` |
 | `Memo` | `ref` | | memod `memo` (a `premise:` tag) |
 | `Commit` | `sha` | `short`, `date`, `subject` | memod `commit` |
-| `Decision` | `id` | `title`, `date`, `status`, `source`, `searchText`, `vector` | a decision record |
+| `Decision` | `id` | `title`, `date`, `status`, `source`, `searchText`, `vector`, `termCount` | a decision record |
 | `Item` | | `ord`, `label`, `text` | a record's item |
+| `Term` | `text` | `records` | a record's text (title and statements) |
 
 | Relationship | From -> to |
 | --- | --- |
@@ -739,6 +742,7 @@ build.
 | `NAMES` | DecidedTag -> Decision (the tag's text names the record) |
 | `CHANGES` | Commit -> File or Symbol (a changed code hash or tag, by memod's rule) |
 | `STATES`, `ABOUT` | Decision -> Item, Topic |
+| `MENTIONS` (`count`) | Decision -> Term (how many times the record's text holds the term) |
 | `RESTS_ON`, `SUPERSEDES` | Decision -> Decision |
 | `CITES` | Decision -> Commit |
 
@@ -746,6 +750,20 @@ A record reaches a symbol directly through
 `(:Symbol)-[:DECIDED]->(:DecidedTag)-[:NAMES]->(:Decision)` (or the same from
 its File), and loosely through
 `(:Decision)-[:CITES]->(:Commit)-[:CHANGES]->(:Symbol)`.
+
+`Term` nodes hold the words a record's text shares with code. A build
+tokenizes each record's title and statements: every run of letters, digits and
+`_`, split at `_` and at camelCase and digit boundaries, with the whole
+identifier kept too, lowercased, at least three characters, digits only left
+out. It makes one `Term` per kept word, holding `records`, the number of
+records that use it, and one `MENTIONS` edge from each record to each of its
+terms, holding how many times the record's text holds it. Each record holds
+`termCount`, every term of its text, kept or not. A term used by more than
+half of at least ten records makes no node, because its BM25 weight is under
+0.7, near zero; on the 2,662-record memoryd file that rule leaves 6,754 of
+6,756 term nodes and 77,404 of 80,858 edges, and drops only `and` and `the`.
+The terms are not a link: a shared word is a candidate to read, never a
+reason the record governs the code.
 
 The store is a relate directory store behind a symlink. A build loads into a
 new directory and swaps the link only when every statement succeeded, so a
@@ -776,6 +794,10 @@ store rather than merging into it.
 - The store is as of the last build. whygraph does not watch the repo.
 - `CHANGES` reaches only files and symbols that exist now; memod does not
   index Markdown, so an ADR file has no node.
+- `build` stores a record's terms (`Term` nodes and `MENTIONS` edges), but no
+  command reads them yet: `memod graph` gives no line range for a symbol, so
+  `carry` cannot read the symbol's own code to tokenize. The term bridge waits
+  on a symbol line range; the graph holds the other half.
 - The recipes use no `CALL { }` subquery: relate's read-only MCP tool rejects
   one.
 - `search` reads only a record's title and statements. It ranks by words
