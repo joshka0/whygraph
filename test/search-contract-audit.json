@@ -1,0 +1,113 @@
+{
+  "base": "9972acb",
+  "groundTruth": [
+    "docs/failures.md Q1-Q24 and M1",
+    "README.md commands, search explanation and limits",
+    "docs/adr/0001-record-search.md",
+    "scripts/fixture.sh public records"
+  ],
+  "scope": "Only test/ changes are committed. Production source and recipes are unchanged. No delegation, deletions, publishing or pushes. Scratch remains under ignored test-results/scratch/ for the parent.",
+  "coverage": [
+    { "id": "Q1", "check": "Real CLI fixture order, candidate heading, every date/id/title, first statement line, source, scope and required match labels; separate multiline first-item fixture.", "result": "FAIL: ADR-0002 and ADR-0003 say words and meaning instead of required meaning. All earlier assertions pass." },
+    { "id": "Q2", "check": "A real MCP word-query miss still yields five meaning-only CLI candidates.", "result": "PASS" },
+    { "id": "Q3", "check": "A zero-record store returns exactly the empty-answer line plus the two scope lines.", "result": "PASS" },
+    { "id": "Q4", "check": "Both prescribed punctuated/plain requests have the same candidate order and normalized searched words.", "result": "PASS" },
+    { "id": "Q5", "check": "Both wordless inputs exit 2; forbidden relate wrapper and model import hook prove neither query nor model runs.", "result": "PASS" },
+    { "id": "Q6", "check": "Missing-store CLI error and exit 1.", "result": "PASS" },
+    { "id": "Q7", "check": "Missing request, two requests and build-only option exit 2 with useful usage.", "result": "PASS" },
+    { "id": "Q8", "check": "Real word recipe and CLI find title, first-item and later-item terms. Metadata and item labels do not word-match.", "result": "PASS" },
+    { "id": "Q9", "check": "A titleless, itemless record has empty searchText, a finite 384-number vector, no word hit and a meaning-only CLI hit.", "result": "PASS" },
+    { "id": "Q10", "check": "Drop each index separately in retained fixture stores; search exits 1 with the precise missing-index error and no partial stdout.", "result": "PASS" },
+    { "id": "Q11", "check": "A fresh HOME and blocked fetch fail both search and build with the model and cache path named, no answer, and the prior store still usable.", "result": "PASS" },
+    { "id": "Q12", "check": "An unconstrained symbol's why ends with the exact search hint; a forbidden model hook proves no search runs.", "result": "PASS" },
+    { "id": "Q13", "check": "The fixture's unlinked rounding decided tag remains the decision, with no empty-decision line or search hint.", "result": "PASS" },
+    { "id": "Q14", "check": "Unconstrained carry has the same hint and retains one-step/scope sections; existing carry contracts run unchanged.", "result": "PASS" },
+    { "id": "Q15", "check": "Both printed recipes execute over actual read-only MCP with word text or a stored real-model 384-float vector, return candidate fields without scores, and contain no CALL subquery.", "result": "PASS" },
+    { "id": "Q16", "check": "Actual MCP meaning call without vector returns isError and names the missing parameter.", "result": "PASS" },
+    { "id": "Q17", "check": "CLI stdout is byte-identical twice and after rebuilding. Public pure fusion tests use synthetic opposite ranks to expose exact ties, five-result bounding, matching paths, ignored raw scores and RRF weighting.", "result": "PASS" },
+    { "id": "Q18", "check": "Newline/tab heading is one line, words are normalized, and a forwarding relate wrapper captures the bound vector; it equals an independent real-model embedding of the whole raw request, including punctuation.", "result": "PASS" },
+    { "id": "Q19", "check": "Explicit --repo and cwd outside Git both exit 2. GIT_CEILING_DIRECTORIES prevents scratch from discovering the enclosing subject repo.", "result": "PASS" },
+    { "id": "Q20", "check": "Warm builds/search never fetch or print model chatter. A fresh HOME downloads about 34.7 MB through an in-process fixture transport from the existing public model cache; cold/warm build output is byte-identical and later build/search do not fetch again.", "result": "PASS with transport limitation below" },
+    { "id": "Q21", "check": "A no-record build succeeds with a fresh HOME and a forbidden model import, creates no model cache, and still has both indexes.", "result": "PASS" },
+    { "id": "Q22", "check": "Every fixture record stores its title/all item texts and a finite 384-float vector. SHOW VECTOR INDEXES reports the index ONLINE on Decision.vector.", "result": "PASS" },
+    { "id": "Q23", "check": "Word-heavy, meaning-only and mixed answers expose matching-path labels and no score/similarity numbers.", "result": "PASS" },
+    { "id": "Q24", "check": "Distinct id/date/status/source/topic terms have no MCP word rows and only meaning matches in CLI answers.", "result": "PASS" }
+  ],
+  "m1": {
+    "protects": "The MCP config remains read-only with telemetry disabled and prints the full supported recipe surface.",
+    "oldList": ["carry", "impact", "names", "users", "why"],
+    "requiredList": ["carry", "impact", "meaning", "names", "search", "users", "why"],
+    "reason": "Q15 explicitly adds search and meaning; M1 says every recipe. Existing command/config assertions remain intact, and Q15/Q16 execute the additions over MCP."
+  },
+  "contractFailures": [
+    {
+      "id": "Q1",
+      "test": "Q1 CONTRACT FAILURE: fixture ranking and required match labels",
+      "expected": ["words and meaning", "meaning", "meaning", "meaning", "meaning"],
+      "actual": ["words and meaning", "words and meaning", "words and meaning", "meaning", "meaning"],
+      "order": ["note-1", "ADR-0002", "ADR-0003", "ADR-0001", "note-2"],
+      "repro": "node test/run.mjs --test-name-pattern='^Q1 CONTRACT FAILURE'",
+      "cliRepro": "node src/main.ts search 'round tax half to even' --repo test-results/scratch/2026-11-13T09-32-13-592Z-2474484/Q1_CONTRACT_FAILURE__fixture_ranking_and_required_match_labels/repo",
+      "handling": "Ordinary failing assertion, explicitly labelled CONTRACT FAILURE; never skipped or TODO. Production code was not fixed."
+    }
+  ],
+  "ambiguities": [
+    "Q1 and the README example require meaning-only labels on ADR-0002 and ADR-0003, but both titles contain tax and the actual full-text recipe returns them for this request. The required expectation remains the test oracle until the parent decides whether the contract or search behavior should change."
+  ],
+  "notTested": [
+    "No Q item is wholly omitted. Q20 does not contact the real Hugging Face endpoint or establish live endpoint availability/download timing: the brief forbids needing network. Its real model bytes are served through a test-only fetch transport, including range metadata, and the production library performs the actual caching and inference."
+  ],
+  "realData": {
+    "fixture": "test/fixtures/search-paraphrase.json",
+    "record": "ADR-0001 from the public fixture's docs/adr/0001-money-in-cents.md",
+    "paraphrase": "currency arithmetic avoids binary precision errors",
+    "words": "money cents integer amount",
+    "observed": "No overlapping record-text word and zero MCP word hits for the paraphrase; ADR-0001 appears among the five as meaning-only. The record's own words put ADR-0001 first.",
+    "limit": "The shared fixture has five records; this establishes the requested meaning path and lexical first place, not broad retrieval quality.",
+    "privacy": "The committed fixture contains two short public requests, a record id and a provenance note; no private text or model weights."
+  },
+  "plants": {
+    "command": "node test/search-plants.mjs",
+    "evidence": "test-results/scratch/search-plants-2026-11-13T09-31-40-919Z-2448037/summary.json",
+    "outcomes": [
+      { "name": "word-index-title-only", "bug": "Omit all statement text from the indexed record text.", "red": "Q8 Q24", "exit": 1 },
+      { "name": "fusion-ties-reverse-id", "bug": "Break equal fused ranks by descending instead of ascending id.", "red": "Q17 fusion", "exit": 1 },
+      { "name": "empty-build-loads-model", "bug": "Remove the no-text early return so an empty build loads the model.", "red": "Q21", "exit": 1 },
+      { "name": "candidate-prints-score", "bug": "Print a numeric score with every candidate.", "red": "Q23", "exit": 1 }
+    ],
+    "proof": "Each selected test passes on the unmodified subject and fails individually on its planted copy. Runner exit 0 confirms four detected plants. Copies, plant manifests and TAP evidence remain in scratch; none is staged."
+  },
+  "executionNotes": [
+    "The sandbox made Node spawnSync report EPERM even for successful git/true children. Tests were rerun with the approved unsandboxed Node command; these infrastructure errors were not counted as contract failures.",
+    "Final runner preloads the offline fetch guard for all Node descendants. Existing README tests with fresh homes receive the public cached model through the fixture transport; Q11 explicitly opts out.",
+    "pnpm check and pnpm lint exited 0. Lint was rerun unsandboxed so its ordinary event log could be written.",
+    "No OptMem commands were run: this is a delegated session. The memo line below is for the parent."
+  ],
+  "validation": {
+    "check": { "command": "pnpm check", "exit": 0 },
+    "lint": { "command": "pnpm lint", "exit": 0 },
+    "suite": {
+      "command": "node test/run.mjs",
+      "exit": 1,
+      "tests": 153,
+      "pass": 152,
+      "fail": 1,
+      "skipped": 0,
+      "todo": 0,
+      "newSearchTests": 26,
+      "newSearchPass": 25,
+      "newSearchFail": 1,
+      "report": "test-results/2026-11-13T09-30-51-682Z-2405617.tap",
+      "wallSeconds": 159.524,
+      "soleFailure": "Q1 CONTRACT FAILURE: fixture ranking and required match labels"
+    },
+    "focusedFinalQ1": {
+      "command": "node test/run.mjs --test-name-pattern='^Q1 CONTRACT FAILURE'",
+      "exit": 1,
+      "reason": "After adding all five records' metadata assertions, Q1 still fails only on the required match labels.",
+      "report": "test-results/2026-11-13T09-32-13-592Z-2474484.tap"
+    },
+    "plants": { "command": "node test/search-plants.mjs", "exit": 0, "detected": 4, "total": 4 }
+  },
+  "memo": "[[whygraph-relate-loader]] Search Q1-Q24 tests cover CLI, indexes, real embeddings and MCP; four fault plants are detected. Q1 alone disagrees: ADR-0002/0003 print words and meaning where the contract requires meaning."
+}

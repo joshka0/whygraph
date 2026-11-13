@@ -2,6 +2,7 @@
 import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -14,10 +15,16 @@ console.log(`TAP report: ${report}\nRetained scratch: ${scratch}`);
 const child = spawn(process.execPath, [
   '--test', '--test-reporter=spec', '--test-reporter-destination=stdout',
   '--test-reporter=tap', `--test-reporter-destination=${report}`,
-  ...process.argv.slice(2), resolve(root, 'test/contracts.test.mjs'), resolve(root, 'test/docs.test.mjs'), resolve(root, 'test/carry.test.mjs'),
+  ...process.argv.slice(2), resolve(root, 'test/contracts.test.mjs'), resolve(root, 'test/docs.test.mjs'), resolve(root, 'test/carry.test.mjs'), resolve(root, 'test/search.test.mjs'),
 ], {
   cwd: root, stdio: 'inherit',
-  env: { ...process.env, RELATE_TELEMETRY: '0', DO_NOT_TRACK: '1', WHYGRAPH_TEST_RUN_DIR: scratch },
+  env: {
+    ...process.env, RELATE_TELEMETRY: '0', DO_NOT_TRACK: '1', WHYGRAPH_TEST_RUN_DIR: scratch,
+    NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ''} --import=${resolve(root, 'test/search-offline.mjs')}`.trim(),
+    // README checks use fresh homes. Supply the public cached model through
+    // the offline fixture transport rather than contacting Hugging Face.
+    WHYGRAPH_TEST_MODEL_FIXTURE_CACHE: resolve(homedir(), '.cache/whygraph'),
+  },
 });
 child.on('error', error => { console.error(error); process.exitCode = 1; });
 child.on('exit', (code, signal) => {

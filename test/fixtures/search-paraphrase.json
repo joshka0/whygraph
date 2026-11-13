@@ -1,0 +1,6 @@
+{
+  "source": "scripts/fixture.sh public ADR 0001; no private text",
+  "id": "ADR-0001",
+  "paraphrase": "currency arithmetic avoids binary precision errors",
+  "words": "money cents integer amount"
+}

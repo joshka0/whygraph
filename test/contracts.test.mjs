@@ -539,7 +539,7 @@ contract('M1', 'printed MCP config is read-only and includes every recipe', 'fix
   assert.equal(server.command, 'relate');
   assert.deepEqual(server.args, ['serve', '--mcp', 'stdio', '--database', s.store, '--read-only']);
   assert.deepEqual(server.env, { RELATE_TELEMETRY: '0', DO_NOT_TRACK: '1' });
-  assert.deepEqual([...recipes.keys()].sort(), ['carry', 'impact', 'names', 'users', 'why']);
+  assert.deepEqual([...recipes.keys()].sort(), ['carry', 'impact', 'meaning', 'names', 'search', 'users', 'why']);
   for (const text of recipes.values()) assert.match(text, /\bMATCH\b/);
 });
 contract('M2', 'the printed server exposes exactly two read-only tools and a schema', 'fixture', async (s, t) => {
