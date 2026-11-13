@@ -1,0 +1,97 @@
+{
+  "base": "19c2067",
+  "groundTruth": [
+    "docs/failures.md Q25/Q26",
+    "docs/adr/0001-record-search.md embedding-memory amendment",
+    "README.md build memory limit",
+    "/home/dev/scratch/whygraph-eval/embed-tests-brief.md parent ruling on Q4"
+  ],
+  "scope": "Only test/ changes are committed. All fault plants and run evidence remain under ignored test-results/scratch/. Production source, recipes and documentation are unchanged. No delegation, deletes, pushes or OptMem calls.",
+  "q4": {
+    "testedSentence": "Punctuation must not act as an operator, the `Searched:` line names the same plain words, and the word-matched records are the same; the order of meaning-only candidates may differ.",
+    "sentenceSource": "Parent ruling in embed-tests-brief.md; the parent owns the corresponding docs/failures.md correction.",
+    "checks": [
+      "Both real CLI requests exit 0. A forwarding relate wrapper captures exactly text=\"why do we round half to even\" from both calls, proving punctuation cannot reach the word index as syntax.",
+      "Both answers name why do we round half to even on the Searched line.",
+      "Both answers' word-matched ids equal the nonempty id set returned by the real read-only MCP word recipe for those plain words.",
+      "The complete fused order is not compared, since the raw punctuated request is independently embedded; existing Q18 verifies the raw request reaches the meaning search."
+    ],
+    "observed": "Both requests word-match only note-1. Full fused ids are note-1, ADR-0001, ADR-0002, ADR-0003, note-2 for the punctuated request and note-1, ADR-0001, ADR-0003, ADR-0002, note-2 for plain words; only meaning-only order differs.",
+    "result": "PASS"
+  },
+  "q25": {
+    "test": "Q25 build peak memory stays bounded as records grow from 8 to 128",
+    "choice": "Compare GNU time -v peak RSS for fresh real CLI builds of 8 and 128 synthetic public records, with the same maximum text length, and assert the stated 2 GB ceiling at both sizes. Each measurement has its own MemoryMax=6G/CPUQuota=400% systemd scope.",
+    "reason": "The brief caps tests at 300 records and forbids risking the shared host. A 16-fold growth in records exposes the old all-record tensor while staying fast and safely below the machine limit; thousands are unnecessary for that regression.",
+    "fixture": "Each record has the same short title and a statement repeating one public currency-rounding sentence 16 times. No private records, network access or model weights are committed.",
+    "acceptance": "Every measured build exits 0 and a real count(d) query confirms its full record count. Peak RSS must be below 2,000,000,000 bytes for each build; the 128-record build may grow at most 256 MiB over the 8-record build to allow allocator/runtime noise.",
+    "observedPeakKiB": { "8": 275172, "128": 272892 },
+    "result": "PASS",
+    "limits": "This is a bounded-size regression, not a fresh measurement of the documented 2,662-record run. GNU time reports maximum process RSS, the same measurement used by the ADR, rather than an aggregate cgroup-memory peak. It cannot prove asymptotic constancy for every input."
+  },
+  "q26": {
+    "test": "Q26 stored vectors equal a fresh single-text embedding regardless of companion records",
+    "oracle": "A fresh independent process directly loads the cached real q8 model and embeds the public target's exact title/newline/statement in a one-element input. The oracle does not import src/embed.ts.",
+    "checks": "Read the target's actual persisted searchText/vector after three real builds: alone; with a short and a long unrelated companion; and with reordered companions plus an empty record. Assert the exact stored text, 384 dimensions, maximum absolute difference 0 and deep equality of every float to the fresh embedding.",
+    "observedMaxAbsoluteDifferences": [0, 0, 0],
+    "result": "PASS"
+  },
+  "plants": {
+    "command": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node test/embed-plants.mjs",
+    "evidence": "test-results/scratch/embed-plants-2026-11-13T13-41-54-173Z-188352/summary.json",
+    "outcomes": [
+      {
+        "name": "all-records-in-one-model-call",
+        "change": "In a scratch copy only, replace the per-text embedding loop with the former extract([...texts]) single call.",
+        "exit": 1,
+        "pass": 0,
+        "fail": 2,
+        "red": ["Q25", "Q26"],
+        "q25PeakKiB": { "8": 328036, "128": 1161960 },
+        "q25Reason": "Peak grows by 833,924 KiB, over the 262,144 KiB allowance, even though both samples remain below the absolute 2 GB ceiling.",
+        "q26MaxAbsoluteDifference": 0.013993225991725922
+      },
+      {
+        "name": "punctuation-reaches-word-index",
+        "change": "In a scratch copy only, bind the raw request in place of searchWords(text).",
+        "exit": 1,
+        "pass": 0,
+        "fail": 1,
+        "red": ["Q4"]
+      }
+    ],
+    "runnerExit": 0,
+    "detected": 2,
+    "total": 2,
+    "proof": "The old-behavior plant fails both independent embedding regressions, with explicit peak-growth and vector-difference assertions. The punctuation plant fails Q4. Per-plant TAP, stderr, manifests, code copies and measured values remain in scratch."
+  },
+  "contractFailures": [],
+  "notTested": [
+    "No thousands-record build was run: the safety rule caps a test at 300. Q25 instead uses the explicitly authorized small-versus-larger peak comparison.",
+    "No real network download was used; model inference uses the existing cache with the test fetch guard. Existing cold-cache tests retain their public fixture transport."
+  ],
+  "executionNotes": [
+    "The initial focused run's Q25 failed in the test harness when relate's default display cap returned 100 rows for a 128-record build. Replaced row counting with a real count(d) query; production code was unchanged. Both measured builds had exited 0.",
+    "systemd's user bus is unavailable in the sandbox. All scoped runs use approved escalated execution; limits were never omitted.",
+    "pnpm lint was rerun with approved filesystem access so memod could write its ordinary .git/memod event log."
+  ],
+  "validation": {
+    "check": { "command": "pnpm check", "exit": 0 },
+    "lint": { "command": "pnpm lint", "exit": 0 },
+    "suite": {
+      "command": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node test/run.mjs",
+      "exit": 0,
+      "tests": 156,
+      "pass": 156,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "newEmbeddingPass": 2,
+      "report": "test-results/2026-11-13T13-42-37-084Z-217878.tap",
+      "scratch": "test-results/scratch/2026-11-13T13-42-37-084Z-217878",
+      "wallSeconds": 213.782
+    }
+  },
+  "memoForParent": "[[whygraph-relate-loader]] Added bounded CLI peak-memory and exact stored-vector regressions for Q25/Q26. Restoring all-text batching fails both (8/128 peaks 328036/1161960 KiB; vector drift 0.0139932). Q4 follows the parent's word-search-only ruling."
+}

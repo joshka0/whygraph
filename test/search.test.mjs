@@ -95,11 +95,32 @@ contract('Q3', 'empty record stores return the scoped empty answer', 'code', s =
   const text = ok(search(s, 'anything')); assert.match(text, /^No record matches "anything"\.\nSearched:/);
   assert.equal(text.trimEnd().split('\n').length, 3); assert.doesNotMatch(text, /Decision records that match/); scope(text);
 });
-contract('Q4', 'punctuation is plain words and preserves candidate order', 'fixture', s => {
-  const punctuated = ok(search(s, 'why (do) we *round* half-to-even?'));
-  const plain = ok(search(s, 'why do we round half to even'));
-  assert.deepEqual(ids(punctuated), ids(plain));
-  for (const text of [punctuated, plain]) has(text, 'for the words: why do we round half to even,');
+contract('Q4', 'punctuation preserves plain word queries and word-matched records', 'fixture', async (s, t) => {
+  // Parent ruling: punctuation is not an operator in the word search; the
+  // raw request still reaches the model, so meaning-only order can differ.
+  const words = 'why do we round half to even';
+  const calls = join(s.dir, 'relate-calls.jsonl');
+  const relate = ok(s.run('/usr/bin/which', ['relate'])).trim();
+  const wrapper = s.wrapper('relate', `
+    import * as fs from 'node:fs';
+    import { spawnSync } from 'node:child_process';
+    const args = process.argv.slice(2);
+    fs.appendFileSync(${JSON.stringify(calls)}, JSON.stringify(args) + '\\n');
+    const result = spawnSync(${JSON.stringify(relate)}, args, { input: fs.readFileSync(0), stdio: ['pipe', 'inherit', 'inherit'] });
+    if (result.error) throw result.error;
+    process.exit(result.status ?? 1);
+  `);
+  const answers = ['why (do) we *round* half-to-even?', words].map(request => ok(search(s, request, { env: wrapper })));
+  const boundWords = read(calls).trim().split('\n').flatMap(line => JSON.parse(line)).filter(arg => arg.startsWith('text='));
+  assert.deepEqual(boundWords, Array(2).fill(`text=${JSON.stringify(words)}`), 'only plain words may reach the word index');
+  const expected = (await wordRows(t, s, words)).map(row => row.id).sort();
+  assert.ok(expected.length > 0, 'the fixture must exercise an actual word match');
+  for (const answer of answers) {
+    has(answer, `for the words: ${words},`);
+    const blocks = answer.split(/(?=^  \d{4}-\d{2}-\d{2}  )/m);
+    const matched = blocks.filter(block => /^      matched: words(?: and meaning)?$/m.test(block)).flatMap(ids).sort();
+    assert.deepEqual(matched, expected);
+  }
 });
 contract('Q5', 'wordless requests run neither queries nor model', 'fixture', s => {
   const model = trace(s);

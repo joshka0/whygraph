@@ -13,7 +13,7 @@
     { "id": "Q1", "check": "Real CLI fixture order, candidate heading, every date/id/title, first statement line, source and scope. Corrected matched values are words and meaning for note-1/ADR-0002/ADR-0003 and meaning for ADR-0001/note-2. Separate multiline and repeated-title fixtures verify that only the first statement line is eligible for display; when it equals the title, no statement line appears and further statement lines stay hidden.", "result": "PASS" },
     { "id": "Q2", "check": "A real MCP word-query miss still yields five meaning-only CLI candidates.", "result": "PASS" },
     { "id": "Q3", "check": "A zero-record store returns exactly the empty-answer line plus the two scope lines.", "result": "PASS" },
-    { "id": "Q4", "check": "Both prescribed punctuated/plain requests have the same candidate order and normalized searched words.", "result": "PASS" },
+    { "id": "Q4", "check": "Under the parent's embedding-batches ruling, both prescribed punctuated/plain CLI requests bind exactly the same plain text parameter to relate, print the same normalized searched words, and return the same word-matched ids as the real MCP word recipe. Meaning-only candidate order is allowed to differ. See embed-contract-audit.json for the ruling and fault plant.", "result": "PASS" },
     { "id": "Q5", "check": "Both wordless inputs exit 2; forbidden relate wrapper and model import hook prove neither query nor model runs.", "result": "PASS" },
     { "id": "Q6", "check": "Missing-store CLI error and exit 1.", "result": "PASS" },
     { "id": "Q7", "check": "Missing request, two requests and build-only option exit 2 with useful usage.", "result": "PASS" },
