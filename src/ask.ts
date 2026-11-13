@@ -6,9 +6,10 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { carryAnswer, impactAnswer, whyAnswer } from "./answers.pure.ts";
 import { fail, type Exit } from "./build.ts";
-import { candidates, searchAnswer, searchWords } from "./search.pure.ts";
+import { fuse, searchAnswer, searchWords } from "./search.pure.ts";
 import { closest, missingSymbol, readSymbolTarget } from "./target.pure.ts";
 import { readQuery } from "./tools.ts";
+import { embedTexts, ModelUnavailable } from "./embed.ts";
 
 const RECIPES = new URL("../recipes/", import.meta.url);
 
@@ -64,13 +65,22 @@ export function ask(command: "why" | "impact" | "carry", target: string, root: s
 /**
  * Answers `whygraph search`.
  * owns: [[whygraph-questions]]
- * post: exit 0 with the word search of the request over the decision records, at most five, best match first; exit 2 when the request holds no word; exit 1 when there is no store.
+ * post: exit 0 with the decision records that best match the request: the word search and the meaning search each rank at most five, fused by reciprocal rank into one list of five, each saying how it matched; exit 2 when the request holds no word; exit 1 when there is no store or the embedding model is unavailable.
  */
-export function search(text: string, store: string): Exit {
+export async function search(text: string, store: string): Promise<Exit> {
   if (!existsSync(store)) return noStore(store);
   const words = searchWords(text);
   if (words === "") return fail("search needs a request with at least one word", 2);
-  console.log(searchAnswer(text, words, candidates(readQuery(store, recipe("search"), { text: words }))));
+  let vector: readonly number[];
+  try {
+    vector = (await embedTexts([text]))[0]!;
+  } catch (e) {
+    if (e instanceof ModelUnavailable) return fail(e.message);
+    throw e;
+  }
+  const wordRows = readQuery(store, recipe("search"), { text: words });
+  const meaningRows = readQuery(store, recipe("meaning"), { vector });
+  console.log(searchAnswer(text, words, true, fuse(wordRows, meaningRows)));
   return 0;
 }
 
@@ -97,7 +107,7 @@ export function mcp(store: string): Exit {
     JSON.stringify(config, null, 2),
     "",
     "Recipes: call read_cypher with a recipe as `statement` and its parameters as `parameters`, such as {\"symbol\": \"src/main.ts#run\"}. A symbol id is \"<file>#<name>\", the file path from the repo root.",
-    "To answer why: why. Before an edit: carry, why and users. When a decision changes: impact. To find a record by its text: search. To check a name: names.",
+    "To answer why: why. Before an edit: carry, why and users. When a decision changes: impact. To find a record by its text: search (words), and meaning (a 384-float vector the caller supplies). To check a name: names.",
   ];
   for (const name of recipeNames()) out.push("", `== ${name}`, recipe(name).trimEnd());
   console.log(out.join("\n"));

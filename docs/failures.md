@@ -153,28 +153,43 @@ line starts with `  - ` and says where it sits and how it relates, such as
 
 `whygraph search "<text>"` ranks decision records by their text. It never
 links a record to code: a listed record is a candidate to judge. "The fixture
-build" is as above. The word search reads the full-text index
-`decision_search` that `build` creates over each record's title and
-statements.
+build" is as above.
+
+Two searches run. The word search reads the full-text index `decision_search`
+that `build` creates over each record's `searchText` (its title and
+statements). The meaning search embeds the request with the local model
+`Xenova/bge-small-en-v1.5` (384 dimensions, cosine) and reads the vector index
+`decision_search_vector` over each record's `vector` (the embedding of the
+same `searchText`). The two ranked lists are fused by reciprocal rank
+(`1 / (60 + rank)`) into one list of five. Each line says how it matched:
+`words`, `meaning` or `words and meaning`. No score is printed.
 
 | ID | Input | Required result |
 | --- | --- | --- |
-| Q1 | `search "money in cents"` on the fixture build | Exit 0. At most 5 records, best match first; `ADR-0001` first. The heading is `Decision records that match "money in cents", best match first (a candidate, not a link: ...)`. Each record shows `YYYY-MM-DD  <id>  <title>`, then `statement:` the first line of its first item, then `source:`. The answer ends with a `Searched:` line naming the words and a `Not searched:` line. A multi-line statement shows only its first line. |
-| Q2 | A request whose words match no record | Exit 0. The first line is `No record matches "<request>".`; then the `Searched:` and `Not searched:` lines; no candidate heading. |
-| Q3 | `search "why (do) we *round* half-to-even?"` and `search "why do we round half to even"` | Exit 0. The same records in the same order: `(`, `)`, `*`, `-` and `?` are dropped, not read as operators. The `Searched:` line names the words `why do we round half to even`. |
-| Q4 | `search "   "` or `search "***"` (a request with no letter or digit) | Exit 2; stderr `search needs a request with at least one word`. No query runs. |
-| Q5 | `search "x"` with no store | Exit 1; stderr `no store at <path>; run whygraph build first`. |
-| Q6 | `search` with no argument, `search a b` (two arguments), or `search --decisions f` | Exit 2 with a usage message naming the bad argument. |
-| Q7 | The indexed text | A record is found by a word in its title or in any of its statements; never by its id, date, status, source or topics. |
-| Q8 | A record with no title and no statements | Loads; its `searchText` is empty and no request finds it. |
-| Q9 | `search` on a store built before this change (no `decision_search` index) | Exit 1; stderr `relate query failed (exit 1): IndexDoesNotExist: decision_search`. |
-| Q10 | `why` on a symbol with no tag, no record and no commit link | Exit 0. The last line starts `No decision is recorded for it.` and names `whygraph search "<the change in your own words>"`. `why` runs no search itself. |
-| Q11 | `why` on a symbol whose `decided:` tag names no record (W16) | No `No decision is recorded` line and no search hint: the tag is the decision. |
-| Q12 | `carry` on a symbol with no decision | The `why` part of the answer carries the same search hint as Q10; the rest of the answer is unchanged. |
-| Q13 | `mcp` with a store, then `read_cypher` with the `search` recipe and `{"text": "money cents"}` | `mcp` prints `== search`; the call returns the same records the CLI renders, and the recipe holds no `CALL { }` subquery. |
-| Q14 | The same request twice, and again after a rebuild | Byte-identical stdout. Records with an equal match order by id. |
-| Q15 | A request with a newline or a tab | The heading echoes it as one line (each whitespace run becomes one space); the words are searched. |
-| Q16 | `search --repo <folder outside any git repo>`, or run outside a repo | Exit 2; stderr `... is not in a git repo`. |
+| Q1 | `search "round tax half to even"` on the fixture build | Exit 0. Exactly 5 records, in this order: `note-1`, `ADR-0002`, `ADR-0003`, `ADR-0001`, `note-2`; `note-1` first with `matched: words and meaning`, the rest `matched: meaning`. The heading is `Decision records that match "round tax half to even", best match first (a candidate, not a link: ...)`. Each record shows `YYYY-MM-DD  <id>  <title>`, `matched: <words|meaning|words and meaning>`, `statement:` the first line of its first item, `source:`. Ends with `Searched:` (naming the words and the meaning search) and `Not searched:`. A multi-line statement shows only its first line. |
+| Q2 | A request whose words match no record, on a store that holds records | Exit 0. No `No record matches` line: the word list is empty but the meaning search still returns its nearest records. The heading lists them, each `matched: meaning`. |
+| Q3 | A store with no decision records | Exit 0. Both lists are empty; the first line is `No record matches "<request>".`, then the `Searched:` and `Not searched:` lines; no candidate heading. |
+| Q4 | `search "why (do) we *round* half-to-even?"` and `search "why do we round half to even"` | Exit 0. The same records in the same order: `(`, `)`, `*`, `-` and `?` are dropped, not read as operators. The `Searched:` line names the words `why do we round half to even`. |
+| Q5 | `search "   "` or `search "***"` (a request with no letter or digit) | Exit 2; stderr `search needs a request with at least one word`. Neither query runs and the model is not loaded. |
+| Q6 | `search "x"` with no store | Exit 1; stderr `no store at <path>; run whygraph build first`. |
+| Q7 | `search` with no argument, `search a b` (two arguments), or `search --decisions f` | Exit 2 with a usage message naming the bad argument. |
+| Q8 | The word-indexed text | The word search finds a record by a word in its title or in any of its statements; never by its id, date, status, source or topics. |
+| Q9 | A record with no title and no statements | Loads; its `searchText` is empty, no request finds it by words, and it still gets a `vector` (the model embeds the empty text). |
+| Q10 | `search` on a store built before this change (no `decision_search` or no `decision_search_vector`) | Exit 1; stderr `relate query failed (exit 1): IndexDoesNotExist: <index>`. It never answers with the other search alone. |
+| Q11 | The model is not cached and cannot be downloaded (an empty cache folder and no network) | Exit 1; stderr names `Xenova/bge-small-en-v1.5` and the cache folder `~/.cache/whygraph`; no word-only answer is printed. |
+| Q12 | `why` on a symbol with no tag, no record and no commit link | Exit 0. The last line starts `No decision is recorded for it.` and names `whygraph search "<the change in your own words>"`. `why` runs no search itself. |
+| Q13 | `why` on a symbol whose `decided:` tag names no record (W16) | No `No decision is recorded` line and no search hint: the tag is the decision. |
+| Q14 | `carry` on a symbol with no decision | The `why` part of the answer carries the same search hint as Q12; the rest of the answer is unchanged. |
+| Q15 | `mcp` with a store | Prints `== search` and `== meaning`. `read_cypher` with the `search` recipe and `{"text": "money cents"}` returns the word rows; with the `meaning` recipe and a 384-float `{"vector": [...]}` it returns the vector rows; neither recipe holds a `CALL { }` subquery. |
+| Q16 | `read_cypher` with the `meaning` recipe and no `vector` parameter | An error that names the missing parameter; never a list. `meaning` is the CLI's own query, so an MCP host with no local model cannot run it. |
+| Q17 | The same request twice, and again after a rebuild | Byte-identical stdout. Records with an equal fused rank order by id. |
+| Q18 | A request with a newline or a tab | The heading echoes it as one line (each whitespace run becomes one space); the words are searched and the whole request is embedded. |
+| Q19 | `search --repo <folder outside any git repo>`, or run outside a repo | Exit 2; stderr `... is not in a git repo`. |
+| Q20 | `build` on the fixture | The first build (empty cache) downloads about 35 MB into `~/.cache/whygraph` and prints nothing extra: stdout and stderr are byte-identical to a build with a warm cache. A second build and a search do not download again. |
+| Q21 | `build` with no decision records | Exit 0; the model is not loaded or downloaded (there is no text to embed); the store still gets both indexes. |
+| Q22 | The store after a build | Every `Decision` has a `searchText` and a `vector` of 384 floats (`size(d.vector) = 384`); `SHOW VECTOR INDEXES` lists `decision_search_vector` on `Decision.vector`, state `ONLINE`. |
+| Q23 | Any `search` answer | Holds no score: no `score:` line and no similarity number. The order and the `matched:` line are the whole signal. |
+| Q24 | A record whose id, date, status, source or topic holds the request's only word | Not a word match (those fields are not indexed); it may still be a meaning match. |
 
 ## mcp
 

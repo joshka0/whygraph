@@ -27,7 +27,7 @@ function repoRoot(repo: string | undefined): string | undefined {
   return git(repo ?? ".", "rev-parse", "--show-toplevel")?.trim();
 }
 
-function main(argv: readonly string[]): Exit {
+async function main(argv: readonly string[]): Promise<Exit> {
   const args = readArgs(argv);
   if ("usage" in args) return fail(`${args.usage}\n\n${USAGE}`, 2);
   if (args.command === "help") {
@@ -46,7 +46,7 @@ function main(argv: readonly string[]): Exit {
 
 let status: Exit;
 try {
-  status = main(process.argv.slice(2));
+  status = await main(process.argv.slice(2));
 } catch (e) {
   if (e instanceof ToolMissing) status = fail(e.message);
   else if (e instanceof QueryFailed) status = fail(`relate query failed (exit ${e.status}): ${e.message}`);

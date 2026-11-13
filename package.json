@@ -18,5 +18,8 @@
     "@types/node": "^26.6.6",
     "memod": "git+file:///home/dev/repos/personal/memod#be6b12674ea4004f75abd5fa86d925255b3967f7",
     "tsrs": "0.23.0-ts7.1.0-beta"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "4.3.2"
   }
 }

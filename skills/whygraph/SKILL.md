@@ -6,7 +6,7 @@ description: Ask the repo's why graph before changing code. Use before you edit,
 # whygraph
 
 whygraph holds this repo's code, its history and its decision records in one
-graph. Three questions, three commands:
+graph. Four questions, four commands:
 
 | When | Ask | Command |
 | --- | --- | --- |
@@ -46,6 +46,11 @@ exactly, such as `ADR-0003` or `note-2`.
   strong; with a large N the commit may have touched this symbol for another
   reason.
 - "superseded by: X" means the record was replaced; read X too.
+- In a `search` answer, `matched: words` means the record shares a word with
+  the change, `matched: meaning` means the local model ranked it near, and
+  `words and meaning` means both. Neither score is a confidence, and the
+  meaning search always returns its nearest records, so the list is
+  candidates to judge, never links.
 
 ## Exit status
 
@@ -66,6 +71,9 @@ whygraph build --decisions "$(git rev-parse --git-dir)/whygraph-adrs.json"
 ```
 
 Add `--decisions <file>` once for each other decisions file the repo keeps.
+The first build downloads the embedding model (about 35 MB) into
+`~/.cache/whygraph`; later builds and searches read it from there. With no
+network and no cache, the build exits 1 and names the model.
 
 ## Without a shell (MCP)
 

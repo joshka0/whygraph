@@ -79,9 +79,16 @@ the change reverses `note-2`, instead of making it silently.
   you need a memod clone that holds that commit, at that path or at a path
   you write into `package.json` instead.
 
-whygraph itself has no runtime dependency; it runs `git`, `memod` and `relate`
-as child processes. Every `relate` call it makes sets `RELATE_TELEMETRY=0` and
-`DO_NOT_TRACK=1`.
+whygraph has one runtime dependency, `@huggingface/transformers`, which runs
+a local ONNX model to rank decision records by meaning for `whygraph
+search`. It otherwise runs `git`, `memod` and `relate` as child processes.
+Every `relate` call it makes sets `RELATE_TELEMETRY=0` and `DO_NOT_TRACK=1`.
+
+The model is `Xenova/bge-small-en-v1.5` (384 dimensions, cosine). The first
+`whygraph build` downloads it: about 35 MB of weights into `~/.cache/whygraph`.
+Later builds and every `search` read it from there. With no network and no
+cache, `build` and `search` exit 1 with an error that names the model; they
+do not fall back to the word search alone.
 
 ## Set up
 
@@ -93,10 +100,12 @@ export WHYGRAPH="$PWD"
 export PATH="$WHYGRAPH/bin:$WHYGRAPH/node_modules/.bin:$PATH"
 ```
 
-`pnpm install` builds memod from the pinned commit. `bin/` holds the
-`whygraph` command and `node_modules/.bin` holds `memod`. Put the two
-`export` lines in your shell profile (with the folder's full path in place of
-`$PWD`) so that every shell, and every agent you start from one, finds them.
+`pnpm install` builds memod from the pinned commit and installs the
+embedding runtime (about 500 MB, mostly the ONNX runtime binaries for every
+platform). `bin/` holds the `whygraph` command and `node_modules/.bin` holds
+`memod`. Put the two `export` lines in your shell profile (with the folder's
+full path in place of `$PWD`) so that every shell, and every agent you start
+from one, finds them.
 
 ```console
 $ whygraph help
@@ -304,6 +313,38 @@ No symbol uses it.
 
 1 commit changed its code or tags, newest first:
   17078bb 2026-01-09 Add checkout with tax rounded half to even
+```
+
+A record can govern a change with no tag or commit that links it to the code.
+`search` ranks the records by their text and shows the candidates; the reader
+judges whether one governs the change. Each line says how it matched: by
+words, by meaning, or by both.
+
+```console
+$ whygraph search "round tax half to even"
+Decision records that match "round tax half to even", best match first (a candidate, not a link: read the record and judge whether it governs your change):
+  2026-01-02  note-1  Tax is computed once per order, not per line
+      matched: words and meaning
+      statement: tax once per order because per-line rounding adds up to a cent per line
+      source: decisions/notes.json
+  2026-01-02  ADR-0002  One flat tax rate
+      matched: words and meaning
+      statement: Tax is computed on cents (ADR 0001).
+      source: docs/adr/0002-flat-tax.md
+  2026-01-03  ADR-0003  Tax rate by region
+      matched: words and meaning
+      statement: Orders now ship outside the EU. Amounts stay in cents (ADR 0001).
+      source: docs/adr/0003-regional-tax.md
+  2026-01-01  ADR-0001  Money in cents
+      matched: meaning
+      statement: Prices arrive as decimal numbers.
+      source: docs/adr/0001-money-in-cents.md
+  2026-01-04  note-2  Show thousands separators in totals
+      matched: meaning
+      statement: en-US separators because the shop sells in USD first
+      source: decisions/notes.json
+Searched: the title and statement of every decision record in the store, for the words: round tax half to even, and for the meaning of the request.
+Not searched: the code, the commits and the tags (run whygraph why or carry on a symbol for the links the graph holds); a record's id, date, status, topics and source (only its title and statement are indexed).
 ```
 
 A name the graph does not hold exits 3 and lists close names:
@@ -574,7 +615,7 @@ jq '{records: (.items | group_by(.memo) | map({
 | `whygraph why <file>:<symbol>` | The `decided:` tags on the symbol and on its file header; the records those tags name; then the records linked only through a commit that cites them and changed the symbol, oldest first, each commit with how many symbols it changed. |
 | `whygraph impact <decision id>` | The record and every record that rests on it, directly or through others; for each, the symbols and files whose `decided:` tags name it, then the commits that cite it and the other symbols those commits changed, with how many symbols use each directly. |
 | `whygraph carry <file>:<symbol>` | Before an edit: the topics the symbol owns and their other owners, the formal checks that cover it, its premise memos, its decisions (as `why`); then one step away, the `decided:` tags, the records they name, the checks and the topics of the symbols it uses and of the symbols that use it, most binding first, each line naming where it sits; then its direct and transitive users, and the commits that changed it. |
-| `whygraph search "<text>"` | The five decision records whose title and statement best match the text, best match first, each a candidate to judge, not a link; then what was searched and what was not. |
+| `whygraph search "<text>"` | The five decision records that best match the text: the word search and the meaning search each rank at most five, fused by reciprocal rank, each line saying how it matched (`words`, `meaning` or `words and meaning`), each a candidate to judge, not a link; then what was searched and what was not. |
 | `whygraph mcp` | The MCP server config that serves the store read-only through `relate serve --mcp stdio`, and every recipe. |
 | `whygraph help` | The usage. |
 
@@ -684,7 +725,7 @@ build.
 | `Check` | `name` | | memod `check` |
 | `Memo` | `ref` | | memod `memo` (a `premise:` tag) |
 | `Commit` | `sha` | `short`, `date`, `subject` | memod `commit` |
-| `Decision` | `id` | `title`, `date`, `status`, `source`, `searchText` | a decision record |
+| `Decision` | `id` | `title`, `date`, `status`, `source`, `searchText`, `vector` | a decision record |
 | `Item` | | `ord`, `label`, `text` | a record's item |
 
 | Relationship | From -> to |
@@ -736,11 +777,14 @@ store rather than merging into it.
   index Markdown, so an ADR file has no node.
 - The recipes use no `CALL { }` subquery: relate's read-only MCP tool rejects
   one.
-- `search` reads only a record's title and statements, by words: it does not
-  look at the code, the commits or the tags, and it ranks by how well the
-  words match, which does not separate a record that governs the change from
-  noise. A listed record is a candidate; read it and judge. A record with an
-  empty title and no statements matches no word.
+- `search` reads only a record's title and statements. It ranks by words
+  and by meaning (a local embedding model), then fuses the two lists by
+  reciprocal rank. Neither score separates a record that governs the change
+  from noise, and a nearest-by-meaning record is always returned even when
+  the request shares nothing with it, so a listed record is a candidate; read
+  it and judge. A record with an empty title and no statements matches no
+  word and embeds its empty text. `search` over MCP is the word search only:
+  an MCP host has no local model to embed the request.
 
 ## Develop
 

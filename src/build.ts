@@ -5,9 +5,10 @@
 import { readFileSync } from "node:fs";
 import { readCodeGraph, graphCommits } from "./code-graph.pure.ts";
 import { tagLinks, trailerCites, type CommitTrailers } from "./links.pure.ts";
-import { loadPlan } from "./load.pure.ts";
+import { loadPlan, recordText } from "./load.pure.ts";
 import { checkRecords, readDecisionsFile, type SourcedRecord } from "./records.pure.ts";
 import { buildStore, foreignStore } from "./store.ts";
+import { embedTexts, ModelUnavailable } from "./embed.ts";
 import { git, readQuery, relate, run } from "./tools.ts";
 
 /** The outcome of a command: an exit status and what was printed. */
@@ -18,9 +19,10 @@ export type Exit = number;
  * owns: [[whygraph-build]]
  * post: exit 0 and a summary of node and relationship counts by label and type, sorted by name; warnings go to stderr, one per line, sorted.
  * post: a record cites the commits it lists and the commits of HEAD whose `Decision:` trailers name its id; a decided: tag names the records `namedRecords` finds in its text.
- * post: exit 1, store unchanged, when relate or memod is missing, memod fails or prints no graph, a decisions file cannot be read or holds a bad record, two records share an id, or records supersede in a cycle, or a load statement fails.
+ * post: every record's text is embedded once with the local model and stored on its node, which the vector index holds; the first build downloads the model.
+ * post: exit 1, store unchanged, when relate or memod is missing, memod fails or prints no graph, a decisions file cannot be read or holds a bad record, two records share an id, or records supersede in a cycle, or a load statement fails, or the embedding model is unavailable.
  */
-export function build(root: string, store: string, decisionFiles: readonly string[]): Exit {
+export async function build(root: string, store: string, decisionFiles: readonly string[]): Promise<Exit> {
   const foreign = foreignStore(store);
   if (foreign !== undefined) return fail(foreign);
   if (relate(["--version"]).status !== 0) return fail("relate --version failed; check the relate install");
@@ -65,7 +67,15 @@ export function build(root: string, store: string, decisionFiles: readonly strin
   if (commits.length === 0) process.stderr.write("warning: the repo has no commits, so no record links to code and no symbol has a history\n");
 
   const files = new Map(sourced.map((s) => [s.record.id, s.file]));
-  const done = buildStore(store, loadPlan(graph, { ...checked, cites: trailers.cites }, tags.links, files));
+  let vectors: ReadonlyMap<string, readonly number[]>;
+  try {
+    const embedded = await embedTexts(checked.records.map(recordText));
+    vectors = new Map(checked.records.map((r, i) => [r.id, embedded[i]!]));
+  } catch (e) {
+    if (e instanceof ModelUnavailable) return fail(e.message);
+    throw e;
+  }
+  const done = buildStore(store, loadPlan(graph, { ...checked, cites: trailers.cites }, tags.links, files, vectors));
   if ("status" in done) return fail(`relate failed while loading (exit ${done.status}); the store is unchanged:\n${done.message}`);
 
   const labels = readQuery(store, "MATCH (n) RETURN labels(n)[0] AS name, count(*) AS n ORDER BY name");
