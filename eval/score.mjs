@@ -287,21 +287,40 @@ function main(argv) {
   console.log(`${rows.length} finished runs\n\nRuns:`);
   for (const r of rows) console.log(`  ${r.verdict.pass ? 'PASS' : 'FAIL'}  ${r.id}  whygraph calls: ${r.verdict.whygraphCalls}${r.verdict.reasons.length ? `  (${r.verdict.reasons.join('; ')})` : ''}`);
   const shaped = [...tasks.values()].filter((t) => t.shaped_tool !== undefined).map((t) => t.id);
-  rates(rows, tasks, 'All tasks');
-  if (shaped.length > 0) rates(rows.filter((r) => !shaped.includes(r.task.id)), tasks, `Without the tasks that shaped the tool (${shaped.join(', ')})`);
+  const unshaped = (rs) => rs.filter((r) => !shaped.includes(r.task.id));
+  const batch = (n) => (rs) => rs.filter((r) => (r.task.batch ?? 1) === n);
+  const first = batch(1);
+  const second = batch(2);
+  // Batch 1: the fourteen tasks of the first run, reported as they were before the second batch existed.
+  rates(first(rows), tasks, 'All tasks');
+  if (shaped.length > 0) rates(unshaped(first(rows)), tasks, `Without the tasks that shaped the tool (${shaped.join(', ')})`);
+  // Batch 2: sixteen tasks chosen blind; the tool did not change after they were seen. Primary result: graph - stub here.
+  if (second(rows).length > 0) {
+    rates(second(rows), tasks, 'Batch 2: the sixteen tasks chosen blind (primary result: graph - stub)');
+    for (const repo of ['memod', 'memoryd']) rates(second(rows).filter((r) => r.task.repo === repo), tasks, `Batch 2: ${repo} only`);
+    for (const level of ['easy', 'medium', 'hard']) {
+      rates(second(rows).filter((r) => r.task.ground_truth?.source?.findable_by_search?.likelihood === level), tasks, `Batch 2: findable by search, picker's rating ${level}`);
+    }
+    rates(rows, tasks, 'Both batches: all thirty tasks');
+    if (shaped.length > 0) rates(unshaped(rows), tasks, `Both batches: without the tasks that shaped the tool (${shaped.join(', ')})`);
+  }
   console.log(`\n=== Unscored runs (an agent timed out twice; not in any rate above): ${unscored.length}`);
   for (const r of unscored) console.log(`  ${r.id}  (exit ${r.meta.exit}, ${Math.round(r.meta.wall_ms / 1000)} s)`);
   if (unscored.length > 0) {
     console.log('\nSensitivity: the same paired differences with every unscored run counted as FAIL:');
     const all = [...rows, ...unscored];
-    console.log(`  All tasks: ${headline(all, tasks)}`);
-    if (shaped.length > 0) console.log(`  Without the tasks that shaped the tool: ${headline(all.filter((r) => !shaped.includes(r.task.id)), tasks)}`);
+    console.log(`  All tasks: ${headline(first(all), tasks)}`);
+    if (shaped.length > 0) console.log(`  Without the tasks that shaped the tool: ${headline(unshaped(first(all)), tasks)}`);
+    if (second(all).length > 0) {
+      console.log(`  Batch 2: ${headline(second(all), tasks)}`);
+      console.log(`  Both batches: ${headline(all, tasks)}`);
+    }
   }
   console.log('\n=== Post hoc, added after the results were seen: without the fixture tasks whose records exist only outside the repo');
   console.log(`(${OUTSIDE_ONLY.join(', ')}: no agent without the graph can name their records, so they score 0/100/0 by design and carry much of the headline.)`);
-  const reachable = rows.filter((r) => !OUTSIDE_ONLY.includes(r.task.id));
+  const reachable = first(rows).filter((r) => !OUTSIDE_ONLY.includes(r.task.id));
   rates(reachable, tasks, 'Post hoc: without the outside-only tasks');
-  if (shaped.length > 0) rates(reachable.filter((r) => !shaped.includes(r.task.id)), tasks, `Post hoc: without the outside-only tasks and the tasks that shaped the tool (${shaped.join(', ')})`);
+  if (shaped.length > 0) rates(unshaped(reachable), tasks, `Post hoc: without the outside-only tasks and the tasks that shaped the tool (${shaped.join(', ')})`);
   const total = rows.reduce((a, r) => a + (r.meta.tokens?.total ?? 0), 0);
   console.log(`\nTotal tokens: ${total}`);
   return 0;

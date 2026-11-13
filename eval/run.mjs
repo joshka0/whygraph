@@ -9,7 +9,7 @@
  *
  * --plan prints the runs it would start and starts none. A run whose results/<id>/meta.json says
  * "done" is not started again. At most 3 agents run at once. Work folders live under
- * $WHYGRAPH_EVAL_WORK (default /tmp/whygraph-eval) and are deleted after each run.
+ * $WHYGRAPH_EVAL_WORK (default /var/tmp/whygraph-eval) and are deleted after each run.
  */
 import { spawn, spawnSync } from 'node:child_process';
 import { appendFileSync, chmodSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -20,8 +20,10 @@ import { readTasks } from './score.mjs';
 const EVAL = fileURLToPath(new URL('./', import.meta.url));
 const WHYGRAPH = join(EVAL, '..');
 const RESULTS = join(EVAL, 'results');
-const WORK = process.env.WHYGRAPH_EVAL_WORK ?? '/tmp/whygraph-eval';
-const MEMOD_REPO = '/home/dev/scratch/whygraph-eval/memod-tasks';
+// On disk, not in /tmp: /tmp is an 8 GB tmpfs on this box, and three memoryd copies with their snapshots do not fit in it.
+const WORK = process.env.WHYGRAPH_EVAL_WORK ?? '/var/tmp/whygraph-eval';
+const MEMOD_REPO = '/home/dev/scratch/whygraph-eval/tasks2/memod';
+const MEMORYD_REPO = '/home/dev/scratch/whygraph-eval/tasks2/memoryd';
 const MODEL = 'sonnet';
 const TIMEOUT_MS = 20 * 60 * 1000;
 const QUIET = { RELATE_TELEMETRY: '0', DO_NOT_TRACK: '1' };
@@ -108,6 +110,32 @@ export function memodTemplate() {
   return repo;
 }
 
+/**
+ * The memoryd task repo, copied once from the read-only clone. Its dependencies are not installed:
+ * its package.json depends on `bend-boundary` as `file:../bend-boundary`, a folder the clone does not
+ * have, so `sfw bun install --frozen-lockfile` fails. Every condition gets the same uninstalled copy.
+ * owns: [[whygraph-eval-runner]]
+ */
+export function memorydTemplate() {
+  const base = join(WORK, '_memoryd');
+  const repo = join(base, 'repo');
+  if (existsSync(join(base, 'ready'))) return repo;
+  rmSync(base, { recursive: true, force: true });
+  mkdirSync(base, { recursive: true });
+  cpSync(MEMORYD_REPO, repo, { recursive: true, verbatimSymlinks: true });
+  if (sh('git', ['status', '--porcelain'], { cwd: repo }).trim() !== '') throw new Error(`the memoryd copy in ${repo} is not clean`);
+  writeFileSync(join(base, 'ready'), '');
+  return repo;
+}
+
+/** The template a task's repo is copied from. */
+function template(task) {
+  if (task.repo === 'fixture') return fixtureTemplate().repo;
+  if (task.repo === 'memod') return memodTemplate();
+  if (task.repo === 'memoryd') return memorydTemplate();
+  throw new Error(`task ${task.id}: unknown repo ${task.repo}`);
+}
+
 /** An executable shell script at `path`. */
 function wrapper(path, body) {
   writeFileSync(path, `#!/bin/sh\n${body}\n`);
@@ -146,7 +174,8 @@ export function confinement(condition, work) {
     ...(condition === 'none' ? [WHYGRAPH] : ['eval', 'scripts', 'test', 'test-results', 'docs', '.git'].map((d) => join(WHYGRAPH, d))),
   ];
   // One /tmp for every Bash call of the run, so a file a command leaves there is there for the next one.
-  const args = ['bwrap', '--die-with-parent', '--unshare-net', '--ro-bind', '/', '/', '--dev', '/dev', '--proc', '/proc', '--bind', join(work, 'systmp'), '/tmp'];
+  // WORK is hidden whole (other runs, the templates); this run's folder and the shared tools are mounted back below.
+  const args = ['bwrap', '--die-with-parent', '--unshare-net', '--ro-bind', '/', '/', '--tmpfs', WORK, '--dev', '/dev', '--proc', '/proc', '--bind', join(work, 'systmp'), '/tmp'];
   for (const d of hide) if (existsSync(d)) args.push('--tmpfs', d);
   for (const f of [join(home, '.claude.json'), ...(condition === 'none' ? [] : [join(WHYGRAPH, 'README.md')])]) if (existsSync(f)) args.push('--ro-bind', '/dev/null', f);
   // The CLI sources a snapshot of the login shell from here before each command.
@@ -168,7 +197,7 @@ export function prepare(task, condition, work) {
   mkdirSync(join(work, 'systmp'), { recursive: true });
   const repo = join(work, 'repo');
   const fixture = task.repo === 'fixture' ? fixtureTemplate() : undefined;
-  cpSync(fixture?.repo ?? memodTemplate(), repo, { recursive: true, verbatimSymlinks: true });
+  cpSync(template(task), repo, { recursive: true, verbatimSymlinks: true });
   const bin = join(work, 'bin');
   if (condition !== 'none') {
     // graph and stub share every tool and every line of instructions; only `whygraph` differs.

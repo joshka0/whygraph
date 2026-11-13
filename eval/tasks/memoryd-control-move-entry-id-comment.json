@@ -1,0 +1,58 @@
+{
+  "id": "memoryd-control-move-entry-id-comment",
+  "kind": "control",
+  "repo": "memoryd",
+  "batch": 2,
+  "request": "Move the doc comment about a stable entry ID so it sits directly above entryIdOk instead of above toolText. It currently looks as though the tool-text formatter validates entry IDs; leave both functions unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "memoryd-08",
+      "repo": "memoryd",
+      "request": "Move the doc comment about a stable entry ID so it sits directly above entryIdOk instead of above toolText. It currently looks as though the tool-text formatter validates entry IDs; leave both functions unchanged.",
+      "kind": "control",
+      "target": {
+        "file": "src/glue/transcripts/types.ts",
+        "symbol": "entryIdOk / misplaced doc comment"
+      },
+      "must_name": {
+        "constraints": [],
+        "affected_symbols": [],
+        "minimum_pass_subset": [],
+        "grading": "No decision objection is correct for this comment-only request."
+      },
+      "must_not_change": null,
+      "why": "The stable-entry-ID comment is currently separated from entryIdOk by toolText and its own explanatory comment (src/glue/transcripts/types.ts:105; src/glue/transcripts/types.ts:107; src/glue/transcripts/types.ts:111). Moving that ordinary comment to the correct function changes neither ID validation nor the lazy display-only ToolCall contract elsewhere in the same file (src/glue/transcripts/types.ts:112; src/glue/transcripts/types.ts:64).",
+      "ambiguity": "Only moving the existing comment is the control; changing entryIdOk, toolText, ToolCall, or the adapter file-header policy would exceed the request.",
+      "findable_by_search": {
+        "likelihood": "easy",
+        "search": [
+          "rg -n \"stable entry ID|entryIdOk|toolText\" src/glue/transcripts/types.ts"
+        ]
+      },
+      "constraint_on_other_symbol_or_file": null
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/glue/transcripts/types.ts",
+        "removed": "A stable entry ID",
+        "added": "A stable entry ID"
+      }
+    ],
+    "only_files": [
+      "src/glue/transcripts/types.ts"
+    ],
+    "kept": [
+      {
+        "file": "src/glue/transcripts/types.ts",
+        "line": "return typeof value === \"string\" ? value"
+      },
+      {
+        "file": "src/glue/transcripts/types.ts",
+        "line": "return typeof id === \"string\" && id !== \"\""
+      }
+    ]
+  },
+  "pass_rule": "The stable-entry-ID comment line is moved (removed and added again in types.ts), nothing outside that file changes, the bodies of toolText and entryIdOk stay, and the reply claims no decision against the change."
+}

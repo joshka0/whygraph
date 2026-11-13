@@ -1,0 +1,93 @@
+{
+  "id": "memoryd-impact-no-detached-scan",
+  "kind": "impact",
+  "repo": "memoryd",
+  "batch": 2,
+  "request": "A summary scan that times out should stop completely and resume from its saved cache only when the user runs another command, so mem never leaves a background process behind. List the current production symbols to change or retire for that behavior; leave the foreground scan and its incremental cache writes in place.",
+  "ground_truth": {
+    "source": {
+      "id": "memoryd-06",
+      "repo": "memoryd",
+      "request": "A summary scan that times out should stop completely and resume from its saved cache only when the user runs another command, so mem never leaves a background process behind. List the current production symbols to change or retire for that behavior; leave the foreground scan and its incremental cache writes in place.",
+      "kind": "impact",
+      "target": {
+        "file": "mem/src/SummaryStore.ts",
+        "symbol": "SummaryStore.layer / timeout branch"
+      },
+      "must_name": {
+        "constraints": [
+          {
+            "id": "ADR 0040 detached continuation",
+            "location": "docs/adr/0040-summary-scan-cache.md:49",
+            "quote": "- Added 2026-10-29 (operator): a scan that passes its limit goes on in a"
+          },
+          {
+            "id": "finishLater decision link",
+            "location": "mem/src/SummaryStore.ts:35",
+            "quote": "/** Finishes the scan in a detached `fileWorker.js` process that outlives mem and saves the cache (ADR 0040). */"
+          }
+        ],
+        "affected_symbols": [
+          "mem/src/SummaryStore.ts:SummaryStore.layer",
+          "mem/src/SummaryStore.ts:finishLater",
+          "mem/src/fileWorker.ts:finishScan",
+          "mem/src/summaryCache.ts:lockScan",
+          "mem/src/summaryCache.ts:unlockScan"
+        ],
+        "minimum_pass_subset": [
+          "mem/src/SummaryStore.ts:SummaryStore.layer",
+          "mem/src/SummaryStore.ts:finishLater",
+          "mem/src/fileWorker.ts:finishScan"
+        ],
+        "grading": "Name the listed constraints and the minimum affected-symbol subset; extra correctly justified symbols are allowed."
+      },
+      "must_not_change": null,
+      "why": "The timeout branch launches finishLater and prints that the scan continues in the background; finishLater spawns a detached process and unreferences it (mem/src/SummaryStore.ts:26; mem/src/SummaryStore.ts:38). That process dispatches to finishScan, which is the sole user of the dedicated lockScan/unlockScan protocol, so all five listed symbols participate in the retired path (mem/src/fileWorker.ts:64; mem/src/fileWorker.ts:69; mem/src/fileWorker.ts:75).",
+      "ambiguity": "An implementation could leave unreachable exported lock helpers behind, but the list includes retirement candidates as the question requests; foreground readCache.progress and writeCache are deliberately retained. The plain main-thread entry statement in fileWorker.ts:79 must also stop dispatching finishScan, although it has no separate named symbol.",
+      "findable_by_search": {
+        "likelihood": "medium",
+        "search": [
+          "rg -n \"finishLater|background|timeout\" mem/src/SummaryStore.ts",
+          "rg -n \"finishScan|lockScan|unlockScan|isMainThread\" mem/src/fileWorker.ts mem/src/summaryCache.ts",
+          "rg -n \"detached|timeout\" docs/adr/0040*"
+        ]
+      },
+      "constraint_on_other_symbol_or_file": "Timeout dispatch, detached-process entrypoint, and its lock helpers live in three separate modules."
+    }
+  },
+  "score": {
+    "symbols": [
+      {
+        "symbol": "mem/src/SummaryStore.ts:SummaryStore",
+        "required": true
+      },
+      {
+        "symbol": "mem/src/SummaryStore.ts:finishLater",
+        "required": true
+      },
+      {
+        "symbol": "mem/src/fileWorker.ts:finishScan",
+        "required": true
+      },
+      {
+        "symbol": "mem/src/summaryCache.ts:lockScan",
+        "required": false
+      },
+      {
+        "symbol": "mem/src/summaryCache.ts:unlockScan",
+        "required": false
+      }
+    ],
+    "records": [
+      {
+        "id": "ADR-0040",
+        "any": [
+          "outlives mem"
+        ]
+      }
+    ],
+    "min_recall": 1,
+    "min_precision": 0.6
+  },
+  "pass_rule": "Lists SummaryStore (the scorer reads `mem/src/SummaryStore.ts:SummaryStore.layer` as this item), finishLater and finishScan, and names ADR-0040 (recall 1); of the symbols listed, at least 60% are in the true set of five. The finishLater comment counts as named with ADR-0040, which it cites."
+}

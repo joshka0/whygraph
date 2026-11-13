@@ -1,0 +1,94 @@
+{
+  "id": "memod2-impact-rename-first-candidate",
+  "kind": "impact",
+  "repo": "memod",
+  "batch": 2,
+  "request": "When several deleted symbols share an owns topic with a new name, follow the first candidate in file order instead of dropping rename tracking. Before implementing this, list the production symbols that would need edits to keep history tracking consistent.",
+  "ground_truth": {
+    "source": {
+      "id": "memod2-06",
+      "repo": "memod",
+      "request": "When several deleted symbols share an owns topic with a new name, follow the first candidate in file order instead of dropping rename tracking. Before implementing this, list the production symbols that would need edits to keep history tracking consistent.",
+      "kind": "impact",
+      "target": {
+        "file": "src/history.pure.ts",
+        "symbol": "side / rename tracking"
+      },
+      "must_name": {
+        "constraints": [
+          {
+            "id": "rename ambiguity contract",
+            "location": "src/history.pure.ts:78",
+            "quote": "* post: when the pairing is not unique (two gone symbols share a topic with `b`, or two new symbols with `a`) no rename is followed in that parent: the gone symbols are deleted and the new ones added, because guessing a pair would give one symbol another's history."
+          },
+          {
+            "id": "ADR 0004 amendment 2 unique pairing",
+            "location": "docs/adr/0004-code-changes-by-code-hash.md:131",
+            "quote": "- The rename rule of the tag timeline (owned by `tagTimeline`'s doc"
+          }
+        ],
+        "affected_symbols": [
+          "src/history.pure.ts:side",
+          "src/history.pure.ts:tagTimeline"
+        ],
+        "minimum_pass_subset": [
+          "src/history.pure.ts:side",
+          "src/history.pure.ts:tagTimeline"
+        ],
+        "grading": "Name the listed constraints and the minimum affected-symbol subset; extra correctly justified symbols are allowed.",
+        "also_affected_without_required_direct_edit": [
+          "src/history.pure.ts:shapingVersions",
+          "src/history.pure.ts:timeline"
+        ]
+      },
+      "must_not_change": null,
+      "why": "side currently accepts a rename only when each side of the pairing has exactly one candidate (src/history.pure.ts:109). tagTimeline owns the no-guessing contract, and shapingVersions explicitly incorporates that rename rule for code history as well (src/history.pure.ts:78; src/history.pure.ts:179).",
+      "ambiguity": "The source helper side needs an executable predicate change, and tagTimeline owns the explicit no-guessing contract that must be updated with it. shapingVersions and timeline consume the resulting mapping but do not necessarily need direct edits; naming them as additional affected consumers is allowed.",
+      "findable_by_search": {
+        "likelihood": "medium",
+        "search": [
+          "rg -n \"renamed|pairing|gone|from.length\" src/history.pure.ts",
+          "rg -n \"unique|candidate\" docs/adr/0004*"
+        ]
+      },
+      "constraint_on_other_symbol_or_file": "The private side helper implements a rule owned by the public tagTimeline contract; shapingVersions consumes the same identity mapping."
+    }
+  },
+  "score": {
+    "symbols": [
+      {
+        "symbol": "src/history.pure.ts:side",
+        "required": true
+      },
+      {
+        "symbol": "src/history.pure.ts:tagTimeline",
+        "required": true
+      },
+      {
+        "symbol": "src/history.pure.ts:shapingVersions",
+        "required": false
+      },
+      {
+        "symbol": "src/history.pure.ts:timeline",
+        "required": false
+      }
+    ],
+    "records": [
+      {
+        "label": "post: no rename is followed when the pairing is not unique (src/history.pure.ts:78)",
+        "any": [
+          "no rename is followed",
+          "pairing is not unique",
+          "guessing a pair",
+          "another's history"
+        ]
+      },
+      {
+        "id": "ADR-0004"
+      }
+    ],
+    "min_recall": 1,
+    "min_precision": 0.6
+  },
+  "pass_rule": "Lists side and tagTimeline and names both the no-guessing postcondition (by its words) and ADR-0004 (recall 1); of the symbols listed, at least 60% are in the true set of four."
+}

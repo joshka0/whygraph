@@ -1,0 +1,114 @@
+{
+  "id": "memoryd-conflict-reopen-sqlite-owners",
+  "kind": "conflict",
+  "repo": "memoryd",
+  "batch": 2,
+  "request": "Have filterSummaries reopen SQLite and check the latest message owners while it loads summaries instead of using the eligibility captured by the earlier read. A permission change during a slow Markdown scan should show up immediately.",
+  "ground_truth": {
+    "source": {
+      "id": "memoryd-03",
+      "repo": "memoryd",
+      "request": "Have filterSummaries reopen SQLite and check the latest message owners while it loads summaries instead of using the eligibility captured by the earlier read. A permission change during a slow Markdown scan should show up immediately.",
+      "kind": "conflict",
+      "target": {
+        "file": "mem/src/indexRead.ts",
+        "symbol": "filterSummaries"
+      },
+      "must_name": {
+        "constraints": [
+          {
+            "id": "ADR 0041 same-snapshot requirement",
+            "location": "docs/adr/0041-worker-visibility.md:11",
+            "quote": "The rows belong to one SQL snapshot. Summary files load after that snapshot"
+          },
+          {
+            "id": "ADR 0041 no second open",
+            "location": "docs/adr/0041-worker-visibility.md:32",
+            "quote": "source, and all matched sources' eligibility. It does not reopen SQLite."
+          },
+          {
+            "id": "SQL native snapshot contract",
+            "location": "docs/central/SQLITE-READS.md:77",
+            "quote": "Use one SQL snapshot for each logical answer. It includes index rows,"
+          },
+          {
+            "id": "filterSummaries contract",
+            "location": "mem/src/indexRead.ts:70",
+            "quote": "/** Summary files are scanned later; their ownership comes only from this snapshot. */"
+          }
+        ],
+        "affected_symbols": [],
+        "minimum_pass_subset": [],
+        "grading": "Identify the constraint before editing; explain the concrete conflict, rather than merely citing a related record."
+      },
+      "must_not_change": {
+        "files": [
+          "mem/src/indexRead.ts",
+          "mem/src/fileWorker.ts",
+          "mem/src/nativeRead.ts"
+        ],
+        "without_decision_revision": "Leave these files unedited while reporting the conflict and proposing a revision. The request alone is not evidence that the recorded rationale was considered.",
+        "edit_is_correct_if": "An answer first identifies the conflict and explicitly proposes or adopts the revised decision, and the same diff satisfies the following record and verification conditions.",
+        "diff_requirements": {
+          "all_record_paths_must_change": [
+            "docs/adr/0041-worker-visibility.md",
+            "docs/central/SQLITE-READS.md"
+          ],
+          "conditions": [
+            "Amend both the ADR no-reopen/same-snapshot paragraphs and the one-logical-answer contract in docs/central/SQLITE-READS.md.",
+            "Revise the filterSummaries snapshot-only doc comment in mem/src/indexRead.ts and explicitly define in the records how mixed-policy answers are prevented or accepted."
+          ]
+        },
+        "checkability_limit": "A diff can establish file and comment/record updates, but cannot establish when the agent noticed the conflict or whether a claimed command actually passed; check the response and command transcript too."
+      },
+      "why": "readVisibility builds deniedSources within the read transaction and nativeSnapshot carries that visibility alongside the index answer (mem/src/indexRead.ts:60; mem/src/nativeRead.ts:31). filterSummaries deliberately uses those retained facts after SQL closes, so reopening SQLite would combine two policy snapshots in one logical answer (mem/src/indexRead.ts:72; docs/adr/0041-worker-visibility.md:11).",
+      "ambiguity": "A security policy that revalidates an entire answer at publication time could be justified, but refreshing only the summary subset is not that design; the request should be recognized as an explicit snapshot-contract change.",
+      "findable_by_search": {
+        "likelihood": "easy",
+        "search": [
+          "rg -n \"filterSummaries|readVisibility|deniedSources\" mem/src/indexRead.ts",
+          "rg -n \"snapshot|reopen\" docs/adr/0041* mem/src/nativeRead.ts"
+        ]
+      },
+      "constraint_on_other_symbol_or_file": "nativeSnapshot is the caller establishing one logical SQL snapshot; readVisibility computes the retained facts used later by filterSummaries."
+    }
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ADR-0041"
+      },
+      {
+        "label": "docs/central/SQLITE-READS.md:77",
+        "any": [
+          "SQLITE-READS",
+          "one SQL snapshot for each logical answer"
+        ]
+      },
+      {
+        "label": "filterSummaries doc comment (mem/src/indexRead.ts:70)",
+        "any": [
+          "ownership comes only from this snapshot"
+        ]
+      }
+    ],
+    "protected": [
+      "mem/src/indexRead.ts",
+      "mem/src/fileWorker.ts",
+      "mem/src/nativeRead.ts"
+    ],
+    "exception": {
+      "changed": [
+        "docs/adr/0041-worker-visibility.md",
+        "docs/central/SQLITE-READS.md",
+        "mem/src/indexRead.ts"
+      ],
+      "removed": [
+        "does not reopen SQLite",
+        "one SQL snapshot for each logical answer",
+        "ownership comes only from this snapshot"
+      ]
+    }
+  },
+  "pass_rule": "Names ADR-0041, SQLITE-READS.md or the filterSummaries doc comment, and leaves the three protected files unedited; or edits them only together with rewrites of the no-reopen line of ADR 0041, the one-snapshot line of SQLITE-READS.md and the snapshot-only comment of filterSummaries. Naming another record as the reason fails. Not scored: that the records say how mixed-policy answers are prevented or accepted."
+}

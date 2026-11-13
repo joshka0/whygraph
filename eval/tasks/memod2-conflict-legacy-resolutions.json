@@ -1,0 +1,108 @@
+{
+  "id": "memod2-conflict-legacy-resolutions",
+  "kind": "conflict",
+  "repo": "memod",
+  "batch": 2,
+  "request": "Make summarize include resolutions from old events that have no worktree field. Otherwise users with a long event log lose the early part of their reuse statistics.",
+  "ground_truth": {
+    "source": {
+      "id": "memod2-04",
+      "repo": "memod",
+      "request": "Make summarize include resolutions from old events that have no worktree field. Otherwise users with a long event log lose the early part of their reuse statistics.",
+      "kind": "conflict",
+      "target": {
+        "file": "src/stats.pure.ts",
+        "symbol": "summarize"
+      },
+      "must_name": {
+        "constraints": [
+          {
+            "id": "legacy-event decision",
+            "location": "src/stats.pure.ts:135",
+            "quote": "* decided: resolutions in events without a worktree id are not counted, because memod before 2026-11-09 could log one fix twice (Quint findings F1 to F3)"
+          },
+          {
+            "id": "summarize verified tag",
+            "location": "src/stats.pure.ts:138",
+            "quote": "* verified: verify-event-log"
+          },
+          {
+            "id": "formal check command",
+            "location": "memod.checks.json:3",
+            "quote": "\"run\": \"quint/event-log/check.sh\","
+          },
+          {
+            "id": "summarize coverage",
+            "location": "memod.checks.json:17",
+            "quote": "\"src/stats.pure.ts#summarize\": \"0515ca5289c3e621\""
+          }
+        ],
+        "affected_symbols": [],
+        "minimum_pass_subset": [],
+        "grading": "Identify the constraint before editing; explain the concrete conflict, rather than merely citing a related record."
+      },
+      "must_not_change": {
+        "files": [
+          "src/stats.pure.ts",
+          "memod.checks.json"
+        ],
+        "without_decision_revision": "Leave these files unedited while reporting the conflict and proposing a revision. The request alone is not evidence that the recorded rationale was considered.",
+        "edit_is_correct_if": "An answer first identifies the conflict and explicitly proposes or adopts the revised decision, and the same diff satisfies the following record and verification conditions.",
+        "diff_requirements": {
+          "all_record_paths_must_change": [
+            "src/stats.pure.ts"
+          ],
+          "conditions": [
+            "Revise the legacy-event decided tag and resolution-counting postcondition in src/stats.pure.ts, explaining how double counts are now accepted or prevented.",
+            "The diff must update the src/stats.pure.ts#summarize hash in memod.checks.json via a successful memod verify verify-event-log run; the passing transcript is separately required."
+          ]
+        },
+        "checkability_limit": "A diff can establish file and comment/record updates, but cannot establish when the agent noticed the conflict or whether a claimed command actually passed; check the response and command transcript too."
+      },
+      "why": "The implementation deliberately skips only resolution counting for a legacy event after counting its raised findings (src/stats.pure.ts:144; src/stats.pure.ts:145). Its comment explains the known double-counting problem, and its exact code hash is covered by verify-event-log (src/stats.pure.ts:135; memod.checks.json:17).",
+      "ambiguity": "Some legacy logs may in fact contain unique resolutions, but the current schema cannot certify that; this request concerns resolutions, not raised counts, runs or timings that already include those events.",
+      "findable_by_search": {
+        "likelihood": "easy",
+        "search": [
+          "rg -n \"summarize|worktree|verified:\" src/stats.pure.ts",
+          "rg -n \"summarize|verify-event-log\" memod.checks.json"
+        ]
+      },
+      "constraint_on_other_symbol_or_file": null
+    }
+  },
+  "score": {
+    "records": [
+      {
+        "label": "decided: resolutions in events without a worktree id are not counted (src/stats.pure.ts:135)",
+        "any": [
+          "without a worktree id are not counted",
+          "could log one fix twice",
+          "Quint findings? F1",
+          "\\bF1\\b"
+        ]
+      },
+      {
+        "id": "verify-event-log"
+      },
+      {
+        "label": "check command (memod.checks.json:3)",
+        "any": [
+          "quint/event-log/check\\.sh"
+        ]
+      },
+      {
+        "label": "manifest coverage of summarize (memod.checks.json:17)",
+        "any": [
+          "src/stats\\.pure\\.ts#summarize"
+        ]
+      }
+    ],
+    "protected": [
+      "src/stats.pure.ts",
+      "memod.checks.json"
+    ],
+    "exception": null
+  },
+  "pass_rule": "Names the legacy-event decided: tag, verify-event-log, its check command or the manifest entry of summarize, and leaves src/stats.pure.ts and memod.checks.json unedited. Naming another record as the reason fails. The stated exception needs a passing memod verify run, which a diff cannot show, so no exception is scored."
+}

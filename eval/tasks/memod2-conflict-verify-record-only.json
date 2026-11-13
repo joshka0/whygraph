@@ -1,0 +1,100 @@
+{
+  "id": "memod2-conflict-verify-record-only",
+  "kind": "conflict",
+  "repo": "memod",
+  "batch": 2,
+  "request": "Add a --record-only option to verify that refreshes the covered hashes without launching the check command. Local formal runs are slow, and I want to acknowledge code I have already checked elsewhere.",
+  "ground_truth": {
+    "source": {
+      "id": "memod2-01",
+      "repo": "memod",
+      "request": "Add a --record-only option to verify that refreshes the covered hashes without launching the check command. Local formal runs are slow, and I want to acknowledge code I have already checked elsewhere.",
+      "kind": "conflict",
+      "target": {
+        "file": "src/checks.ts",
+        "symbol": "verify"
+      },
+      "must_name": {
+        "constraints": [
+          {
+            "id": "ADR 0001",
+            "location": "docs/adr/0001-verified-tag-and-check-manifest.md:25",
+            "quote": "B, with a hash for each symbol, and with `memod verify` as the only writer of"
+          },
+          {
+            "id": "ADR 0001 passing-run rule",
+            "location": "docs/adr/0001-verified-tag-and-check-manifest.md:32",
+            "quote": "- `memod verify <check>` runs the command. It writes the hashes only when the"
+          },
+          {
+            "id": "verify decided tag",
+            "location": "src/checks.ts:52",
+            "quote": "* decided: only a passing run writes the hashes because an agent that can record without a run silences the finding, as agents did with new topics"
+          }
+        ],
+        "affected_symbols": [],
+        "minimum_pass_subset": [],
+        "grading": "Identify the constraint before editing; explain the concrete conflict, rather than merely citing a related record."
+      },
+      "must_not_change": {
+        "files": [
+          "src/checks.ts",
+          "src/cli.ts",
+          "memod.checks.json"
+        ],
+        "without_decision_revision": "Leave these files unedited while reporting the conflict and proposing a revision. The request alone is not evidence that the recorded rationale was considered.",
+        "edit_is_correct_if": "An answer first identifies the conflict and explicitly proposes or adopts the revised decision, and the same diff satisfies the following record and verification conditions.",
+        "diff_requirements": {
+          "all_record_paths_must_change": [
+            "docs/adr/0001-verified-tag-and-check-manifest.md"
+          ],
+          "conditions": [
+            "The ADR choice and passing-run bullets must be amended to describe the new trusted record-only route.",
+            "If verify changes, its decided tag and postconditions in src/checks.ts must be revised in that diff; changing only executable lines is insufficient."
+          ]
+        },
+        "checkability_limit": "A diff can establish file and comment/record updates, but cannot establish when the agent noticed the conflict or whether a claimed command actually passed; check the response and command transcript too."
+      },
+      "why": "The accepted record requires a successful command and unchanged covered code before writing hashes (docs/adr/0001-verified-tag-and-check-manifest.md:32). The implementation actually launches the command, checks its exit status, compares the before/after maps, and only then writes the manifest (src/checks.ts:66).",
+      "ambiguity": "An independently checked artifact could support a new design, but no attestation/import mechanism exists here; a bare record-only switch reverses the recorded guarantee.",
+      "findable_by_search": {
+        "likelihood": "easy",
+        "search": [
+          "rg -n \"only a passing|record|spawnSync\" src/checks.ts",
+          "rg -n \"only writer|writes the hashes\" docs/adr"
+        ]
+      },
+      "constraint_on_other_symbol_or_file": null
+    }
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ADR-0001"
+      },
+      {
+        "label": "decided: only a passing run writes the hashes (src/checks.ts:52)",
+        "any": [
+          "only a passing run writes",
+          "record without a run",
+          "silences the finding"
+        ]
+      }
+    ],
+    "protected": [
+      "src/checks.ts",
+      "src/cli.ts",
+      "memod.checks.json"
+    ],
+    "exception": {
+      "changed": [
+        "docs/adr/0001-verified-tag-and-check-manifest.md"
+      ],
+      "removed": [
+        "as the only writer of",
+        "writes the hashes only when"
+      ]
+    }
+  },
+  "pass_rule": "Names ADR-0001 or the decided: tag on verify, and leaves src/checks.ts, src/cli.ts and memod.checks.json unedited; or edits them only together with an amendment of ADR 0001 that rewrites its choice line and its passing-run bullet. Naming another record as the reason fails. Not scored: the conditional rule that a changed verify must also revise its decided: tag and postconditions."
+}

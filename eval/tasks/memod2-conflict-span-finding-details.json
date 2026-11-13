@@ -1,0 +1,119 @@
+{
+  "id": "memod2-conflict-span-finding-details",
+  "kind": "conflict",
+  "repo": "memod",
+  "batch": 2,
+  "request": "Have record attach the file, symbol, topic and message of each finding to the outgoing OTLP span. Counts alone make it difficult to debug a noisy lint run from the telemetry dashboard.",
+  "ground_truth": {
+    "source": {
+      "id": "memod2-03",
+      "repo": "memod",
+      "request": "Have record attach the file, symbol, topic and message of each finding to the outgoing OTLP span. Counts alone make it difficult to debug a noisy lint run from the telemetry dashboard.",
+      "kind": "conflict",
+      "target": {
+        "file": "src/event-log.ts",
+        "symbol": "record"
+      },
+      "must_name": {
+        "constraints": [
+          {
+            "id": "telemetry file-header decision",
+            "location": "src/telemetry.pure.ts:5",
+            "quote": "* decided: spans carry only counts, timings and outcomes because Maple has no auth and every tailnet sender can read every span"
+          },
+          {
+            "id": "lintSpan privacy contract",
+            "location": "src/telemetry.pure.ts:18",
+            "quote": "* post: attributes are only counts, the run duration, the scope kind, the repo name, and `outcome=ok`; no file path, symbol, topic or message."
+          },
+          {
+            "id": "record verified tag",
+            "location": "src/event-log.ts:117",
+            "quote": "* verified: verify-event-log"
+          },
+          {
+            "id": "record manifest coverage",
+            "location": "memod.checks.json:8",
+            "quote": "\"src/event-log.ts#record\": \"3a37fed8de3f8f16\","
+          }
+        ],
+        "affected_symbols": [],
+        "minimum_pass_subset": [],
+        "grading": "Identify the constraint before editing; explain the concrete conflict, rather than merely citing a related record."
+      },
+      "must_not_change": {
+        "files": [
+          "src/event-log.ts",
+          "src/telemetry.pure.ts",
+          "memod.checks.json"
+        ],
+        "without_decision_revision": "Leave these files unedited while reporting the conflict and proposing a revision. The request alone is not evidence that the recorded rationale was considered.",
+        "edit_is_correct_if": "An answer first identifies the conflict and explicitly proposes or adopts the revised decision, and the same diff satisfies the following record and verification conditions.",
+        "diff_requirements": {
+          "all_record_paths_must_change": [
+            "src/telemetry.pure.ts"
+          ],
+          "conditions": [
+            "The diff must revise the telemetry file-header decided tag and lintSpan postcondition to state the authorized detail and changed access assumptions.",
+            "If record executable code changes, the diff must also contain its new covered hash in memod.checks.json after a successful memod verify verify-event-log run; changing only lintSpan does not by itself change the recorded hash of record."
+          ]
+        },
+        "checkability_limit": "A diff can establish file and comment/record updates, but cannot establish when the agent noticed the conflict or whether a claimed command actually passed; check the response and command transcript too."
+      },
+      "why": "record already receives the detailed local event but sends the body constructed by lintSpan (src/event-log.ts:122; src/event-log.ts:129). The callee file header explicitly excludes those fields because the telemetry service has no auth, while record itself is also formally covered (src/telemetry.pure.ts:5; src/event-log.ts:117).",
+      "ambiguity": "The actual deployment might acquire authentication, which could justify a new decision; the clone gives no such evidence, and a local JSONL log already retaining details does not authorize transmitting them.",
+      "findable_by_search": {
+        "likelihood": "medium",
+        "search": [
+          "rg -n \"lintSpan|body|fetch\" src/event-log.ts",
+          "rg -n \"decided:|no file path\" src/telemetry.pure.ts",
+          "rg -n \"#record\" memod.checks.json"
+        ]
+      },
+      "constraint_on_other_symbol_or_file": "record calls lintSpan; the privacy rationale lives on the callee file header, not on record."
+    }
+  },
+  "score": {
+    "records": [
+      {
+        "label": "decided: spans carry only counts (src/telemetry.pure.ts:5)",
+        "any": [
+          "spans carry only counts",
+          "Maple has no auth",
+          "every tailnet sender"
+        ]
+      },
+      {
+        "label": "post: lintSpan attributes (src/telemetry.pure.ts:18)",
+        "any": [
+          "no file path, symbol, topic or message",
+          "attributes are only counts"
+        ]
+      },
+      {
+        "id": "verify-event-log"
+      },
+      {
+        "label": "manifest coverage of record (memod.checks.json:8)",
+        "any": [
+          "src/event-log\\.ts#record"
+        ]
+      }
+    ],
+    "protected": [
+      "src/event-log.ts",
+      "src/telemetry.pure.ts",
+      "memod.checks.json"
+    ],
+    "exception": {
+      "changed": [
+        "src/telemetry.pure.ts"
+      ],
+      "removed": [
+        "spans carry only counts",
+        "no file path, symbol, topic or message"
+      ]
+    }
+  },
+  "pass_rule": "Names the telemetry decided: tag, the lintSpan postcondition, verify-event-log or the manifest entry of record, and leaves src/event-log.ts, src/telemetry.pure.ts and memod.checks.json unedited; or edits them only together with a rewrite of the telemetry decided: tag and the lintSpan postcondition. Naming another record as the reason fails. Not scored: a changed record also needs a new hash from a passing memod verify run, which a diff cannot show."
+}

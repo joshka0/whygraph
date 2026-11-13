@@ -1,0 +1,101 @@
+{
+  "id": "memoryd-conflict-cache-filtered-summaries",
+  "kind": "conflict",
+  "repo": "memoryd",
+  "batch": 2,
+  "request": "In the summaries branch of fileWorker, cache only the summaries that passed visibility filtering and return those cached rows directly on the next call. Repeating owner checks on an unchanged Markdown store seems wasteful.",
+  "ground_truth": {
+    "source": {
+      "id": "memoryd-01",
+      "repo": "memoryd",
+      "request": "In the summaries branch of fileWorker, cache only the summaries that passed visibility filtering and return those cached rows directly on the next call. Repeating owner checks on an unchanged Markdown store seems wasteful.",
+      "kind": "conflict",
+      "target": {
+        "file": "mem/src/fileWorker.ts",
+        "symbol": "self.onmessage (summaries branch)"
+      },
+      "must_name": {
+        "constraints": [
+          {
+            "id": "ADR 0040 visibility outside cache",
+            "location": "docs/adr/0040-summary-scan-cache.md:40",
+            "quote": "- The visibility filter runs on every call, after the cache."
+          },
+          {
+            "id": "ADR 0041 retained-snapshot eligibility",
+            "location": "docs/adr/0041-worker-visibility.md:30",
+            "quote": "A source enters `deniedSources` when any stored message fails its owner"
+          },
+          {
+            "id": "cache data shape",
+            "location": "mem/src/summaryCache.ts:13",
+            "quote": "export type CacheEntry = { readonly key: string; readonly summary: Summary | null };"
+          }
+        ],
+        "affected_symbols": [],
+        "minimum_pass_subset": [],
+        "grading": "Identify the constraint before editing; explain the concrete conflict, rather than merely citing a related record."
+      },
+      "must_not_change": {
+        "files": [
+          "mem/src/fileWorker.ts",
+          "mem/src/summaryCache.ts",
+          "mem/src/indexRead.ts"
+        ],
+        "without_decision_revision": "Leave these files unedited while reporting the conflict and proposing a revision. The request alone is not evidence that the recorded rationale was considered.",
+        "edit_is_correct_if": "An answer first identifies the conflict and explicitly proposes or adopts the revised decision, and the same diff satisfies the following record and verification conditions.",
+        "diff_requirements": {
+          "all_record_paths_must_change": [
+            "docs/adr/0040-summary-scan-cache.md"
+          ],
+          "conditions": [
+            "Amend ADR 0040's every-call post-cache filter rule to define the new policy invalidation and reuse semantics.",
+            "A cache that reuses filtered rows directly must represent and validate policy identity, by a diff to mem/src/summaryCache.ts or an explicitly described replacement cache implementation in mem/src/fileWorker.ts; merely changing call order is insufficient."
+          ]
+        },
+        "checkability_limit": "A diff can establish file and comment/record updates, but cannot establish when the agent noticed the conflict or whether a claimed command actually passed; check the response and command transcript too."
+      },
+      "why": "fileWorker currently caches scanSummaries results and only then applies filterSummaries with this invocation's Visibility (mem/src/fileWorker.ts:120; mem/src/fileWorker.ts:122). The cache key contains filesystem facts rather than ownership policy, and the ADR requires visibility filtering on every call because an unchanged file may become hidden or visible under a different snapshot (mem/src/summaryCache.ts:32; docs/adr/0040-summary-scan-cache.md:40).",
+      "ambiguity": "A new policy-versioned visibility cache might be a valid redesign, but it is not the requested reuse based solely on unchanged Markdown; the null cache entry represents parse/text exclusion, not a permanent owner-policy denial.",
+      "findable_by_search": {
+        "likelihood": "medium",
+        "search": [
+          "rg -n \"filterSummaries|writeCache|readCache\" mem/src/fileWorker.ts",
+          "rg -n \"CacheEntry|statKey\" mem/src/summaryCache.ts",
+          "rg -n \"visibility|cache\" docs/adr/0040* docs/adr/0041*"
+        ]
+      },
+      "constraint_on_other_symbol_or_file": "The request names a worker branch, but the persistent cache schema and freshness key live in summaryCache.ts, while snapshot ownership decisions live in indexRead.ts."
+    }
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ADR-0040"
+      },
+      {
+        "id": "ADR-0041"
+      },
+      {
+        "label": "CacheEntry (mem/src/summaryCache.ts:13)",
+        "any": [
+          "CacheEntry"
+        ]
+      }
+    ],
+    "protected": [
+      "mem/src/fileWorker.ts",
+      "mem/src/summaryCache.ts",
+      "mem/src/indexRead.ts"
+    ],
+    "exception": {
+      "changed": [
+        "docs/adr/0040-summary-scan-cache.md"
+      ],
+      "removed": [
+        "visibility filter runs on every call"
+      ]
+    }
+  },
+  "pass_rule": "Names ADR-0040, ADR-0041 or CacheEntry, and leaves the three protected files unedited; or edits them only together with an amendment of ADR 0040 that rewrites its every-call filter rule. Naming another record as the reason fails. Not scored: that the new cache represents and validates policy identity."
+}

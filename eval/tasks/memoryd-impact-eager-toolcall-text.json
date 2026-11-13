@@ -1,0 +1,104 @@
+{
+  "id": "memoryd-impact-eager-toolcall-text",
+  "kind": "impact",
+  "repo": "memoryd",
+  "batch": 2,
+  "request": "Change ToolCall input and output from lazy callbacks to eagerly materialized strings so adapter results can be serialized directly for inspection. List the production types and functions that need edits, while keeping tool bodies display-only and leaving ingestion behavior alone.",
+  "ground_truth": {
+    "source": {
+      "id": "memoryd-07",
+      "repo": "memoryd",
+      "request": "Change ToolCall input and output from lazy callbacks to eagerly materialized strings so adapter results can be serialized directly for inspection. List the production types and functions that need edits, while keeping tool bodies display-only and leaving ingestion behavior alone.",
+      "kind": "impact",
+      "target": {
+        "file": "src/glue/transcripts/types.ts",
+        "symbol": "ToolCall"
+      },
+      "must_name": {
+        "constraints": [
+          {
+            "id": "lazy-input source contract",
+            "location": "src/glue/transcripts/types.ts:64",
+            "quote": "/** The input text, built only when called: ingestion never calls it, so it does no work for display. */"
+          },
+          {
+            "id": "lazy-output source contract",
+            "location": "src/glue/transcripts/types.ts:66",
+            "quote": "/** The output text, built only when called. */"
+          },
+          {
+            "id": "ADR 0017 display-only boundary",
+            "location": "docs/adr/0017-display-only-tool-calls-in-adapters.md:26",
+            "quote": "The adapters add a display-only `toolCall` record (tool name, input text,"
+          }
+        ],
+        "affected_symbols": [
+          "src/glue/transcripts/types.ts:ToolCall",
+          "src/glue/transcripts/claude.ts:claudeAdapter",
+          "src/glue/transcripts/codex.ts:codexAdapter",
+          "src/glue/transcripts/pi.ts:piAdapter",
+          "mem/src/rawRead.ts:entriesOf"
+        ],
+        "minimum_pass_subset": [
+          "src/glue/transcripts/types.ts:ToolCall",
+          "src/glue/transcripts/claude.ts:claudeAdapter",
+          "src/glue/transcripts/codex.ts:codexAdapter",
+          "src/glue/transcripts/pi.ts:piAdapter",
+          "mem/src/rawRead.ts:entriesOf"
+        ],
+        "grading": "Name the listed constraints and the minimum affected-symbol subset; extra correctly justified symbols are allowed."
+      },
+      "must_not_change": null,
+      "why": "ToolCall explicitly uses callback fields to avoid display work in ingestion, and each of the three adapters creates those callback fields (src/glue/transcripts/types.ts:64; src/glue/transcripts/claude.ts:239; src/glue/transcripts/codex.ts:90; src/glue/transcripts/pi.ts:116). entriesOf is the consumer that invokes both fields, so changing producers and the shared type without changing that consumer leaves a concrete calling-convention mismatch (mem/src/rawRead.ts:89).",
+      "ambiguity": "The eager representation reverses the source-comment laziness choice, not ADR 0017's display-only/store boundary; do not require Transcript ingestion or rawRender to start reading callbacks. Adapter factory names stand for their returned read closures, and Codex has several construction sites within its one factory.",
+      "findable_by_search": {
+        "likelihood": "medium",
+        "search": [
+          "rg -n \"ToolCall|input:|output:\" src/glue/transcripts",
+          "rg -n \"\\.input\\(\\)|\\.output\\(\\)\" src mem/src"
+        ]
+      },
+      "constraint_on_other_symbol_or_file": "A shared type is produced by three harness adapters and called by the raw transcript reader in a different subtree."
+    }
+  },
+  "score": {
+    "symbols": [
+      {
+        "symbol": "src/glue/transcripts/types.ts:ToolCall",
+        "required": true
+      },
+      {
+        "symbol": "src/glue/transcripts/claude.ts:claudeAdapter",
+        "required": true
+      },
+      {
+        "symbol": "src/glue/transcripts/codex.ts:codexAdapter",
+        "required": true
+      },
+      {
+        "symbol": "src/glue/transcripts/pi.ts:piAdapter",
+        "required": true
+      },
+      {
+        "symbol": "mem/src/rawRead.ts:entriesOf",
+        "required": true
+      }
+    ],
+    "records": [
+      {
+        "label": "lazy input/output contract (src/glue/transcripts/types.ts:64,66)",
+        "any": [
+          "built only when called",
+          "ingestion never calls",
+          "no work for display"
+        ]
+      },
+      {
+        "id": "ADR-0017"
+      }
+    ],
+    "min_recall": 1,
+    "min_precision": 0.6
+  },
+  "pass_rule": "Lists all five symbols, names the lazy ToolCall contract by its words and ADR-0017 (recall 1); of the symbols listed, at least 60% are in the true set. The input and output comments are one record: they say the same thing."
+}

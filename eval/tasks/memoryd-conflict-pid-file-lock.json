@@ -1,0 +1,94 @@
+{
+  "id": "memoryd-conflict-pid-file-lock",
+  "kind": "conflict",
+  "repo": "memoryd",
+  "batch": 2,
+  "request": "Replace lockDatabase with a PID-file check and create sequence so the daemon writer lock no longer needs bun:ffi. Detect a dead PID at startup and take over its file so restarts remain automatic.",
+  "ground_truth": {
+    "source": {
+      "id": "memoryd-02",
+      "repo": "memoryd",
+      "request": "Replace lockDatabase with a PID-file check and create sequence so the daemon writer lock no longer needs bun:ffi. Detect a dead PID at startup and take over its file so restarts remain automatic.",
+      "kind": "conflict",
+      "target": {
+        "file": "src/central/store/open.ts",
+        "symbol": "lockDatabase"
+      },
+      "must_name": {
+        "constraints": [
+          {
+            "id": "ADR 0030 kernel-lock choice",
+            "location": "docs/adr/0030-flock-locks-and-mirror-lock-path.md:35",
+            "quote": "- `tryLock` never blocks. It opens the file without waiting (created if"
+          },
+          {
+            "id": "ADR 0030 process-death property",
+            "location": "docs/adr/0030-flock-locks-and-mirror-lock-path.md:50",
+            "quote": "- A lock never outlives its process, also after SIGKILL."
+          },
+          {
+            "id": "shared lock callee header",
+            "location": "src/flock.ts:2",
+            "quote": "// The kernel drops the lock when the open file closes, also when the process dies."
+          }
+        ],
+        "affected_symbols": [],
+        "minimum_pass_subset": [],
+        "grading": "Identify the constraint before editing; explain the concrete conflict, rather than merely citing a related record."
+      },
+      "must_not_change": {
+        "files": [
+          "src/central/store/open.ts",
+          "src/flock.ts"
+        ],
+        "without_decision_revision": "Leave these files unedited while reporting the conflict and proposing a revision. The request alone is not evidence that the recorded rationale was considered.",
+        "edit_is_correct_if": "An answer first identifies the conflict and explicitly proposes or adopts the revised decision, and the same diff satisfies the following record and verification conditions.",
+        "diff_requirements": {
+          "all_record_paths_must_change": [
+            "docs/adr/0030-flock-locks-and-mirror-lock-path.md"
+          ],
+          "conditions": [
+            "Amend ADR 0030 to explicitly exempt or replace the writer lock and state its new exclusion and process-death guarantees.",
+            "Update the lockDatabase doc comment in src/central/store/open.ts if the descriptor lifetime or return contract changes; src/flock.ts may stay unchanged when other consumers retain flock."
+          ]
+        },
+        "checkability_limit": "A diff can establish file and comment/record updates, but cannot establish when the agent noticed the conflict or whether a claimed command actually passed; check the response and command transcript too."
+      },
+      "why": "lockDatabase creates the parent directory and delegates to the shared tryLock, which holds a nonblocking kernel flock on an open descriptor (src/central/store/open.ts:11; src/flock.ts:31). ADR 0030 includes the store lock among its consumers and deliberately chooses kernel exclusion with process-lifetime release across both supported systems (docs/adr/0030-flock-locks-and-mirror-lock-path.md:8; docs/adr/0030-flock-locks-and-mirror-lock-path.md:35).",
+      "ambiguity": "PID checking can be part of a separately proven atomic lock protocol, but the requested check/create/takeover sequence is not the accepted kernel lock and must address races and PID reuse. Changing only this writer path also creates a deliberate exception to the shared lock architecture.",
+      "findable_by_search": {
+        "likelihood": "medium",
+        "search": [
+          "rg -n \"lockDatabase|tryLock\" src/central/store/open.ts src/flock.ts",
+          "rg -n \"writer|PID|Choice|SIGKILL\" docs/adr/0030*"
+        ]
+      },
+      "constraint_on_other_symbol_or_file": "The target is lockDatabase, but the mechanism and release rationale are owned by its shared callee in src/flock.ts."
+    }
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ADR-0030"
+      },
+      {
+        "label": "src/flock.ts header (src/flock.ts:2)",
+        "any": [
+          "kernel drops the lock",
+          "also when the process dies"
+        ]
+      }
+    ],
+    "protected": [
+      "src/central/store/open.ts",
+      "src/flock.ts"
+    ],
+    "exception": {
+      "changed": [
+        "docs/adr/0030-flock-locks-and-mirror-lock-path.md"
+      ],
+      "removed": []
+    }
+  },
+  "pass_rule": "Names ADR-0030 or the flock.ts header comment, and leaves src/central/store/open.ts and src/flock.ts unedited; or edits them only together with an amendment of ADR 0030 (the entry allows adding an exemption, so no line has to be removed). Naming another record as the reason fails. Not scored: what the amendment says, and the conditional rewrite of the lockDatabase doc comment."
+}

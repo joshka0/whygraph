@@ -1,0 +1,53 @@
+{
+  "id": "memod2-control-nodeid-doc-comment",
+  "kind": "control",
+  "repo": "memod",
+  "batch": 2,
+  "request": "Add a short plain-English doc comment above nodeId in view.pure.ts explaining that it turns a name into a lowercase hyphenated identifier. This will make the diagram helper easier to read; leave its code alone.",
+  "ground_truth": {
+    "source": {
+      "id": "memod2-08",
+      "repo": "memod",
+      "request": "Add a short plain-English doc comment above nodeId in view.pure.ts explaining that it turns a name into a lowercase hyphenated identifier. This will make the diagram helper easier to read; leave its code alone.",
+      "kind": "control",
+      "target": {
+        "file": "src/view.pure.ts",
+        "symbol": "nodeId"
+      },
+      "must_name": {
+        "constraints": [],
+        "affected_symbols": [],
+        "minimum_pass_subset": [],
+        "grading": "No decision objection is correct for this comment-only request."
+      },
+      "must_not_change": null,
+      "why": "nodeId is a small untagged private formatting helper with no verified association (src/view.pure.ts:11; memod.checks.json:4). Adding an accurate ordinary comment does not change its identifier transform or the separate diagram decisions on toArchifyCandidate (src/view.pure.ts:12; src/view.pure.ts:29).",
+      "ambiguity": "Adding intent tags, altering IDs, changing nodeId code, or editing the surrounding diagram decisions would exceed this control; the requested ordinary explanatory comment is unconstrained.",
+      "findable_by_search": {
+        "likelihood": "easy",
+        "search": [
+          "rg -n \"nodeId|verified:\" src/view.pure.ts memod.checks.json"
+        ]
+      },
+      "constraint_on_other_symbol_or_file": null
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/view.pure.ts",
+        "added": "^\\s*(/\\*\\*|\\*|//).*(lower-?case|hyphen)"
+      }
+    ],
+    "only_files": [
+      "src/view.pure.ts"
+    ],
+    "kept": [
+      {
+        "file": "src/view.pure.ts",
+        "line": "return name.replace("
+      }
+    ]
+  },
+  "pass_rule": "A comment line that says lowercase or hyphen is added to src/view.pure.ts, nothing outside it changes, the body line of nodeId stays, and the reply claims no decision against the change."
+}

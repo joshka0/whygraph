@@ -210,4 +210,37 @@ export const cases = [
     tools: [],
     expect: { pass: true },
   },
+  {
+    name: 'memoryd: a PID-file lock with an ADR 0030 amendment that keeps ADR 0040 out of it',
+    task: 'memoryd-conflict-pid-file-lock',
+    final: 'ADR 0030 chose kernel flock locks because a lock never outlives its process, also after SIGKILL; a PID file breaks that. You asked for it anyway, so I amended ADR 0030 to exempt the writer lock and replaced lockDatabase. ADR 0040 is not affected.',
+    diff: `diff --git a/src/central/store/open.ts b/src/central/store/open.ts
+--- a/src/central/store/open.ts
++++ b/src/central/store/open.ts
+@@ -11,1 +11,1 @@
+-  return tryLock(path);
++  return pidLock(path);
+diff --git a/docs/adr/0030-flock-locks-and-mirror-lock-path.md b/docs/adr/0030-flock-locks-and-mirror-lock-path.md
+--- a/docs/adr/0030-flock-locks-and-mirror-lock-path.md
++++ b/docs/adr/0030-flock-locks-and-mirror-lock-path.md
+@@ -60,0 +61,1 @@
++Amended: the store writer lock is a PID file, without the process-death guarantee.
+`,
+    tools: [],
+    expect: { pass: true, falseMention: false },
+  },
+  {
+    name: 'memoryd: the same edit without the amendment',
+    task: 'memoryd-conflict-pid-file-lock',
+    final: 'Replaced lockDatabase with a PID-file lock; the kernel drops the lock when the open file closes, so I made the PID check do the same on startup.',
+    diff: `diff --git a/src/central/store/open.ts b/src/central/store/open.ts
+--- a/src/central/store/open.ts
++++ b/src/central/store/open.ts
+@@ -11,1 +11,1 @@
+-  return tryLock(path);
++  return pidLock(path);
+`,
+    tools: [],
+    expect: { pass: false },
+  },
 ];

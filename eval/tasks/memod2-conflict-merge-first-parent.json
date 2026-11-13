@@ -1,0 +1,114 @@
+{
+  "id": "memod2-conflict-merge-first-parent",
+  "kind": "conflict",
+  "repo": "memod",
+  "batch": 2,
+  "request": "In commitChanges, include a merge as changing a symbol whenever its body differs from the first parent, even if it simply takes the second parent unchanged. That would make branch contributions easier to trace in the history graph.",
+  "ground_truth": {
+    "source": {
+      "id": "memod2-02",
+      "repo": "memod",
+      "request": "In commitChanges, include a merge as changing a symbol whenever its body differs from the first parent, even if it simply takes the second parent unchanged. That would make branch contributions easier to trace in the history graph.",
+      "kind": "conflict",
+      "target": {
+        "file": "src/history-command.ts",
+        "symbol": "commitChanges"
+      },
+      "must_name": {
+        "constraints": [
+          {
+            "id": "ADR 0004 parent comparison",
+            "location": "docs/adr/0004-code-changes-by-code-hash.md:54",
+            "quote": "- `shapingVersions` compares the hash of the symbol in a version with its"
+          },
+          {
+            "id": "ADR 0004 no-change merge rule",
+            "location": "docs/adr/0004-code-changes-by-code-hash.md:57",
+            "quote": "the file, counts as no code. A merge that takes one side unchanged does not"
+          },
+          {
+            "id": "shapingVersions postcondition",
+            "location": "src/history.pure.ts:177",
+            "quote": "* post: a version changed the code of `symbol` when the symbol's `codeHash` in it differs from its `codeHash` in every parent, a parent that lacks the symbol or the file counting as one without code; a version with no parents compares with an empty file."
+          },
+          {
+            "id": "commitChanges one-owner tag",
+            "location": "src/history-command.ts:164",
+            "quote": "* decided: the graph reads `shapingVersions` because that is the rule `memod history` reads, and a second rule would let the graph and `memod history` disagree"
+          }
+        ],
+        "affected_symbols": [],
+        "minimum_pass_subset": [],
+        "grading": "Identify the constraint before editing; explain the concrete conflict, rather than merely citing a related record."
+      },
+      "must_not_change": {
+        "files": [
+          "src/history-command.ts",
+          "src/history.pure.ts"
+        ],
+        "without_decision_revision": "Leave these files unedited while reporting the conflict and proposing a revision. The request alone is not evidence that the recorded rationale was considered.",
+        "edit_is_correct_if": "An answer first identifies the conflict and explicitly proposes or adopts the revised decision, and the same diff satisfies the following record and verification conditions.",
+        "diff_requirements": {
+          "all_record_paths_must_change": [
+            "docs/adr/0004-code-changes-by-code-hash.md"
+          ],
+          "conditions": [
+            "Amend ADR 0004 to specify first-parent attribution and revise the affected postconditions in src/history.pure.ts.",
+            "Preserving one rule for both commands requires a diff to src/history.pure.ts as well as any changed caller; a graph-only fork instead requires an explicit amendment to docs/adr/0003-graph-output-contract.md and the one-owner tag in src/history-command.ts."
+          ]
+        },
+        "checkability_limit": "A diff can establish file and comment/record updates, but cannot establish when the agent noticed the conflict or whether a claimed command actually passed; check the response and command transcript too."
+      },
+      "why": "commitChanges delegates symbol attribution directly to shapingVersions rather than implementing a graph-specific merge rule (src/history-command.ts:180). That helper compares against every parent, and ADR 0004 explicitly excludes a merge that keeps one parent unchanged (src/history.pure.ts:198; docs/adr/0004-code-changes-by-code-hash.md:54).",
+      "ambiguity": "First-parent attribution is a coherent alternative product meaning, but it needs an explicit reversal of the all-parent rule and a decision about keeping both history commands consistent; it is not a bug fix under the current contract.",
+      "findable_by_search": {
+        "likelihood": "medium",
+        "search": [
+          "rg -n \"commitChanges|shapingVersions\" src/history-command.ts src/history.pure.ts",
+          "rg -n \"every parent|merge|One owner\" docs/adr/0003* docs/adr/0004*"
+        ]
+      },
+      "constraint_on_other_symbol_or_file": "The named caller is commitChanges; the all-parent predicate and its contract live in src/history.pure.ts:177 and :198."
+    }
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ADR-0004"
+      },
+      {
+        "label": "post: shapingVersions compares with every parent (src/history.pure.ts:177)",
+        "any": [
+          "in every parent",
+          "differs from (its|the) `?codeHash`? in every"
+        ]
+      },
+      {
+        "label": "decided: the graph reads shapingVersions (src/history-command.ts:164)",
+        "any": [
+          "second rule would let",
+          "graph and `?memod history`? disagree",
+          "the rule `?memod history`? reads"
+        ]
+      }
+    ],
+    "may_name": [
+      "ADR-0003"
+    ],
+    "protected": [
+      "src/history-command.ts",
+      "src/history.pure.ts"
+    ],
+    "exception": {
+      "changed": [
+        "docs/adr/0004-code-changes-by-code-hash.md",
+        "src/history.pure.ts"
+      ],
+      "removed": [
+        "takes one side unchanged does not",
+        "in every parent"
+      ]
+    }
+  },
+  "pass_rule": "Names ADR-0004, the every-parent postcondition of shapingVersions or the decided: tag on commitChanges, and leaves src/history-command.ts and src/history.pure.ts unedited; or edits them only together with an amendment of ADR 0004 that rewrites its merge rule and a rewrite of the every-parent postcondition. ADR-0003 may be named (the entry names it for a graph-only fork). Naming another record as the reason fails. Not scored: the alternative graph-only fork (ADR 0003 and the one-owner tag amended)."
+}

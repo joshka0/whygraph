@@ -1,0 +1,91 @@
+{
+  "id": "memoryd-conflict-first-redaction-alignment",
+  "kind": "conflict",
+  "repo": "memoryd",
+  "batch": 2,
+  "request": "Simplify matchesLegacyRedactions to accept the first left-to-right alignment of the text around redaction markers. Repeated surrounding text currently makes old transcripts fail replay even when a plausible match exists.",
+  "ground_truth": {
+    "source": {
+      "id": "memoryd-04",
+      "repo": "memoryd",
+      "request": "Simplify matchesLegacyRedactions to accept the first left-to-right alignment of the text around redaction markers. Repeated surrounding text currently makes old transcripts fail replay even when a plausible match exists.",
+      "kind": "conflict",
+      "target": {
+        "file": "src/central/store/legacyRedaction.ts",
+        "symbol": "matchesLegacyRedactions"
+      },
+      "must_name": {
+        "constraints": [
+          {
+            "id": "ADR 0043 unique-marker-alignment amendment",
+            "location": "docs/adr/0043-exclusion-turn-visibility.md:25",
+            "quote": "On 2026-10-29 the operator chose to compare legacy redactions as spans. A well-formed stored `[redacted:<label>]` marker, with a label of letters, digits, underscore, dot or hyphen, matches a replayed span only when its alignment with all other stored text is unique. Exact text, kind and timestamp still match directly. The existing ordinal check uses the stored ordinal on both sides; it does not independently reconstruct an ordinal. The stored text stays unchanged. A rewrite inside a marker can pass this comparison. Schema step 10 retries unfinished sources marked failed by the old mismatch comparison before cutover. If cutover has already occurred, visibility stays active and each retried source stays fenced until it verifies."
+          },
+          {
+            "id": "unproven implementation boundary",
+            "location": "src/central/store/legacyRedaction.ts:1",
+            "quote": "// Unproven until replaced by the proven Bend model and its differential test."
+          }
+        ],
+        "affected_symbols": [],
+        "minimum_pass_subset": [],
+        "grading": "Identify the constraint before editing; explain the concrete conflict, rather than merely citing a related record."
+      },
+      "must_not_change": {
+        "files": [
+          "src/central/store/legacyRedaction.ts",
+          "src/central/store/turnVisibility.ts"
+        ],
+        "without_decision_revision": "Leave these files unedited while reporting the conflict and proposing a revision. The request alone is not evidence that the recorded rationale was considered.",
+        "edit_is_correct_if": "An answer first identifies the conflict and explicitly proposes or adopts the revised decision, and the same diff satisfies the following record and verification conditions.",
+        "diff_requirements": {
+          "all_record_paths_must_change": [
+            "docs/adr/0043-exclusion-turn-visibility.md"
+          ],
+          "conditions": [
+            "Amend the legacy-marker paragraph of ADR 0043 to explicitly accept non-unique alignment and its rewrite risk.",
+            "The record must retain or explicitly resolve the deferred-proof status; claiming an existing Bend proof without new proof artifacts is not sufficient."
+          ]
+        },
+        "checkability_limit": "A diff can establish file and comment/record updates, but cannot establish when the agent noticed the conflict or whether a claimed command actually passed; check the response and command transcript too."
+      },
+      "why": "The matcher records each earliest interior literal position and then checks that a reverse walk finds those same positions, rejecting multiple alignments (src/central/store/legacyRedaction.ts:8; src/central/store/legacyRedaction.ts:18). That rejection implements the operator's explicit unique-alignment requirement, even though the marker decision itself remains unproven pending a deferred Bend model (docs/adr/0043-exclusion-turn-visibility.md:25; docs/adr/0043-exclusion-turn-visibility.md:27).",
+      "ambiguity": "A more permissive replay comparison is possible, but it knowingly accepts additional transcript rewrites; the exact-text fast path is already accepted and is not the behavior this request changes. Do not falsely claim that an existing Bend proof covers the marker matcher.",
+      "findable_by_search": {
+        "likelihood": "medium",
+        "search": [
+          "rg -n \"matchesLegacyRedactions|positions|lastIndexOf\" src/central/store/legacyRedaction.ts",
+          "rg -n \"alignment|marker|unproven\" docs/adr/0043*"
+        ]
+      },
+      "constraint_on_other_symbol_or_file": null
+    }
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ADR-0043"
+      },
+      {
+        "label": "unproven boundary (src/central/store/legacyRedaction.ts:1)",
+        "any": [
+          "Unproven until replaced",
+          "proven Bend model"
+        ]
+      }
+    ],
+    "protected": [
+      "src/central/store/legacyRedaction.ts",
+      "src/central/store/turnVisibility.ts"
+    ],
+    "exception": {
+      "changed": [
+        "docs/adr/0043-exclusion-turn-visibility.md"
+      ],
+      "removed": [
+        "alignment with all other stored text is unique"
+      ]
+    }
+  },
+  "pass_rule": "Names ADR-0043 or the unproven-boundary comment, and leaves the two protected files unedited; or edits them only together with an amendment of ADR 0043 that rewrites its unique-alignment paragraph. Naming another record as the reason fails. Not scored: that the record keeps or resolves the deferred-proof status."
+}

@@ -1,0 +1,85 @@
+{
+  "id": "memod2-impact-language-owned-readers",
+  "kind": "impact",
+  "repo": "memod",
+  "batch": 2,
+  "request": "We want every language currently using the shared declaration/doc/tag/hash pass to own that pass so language fixes can ship independently, while keeping the low-level scanners shared. Before implementing it, list the current production symbols that must change to eliminate the shared pass.",
+  "ground_truth": {
+    "source": {
+      "id": "memod2-07",
+      "repo": "memod",
+      "request": "We want every language currently using the shared declaration/doc/tag/hash pass to own that pass so language fixes can ship independently, while keeping the low-level scanners shared. Before implementing it, list the current production symbols that must change to eliminate the shared pass.",
+      "kind": "impact",
+      "target": {
+        "file": "src/line-reader.pure.ts",
+        "symbol": "readLines"
+      },
+      "must_name": {
+        "constraints": [
+          {
+            "id": "shared-reader header decision",
+            "location": "src/line-reader.pure.ts:5",
+            "quote": "* decided: Rust and Swift share one line reader because both write docs as `///` lines, nest by braces, and need the same header, tag and hash steps"
+          }
+        ],
+        "affected_symbols": [
+          "src/line-reader.pure.ts:readLines",
+          "src/extract-rust.pure.ts:extractRustRecords",
+          "src/extract-swift.pure.ts:extractSwiftRecords",
+          "src/extract-kotlin.pure.ts:extractKotlinRecords"
+        ],
+        "minimum_pass_subset": [
+          "src/line-reader.pure.ts:readLines",
+          "src/extract-rust.pure.ts:extractRustRecords",
+          "src/extract-swift.pure.ts:extractSwiftRecords",
+          "src/extract-kotlin.pure.ts:extractKotlinRecords"
+        ],
+        "grading": "Name the listed constraints and the minimum affected-symbol subset; extra correctly justified symbols are allowed."
+      },
+      "must_not_change": null,
+      "why": "The shared pass is readLines, and Rust and Swift call it directly as their extraction result (src/line-reader.pure.ts:155; src/extract-rust.pure.ts:102; src/extract-swift.pure.ts:83). Kotlin also calls it before applying Kotlin-specific deduplication and module-name work, so the header mentioning only Rust and Swift is not a complete current caller inventory (src/extract-kotlin.pure.ts:117).",
+      "ambiguity": "New language-specific function names are implementation choices and are not part of the expected list; scanBraces and declarationEnd can remain shared because the request explicitly preserves low-level scanners. Merely renaming readLines or adding wrappers that still use its shared pass does not meet the requested reversal.",
+      "findable_by_search": {
+        "likelihood": "hard",
+        "search": [
+          "rg -n \"readLines|decided:\" src/line-reader.pure.ts",
+          "rg -n \"readLines\\(\" src"
+        ]
+      },
+      "constraint_on_other_symbol_or_file": "The file-header decision covers three language readers in other files; Kotlin is a caller not named in that decision text."
+    }
+  },
+  "score": {
+    "symbols": [
+      {
+        "symbol": "src/line-reader.pure.ts:readLines",
+        "required": true
+      },
+      {
+        "symbol": "src/extract-rust.pure.ts:extractRustRecords",
+        "required": true
+      },
+      {
+        "symbol": "src/extract-swift.pure.ts:extractSwiftRecords",
+        "required": true
+      },
+      {
+        "symbol": "src/extract-kotlin.pure.ts:extractKotlinRecords",
+        "required": true
+      }
+    ],
+    "records": [
+      {
+        "label": "decided: Rust and Swift share one line reader (src/line-reader.pure.ts:5)",
+        "any": [
+          "share one line reader",
+          "Rust and Swift share",
+          "same header, tag and hash steps"
+        ]
+      }
+    ],
+    "min_recall": 1,
+    "min_precision": 0.6
+  },
+  "pass_rule": "Lists all four symbols and names the shared-reader decided: tag by its words (recall 1); of the symbols listed, at least 60% are in the true set."
+}

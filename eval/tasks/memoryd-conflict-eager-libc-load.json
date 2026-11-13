@@ -1,0 +1,93 @@
+{
+  "id": "memoryd-conflict-eager-libc-load",
+  "kind": "conflict",
+  "repo": "memoryd",
+  "batch": 2,
+  "request": "Move the libc dlopen work in flock.ts to module scope and remove the lazy load branch. That should make the locking code easier to follow and pay initialization only once per process.",
+  "ground_truth": {
+    "source": {
+      "id": "memoryd-05",
+      "repo": "memoryd",
+      "request": "Move the libc dlopen work in flock.ts to module scope and remove the lazy load branch. That should make the locking code easier to follow and pay initialization only once per process.",
+      "kind": "conflict",
+      "target": {
+        "file": "src/flock.ts",
+        "symbol": "load / libc initialization"
+      },
+      "must_name": {
+        "constraints": [
+          {
+            "id": "lazy-FFI source rationale",
+            "location": "src/flock.ts:13",
+            "quote": "// Loaded on the first lock, not at import: Bun 1.2.18 crashes (bus error) when"
+          },
+          {
+            "id": "lazy-FFI worker trigger",
+            "location": "src/flock.ts:14",
+            "quote": "// many short-lived workers that import this module each load the library."
+          }
+        ],
+        "affected_symbols": [],
+        "minimum_pass_subset": [],
+        "grading": "Identify the constraint before editing; explain the concrete conflict, rather than merely citing a related record."
+      },
+      "must_not_change": {
+        "files": [
+          "src/flock.ts"
+        ],
+        "without_decision_revision": "Leave these files unedited while reporting the conflict and proposing a revision. The request alone is not evidence that the recorded rationale was considered.",
+        "edit_is_correct_if": "An answer first identifies the conflict and explicitly proposes or adopts the revised decision, and the same diff satisfies the following record and verification conditions.",
+        "diff_requirements": {
+          "all_record_paths_must_change": [
+            "src/flock.ts"
+          ],
+          "conditions": [
+            "The diff must replace or amend the two-line lazy-initialization rationale at src/flock.ts:13, documenting why eager initialization is now acceptable and for which runtime.",
+            "Removing the lazy code but leaving its crash rationale unchanged is a failure; validating that the historical crash no longer reproduces requires command-transcript evidence in addition to the diff."
+          ]
+        },
+        "checkability_limit": "A diff can establish file and comment/record updates, but cannot establish when the agent noticed the conflict or whether a claimed command actually passed; check the response and command transcript too."
+      },
+      "why": "The only local record of this initialization choice is a source comment explaining a concrete import-time crash in short-lived workers (src/flock.ts:13). The implementation defers dlopen behind the memoized load helper, which readErrno and tryLock call on demand (src/flock.ts:16; src/flock.ts:22; src/flock.ts:31).",
+      "ambiguity": "This is intentionally contestable: the current repository pins Bun 1.4.2 (commit 6b09ee7117b2fdcaca27bb003789ae1f0e0a7d2c), while the comment cites 1.2.18. A correct answer may test the newer runtime and revise the comment, rather than treating the old workaround as permanently binding; it must notice the recorded reason first.",
+      "findable_by_search": {
+        "likelihood": "easy",
+        "search": [
+          "rg -n \"dlopen|Loaded on|bus error|load =\" src/flock.ts",
+          "git log --oneline -- src/flock.ts package.json"
+        ]
+      },
+      "constraint_on_other_symbol_or_file": null
+    }
+  },
+  "score": {
+    "records": [
+      {
+        "label": "lazy-FFI comment (src/flock.ts:13)",
+        "any": [
+          "Loaded on the first lock",
+          "bus error",
+          "1\\.2\\.18"
+        ]
+      },
+      {
+        "label": "lazy-FFI worker trigger (src/flock.ts:14)",
+        "any": [
+          "short-lived workers"
+        ]
+      }
+    ],
+    "protected": [
+      "src/flock.ts"
+    ],
+    "exception": {
+      "changed": [
+        "src/flock.ts"
+      ],
+      "removed": [
+        "Loaded on the first lock, not at import"
+      ]
+    }
+  },
+  "pass_rule": "Names the lazy-load comment of src/flock.ts by its words, and leaves src/flock.ts unedited; or edits it only together with a rewrite of that comment. Naming a record id as the reason fails. Not scored: what the new comment says, and evidence that the crash no longer reproduces."
+}

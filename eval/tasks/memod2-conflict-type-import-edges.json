@@ -1,0 +1,81 @@
+{
+  "id": "memod2-conflict-type-import-edges",
+  "kind": "conflict",
+  "repo": "memod",
+  "batch": 2,
+  "request": "Include connections for type-only imports in toArchifyCandidate so the architecture diagram shows schema dependencies too. Use the same connection shape as value imports.",
+  "ground_truth": {
+    "source": {
+      "id": "memod2-05",
+      "repo": "memod",
+      "request": "Include connections for type-only imports in toArchifyCandidate so the architecture diagram shows schema dependencies too. Use the same connection shape as value imports.",
+      "kind": "conflict",
+      "target": {
+        "file": "src/view.pure.ts",
+        "symbol": "toArchifyCandidate"
+      },
+      "must_name": {
+        "constraints": [
+          {
+            "id": "view type-import decision",
+            "location": "src/view.pure.ts:29",
+            "quote": "* decided: type-only imports draw no edge because every module imports the shared types and those edges hide the call structure"
+          }
+        ],
+        "affected_symbols": [],
+        "minimum_pass_subset": [],
+        "grading": "Identify the constraint before editing; explain the concrete conflict, rather than merely citing a related record."
+      },
+      "must_not_change": {
+        "files": [
+          "src/view.pure.ts"
+        ],
+        "without_decision_revision": "Leave these files unedited while reporting the conflict and proposing a revision. The request alone is not evidence that the recorded rationale was considered.",
+        "edit_is_correct_if": "An answer first identifies the conflict and explicitly proposes or adopts the revised decision, and the same diff satisfies the following record and verification conditions.",
+        "diff_requirements": {
+          "all_record_paths_must_change": [
+            "src/view.pure.ts"
+          ],
+          "conditions": [
+            "The same diff must replace the decided tag at src/view.pure.ts:29 and the value-only postcondition at :27 with the new diagram meaning; removing only the r.typeOnly guard is insufficient."
+          ]
+        },
+        "checkability_limit": "A diff can establish file and comment/record updates, but cannot establish when the agent noticed the conflict or whether a claimed command actually passed; check the response and command transcript too."
+      },
+      "why": "The requested edges are explicitly excluded by the symbol decision, whose reason is that ubiquitous shared types obscure call structure (src/view.pure.ts:29). The implementation enforces that exact choice by returning no connection when r.typeOnly is true (src/view.pure.ts:59).",
+      "ambiguity": "A schema-oriented diagram could reasonably choose otherwise, but the same output currently has a documented value-import meaning; package-node creation already seeing an import does not mean its connection is drawn.",
+      "findable_by_search": {
+        "likelihood": "easy",
+        "search": [
+          "rg -n \"toArchifyCandidate|typeOnly|type-only\" src/view.pure.ts"
+        ]
+      },
+      "constraint_on_other_symbol_or_file": null
+    }
+  },
+  "score": {
+    "records": [
+      {
+        "label": "decided: type-only imports draw no edge (src/view.pure.ts:29)",
+        "any": [
+          "type-only imports draw no edge",
+          "hide the call structure",
+          "every module imports the shared types"
+        ]
+      }
+    ],
+    "protected": [
+      "src/view.pure.ts"
+    ],
+    "exception": {
+      "changed": [
+        "src/view.pure.ts"
+      ],
+      "removed": [
+        "decided: type-only imports draw no edge",
+        "one connection per value import"
+      ]
+    }
+  },
+  "pass_rule": "Names the decided: tag \"type-only imports draw no edge\" (by its words), and leaves src/view.pure.ts unedited; or edits it only together with a rewrite of that tag and of the value-only postcondition. Naming a record id as the reason fails."
+}
