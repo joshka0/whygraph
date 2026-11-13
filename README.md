@@ -315,10 +315,13 @@ whygraph: src/money.ts has no symbol cent. Close: src/money.ts:cents, src/money.
 
 Does an agent with the why graph handle change requests better? The trial in
 `eval/` asks. Claude Code ran headless with one model (its `sonnet` alias) on
-fourteen change requests: eight on the fixture shop and six on memod. Some go
-against a recorded decision, some ask what a reversed decision affects, and
-some are harmless controls. Each request ran five times in each of three
-conditions, every run in a fresh copy of the repo:
+change requests in two batches. The first had fourteen: eight on the fixture
+shop and six on memod. The second, fixed in advance before any of its runs,
+had sixteen chosen blind by an agent that knew nothing about whygraph: eight
+more on memod and eight on memoryd, a repo with ADRs but no `decided:` tags.
+Some go against a recorded decision, some ask what a reversed decision
+affects, and some are harmless controls. Each request ran five times in each
+of three conditions, every run in a fresh copy of the repo:
 
 - **none**: the repo only.
 - **graph**: the repo, a fresh store, the skill and the rule section, as this
@@ -366,6 +369,24 @@ Sensitivity: the same paired differences with every unscored run counted as FAIL
   stub    86%  (50 runs, 5238134 tokens)
   graph - none: 0.23 [0.08, 0.40] over 10 tasks
   graph - stub: 0.08 [-0.04, 0.26] over 10 tasks
+=== Batch 2: the sixteen tasks chosen blind (primary result: graph - stub)
+  none    61%  (80 runs, 5471307 tokens)
+  graph   76%  (80 runs, 4545897 tokens)
+  stub    69%  (80 runs, 4953354 tokens)
+  graph - none: 0.15 [0.00, 0.31] over 16 tasks
+  graph - stub: 0.07 [-0.01, 0.18] over 16 tasks
+=== Batch 2: memod only
+  graph - none: -0.03 [-0.15, 0.08] over 8 tasks
+  graph - stub: 0.05 [0.00, 0.12] over 8 tasks
+=== Batch 2: memoryd only
+  graph - none: 0.33 [0.08, 0.58] over 8 tasks
+  graph - stub: 0.10 [-0.05, 0.28] over 8 tasks
+=== Both batches: all thirty tasks
+  none    56%  (149 runs, 11859272 tokens)
+  graph   85%  (150 runs, 9365219 tokens)
+  stub    65%  (150 runs, 11382840 tokens)
+  graph - none: 0.29 [0.15, 0.44] over 30 tasks
+  graph - stub: 0.20 [0.07, 0.34] over 30 tasks
 ```
 
 The "Post hoc" groups were added after the results were seen. Three fixture
@@ -375,12 +396,20 @@ never in none or stub, and they carry much of the headline. Without them the
 graph still leads none, but the interval of its lead over stub reaches below
 zero.
 
+The second batch is the cleaner test: its requests were chosen blind and the
+tool did not change after they were seen. There the graph's lead over stub is
+small and its interval reaches below zero; its lead over none comes mostly from
+memoryd, where the skill and rule alone (stub) already do much of the work.
+Before the run, the graph was expected to add little on memoryd: its store
+links few ADRs to code, and `why` gave a record for only one of the memoryd
+targets checked.
+
 What this does not show:
 
 - One model, one prompt wrapper, and five repeats per cell: a single run moves
   a cell a lot.
-- The tool's author chose the eight fixture requests. An agent that knew
-  nothing about whygraph chose the six memod requests blind.
+- The tool's author chose the eight fixture requests. Agents that knew
+  nothing about whygraph chose the memod and memoryd requests blind.
 - The pilot request (memod's report build gate) changed the tool. Graph failed
   it because `carry` did not show a decision one step away, so `carry` was
   changed to show it. Its numbers are not independent; the second and fourth

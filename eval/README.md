@@ -351,12 +351,49 @@ pass rule or verdict.
 
 ## The committed score
 
-`score.txt` is the output of `node eval/score.mjs` for the full run (the
-results themselves are git-ignored). The section "What a trial measured" of
+`score.txt` is the output of `node eval/score.mjs` for both batches (the
+results themselves are git-ignored): batch 1 in its first blocks, as it was
+before batch 2 existed, then batch 2 and both batches pooled. The section "What a trial measured" of
 the root README quotes it, and `node scripts/readme-check.mjs` fails when a
 quoted line differs from it or when that section holds a number outside the
 quote. Regenerate it with `node eval/score.mjs > eval/score.txt` only from a
 complete results folder.
+
+## Batch 2 results
+
+From `score.txt`, all 240 runs scored (none timed out; the four runs lost to the
+runner bug above were run again after the fix and are in `results/_invalid/`).
+
+| | none | graph | stub | graph - none | graph - stub |
+| --- | --- | --- | --- | --- | --- |
+| Batch 2, 16 tasks (primary: graph - stub) | 61% | 76% | 69% | 0.15 [0.00, 0.31] | **0.07 [-0.01, 0.18]** |
+| memod, 8 tasks | 80% | 78% | 73% | -0.03 [-0.15, 0.08] | 0.05 [0.00, 0.12] |
+| memoryd, 8 tasks | 43% | 75% | 65% | 0.33 [0.08, 0.58] | 0.10 [-0.05, 0.28] |
+| findable: easy, 7 tasks | 86% | 97% | 91% | 0.11 [0.00, 0.34] | 0.06 [0.00, 0.17] |
+| findable: medium, 8 tasks | 48% | 65% | 57% | 0.18 [-0.07, 0.45] | 0.08 [-0.05, 0.25] |
+| findable: hard, 1 task | 0% | 20% | 0% | 0.20 | 0.20 |
+| Batch 1, 14 tasks | 51% | 96% | 61% | 0.45 [0.24, 0.67] | 0.34 [0.11, 0.60] |
+| Both batches, 30 tasks | 56% | 85% | 65% | 0.29 [0.15, 0.44] | 0.20 [0.07, 0.34] |
+| Both, without the pilot task, 29 | 58% | 85% | 68% | 0.26 [0.13, 0.41] | 0.17 [0.06, 0.31] |
+
+- The primary result's interval reaches below zero: on requests chosen blind,
+  the graph's answers add a small lead over the skill and rule alone that
+  these 16 tasks cannot tell from none.
+- On memoryd, graph and stub came out close, as expected before the run, and
+  both well above none: the rule text sends the agent to look for records, and
+  the ADRs are in the repo for it to find. The largest graph-over-stub cells
+  (`memoryd-conflict-first-redaction-alignment` 80/20,
+  `memoryd-conflict-reopen-sqlite-owners` 80/40) are not explained by what the
+  graph said: `carry` on the redaction target answers "No decision is
+  recorded for it".
+- No control drew an objection in any condition. No `none` run called
+  `whygraph`; 78 of 80 `graph` runs and 78 of 80 `stub` runs did.
+- Both impact tasks on memod failed nearly everywhere:
+  `memod2-impact-rename-first-candidate` needs both records named, and no
+  graph or stub reply named ADR 0004; `memod2-impact-language-owned-readers`
+  fails mostly on precision (replies list helpers outside the true set).
+- Tokens: 14970558 over the 240 runs. Agent wall time: 2.9 hours summed
+  (inflated for runs before the fix, see above).
 
 ## What the numbers can and cannot show
 

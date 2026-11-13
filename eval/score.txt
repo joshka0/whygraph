@@ -1,4 +1,4 @@
-209 finished runs
+449 finished runs
 
 Runs:
   PASS  fixture-conflict-flat-rate__graph__r1  whygraph calls: 1
@@ -210,6 +210,246 @@ Runs:
   PASS  memod-impact-types-require-topics__stub__r3  whygraph calls: 0
   FAIL  memod-impact-types-require-topics__stub__r4  whygraph calls: 1  (recall 0.67 < 1)
   PASS  memod-impact-types-require-topics__stub__r5  whygraph calls: 1
+  PASS  memod2-conflict-legacy-resolutions__graph__r1  whygraph calls: 1
+  PASS  memod2-conflict-legacy-resolutions__graph__r2  whygraph calls: 1
+  PASS  memod2-conflict-legacy-resolutions__graph__r3  whygraph calls: 1
+  PASS  memod2-conflict-legacy-resolutions__graph__r4  whygraph calls: 1
+  PASS  memod2-conflict-legacy-resolutions__graph__r5  whygraph calls: 1
+  PASS  memod2-conflict-legacy-resolutions__none__r1  whygraph calls: 0
+  PASS  memod2-conflict-legacy-resolutions__none__r2  whygraph calls: 0
+  PASS  memod2-conflict-legacy-resolutions__none__r3  whygraph calls: 0
+  PASS  memod2-conflict-legacy-resolutions__none__r4  whygraph calls: 0
+  PASS  memod2-conflict-legacy-resolutions__none__r5  whygraph calls: 0
+  PASS  memod2-conflict-legacy-resolutions__stub__r1  whygraph calls: 2
+  PASS  memod2-conflict-legacy-resolutions__stub__r2  whygraph calls: 2
+  PASS  memod2-conflict-legacy-resolutions__stub__r3  whygraph calls: 1
+  PASS  memod2-conflict-legacy-resolutions__stub__r4  whygraph calls: 2
+  PASS  memod2-conflict-legacy-resolutions__stub__r5  whygraph calls: 2
+  PASS  memod2-conflict-merge-first-parent__graph__r1  whygraph calls: 1
+  PASS  memod2-conflict-merge-first-parent__graph__r2  whygraph calls: 1
+  PASS  memod2-conflict-merge-first-parent__graph__r3  whygraph calls: 1
+  PASS  memod2-conflict-merge-first-parent__graph__r4  whygraph calls: 1
+  PASS  memod2-conflict-merge-first-parent__graph__r5  whygraph calls: 1
+  PASS  memod2-conflict-merge-first-parent__none__r1  whygraph calls: 0
+  PASS  memod2-conflict-merge-first-parent__none__r2  whygraph calls: 0
+  PASS  memod2-conflict-merge-first-parent__none__r3  whygraph calls: 0
+  PASS  memod2-conflict-merge-first-parent__none__r4  whygraph calls: 0
+  PASS  memod2-conflict-merge-first-parent__none__r5  whygraph calls: 0
+  PASS  memod2-conflict-merge-first-parent__stub__r1  whygraph calls: 1
+  FAIL  memod2-conflict-merge-first-parent__stub__r2  whygraph calls: 1  (names no required record)
+  PASS  memod2-conflict-merge-first-parent__stub__r3  whygraph calls: 1
+  PASS  memod2-conflict-merge-first-parent__stub__r4  whygraph calls: 1
+  PASS  memod2-conflict-merge-first-parent__stub__r5  whygraph calls: 1
+  PASS  memod2-conflict-span-finding-details__graph__r1  whygraph calls: 1
+  PASS  memod2-conflict-span-finding-details__graph__r2  whygraph calls: 1
+  PASS  memod2-conflict-span-finding-details__graph__r3  whygraph calls: 1
+  PASS  memod2-conflict-span-finding-details__graph__r4  whygraph calls: 2
+  PASS  memod2-conflict-span-finding-details__graph__r5  whygraph calls: 1
+  PASS  memod2-conflict-span-finding-details__none__r1  whygraph calls: 0
+  PASS  memod2-conflict-span-finding-details__none__r2  whygraph calls: 0
+  PASS  memod2-conflict-span-finding-details__none__r3  whygraph calls: 0
+  PASS  memod2-conflict-span-finding-details__none__r4  whygraph calls: 0
+  PASS  memod2-conflict-span-finding-details__none__r5  whygraph calls: 0
+  PASS  memod2-conflict-span-finding-details__stub__r1  whygraph calls: 2
+  PASS  memod2-conflict-span-finding-details__stub__r2  whygraph calls: 1
+  PASS  memod2-conflict-span-finding-details__stub__r3  whygraph calls: 2
+  PASS  memod2-conflict-span-finding-details__stub__r4  whygraph calls: 1
+  PASS  memod2-conflict-span-finding-details__stub__r5  whygraph calls: 2
+  PASS  memod2-conflict-type-import-edges__graph__r1  whygraph calls: 1
+  PASS  memod2-conflict-type-import-edges__graph__r2  whygraph calls: 1
+  PASS  memod2-conflict-type-import-edges__graph__r3  whygraph calls: 1
+  PASS  memod2-conflict-type-import-edges__graph__r4  whygraph calls: 1
+  PASS  memod2-conflict-type-import-edges__graph__r5  whygraph calls: 1
+  PASS  memod2-conflict-type-import-edges__none__r1  whygraph calls: 0
+  PASS  memod2-conflict-type-import-edges__none__r2  whygraph calls: 0
+  PASS  memod2-conflict-type-import-edges__none__r3  whygraph calls: 0
+  PASS  memod2-conflict-type-import-edges__none__r4  whygraph calls: 0
+  PASS  memod2-conflict-type-import-edges__none__r5  whygraph calls: 0
+  PASS  memod2-conflict-type-import-edges__stub__r1  whygraph calls: 2
+  PASS  memod2-conflict-type-import-edges__stub__r2  whygraph calls: 2
+  PASS  memod2-conflict-type-import-edges__stub__r3  whygraph calls: 2
+  PASS  memod2-conflict-type-import-edges__stub__r4  whygraph calls: 2
+  PASS  memod2-conflict-type-import-edges__stub__r5  whygraph calls: 2
+  PASS  memod2-conflict-verify-record-only__graph__r1  whygraph calls: 1
+  PASS  memod2-conflict-verify-record-only__graph__r2  whygraph calls: 2
+  PASS  memod2-conflict-verify-record-only__graph__r3  whygraph calls: 2
+  PASS  memod2-conflict-verify-record-only__graph__r4  whygraph calls: 1
+  PASS  memod2-conflict-verify-record-only__graph__r5  whygraph calls: 1
+  PASS  memod2-conflict-verify-record-only__none__r1  whygraph calls: 0
+  PASS  memod2-conflict-verify-record-only__none__r2  whygraph calls: 0
+  PASS  memod2-conflict-verify-record-only__none__r3  whygraph calls: 0
+  PASS  memod2-conflict-verify-record-only__none__r4  whygraph calls: 0
+  PASS  memod2-conflict-verify-record-only__none__r5  whygraph calls: 0
+  PASS  memod2-conflict-verify-record-only__stub__r1  whygraph calls: 1
+  PASS  memod2-conflict-verify-record-only__stub__r2  whygraph calls: 1
+  PASS  memod2-conflict-verify-record-only__stub__r3  whygraph calls: 1
+  PASS  memod2-conflict-verify-record-only__stub__r4  whygraph calls: 1
+  PASS  memod2-conflict-verify-record-only__stub__r5  whygraph calls: 2
+  PASS  memod2-control-nodeid-doc-comment__graph__r1  whygraph calls: 1
+  PASS  memod2-control-nodeid-doc-comment__graph__r2  whygraph calls: 1
+  PASS  memod2-control-nodeid-doc-comment__graph__r3  whygraph calls: 1
+  PASS  memod2-control-nodeid-doc-comment__graph__r4  whygraph calls: 1
+  PASS  memod2-control-nodeid-doc-comment__graph__r5  whygraph calls: 1
+  PASS  memod2-control-nodeid-doc-comment__none__r1  whygraph calls: 0
+  PASS  memod2-control-nodeid-doc-comment__none__r2  whygraph calls: 0
+  PASS  memod2-control-nodeid-doc-comment__none__r3  whygraph calls: 0
+  PASS  memod2-control-nodeid-doc-comment__none__r4  whygraph calls: 0
+  PASS  memod2-control-nodeid-doc-comment__none__r5  whygraph calls: 0
+  PASS  memod2-control-nodeid-doc-comment__stub__r1  whygraph calls: 1
+  PASS  memod2-control-nodeid-doc-comment__stub__r2  whygraph calls: 1
+  PASS  memod2-control-nodeid-doc-comment__stub__r3  whygraph calls: 1
+  PASS  memod2-control-nodeid-doc-comment__stub__r4  whygraph calls: 2
+  PASS  memod2-control-nodeid-doc-comment__stub__r5  whygraph calls: 1
+  FAIL  memod2-impact-language-owned-readers__graph__r1  whygraph calls: 0  (recall 0.80 < 1; precision 0.44 < 0.6)
+  PASS  memod2-impact-language-owned-readers__graph__r2  whygraph calls: 1
+  FAIL  memod2-impact-language-owned-readers__graph__r3  whygraph calls: 1  (recall 0.80 < 1; precision 0.40 < 0.6)
+  FAIL  memod2-impact-language-owned-readers__graph__r4  whygraph calls: 0  (recall 0.80 < 1; precision 0.33 < 0.6)
+  FAIL  memod2-impact-language-owned-readers__graph__r5  whygraph calls: 1  (precision 0.50 < 0.6)
+  FAIL  memod2-impact-language-owned-readers__none__r1  whygraph calls: 0  (recall 0.80 < 1; precision 0.33 < 0.6)
+  FAIL  memod2-impact-language-owned-readers__none__r2  whygraph calls: 0  (recall 0.80 < 1; precision 0.25 < 0.6)
+  FAIL  memod2-impact-language-owned-readers__none__r3  whygraph calls: 0  (precision 0.40 < 0.6)
+  FAIL  memod2-impact-language-owned-readers__none__r4  whygraph calls: 0  (precision 0.29 < 0.6)
+  FAIL  memod2-impact-language-owned-readers__none__r5  whygraph calls: 0  (recall 0.80 < 1; precision 0.27 < 0.6)
+  FAIL  memod2-impact-language-owned-readers__stub__r1  whygraph calls: 1  (precision 0.33 < 0.6)
+  FAIL  memod2-impact-language-owned-readers__stub__r2  whygraph calls: 1  (precision 0.44 < 0.6)
+  FAIL  memod2-impact-language-owned-readers__stub__r3  whygraph calls: 2  (recall 0.80 < 1; precision 0.44 < 0.6)
+  FAIL  memod2-impact-language-owned-readers__stub__r4  whygraph calls: 1  (recall 0.80 < 1; precision 0.44 < 0.6)
+  FAIL  memod2-impact-language-owned-readers__stub__r5  whygraph calls: 1  (precision 0.36 < 0.6)
+  FAIL  memod2-impact-rename-first-candidate__graph__r1  whygraph calls: 2  (recall 0.75 < 1)
+  FAIL  memod2-impact-rename-first-candidate__graph__r2  whygraph calls: 1  (recall 0.75 < 1)
+  FAIL  memod2-impact-rename-first-candidate__graph__r3  whygraph calls: 1  (recall 0.75 < 1)
+  FAIL  memod2-impact-rename-first-candidate__graph__r4  whygraph calls: 1  (recall 0.75 < 1)
+  FAIL  memod2-impact-rename-first-candidate__graph__r5  whygraph calls: 1  (recall 0.75 < 1)
+  PASS  memod2-impact-rename-first-candidate__none__r1  whygraph calls: 0
+  FAIL  memod2-impact-rename-first-candidate__none__r2  whygraph calls: 0  (recall 0.50 < 1)
+  PASS  memod2-impact-rename-first-candidate__none__r3  whygraph calls: 0
+  FAIL  memod2-impact-rename-first-candidate__none__r4  whygraph calls: 0  (recall 0.50 < 1)
+  FAIL  memod2-impact-rename-first-candidate__none__r5  whygraph calls: 0  (recall 0.75 < 1)
+  FAIL  memod2-impact-rename-first-candidate__stub__r1  whygraph calls: 1  (recall 0.75 < 1)
+  FAIL  memod2-impact-rename-first-candidate__stub__r2  whygraph calls: 1  (recall 0.75 < 1)
+  FAIL  memod2-impact-rename-first-candidate__stub__r3  whygraph calls: 0  (recall 0.75 < 1)
+  FAIL  memod2-impact-rename-first-candidate__stub__r4  whygraph calls: 2  (recall 0.75 < 1)
+  FAIL  memod2-impact-rename-first-candidate__stub__r5  whygraph calls: 1  (recall 0.75 < 1)
+  PASS  memoryd-conflict-cache-filtered-summaries__graph__r1  whygraph calls: 3
+  PASS  memoryd-conflict-cache-filtered-summaries__graph__r2  whygraph calls: 2
+  PASS  memoryd-conflict-cache-filtered-summaries__graph__r3  whygraph calls: 3
+  PASS  memoryd-conflict-cache-filtered-summaries__graph__r4  whygraph calls: 3
+  PASS  memoryd-conflict-cache-filtered-summaries__graph__r5  whygraph calls: 3
+  PASS  memoryd-conflict-cache-filtered-summaries__none__r1  whygraph calls: 0
+  FAIL  memoryd-conflict-cache-filtered-summaries__none__r2  whygraph calls: 0  (names no required record)
+  FAIL  memoryd-conflict-cache-filtered-summaries__none__r3  whygraph calls: 0  (names no required record)
+  FAIL  memoryd-conflict-cache-filtered-summaries__none__r4  whygraph calls: 0  (names no required record)
+  FAIL  memoryd-conflict-cache-filtered-summaries__none__r5  whygraph calls: 0  (names no required record)
+  PASS  memoryd-conflict-cache-filtered-summaries__stub__r1  whygraph calls: 2
+  PASS  memoryd-conflict-cache-filtered-summaries__stub__r2  whygraph calls: 2
+  PASS  memoryd-conflict-cache-filtered-summaries__stub__r3  whygraph calls: 2
+  PASS  memoryd-conflict-cache-filtered-summaries__stub__r4  whygraph calls: 2
+  PASS  memoryd-conflict-cache-filtered-summaries__stub__r5  whygraph calls: 2
+  PASS  memoryd-conflict-eager-libc-load__graph__r1  whygraph calls: 1
+  PASS  memoryd-conflict-eager-libc-load__graph__r2  whygraph calls: 2
+  PASS  memoryd-conflict-eager-libc-load__graph__r3  whygraph calls: 2
+  PASS  memoryd-conflict-eager-libc-load__graph__r4  whygraph calls: 2
+  PASS  memoryd-conflict-eager-libc-load__graph__r5  whygraph calls: 1
+  PASS  memoryd-conflict-eager-libc-load__none__r1  whygraph calls: 0
+  PASS  memoryd-conflict-eager-libc-load__none__r2  whygraph calls: 0
+  PASS  memoryd-conflict-eager-libc-load__none__r3  whygraph calls: 0
+  PASS  memoryd-conflict-eager-libc-load__none__r4  whygraph calls: 0
+  PASS  memoryd-conflict-eager-libc-load__none__r5  whygraph calls: 0
+  PASS  memoryd-conflict-eager-libc-load__stub__r1  whygraph calls: 2
+  PASS  memoryd-conflict-eager-libc-load__stub__r2  whygraph calls: 2
+  PASS  memoryd-conflict-eager-libc-load__stub__r3  whygraph calls: 1
+  PASS  memoryd-conflict-eager-libc-load__stub__r4  whygraph calls: 2
+  PASS  memoryd-conflict-eager-libc-load__stub__r5  whygraph calls: 2
+  PASS  memoryd-conflict-first-redaction-alignment__graph__r1  whygraph calls: 1
+  PASS  memoryd-conflict-first-redaction-alignment__graph__r2  whygraph calls: 2
+  PASS  memoryd-conflict-first-redaction-alignment__graph__r3  whygraph calls: 1
+  PASS  memoryd-conflict-first-redaction-alignment__graph__r4  whygraph calls: 1
+  FAIL  memoryd-conflict-first-redaction-alignment__graph__r5  whygraph calls: 1  (names no required record; edited protected files: src/central/store/legacyRedaction.ts)
+  FAIL  memoryd-conflict-first-redaction-alignment__none__r1  whygraph calls: 0  (names no required record; edited protected files: src/central/store/legacyRedaction.ts)
+  FAIL  memoryd-conflict-first-redaction-alignment__none__r2  whygraph calls: 0  (edited protected files: src/central/store/legacyRedaction.ts)
+  FAIL  memoryd-conflict-first-redaction-alignment__none__r3  whygraph calls: 0  (edited protected files: src/central/store/legacyRedaction.ts)
+  FAIL  memoryd-conflict-first-redaction-alignment__none__r4  whygraph calls: 0  (edited protected files: src/central/store/legacyRedaction.ts)
+  PASS  memoryd-conflict-first-redaction-alignment__none__r5  whygraph calls: 0
+  FAIL  memoryd-conflict-first-redaction-alignment__stub__r1  whygraph calls: 1  (edited protected files: src/central/store/legacyRedaction.ts)
+  PASS  memoryd-conflict-first-redaction-alignment__stub__r2  whygraph calls: 1
+  FAIL  memoryd-conflict-first-redaction-alignment__stub__r3  whygraph calls: 2  (names no required record; edited protected files: src/central/store/legacyRedaction.ts)
+  FAIL  memoryd-conflict-first-redaction-alignment__stub__r4  whygraph calls: 2  (names no required record; edited protected files: src/central/store/legacyRedaction.ts)
+  FAIL  memoryd-conflict-first-redaction-alignment__stub__r5  whygraph calls: 2  (names no required record; edited protected files: src/central/store/legacyRedaction.ts)
+  FAIL  memoryd-conflict-pid-file-lock__graph__r1  whygraph calls: 2  (names no required record; edited protected files: src/central/store/open.ts)
+  FAIL  memoryd-conflict-pid-file-lock__graph__r2  whygraph calls: 1  (names no required record; edited protected files: src/central/store/open.ts)
+  FAIL  memoryd-conflict-pid-file-lock__graph__r3  whygraph calls: 2  (names no required record; edited protected files: src/central/store/open.ts)
+  PASS  memoryd-conflict-pid-file-lock__graph__r4  whygraph calls: 1
+  FAIL  memoryd-conflict-pid-file-lock__graph__r5  whygraph calls: 1  (names no required record; edited protected files: src/central/store/open.ts)
+  FAIL  memoryd-conflict-pid-file-lock__none__r1  whygraph calls: 0  (names no required record; edited protected files: src/central/store/open.ts)
+  FAIL  memoryd-conflict-pid-file-lock__none__r2  whygraph calls: 0  (names no required record; edited protected files: src/central/store/open.ts)
+  FAIL  memoryd-conflict-pid-file-lock__none__r3  whygraph calls: 0  (names no required record; edited protected files: src/central/store/open.ts)
+  FAIL  memoryd-conflict-pid-file-lock__none__r4  whygraph calls: 0  (names no required record; edited protected files: src/central/store/open.ts)
+  FAIL  memoryd-conflict-pid-file-lock__none__r5  whygraph calls: 0  (names no required record; edited protected files: src/central/store/open.ts)
+  FAIL  memoryd-conflict-pid-file-lock__stub__r1  whygraph calls: 2  (names no required record)
+  FAIL  memoryd-conflict-pid-file-lock__stub__r2  whygraph calls: 1  (names no required record; edited protected files: src/central/store/open.ts)
+  FAIL  memoryd-conflict-pid-file-lock__stub__r3  whygraph calls: 2  (names no required record; edited protected files: src/central/store/open.ts)
+  FAIL  memoryd-conflict-pid-file-lock__stub__r4  whygraph calls: 1  (names no required record; edited protected files: src/central/store/open.ts)
+  PASS  memoryd-conflict-pid-file-lock__stub__r5  whygraph calls: 2
+  PASS  memoryd-conflict-reopen-sqlite-owners__graph__r1  whygraph calls: 2
+  PASS  memoryd-conflict-reopen-sqlite-owners__graph__r2  whygraph calls: 1
+  FAIL  memoryd-conflict-reopen-sqlite-owners__graph__r3  whygraph calls: 2  (names no required record; edited protected files: mem/src/fileWorker.ts, mem/src/indexRead.ts)
+  PASS  memoryd-conflict-reopen-sqlite-owners__graph__r4  whygraph calls: 2
+  PASS  memoryd-conflict-reopen-sqlite-owners__graph__r5  whygraph calls: 1
+  FAIL  memoryd-conflict-reopen-sqlite-owners__none__r1  whygraph calls: 0  (names no required record; edited protected files: mem/src/fileWorker.ts, mem/src/indexRead.ts)
+  FAIL  memoryd-conflict-reopen-sqlite-owners__none__r2  whygraph calls: 0  (names no required record; edited protected files: mem/src/fileWorker.ts)
+  FAIL  memoryd-conflict-reopen-sqlite-owners__none__r3  whygraph calls: 0  (names no required record; edited protected files: mem/src/fileWorker.ts, mem/src/indexRead.ts)
+  FAIL  memoryd-conflict-reopen-sqlite-owners__none__r4  whygraph calls: 0  (names no required record; edited protected files: mem/src/fileWorker.ts, mem/src/indexRead.ts)
+  FAIL  memoryd-conflict-reopen-sqlite-owners__none__r5  whygraph calls: 0  (names no required record; edited protected files: mem/src/fileWorker.ts, mem/src/indexRead.ts)
+  FAIL  memoryd-conflict-reopen-sqlite-owners__stub__r1  whygraph calls: 1  (names no required record; edited protected files: mem/src/fileWorker.ts, mem/src/indexRead.ts)
+  FAIL  memoryd-conflict-reopen-sqlite-owners__stub__r2  whygraph calls: 2  (names no required record; edited protected files: mem/src/fileWorker.ts, mem/src/indexRead.ts)
+  PASS  memoryd-conflict-reopen-sqlite-owners__stub__r3  whygraph calls: 2
+  FAIL  memoryd-conflict-reopen-sqlite-owners__stub__r4  whygraph calls: 1  (edited protected files: mem/src/fileWorker.ts, mem/src/indexRead.ts)
+  PASS  memoryd-conflict-reopen-sqlite-owners__stub__r5  whygraph calls: 2
+  PASS  memoryd-control-move-entry-id-comment__graph__r1  whygraph calls: 1
+  PASS  memoryd-control-move-entry-id-comment__graph__r2  whygraph calls: 1
+  PASS  memoryd-control-move-entry-id-comment__graph__r3  whygraph calls: 1
+  PASS  memoryd-control-move-entry-id-comment__graph__r4  whygraph calls: 1
+  PASS  memoryd-control-move-entry-id-comment__graph__r5  whygraph calls: 1
+  PASS  memoryd-control-move-entry-id-comment__none__r1  whygraph calls: 0
+  PASS  memoryd-control-move-entry-id-comment__none__r2  whygraph calls: 0
+  PASS  memoryd-control-move-entry-id-comment__none__r3  whygraph calls: 0
+  PASS  memoryd-control-move-entry-id-comment__none__r4  whygraph calls: 0
+  PASS  memoryd-control-move-entry-id-comment__none__r5  whygraph calls: 0
+  PASS  memoryd-control-move-entry-id-comment__stub__r1  whygraph calls: 1
+  PASS  memoryd-control-move-entry-id-comment__stub__r2  whygraph calls: 1
+  PASS  memoryd-control-move-entry-id-comment__stub__r3  whygraph calls: 1
+  PASS  memoryd-control-move-entry-id-comment__stub__r4  whygraph calls: 0
+  PASS  memoryd-control-move-entry-id-comment__stub__r5  whygraph calls: 1
+  PASS  memoryd-impact-eager-toolcall-text__graph__r1  whygraph calls: 2
+  FAIL  memoryd-impact-eager-toolcall-text__graph__r2  whygraph calls: 1  (recall 0.86 < 1)
+  FAIL  memoryd-impact-eager-toolcall-text__graph__r3  whygraph calls: 1  (recall 0.86 < 1)
+  PASS  memoryd-impact-eager-toolcall-text__graph__r4  whygraph calls: 3
+  FAIL  memoryd-impact-eager-toolcall-text__graph__r5  whygraph calls: 1  (recall 0.86 < 1)
+  FAIL  memoryd-impact-eager-toolcall-text__none__r1  whygraph calls: 0  (recall 0.86 < 1)
+  FAIL  memoryd-impact-eager-toolcall-text__none__r2  whygraph calls: 0  (recall 0.86 < 1)
+  FAIL  memoryd-impact-eager-toolcall-text__none__r3  whygraph calls: 0  (recall 0.57 < 1)
+  FAIL  memoryd-impact-eager-toolcall-text__none__r4  whygraph calls: 0  (recall 0.86 < 1)
+  FAIL  memoryd-impact-eager-toolcall-text__none__r5  whygraph calls: 0  (recall 0.71 < 1)
+  FAIL  memoryd-impact-eager-toolcall-text__stub__r1  whygraph calls: 1  (recall 0.86 < 1)
+  PASS  memoryd-impact-eager-toolcall-text__stub__r2  whygraph calls: 2
+  PASS  memoryd-impact-eager-toolcall-text__stub__r3  whygraph calls: 2
+  FAIL  memoryd-impact-eager-toolcall-text__stub__r4  whygraph calls: 2  (recall 0.86 < 1)
+  FAIL  memoryd-impact-eager-toolcall-text__stub__r5  whygraph calls: 2  (recall 0.86 < 1)
+  PASS  memoryd-impact-no-detached-scan__graph__r1  whygraph calls: 1
+  PASS  memoryd-impact-no-detached-scan__graph__r2  whygraph calls: 1
+  PASS  memoryd-impact-no-detached-scan__graph__r3  whygraph calls: 1
+  FAIL  memoryd-impact-no-detached-scan__graph__r4  whygraph calls: 3  (recall 0.75 < 1)
+  PASS  memoryd-impact-no-detached-scan__graph__r5  whygraph calls: 1
+  PASS  memoryd-impact-no-detached-scan__none__r1  whygraph calls: 0
+  PASS  memoryd-impact-no-detached-scan__none__r2  whygraph calls: 0
+  PASS  memoryd-impact-no-detached-scan__none__r3  whygraph calls: 0
+  PASS  memoryd-impact-no-detached-scan__none__r4  whygraph calls: 0
+  PASS  memoryd-impact-no-detached-scan__none__r5  whygraph calls: 0
+  PASS  memoryd-impact-no-detached-scan__stub__r1  whygraph calls: 1
+  PASS  memoryd-impact-no-detached-scan__stub__r2  whygraph calls: 2
+  PASS  memoryd-impact-no-detached-scan__stub__r3  whygraph calls: 3
+  PASS  memoryd-impact-no-detached-scan__stub__r4  whygraph calls: 3
+  PASS  memoryd-impact-no-detached-scan__stub__r5  whygraph calls: 1
 
 === All tasks
 
@@ -274,12 +514,265 @@ False-objection rate on control tasks:
   graph    0%  (10 runs)
   stub     0%  (10 runs)
 
+=== Batch 2: the sixteen tasks chosen blind (primary result: graph - stub)
+
+Pass rate per condition:
+  none    61%  (80 runs, 5471307 tokens)
+  graph   76%  (80 runs, 4545897 tokens)
+  stub    69%  (80 runs, 4953354 tokens)
+
+Pass rate per task (none graph stub):
+  100% 100% 100%  memod2-conflict-legacy-resolutions
+  100% 100%  80%  memod2-conflict-merge-first-parent
+  100% 100% 100%  memod2-conflict-span-finding-details
+  100% 100% 100%  memod2-conflict-type-import-edges
+  100% 100% 100%  memod2-conflict-verify-record-only
+  100% 100% 100%  memod2-control-nodeid-doc-comment
+    0%  20%   0%  memod2-impact-language-owned-readers
+   40%   0%   0%  memod2-impact-rename-first-candidate
+   20% 100% 100%  memoryd-conflict-cache-filtered-summaries
+  100% 100% 100%  memoryd-conflict-eager-libc-load
+   20%  80%  20%  memoryd-conflict-first-redaction-alignment
+    0%  20%  20%  memoryd-conflict-pid-file-lock
+    0%  80%  40%  memoryd-conflict-reopen-sqlite-owners
+  100% 100% 100%  memoryd-control-move-entry-id-comment
+    0%  40%  40%  memoryd-impact-eager-toolcall-text
+  100%  80% 100%  memoryd-impact-no-detached-scan
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: 0.15 [0.00, 0.31] over 16 tasks
+  graph - stub: 0.07 [-0.01, 0.18] over 16 tasks
+
+False-objection rate on control tasks:
+  none     0%  (10 runs)
+  graph    0%  (10 runs)
+  stub     0%  (10 runs)
+
+=== Batch 2: memod only
+
+Pass rate per condition:
+  none    80%  (40 runs, 2692555 tokens)
+  graph   78%  (40 runs, 1737097 tokens)
+  stub    73%  (40 runs, 2072493 tokens)
+
+Pass rate per task (none graph stub):
+  100% 100% 100%  memod2-conflict-legacy-resolutions
+  100% 100%  80%  memod2-conflict-merge-first-parent
+  100% 100% 100%  memod2-conflict-span-finding-details
+  100% 100% 100%  memod2-conflict-type-import-edges
+  100% 100% 100%  memod2-conflict-verify-record-only
+  100% 100% 100%  memod2-control-nodeid-doc-comment
+    0%  20%   0%  memod2-impact-language-owned-readers
+   40%   0%   0%  memod2-impact-rename-first-candidate
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: -0.03 [-0.15, 0.08] over 8 tasks
+  graph - stub: 0.05 [0.00, 0.12] over 8 tasks
+
+False-objection rate on control tasks:
+  none     0%  (5 runs)
+  graph    0%  (5 runs)
+  stub     0%  (5 runs)
+
+=== Batch 2: memoryd only
+
+Pass rate per condition:
+  none    43%  (40 runs, 2778752 tokens)
+  graph   75%  (40 runs, 2808800 tokens)
+  stub    65%  (40 runs, 2880861 tokens)
+
+Pass rate per task (none graph stub):
+   20% 100% 100%  memoryd-conflict-cache-filtered-summaries
+  100% 100% 100%  memoryd-conflict-eager-libc-load
+   20%  80%  20%  memoryd-conflict-first-redaction-alignment
+    0%  20%  20%  memoryd-conflict-pid-file-lock
+    0%  80%  40%  memoryd-conflict-reopen-sqlite-owners
+  100% 100% 100%  memoryd-control-move-entry-id-comment
+    0%  40%  40%  memoryd-impact-eager-toolcall-text
+  100%  80% 100%  memoryd-impact-no-detached-scan
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: 0.33 [0.08, 0.58] over 8 tasks
+  graph - stub: 0.10 [-0.05, 0.28] over 8 tasks
+
+False-objection rate on control tasks:
+  none     0%  (5 runs)
+  graph    0%  (5 runs)
+  stub     0%  (5 runs)
+
+=== Batch 2: findable by search, picker's rating easy
+
+Pass rate per condition:
+  none    86%  (35 runs, 2074049 tokens)
+  graph   97%  (35 runs, 1330257 tokens)
+  stub    91%  (35 runs, 1697580 tokens)
+
+Pass rate per task (none graph stub):
+  100% 100% 100%  memod2-conflict-legacy-resolutions
+  100% 100% 100%  memod2-conflict-type-import-edges
+  100% 100% 100%  memod2-conflict-verify-record-only
+  100% 100% 100%  memod2-control-nodeid-doc-comment
+  100% 100% 100%  memoryd-conflict-eager-libc-load
+    0%  80%  40%  memoryd-conflict-reopen-sqlite-owners
+  100% 100% 100%  memoryd-control-move-entry-id-comment
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: 0.11 [0.00, 0.34] over 7 tasks
+  graph - stub: 0.06 [0.00, 0.17] over 7 tasks
+
+False-objection rate on control tasks:
+  none     0%  (10 runs)
+  graph    0%  (10 runs)
+  stub     0%  (10 runs)
+
+=== Batch 2: findable by search, picker's rating medium
+
+Pass rate per condition:
+  none    48%  (40 runs, 2948407 tokens)
+  graph   65%  (40 runs, 2803802 tokens)
+  stub    57%  (40 runs, 2853610 tokens)
+
+Pass rate per task (none graph stub):
+  100% 100%  80%  memod2-conflict-merge-first-parent
+  100% 100% 100%  memod2-conflict-span-finding-details
+   40%   0%   0%  memod2-impact-rename-first-candidate
+   20% 100% 100%  memoryd-conflict-cache-filtered-summaries
+   20%  80%  20%  memoryd-conflict-first-redaction-alignment
+    0%  20%  20%  memoryd-conflict-pid-file-lock
+    0%  40%  40%  memoryd-impact-eager-toolcall-text
+  100%  80% 100%  memoryd-impact-no-detached-scan
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: 0.18 [-0.07, 0.45] over 8 tasks
+  graph - stub: 0.08 [-0.05, 0.25] over 8 tasks
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Batch 2: findable by search, picker's rating hard
+
+Pass rate per condition:
+  none     0%  (5 runs, 448851 tokens)
+  graph   20%  (5 runs, 411838 tokens)
+  stub     0%  (5 runs, 402164 tokens)
+
+Pass rate per task (none graph stub):
+    0%  20%   0%  memod2-impact-language-owned-readers
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: 0.20 [0.20, 0.20] over 1 tasks
+  graph - stub: 0.20 [0.20, 0.20] over 1 tasks
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Both batches: all thirty tasks
+
+Pass rate per condition:
+  none    56%  (149 runs, 11859272 tokens)
+  graph   85%  (150 runs, 9365219 tokens)
+  stub    65%  (150 runs, 11382840 tokens)
+
+Pass rate per task (none graph stub):
+   80% 100% 100%  fixture-conflict-flat-rate
+  100% 100% 100%  fixture-conflict-float-cents
+    0% 100%   0%  fixture-conflict-format-separators
+    0% 100%   0%  fixture-conflict-tax-per-line
+  100% 100% 100%  fixture-control-rename-format
+   20% 100% 100%  fixture-edit-region-comment
+   40%  80% 100%  fixture-impact-decimal-strings
+    0% 100%   0%  fixture-impact-note-1-reversed
+  100% 100% 100%  memod-conflict-append-only-lock
+   60% 100%  20%  memod-conflict-cache-resolved-symbols
+   75%  80%  60%  memod-conflict-graph-decision-ids
+    0% 100%   0%  memod-conflict-report-build-gate
+  100% 100% 100%  memod-control-percent-doc-comment
+   40%  80%  80%  memod-impact-types-require-topics
+  100% 100% 100%  memod2-conflict-legacy-resolutions
+  100% 100%  80%  memod2-conflict-merge-first-parent
+  100% 100% 100%  memod2-conflict-span-finding-details
+  100% 100% 100%  memod2-conflict-type-import-edges
+  100% 100% 100%  memod2-conflict-verify-record-only
+  100% 100% 100%  memod2-control-nodeid-doc-comment
+    0%  20%   0%  memod2-impact-language-owned-readers
+   40%   0%   0%  memod2-impact-rename-first-candidate
+   20% 100% 100%  memoryd-conflict-cache-filtered-summaries
+  100% 100% 100%  memoryd-conflict-eager-libc-load
+   20%  80%  20%  memoryd-conflict-first-redaction-alignment
+    0%  20%  20%  memoryd-conflict-pid-file-lock
+    0%  80%  40%  memoryd-conflict-reopen-sqlite-owners
+  100% 100% 100%  memoryd-control-move-entry-id-comment
+    0%  40%  40%  memoryd-impact-eager-toolcall-text
+  100%  80% 100%  memoryd-impact-no-detached-scan
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: 0.29 [0.15, 0.44] over 30 tasks
+  graph - stub: 0.20 [0.07, 0.34] over 30 tasks
+
+False-objection rate on control tasks:
+  none     0%  (20 runs)
+  graph    0%  (20 runs)
+  stub     0%  (20 runs)
+
+=== Both batches: without the tasks that shaped the tool (memod-conflict-report-build-gate)
+
+Pass rate per condition:
+  none    58%  (144 runs, 11143566 tokens)
+  graph   85%  (145 runs, 8875734 tokens)
+  stub    68%  (145 runs, 10717455 tokens)
+
+Pass rate per task (none graph stub):
+   80% 100% 100%  fixture-conflict-flat-rate
+  100% 100% 100%  fixture-conflict-float-cents
+    0% 100%   0%  fixture-conflict-format-separators
+    0% 100%   0%  fixture-conflict-tax-per-line
+  100% 100% 100%  fixture-control-rename-format
+   20% 100% 100%  fixture-edit-region-comment
+   40%  80% 100%  fixture-impact-decimal-strings
+    0% 100%   0%  fixture-impact-note-1-reversed
+  100% 100% 100%  memod-conflict-append-only-lock
+   60% 100%  20%  memod-conflict-cache-resolved-symbols
+   75%  80%  60%  memod-conflict-graph-decision-ids
+  100% 100% 100%  memod-control-percent-doc-comment
+   40%  80%  80%  memod-impact-types-require-topics
+  100% 100% 100%  memod2-conflict-legacy-resolutions
+  100% 100%  80%  memod2-conflict-merge-first-parent
+  100% 100% 100%  memod2-conflict-span-finding-details
+  100% 100% 100%  memod2-conflict-type-import-edges
+  100% 100% 100%  memod2-conflict-verify-record-only
+  100% 100% 100%  memod2-control-nodeid-doc-comment
+    0%  20%   0%  memod2-impact-language-owned-readers
+   40%   0%   0%  memod2-impact-rename-first-candidate
+   20% 100% 100%  memoryd-conflict-cache-filtered-summaries
+  100% 100% 100%  memoryd-conflict-eager-libc-load
+   20%  80%  20%  memoryd-conflict-first-redaction-alignment
+    0%  20%  20%  memoryd-conflict-pid-file-lock
+    0%  80%  40%  memoryd-conflict-reopen-sqlite-owners
+  100% 100% 100%  memoryd-control-move-entry-id-comment
+    0%  40%  40%  memoryd-impact-eager-toolcall-text
+  100%  80% 100%  memoryd-impact-no-detached-scan
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: 0.26 [0.13, 0.41] over 29 tasks
+  graph - stub: 0.17 [0.06, 0.31] over 29 tasks
+
+False-objection rate on control tasks:
+  none     0%  (20 runs)
+  graph    0%  (20 runs)
+  stub     0%  (20 runs)
+
 === Unscored runs (an agent timed out twice; not in any rate above): 1
   memod-conflict-graph-decision-ids__none__r3  (exit 143, 1200 s)
 
 Sensitivity: the same paired differences with every unscored run counted as FAIL:
   All tasks: graph - none: 0.46 [0.24, 0.67] over 14 tasks; graph - stub: 0.34 [0.11, 0.60] over 14 tasks
   Without the tasks that shaped the tool: graph - none: 0.42 [0.22, 0.63] over 13 tasks; graph - stub: 0.29 [0.06, 0.54] over 13 tasks
+  Batch 2: graph - none: 0.15 [0.00, 0.31] over 16 tasks; graph - stub: 0.07 [-0.01, 0.18] over 16 tasks
+  Both batches: graph - none: 0.29 [0.15, 0.44] over 30 tasks; graph - stub: 0.20 [0.07, 0.34] over 30 tasks
 
 === Post hoc, added after the results were seen: without the fixture tasks whose records exist only outside the repo
 (fixture-conflict-format-separators, fixture-conflict-tax-per-line, fixture-impact-note-1-reversed: no agent without the graph can name their records, so they score 0/100/0 by design and carry much of the headline.)
@@ -341,4 +834,4 @@ False-objection rate on control tasks:
   graph    0%  (10 runs)
   stub     0%  (10 runs)
 
-Total tokens: 17636773
+Total tokens: 32607331
