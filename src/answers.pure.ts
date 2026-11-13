@@ -280,11 +280,11 @@ function termLines(section: TermSection, linked: ReadonlySet<string>, heading: s
 }
 
 /** The heading of the symbol form's term section. */
-const TERM_HEADING = "Decision records that share the most distinctive terms with its code (candidates, not links: a shared word does not mean the record governs this symbol):";
+const TERM_HEADING = "Decision records that share the most distinctive terms with its code (candidates to pick from one list; not links: a shared word does not mean the record governs this symbol):";
 /** The empty line of the symbol form's term section. */
 const TERM_EMPTY = "No decision record other than those above shares a distinctive term with its code.";
 /** The heading of the range form's term section. */
-const RANGE_TERM_HEADING = "Decision records that share the most distinctive terms with these lines (candidates, not links: a shared word does not mean the record governs these lines):";
+const RANGE_TERM_HEADING = "Decision records that share the most distinctive terms with these lines (candidates to pick from one list; not links: a shared word does not mean the record governs these lines):";
 /** The empty line of the range form's term section. */
 const RANGE_TERM_EMPTY = "No decision record other than those above shares a distinctive term with these lines.";
 

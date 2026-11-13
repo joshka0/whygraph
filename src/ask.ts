@@ -163,7 +163,7 @@ function termSection(store: string, root: string, carry: Row): TermSection {
 /**
  * Answers `whygraph search`.
  * owns: [[whygraph-questions]]
- * post: exit 0 with the decision records that best match the request: the word search and the meaning search each rank at most five, fused by reciprocal rank into one list of five, each saying how it matched; exit 2 when the request holds no word; exit 1 when there is no store or the embedding model is unavailable.
+ * post: exit 0 with the decision records that best match the request: the word search and the meaning search each rank at most ten (`LIST_SIZE`), fused by reciprocal rank into one list of at most twenty, each candidate saying how it matched; exit 2 when the request holds no word; exit 1 when there is no store or the embedding model is unavailable.
  */
 export async function search(text: string, store: string): Promise<Exit> {
   if (!existsSync(store)) return noStore(store);

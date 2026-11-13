@@ -32,8 +32,9 @@ section, and the answer says no symbol covers the lines.
    to the user and name the record; do not make the change silently.
 2. Before a change, also run `whygraph search "<the change in your own words>"`.
    A record that governs the change may have no tag or commit that links it to
-   the code; `search` lists the records whose text best matches the change.
-   Read the candidates and judge: a listed record is a candidate, not a link.
+   the code; `search` lists up to twenty records, the ten best by words and the
+   ten best by meaning fused by rank. Read the candidates and judge: a listed
+   record is a candidate to pick from, not a link.
 3. When a decision changes (a record is edited, replaced or reversed), run
    `impact` on it, and treat every symbol it lists as possibly affected.
 4. When you wonder why code is the way it is, run `why` before you guess.
@@ -44,7 +45,8 @@ section, and the answer says no symbol covers the lines.
    not search, since an empty part never means nothing constrains the change.
 7. `carry` ends with the decision records that share the most distinctive
    terms with the symbol's code. That part is a term match, not a link: no tag
-   or commit ties those records to the code. Read each shared term and the
+   or commit ties those records to the code, and it lists up to ten records.
+   Read each shared term and the
    record, and judge whether it governs your change. When the symbol is longer
    than 40 lines the part is one line that names the range form instead; ask
    again with the lines you will touch, `<file>:<start>-<end>`.
@@ -60,11 +62,14 @@ section, and the answer says no symbol covers the lines.
 - "superseded by: X" means the record was replaced; read X too.
 - In a `search` answer, `matched: words` means the record shares a word with
   the change, `matched: meaning` means the local model ranked it near, and
-  `words and meaning` means both. Neither score is a confidence, and the
-  meaning search always returns its nearest records, so the list is
-  candidates to judge, never links.
+  `words and meaning` means both; that line also names the record's source.
+  The list is up to twenty records, the ten best by words and the ten best by
+  meaning fused by rank, and the heading names the two lists. Neither score is
+  a confidence, and the meaning search always returns its nearest records, so
+  the list is candidates to pick from, never links.
 - `Decision records that share the most distinctive terms with its code` (at
-  the end of a `carry` answer) is the same kind of candidate list: the symbol's
+  the end of a `carry` answer) is the same kind of candidate list, up to ten
+  records: the symbol's
   code and the record share jargon, not a link. The `shared terms:` line says
   why each record is there. A record the answer already lists as a decision of
   the symbol is not repeated. With no readable code or no shared term, the part

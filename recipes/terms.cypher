@@ -6,7 +6,7 @@
 // digits and `_`, split at `_` and at camelCase and digit boundaries, the whole
 // identifier kept too, lowercased, at least three characters, not digits only.
 // Duplicates do not matter; a term the common-term rule dropped matches nothing.
-// Rows: at most 5 records, best first: id, title, date, source, and `shared`,
+// Rows: at most 10 records, best first: id, title, date, source, and `shared`,
 // the record's up to 5 strongest shared terms (the terms with the largest BM25
 // contribution). No score is returned: the order is the whole answer, and a
 // shared word is a candidate, not a link.
@@ -26,4 +26,4 @@ ORDER BY contribution DESC, term
 WITH d, sum(contribution) AS score, collect(term)[0..5] AS shared
 RETURN d.id AS id, d.title AS title, d.date AS date, d.source AS source, shared, d.termCount AS termCount
 ORDER BY score DESC, id
-LIMIT 5
+LIMIT 10

@@ -51,7 +51,7 @@ One step away, most binding first (what formatCents uses, then what uses formatC
 Searched: src/money.ts:formatCents, the header of src/money.ts, the 0 symbols formatCents uses, 1 symbol that uses formatCents, and the headers of their files.
 Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript and JavaScript); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.
 
-Decision records that share the most distinctive terms with its code (candidates, not links: a shared word does not mean the record governs this symbol):
+Decision records that share the most distinctive terms with its code (candidates to pick from one list; not links: a shared word does not mean the record governs this symbol):
   2026-01-02  ADR-0002  One flat tax rate
       shared terms: cents
   2026-01-03  ADR-0003  Tax rate by region
@@ -282,7 +282,7 @@ One step away, most binding first (what formatCents uses, then what uses formatC
 Searched: src/money.ts:formatCents, the header of src/money.ts, the 0 symbols formatCents uses, 1 symbol that uses formatCents, and the headers of their files.
 Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript and JavaScript); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.
 
-Decision records that share the most distinctive terms with its code (candidates, not links: a shared word does not mean the record governs this symbol):
+Decision records that share the most distinctive terms with its code (candidates to pick from one list; not links: a shared word does not mean the record governs this symbol):
   2026-01-02  ADR-0002  One flat tax rate
       shared terms: cents
   2026-01-03  ADR-0003  Tax rate by region
@@ -323,7 +323,7 @@ One step away, most binding first (what checkout uses, then what uses checkout):
 Searched: src/checkout.ts:checkout, the header of src/checkout.ts, the 1 symbol checkout uses, 0 symbols that use checkout, and the headers of their files.
 Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript and JavaScript); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.
 
-Decision records that share the most distinctive terms with its code (candidates, not links: a shared word does not mean the record governs this symbol):
+Decision records that share the most distinctive terms with its code (candidates to pick from one list; not links: a shared word does not mean the record governs this symbol):
   2026-01-02  ADR-0002  One flat tax rate
       shared terms: rate, cents
   2026-01-03  ADR-0003  Tax rate by region
@@ -352,7 +352,7 @@ Before you edit src/tax.ts:1-8
 
 No symbol's stored range overlaps these lines; the graph holds no symbol for src/tax.ts.
 
-Decision records that share the most distinctive terms with these lines (candidates, not links: a shared word does not mean the record governs these lines):
+Decision records that share the most distinctive terms with these lines (candidates to pick from one list; not links: a shared word does not mean the record governs these lines):
   2026-01-03  ADR-0003  Tax rate by region
       shared terms: the, adr, cents, tax
   2026-01-02  note-1  Tax is computed once per order, not per line
@@ -367,33 +367,24 @@ Decision records that share the most distinctive terms with these lines (candida
 
 A record can govern a change with no tag or commit that links it to the code.
 `search` ranks the records by their text and shows the candidates; the reader
-judges whether one governs the change. Each line says how it matched: by
-words, by meaning, or by both. The `statement:` line holds the first line of
-the record's first statement, and is left out when it repeats the title.
+judges whether one governs the change. It lists up to twenty records: the ten
+best by words and the ten best by meaning, fused into one list by rank. Each
+candidate takes two lines: its date, id and title, then how it matched (by
+words, by meaning, or by both) and its source.
 
 ```console
 $ whygraph search "round tax half to even"
-Decision records that match "round tax half to even", best match first (a candidate, not a link: read the record and judge whether it governs your change):
+Decision records that match "round tax half to even", best match first (candidates to pick from two lists, words and meaning; a candidate, not a link: read the record and judge whether it governs your change):
   2026-01-02  note-1  Tax is computed once per order, not per line
-      matched: words and meaning
-      statement: tax once per order because per-line rounding adds up to a cent per line
-      source: decisions/notes.json
+      matched: words and meaning; source: decisions/notes.json
   2026-01-02  ADR-0002  One flat tax rate
-      matched: words and meaning
-      statement: Tax is computed on cents (ADR 0001).
-      source: docs/adr/0002-flat-tax.md
+      matched: words and meaning; source: docs/adr/0002-flat-tax.md
   2026-01-03  ADR-0003  Tax rate by region
-      matched: words and meaning
-      statement: Orders now ship outside the EU. Amounts stay in cents (ADR 0001).
-      source: docs/adr/0003-regional-tax.md
+      matched: words and meaning; source: docs/adr/0003-regional-tax.md
   2026-01-01  ADR-0001  Money in cents
-      matched: meaning
-      statement: Prices arrive as decimal numbers.
-      source: docs/adr/0001-money-in-cents.md
+      matched: meaning; source: docs/adr/0001-money-in-cents.md
   2026-01-04  note-2  Show thousands separators in totals
-      matched: meaning
-      statement: en-US separators because the shop sells in USD first
-      source: decisions/notes.json
+      matched: meaning; source: decisions/notes.json
 Searched: the title and statement of every decision record in the store, for the words: round tax half to even, and for the meaning of the request.
 Not searched: the code, the commits and the tags (run whygraph why or carry on a symbol for the links the graph holds); a record's id, date, status, topics and source (only its title and statement are indexed).
 ```
@@ -746,7 +737,7 @@ jq '{records: (.items | group_by(.memo) | map({
 | `whygraph why <file>:<symbol>` | The `decided:` tags on the symbol and on its file header; the records those tags name; then the records linked only through a commit that cites them and changed the symbol, oldest first, each commit with how many symbols it changed. |
 | `whygraph impact <decision id>` | The record and every record that rests on it, directly or through others; for each, the symbols and files whose `decided:` tags name it, then the commits that cite it and the other symbols those commits changed, with how many symbols use each directly. |
 | `whygraph carry <file>:<symbol>\|<file>:<start>-<end>` | Before an edit: the topics the symbol owns and their other owners, the formal checks that cover it, its premise memos, its decisions (as `why`); then one step away, the `decided:` tags, the records they name, the checks and the topics of the symbols it uses and of the symbols that use it, most binding first, each line naming where it sits; then the decision records that share the most distinctive terms with its code (candidates, not links), each naming its shared terms; then its direct and transitive users, and the commits that changed it. The range form reads exactly those lines for the term section and takes the linked parts from every symbol whose stored range overlaps them. |
-| `whygraph search "<text>"` | The five decision records that best match the text: the word search and the meaning search each rank at most five, fused by reciprocal rank, each line saying how it matched (`words`, `meaning` or `words and meaning`), each a candidate to judge, not a link; then what was searched and what was not. |
+| `whygraph search "<text>"` | Up to twenty decision records that best match the text: the word search and the meaning search each rank at most ten, fused by reciprocal rank; each candidate takes two lines, its date, id and title, then `matched: <words\|meaning\|words and meaning>; source: <source>`, each a candidate to pick from, not a link; then what was searched and what was not. |
 | `whygraph mcp` | The MCP server config that serves the store read-only through `relate serve --mcp stdio`, and every recipe. |
 | `whygraph help` | The usage. |
 
@@ -894,7 +885,7 @@ The terms are not a link: a shared word is a candidate to read, never a
 reason the record governs the code. memod records each symbol's `line` and
 `endLine` (1-based, inclusive, the declaration without its doc comment), and
 `carry` reads those lines, adds the symbol's name and file path, and shows the
-five records that share the most distinctive terms with them, each line naming
+ten records that share the most distinctive terms with them, each line naming
 the shared terms. A record the answer already lists as a decision of the
 symbol is left out, and the heading says a listed record is a candidate, not a
 link.
@@ -947,7 +938,8 @@ store rather than merging into it.
   one.
 - `search` reads only a record's title and statements. It ranks by words
   and by meaning (a local embedding model), then fuses the two lists by
-  reciprocal rank. Neither score separates a record that governs the change
+  reciprocal rank, at most ten from each into one list of at most twenty.
+  Neither score separates a record that governs the change
   from noise, and a nearest-by-meaning record is always returned even when
   the request shares nothing with it, so a listed record is a candidate; read
   it and judge. A record with an empty title and no statements matches no

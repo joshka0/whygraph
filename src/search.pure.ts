@@ -2,7 +2,7 @@
  * module: [[whygraph-search]]
  * boundary: pure
  * imports: none
- * decided: search shows a short ranked list and says a listed record is a candidate, not a link, because a trial found that neither a word score nor a meaning score separates a record that governs a change from noise, so only a reader can judge the list
+ * decided: search shows a ranked list of ten per list and says a listed record is a candidate, not a link, because a trial found that neither a word score nor a meaning score separates a record that governs a change from noise, so only a reader can judge the list, and a wider list lets the calling agent pick
  */
 
 /** A row as relate returns it. */
@@ -21,6 +21,13 @@ export interface Candidate {
 }
 
 const str = (v: unknown): string => (v === null || v === undefined ? "" : String(v));
+
+/**
+ * The number of records each search list ranks; the fused answer holds at most twice this many.
+ * owns: [[whygraph-search]]
+ * decided: each list is cut at ten rather than five because on 60 blind change requests the needed record was in the top ten of one of the three lists 52 times, against 46 for the top five, and the calling agent picks from the fused union (ADR 0003)
+ */
+export const LIST_SIZE = 10;
 
 /**
  * owns: [[whygraph-search]]
@@ -47,8 +54,7 @@ function candidate(r: Row, match: string): Candidate {
 /**
  * The answer of `whygraph search`.
  * owns: [[whygraph-search]]
- * post: when `candidates` is empty, `No record matches "<request>".`; else a heading that says a listed record is a candidate, not a link, then one block per record: date, id, title, the first line of its statement, its source, and, when `meaning` is true, a `matched:` line naming `words`, `meaning` or `words and meaning`.
- * post: the `statement:` line is printed only when that line adds text the title line does not show; a statement whose first line equals the title is omitted.
+ * post: when `candidates` is empty, `No record matches "<request>".`; else a heading that says these are candidates to pick from two lists (words and meaning) and that a listed record is a candidate, not a link, then two lines per candidate: date, id and title, then `matched: <label>; source: <source>`.
  * post: always ends with `Searched:` naming the words and, when `meaning` is true, the meaning search, then `Not searched:`.
  */
 export function searchAnswer(request: string, words: string, meaning: boolean, candidates: readonly Candidate[]): string {
@@ -56,14 +62,11 @@ export function searchAnswer(request: string, words: string, meaning: boolean, c
   const out: string[] = [];
   if (candidates.length === 0) out.push(`No record matches "${query}".`);
   else {
-    out.push(`Decision records that match "${query}", best match first (a candidate, not a link: read the record and judge whether it governs your change):`);
+    out.push(`Decision records that match "${query}", best match first (candidates to pick from two lists, words and meaning; a candidate, not a link: read the record and judge whether it governs your change):`);
     for (const c of candidates) {
       const title = c.title || "(no title)";
-      const statement = c.statement || "(none)";
       out.push(`  ${c.date || "undated   "}  ${c.id}  ${title}`);
-      if (meaning) out.push(`      matched: ${c.match}`);
-      if (statement.trim() !== title.trim()) out.push(`      statement: ${statement}`);
-      out.push(`      source: ${c.source || "(not stated)"}`);
+      out.push(`      matched: ${c.match}; source: ${c.source || "(not stated)"}`);
     }
   }
   out.push(`Searched: the title and statement of every decision record in the store, for the words: ${words}${meaning ? ", and for the meaning of the request" : ""}.`);
@@ -74,11 +77,11 @@ export function searchAnswer(request: string, words: string, meaning: boolean, c
 /**
  * The two search recipes' rows as one list of candidates, by reciprocal rank fusion.
  * owns: [[whygraph-search]]
- * post: an id in `wordRows` or `meaningRows` scores `1 / (60 + its 1-based rank)` for each list it is in; the candidates are the highest total first, then id, at most `limit`.
+ * post: an id in `wordRows` or `meaningRows` scores `1 / (60 + its 1-based rank)` for each list it is in; the candidates are the highest total first, then id, at most `limit` (twice `LIST_SIZE` by default, so every id of two lists of ten fits and an id in both is listed once).
  * post: `match` is `words`, `meaning` or `words and meaning`, by which lists hold the id.
  * decided: the lists are fused by rank, not by score, because a full-text score and a cosine similarity are not comparable and a printed score would read as confidence
  */
-export function fuse(wordRows: readonly Row[], meaningRows: readonly Row[], limit = 5): readonly Candidate[] {
+export function fuse(wordRows: readonly Row[], meaningRows: readonly Row[], limit = LIST_SIZE * 2): readonly Candidate[] {
   const K = 60;
   const score = new Map<string, number>();
   const matched = new Map<string, { words: boolean; meaning: boolean }>();
