@@ -515,6 +515,64 @@ What this does not show:
   replies. The fix rescored every run and changed six verdicts, all from fail
   to pass, four of them in the graph condition.
 
+## What a retrieval check measured
+
+The trial above has few decisions that live only outside the repo. Most real
+ones do: an agent decides in plain words in its notes, and other agents write
+the code later, with no tag and no commit that cites the note. So a second
+check asked a narrower question, with no agent in it: when a change request
+goes against such a note, does whygraph list that note among its five
+candidates?
+
+The records were the decision notes of two private projects, loaded through
+the decisions file format. For each check, one agent that knew nothing about
+whygraph read a sample of the notes and wrote 30 change requests, each of
+which goes against one note: 10 that reuse the note's words, 10 that reuse
+some, and 10 that use other words. A second agent, which saw only the request
+and the code, named the lines the request would change. A request counts when
+the note it goes against is among the five records listed.
+
+Check 1, 4,453 notes of two projects, `search` only:
+
+| Request wording | `search` |
+| --- | --- |
+| Same words | 10 of 10 |
+| Some of the words | 4 of 10 |
+| Other words | 1 of 10 |
+| All | 15 of 30 |
+
+The words alone found 11 of the 30 and the meaning alone 16. The term section
+of `carry` was built after this check and because of it: a request in other
+words shares little with the note, but the code it changes often shares
+identifiers with the note.
+
+Check 2, 30 new requests on 1,791 notes of one project, the tool unchanged
+after the requests were written. `carry` ran on each line range the second
+agent named, which it did for 27 of the 30:
+
+| Request wording | `search` with the request | `carry` on the lines | Either |
+| --- | --- | --- | --- |
+| Same words | 10 of 10 | 7 of 10 | 10 of 10 |
+| Some of the words | 5 of 10 | 5 of 10 | 6 of 10 |
+| Other words | 4 of 10 | 5 of 10 | 7 of 10 |
+| All | 19 of 30 | 17 of 30 | 23 of 30 |
+
+What this shows and what it does not:
+
+- The two questions find different notes. On requests in other words, three
+  of the five notes that `carry` found were ones `search` missed.
+- It measures a list, not an agent: nothing here shows that an agent reads the
+  five candidates, picks the right one and acts on it.
+- A hit needs the right lines. `carry` on a whole long symbol ranked the note
+  much worse than on the lines an agent chose (see Limits), and the three
+  requests with no lines found could not be asked at all.
+- Each check is 30 requests written by one model, on one or two projects of
+  one author. Ten requests per row means one request moves a row by ten
+  points.
+- The notes and requests are private, so this repo does not hold them and you
+  cannot rerun the check from it. The numbers come from the tool as it is in
+  this repo.
+
 ## Your own repo
 
 whygraph runs on any git repo that memod reads (TypeScript, JavaScript,
