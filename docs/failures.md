@@ -193,6 +193,32 @@ same `searchText`). The two ranked lists are fused by reciprocal rank
 | Q25 | `build` on a decisions file of thousands of records | Exit 0 within a stated memory bound. The peak does not grow with the record count, because the model runs on one record text per call: on this box, under a 6 GB memory and 4-CPU limit, 2,662 records peaked at 0.44 GB and took 304 s, against 0.44 GB and 30 s for 50 records. The whole build stays under 2 GB. |
 | Q26 | The `vector` a build stores for a record, against a fresh embedding of the same text (what `search` does for a request) | Byte-identical: max absolute difference 0. A rebuild and a query embed a text the same way, because the model runs on one text per call. The `q8` weights scale activations over the whole call, so a text embedded with other texts in one call would differ by up to 0.014 (cosine 0.995) with the content of those texts; the one-text call is what makes this hold. |
 
+## The term bridge
+
+A term is a word of a record's text (its title and statements): every run of
+letters, digits and `_`; each run split at `_` and at camelCase and digit
+boundaries, with the whole identifier kept too; all lowercased; a term shorter
+than three characters or all digits is left out. `build` makes one `Term` node
+per kept term, holding `records` (the number of records that use it), and one
+`MENTIONS` edge from each record to each of its terms, holding how many times
+the record's text holds it; each `Decision` holds `termCount`, every term of
+its text. A term used by more than half of at least ten records makes no node
+(ADR 0002). The query side is blocked: `memod graph` gives no line range for a
+symbol, so `carry` cannot read the symbol's own code (ADR 0002, "Blocked").
+
+| ID | Input | Required result |
+| --- | --- | --- |
+| T1 | A record whose text is `formatCents tax_rate the x 42` | The `Term` nodes are `formatcents`, `format`, `cents`, `tax`, `rate` and `the`: the whole identifier and its parts, lowercased, three characters or more, digits only left out. No `tax_rate` (split at `_`), no `x` or `42`. `the` is a term: there is no stop-word list. |
+| T2 | A record whose text holds `alpha` twice and `beta` once; a second record holding `alpha` once | `alpha` and `beta` are `Term` nodes; `alpha.records` is 2, `beta.records` is 1. `MENTIONS.count` is 2 for the first record's `alpha` edge and 1 for its `beta` edge. Each record's `termCount` is every term of its text (3 and 2). |
+| T3 | Eleven records: ten hold `alpha`, one holds `beta`; then the same with nine holding `alpha` | `alpha` has no `Term` node and no `MENTIONS` edge (used by more than half of at least ten records); `beta` has one. With nine records using `alpha`, it has a node: the rule needs ten records using the term. |
+| T4 | A record with no title and no statements; a build with no decision records | The record loads with `termCount` 0 and no `MENTIONS` edge; a build with no records has 0 `Term` nodes and 0 `MENTIONS` edges. |
+| T5 | The fixture build | The counts include 45 `Term` nodes and 57 `MENTIONS` edges; `Decision.termCount` is set on every record. A store built before this change has no `Term` nodes. |
+| T6 | The same decisions files built twice, and the same build read twice | Byte-identical `Term` nodes and `MENTIONS` edges: terms sorted by text, edges by record id then term. |
+| T7 | `recipes/terms.cypher` with a term list | **Open, not met yet.** The recipe is to return the best five records by BM25 over the stored counts (`k1` 1.2, `b` 0.75), each with its shared terms, no score; `whygraph mcp` prints it and it holds no `CALL { }` subquery. Blocked on a symbol line range (ADR 0002). |
+| T8 | `carry <file>:<symbol>` on a symbol whose code shares terms with records | **Open, not met yet.** A term section after the one-step part: the top five records by BM25 that share the most distinctive terms with the symbol's code, each line showing date, id, title and three to five strongest shared terms, no score; a record the answer already lists as linked is not repeated; the heading says a listed record is a candidate, not a link. Blocked on a symbol line range (ADR 0002). |
+| T9 | `carry` on a symbol whose file is gone, whose language the tokenizer cannot read, or whose terms match no record | **Open, not met yet.** The term section is one line saying why (no source lines to read, or no shared term), never an empty heading. Blocked on a symbol line range (ADR 0002). |
+| T10 | A query term that the common-term rule dropped | **Open, not met yet.** It contributes nothing and is not an error: the recipe matches no `Term` node for it. Blocked on a symbol line range (ADR 0002). |
+
 ## mcp
 
 | ID | Input | Required result |
