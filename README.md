@@ -570,6 +570,22 @@ written against one note, which makes the pick easier than a real request
 would; and for 12 requests no code lines were found, so only the two searches
 filled the pool.
 
+whygraph now lists ten per list (ADR 0003), and a fourth measurement asked
+whether the reader of those longer answers needs a reranker in front. For the
+same 60 requests it took the printed output of `search` and of the term
+section of `carry`, about 31 candidates per request, which held the note for
+52. A language model (DeepSeek 4.1 Flash, no reasoning step) read that output
+with the request and the code lines, and named up to five records. In a second
+pass a hosted reranker (Cohere Rerank 5 Fast) first cut the candidates to five.
+
+| | Note named first | Note among the names |
+| --- | --- | --- |
+| Reads the full output | 48 of 60 | 50 of 60 |
+| Reads five kept by the reranker | 41 of 60 | 50 of 60 |
+
+The reranker added nothing here, so whygraph has none. This is still a model
+whose only job was the pick, not an agent in the middle of an edit.
+
 What this shows and what it does not:
 
 - The two questions find different notes. On requests in other words, three
