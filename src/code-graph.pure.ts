@@ -78,11 +78,37 @@ export function symbolParts(name: string): { readonly path: string; readonly nam
 }
 
 /**
- * The file extensions whose symbols get `uses` edges from memod: TypeScript and JavaScript (memod README, Languages).
+ * The languages whose symbols memod gives `uses` edges, and the extension of each file it reads them from.
+ * memod indexes `*.ts`, `*.tsx`, `*.mts`, `*.cts`, `*.js`, `*.jsx`, `*.mjs`, `*.cjs`, `*.zig`, `*.rs`, `*.swift`, `*.ex` and `*.kt`
+ * (memod `dist/repo.js:11`), but only its oxc reader (TypeScript and JavaScript, `dist/extract.pure.js:124`), `rust-uses` and `swift-uses`
+ * make `uses` edges; the Zig, Elixir and Kotlin readers set neither `refs` nor `names`, so memod's `memod uses` on them exits 1
+ * (memod `dist/index-build.js:27`, `dist/graph.pure.js:134,142` and `dist/graph.pure.js:330`).
+ * owns: [[whygraph-code-graph]]
+ * decided: the list is copied from memod's code because memod's graph output has no field that names the languages it read references for
+ */
+const SYMBOL_EDGE_LANGUAGES: readonly { readonly language: string; readonly extensions: readonly string[] }[] = [
+  { language: "TypeScript", extensions: ["ts", "tsx", "mts", "cts"] },
+  { language: "JavaScript", extensions: ["js", "jsx", "mjs", "cjs"] },
+  { language: "Rust", extensions: ["rs"] },
+  { language: "Swift", extensions: ["swift"] },
+];
+
+/** Every file extension in `SYMBOL_EDGE_LANGUAGES`. */
+const SYMBOL_EDGE_EXTENSIONS = new Set(SYMBOL_EDGE_LANGUAGES.flatMap((language) => language.extensions));
+
+/**
+ * The languages memod gives symbol `uses` edges to, named as a sentence lists them: `TypeScript, JavaScript, Rust and Swift`.
+ * owns: [[whygraph-code-graph]]
+ */
+export const SYMBOL_EDGE_LANGUAGE_LIST = SYMBOL_EDGE_LANGUAGES.map((language) => language.language).join(", ").replace(/, ([^,]+)$/, " and $1");
+
+/**
  * owns: [[whygraph-code-graph]]
  * post: true when memod reads symbol-to-symbol uses for files of `path`'s language.
- * decided: the language list is copied from memod's README, because memod's graph has no field that says a file's symbols were read for uses
+ * decided: a file whose extension memod indexes but whose reader finds no references (`.zig`, `.ex`, `.kt`) gives false, because a caller in one of them must be told its uses are unknown rather than none
+ * decided: a declaration file (`.d.ts`) gives true like any other TypeScript file, because memod's oxc reader emits `uses` edges for its symbols and `memod uses` lists them
  */
 export function hasSymbolEdges(path: string): boolean {
-  return /\.(ts|tsx|mts|cts|js|jsx|mjs|cjs)$/.test(path) && !path.endsWith(".d.ts");
+  const dot = path.lastIndexOf(".");
+  return dot >= 0 && SYMBOL_EDGE_EXTENSIONS.has(path.slice(dot + 1));
 }

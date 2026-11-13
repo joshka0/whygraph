@@ -4,7 +4,7 @@
  * imports: ./code-graph.pure.ts
  * decided: answers are plain text with a heading per part and a sentence for each empty part, because an agent reads the answer once and must not need a legend to tell "none" from "unknown"
  */
-import { hasSymbolEdges } from "./code-graph.pure.ts";
+import { hasSymbolEdges, SYMBOL_EDGE_LANGUAGE_LIST } from "./code-graph.pure.ts";
 
 /** A row as relate returns it. */
 export type Row = Readonly<Record<string, unknown>>;
@@ -164,7 +164,7 @@ function oneStepAway(symbolId: string, carry: Row, why: readonly Row[], foundAbo
   const nothing = "Nothing found in what was searched; that does not mean nothing constrains this edit.";
   if (!hasSymbolEdges(file)) {
     return [
-      `One step away: unknown. memod reads which symbols use which only in TypeScript and JavaScript, so whygraph cannot see what ${shown(symbolId)} uses or what uses it.`,
+      `One step away: unknown. memod reads which symbols use which only in ${SYMBOL_EDGE_LANGUAGE_LIST}, so whygraph cannot see what ${shown(symbolId)} uses or what uses it.`,
       ...(foundAbove ? [] : [nothing]),
       `Searched: ${shown(symbolId)} and the header of ${file}. Not searched: anything one step away or further.`,
     ];
@@ -247,7 +247,7 @@ function oneStepAway(symbolId: string, carry: Row, why: readonly Row[], foundAbo
   if (!foundAbove && ordered.length === 0) out.push(nothing);
   out.push(
     `Searched: ${shown(symbolId)}, the header of ${file}, the ${around}, and the headers of their files.`,
-    "Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript and JavaScript); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.",
+    `Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in ${SYMBOL_EDGE_LANGUAGE_LIST}); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.`,
   );
   return out;
 }
@@ -320,7 +320,7 @@ function carrySections(symbolId: string, carry: Row, why: readonly Row[], users:
   out.push("", ...whyAnswer(symbolId, why).split("\n").slice(2), "");
   out.push(...oneStepAway(symbolId, carry, why, why.length > 0 || topics.length > 0 || checks.length > 0 || premises.length > 0), "");
   if (terms !== undefined) out.push(...termLines(terms, new Set(why.filter((r) => r.kind === "record").map((r) => str(r.id))), TERM_HEADING, TERM_EMPTY), "");
-  if (!hasSymbolEdges(file)) out.push(`Its users are unknown: memod reads which symbols use which only in TypeScript and JavaScript, not in ${file}.`);
+  if (!hasSymbolEdges(file)) out.push(`Its users are unknown: memod reads which symbols use which only in ${SYMBOL_EDGE_LANGUAGE_LIST}, not in ${file}.`);
   else if (users.length === 0) out.push("No symbol uses it.");
   else {
     const direct = users.filter((u) => Number(u.distance) === 1).length;

@@ -9,7 +9,8 @@
 // the fleet memos its premise: tags rest on; the commits that changed it,
 // newest first; and `neighbors`, the symbols one step away.
 // A neighbor is a symbol that this one uses or that uses this one (a USES
-// edge either way; memod reads them only in TypeScript and JavaScript),
+// edge either way; memod reads them in TypeScript, JavaScript, Rust and
+// Swift),
 // ordered by id, each listed once with:
 // - uses / usesTypeOnly: this symbol uses it (only as a type);
 // - usedBy / usedByTypeOnly: it uses this symbol (only as a type);

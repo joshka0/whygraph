@@ -49,7 +49,7 @@ Decision records linked only through a commit that cites them and changed its co
 One step away, most binding first (what formatCents uses, then what uses formatCents):
   - topic owned by src/cart.ts:total, which uses formatCents: fx-cart
 Searched: src/money.ts:formatCents, the header of src/money.ts, the 0 symbols formatCents uses, 1 symbol that uses formatCents, and the headers of their files.
-Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript and JavaScript); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.
+Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript, JavaScript, Rust and Swift); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.
 
 Decision records that share the most distinctive terms with its code (candidates to pick from one list; not links: a shared word does not mean the record governs this symbol):
   2026-01-02  ADR-0002  One flat tax rate
@@ -280,7 +280,7 @@ Decision records linked only through a commit that cites them and changed its co
 One step away, most binding first (what formatCents uses, then what uses formatCents):
   - topic owned by src/cart.ts:total, which uses formatCents: fx-cart
 Searched: src/money.ts:formatCents, the header of src/money.ts, the 0 symbols formatCents uses, 1 symbol that uses formatCents, and the headers of their files.
-Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript and JavaScript); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.
+Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript, JavaScript, Rust and Swift); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.
 
 Decision records that share the most distinctive terms with its code (candidates to pick from one list; not links: a shared word does not mean the record governs this symbol):
   2026-01-02  ADR-0002  One flat tax rate
@@ -321,7 +321,7 @@ One step away, most binding first (what checkout uses, then what uses checkout):
   - check on src/rounding.ts:roundHalfEven, which checkout uses: memod verify rounding-model
   - topic owned by src/rounding.ts:roundHalfEven, which checkout uses: fx-rounding
 Searched: src/checkout.ts:checkout, the header of src/checkout.ts, the 1 symbol checkout uses, 0 symbols that use checkout, and the headers of their files.
-Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript and JavaScript); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.
+Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript, JavaScript, Rust and Swift); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.
 
 Decision records that share the most distinctive terms with its code (candidates to pick from one list; not links: a shared word does not mean the record governs this symbol):
   2026-01-02  ADR-0002  One flat tax rate
@@ -898,7 +898,7 @@ build.
 | `DECLARES` | File -> Symbol |
 | `IMPORTS` (`specifier`, `line`, `typeOnly`) | File -> File or Package |
 | `OWNS` | File -> Topic, and each Symbol that the tag names -> Topic |
-| `USES` (`typeOnly`) | Symbol -> Symbol (TypeScript and JavaScript only) |
+| `USES` (`typeOnly`) | Symbol -> Symbol (TypeScript, JavaScript, Rust and Swift) |
 | `DECIDED`, `VERIFIED`, `PREMISE` | Symbol or File -> DecidedTag, Check, Memo |
 | `NAMES` | DecidedTag -> Decision (the tag's text names the record) |
 | `CHANGES` | Commit -> File or Symbol (a changed code hash or tag, by memod's rule) |
@@ -939,9 +939,9 @@ store rather than merging into it.
 
 ## Limits
 
-- memod reads which symbols use which only in TypeScript and JavaScript. For
-  a symbol in another language, `carry` says its users and what sits one step
-  away are unknown.
+- memod reads which symbols use which only in TypeScript, JavaScript, Rust
+  and Swift. For a symbol in another language (Kotlin, Elixir or Zig),
+  `carry` says its users and what sits one step away are unknown.
 - `carry` looks one step away and no further, and only along uses the graph
   holds: a function passed as a value or called through an interface is not
   a neighbor. It shows the first 20 lines one step away and says what it left

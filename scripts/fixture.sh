@@ -10,7 +10,7 @@
 #   c3 regional tax.ts regional, ADR 0003 (supersedes ADR 0002); the tag on taxRate names ADR 0003   branch "regional"
 #   c4 main     money.ts formatCents with separators; the message names ADR 0001 in free text only (no link)
 #   c5 main     merge of "regional"
-#   c6 main     lib.rs: a Rust symbol (memod reads no symbol uses in Rust); trailer "Decision: ADR-0001"
+#   c6 main     lib.rs: a Rust symbol with no users (memod reads Rust uses); trailer "Decision: ADR-0001"
 #   c7 main     decisions/notes.json: a second decisions source citing c2 and c4 by short id
 #   c8 main     renames the amount parameter of five symbols: a large commit with trailer "Decision: ADR-0001"
 #   c9 main     rounding.ts (roundHalfEven: a decided: tag and verified: rounding-model) and checkout.ts (checkout:
