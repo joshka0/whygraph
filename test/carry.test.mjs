@@ -1,6 +1,6 @@
 /**
  * module: [[whygraph-carry-contracts]]
- * C1-C12 derive from docs/failures.md and the public pure-unit contracts.
+ * C1-C13 and W17-W20 derive from docs/failures.md and the public pure-unit contracts.
  * The final regression isolates the cross-file constraint that prompted carry.
  */
 import test from 'node:test';
@@ -11,7 +11,7 @@ import { harness as h } from './support.mjs';
 const { ok, has, record } = h;
 const checkout = 'src/checkout.ts:checkout';
 const rounding = 'src/rounding.ts:roundHalfEven';
-const notSearched = 'Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript and JavaScript); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.';
+const notSearched = 'Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript, JavaScript, Rust and Swift); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.';
 function contract(id, description, mode, body) {
   test(`${id} ${description}`, { timeout: 120_000 }, async t => body(h.state(t, mode), t));
 }
@@ -78,10 +78,14 @@ contract('C5', 'native bindings and Rust report the boundary of visible symbol e
   s.commit('Add a native binding call'); ok(s.build());
   const typed = carry(s, 'src/binding.ts:callNative');
   assert.ok(!items(typed).some(line => line.includes('src/lib.rs:round_cents')));
-  has(oneStep(typed), 'code in languages without symbol edges');
-  const native = oneStep(carry(s, 'src/lib.rs:round_cents'));
-  has(native, 'One step away: unknown. memod reads which symbols use which only in TypeScript and JavaScript, so whygraph cannot see what src/lib.rs:round_cents uses or what uses it.', 'Searched: src/lib.rs:round_cents and the header of src/lib.rs. Not searched: anything one step away or further.');
-  assert.ok(!native.includes('on the 0 symbols'));
+  has(oneStep(typed), 'the 0 symbols callNative uses, 0 symbols that use callNative', notSearched);
+  assert.doesNotMatch(typed, /One step away: unknown|Its users are unknown/);
+  const native = carry(s, 'src/lib.rs:round_cents');
+  has(oneStep(native),
+    'One step away: no decided: tag, decision record, formal check or topic on the 0 symbols round_cents uses, 0 symbols that use round_cents, or in the headers of their files.',
+    'Searched: src/lib.rs:round_cents, the header of src/lib.rs, the 0 symbols round_cents uses, 0 symbols that use round_cents, and the headers of their files.', notSearched);
+  has(native, 'No symbol uses it.');
+  assert.doesNotMatch(native, /One step away: unknown|Its users are unknown|Nothing found in what was searched/);
 });
 contract('C6', 'type-only neighbors are labelled in each direction', 'empty', s => {
   s.write(join(s.repo, 'src/t.ts'), header('shape') + doc(['decided: shapes retain their area because serialization relies on it']) + 'export interface Shape { area: number }\n');
@@ -181,6 +185,87 @@ contract('C11', 'many-neighbor answers are deterministic and order facts by plac
 contract('C12', 'a callee check follows its decision and precedes its topic', 'fixture', s => {
   const part = oneStep(carry(s, checkout));
   ordered(part, ['decided on src/rounding.ts:roundHalfEven,', 'check on src/rounding.ts:roundHalfEven, which checkout uses: memod verify rounding-model', 'topic owned by src/rounding.ts:roundHalfEven,']);
+});
+
+// These expectations are fixed by the failure list, never imported from the subject.
+const oneUser = '1 symbol uses it directly, 1 in all (distance n: through n-1 other symbols; type: only a type use):';
+const nothing = 'Nothing found in what was searched; that does not mean nothing constrains this edit.';
+function exactLines(text, expected) {
+  const lines = text.split('\n');
+  for (const line of expected) assert.equal(lines.filter(actual => actual === line).length, 1, text);
+}
+function knownEmpty(s, target, used, using) {
+  const text = carry(s, target);
+  const colon = target.lastIndexOf(':');
+  const file = target.slice(0, colon); const name = target.slice(colon + 1);
+  const around = `${used} symbol${used === 1 ? '' : 's'} ${name} uses, ${using} symbol${using === 1 ? '' : 's'} that use${using === 1 ? 's' : ''} ${name}`;
+  exactLines(text, [
+    `One step away: no decided: tag, decision record, formal check or topic on the ${around}, or in the headers of their files.`,
+    nothing,
+    `Searched: ${target}, the header of ${file}, the ${around}, and the headers of their files.`,
+    notSearched,
+  ]);
+  assert.doesNotMatch(text, /One step away: unknown|Its users are unknown/);
+  return text;
+}
+function userRows(text) { return text.split('\n').filter(line => /^\s+\d+\s+src\//.test(line)); }
+const rustPair = 'pub fn helper() -> i64 { 1 }\npub fn caller() -> i64 { helper() }\n';
+
+contract('W17', 'Rust carries a real caller and counts both edge directions', 'empty', s => {
+  s.write(join(s.repo, 'src/lib.rs'), rustPair); commitBuild(s);
+  const text = knownEmpty(s, 'src/lib.rs:helper', 0, 1);
+  exactLines(text, [oneUser]);
+  assert.deepEqual(userRows(text), ['   1  src/lib.rs:caller']);
+  assert.ok(!text.includes('No symbol uses it.'), text);
+  const caller = knownEmpty(s, 'src/lib.rs:caller', 1, 0);
+  exactLines(caller, ['No symbol uses it.']);
+});
+contract('W18', 'Swift carries a real caller and counts both edge directions', 'empty', s => {
+  s.write(join(s.repo, 'src/Room.swift'), 'func join(_ id: Int) -> Int { id }\nfunc open(_ id: Int) -> Int { join(id) }\n'); commitBuild(s);
+  const text = knownEmpty(s, 'src/Room.swift:join', 0, 1);
+  exactLines(text, [oneUser]);
+  assert.deepEqual(userRows(text), ['   1  src/Room.swift:open']);
+  assert.ok(!text.includes('No symbol uses it.'), text);
+  exactLines(knownEmpty(s, 'src/Room.swift:open', 1, 0), ['No symbol uses it.']);
+});
+for (const [language, file, code] of [
+  ['Kotlin', 'src/store.kt', 'fun helper(): Int { return 1 }\nfun caller(): Int { return helper() }\n'],
+  ['Elixir', 'src/store.ex', 'defmodule Store do\n  def helper(), do: 1\n  def caller(), do: helper()\nend\n'],
+  ['Zig', 'src/store.zig', 'pub fn helper() i64 { return 1; }\npub fn caller() i64 { return helper(); }\n'],
+]) contract('W19', `${language} symbols keep unknown neighbors and users`, 'empty', s => {
+  s.write(join(s.repo, file), code); commitBuild(s);
+  // Query both indexed declarations: an empty graph or missing caller cannot pass.
+  for (const name of ['helper', 'caller']) {
+    const target = `${file}:${name}`; const text = carry(s, target);
+    exactLines(text, [
+      `One step away: unknown. memod reads which symbols use which only in TypeScript, JavaScript, Rust and Swift, so whygraph cannot see what ${target} uses or what uses it.`,
+      nothing,
+      `Searched: ${target} and the header of ${file}. Not searched: anything one step away or further.`,
+      `Its users are unknown: memod reads which symbols use which only in TypeScript, JavaScript, Rust and Swift, not in ${file}.`,
+    ]);
+    assert.ok(!text.includes('No symbol uses it.'), text);
+    assert.doesNotMatch(text, /One step away: no decided: tag|symbol uses it directly/);
+  }
+});
+contract('W20', 'TypeScript declaration symbols retain type-only users', 'empty', s => {
+  s.write(join(s.repo, 'src/types.d.ts'), 'export interface Declared { value: number }\n');
+  s.write(join(s.repo, 'src/b.ts'), 'import type { Declared } from "./types.d.ts";\nexport function useShape2(value: Declared): number { return value.value; }\n'); commitBuild(s);
+  const text = knownEmpty(s, 'src/types.d.ts:Declared', 0, 1);
+  exactLines(text, [oneUser]);
+  assert.deepEqual(userRows(text), ['   1  src/b.ts:useShape2  type']);
+  assert.ok(!text.includes('No symbol uses it.'), text);
+});
+contract('C13', 'mixed TypeScript and Rust bindings do not become symbol edges', 'empty', s => {
+  s.write(join(s.repo, 'src/app.ts'), 'import { helper } from "native-store";\nexport function tsh() { return helper(); }\n');
+  s.write(join(s.repo, 'src/lib.rs'), rustPair + '\nunsafe extern "C" { fn tsh() -> i64; }\npub fn call_ts() -> i64 { unsafe { tsh() } }\n');
+  commitBuild(s);
+  const typed = knownEmpty(s, 'src/app.ts:tsh', 0, 0);
+  exactLines(typed, ['No symbol uses it.']);
+  assert.deepEqual(userRows(typed), []);
+  const native = knownEmpty(s, 'src/lib.rs:helper', 0, 1);
+  exactLines(native, [oneUser]);
+  assert.deepEqual(userRows(native), ['   1  src/lib.rs:caller']);
+  assert.ok(!oneStep(native).includes('src/app.ts:tsh'), native);
 });
 contract('Carry regression', 'the only constraint on a cross-file callee is carried to its unconstrained caller', 'empty', s => {
   const decision = 'tax ties round to even because rounding half up overcharges on average';

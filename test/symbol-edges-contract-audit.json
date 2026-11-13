@@ -1,0 +1,194 @@
+{
+  "implementation": "e452c7f",
+  "groundTruth": "git diff main -- docs/failures.md (main: 57581a7)",
+  "newTestCount": 7,
+  "newEntries": [
+    {
+      "id": "W17",
+      "contract": "| W17 | A Rust symbol that a Rust symbol uses: `src/lib.rs` holds `pub fn helper() -> i64 { 1 }` and `pub fn caller() -> i64 { helper() }` | Exit 0. `carry src/lib.rs:helper` lists one direct user: `1 symbol uses it directly, 1 in all (distance n: through n-1 other symbols; type: only a type use):` then `   1  src/lib.rs:caller`. Its one-step part is `One step away: no decided: tag, decision record, formal check or topic on the 0 symbols helper uses, 1 symbol that uses helper, or in the headers of their files.`, `Nothing found in what was searched; that does not mean nothing constrains this edit.` (it owns no topic), and `Searched: src/lib.rs:helper, the header of src/lib.rs, the 0 symbols helper uses, 1 symbol that uses helper, and the headers of their files.` It never says uses are unknown. |",
+      "file": "test/carry.test.mjs",
+      "tests": 1,
+      "verification": "Rust caller and callee: exact one-step scope, direct user and reverse edge count."
+    },
+    {
+      "id": "W18",
+      "contract": "| W18 | A Swift file: `src/Room.swift` holds `func join(_ id: Int) -> Int { id }` and `func open(_ id: Int) -> Int { join(id) }` | Exit 0. `carry src/Room.swift:join` lists one direct user, `   1  src/Room.swift:open`; its one-step part is `One step away: no decided: tag, decision record, formal check or topic on the 0 symbols join uses, 1 symbol that uses join, or in the headers of their files.`, `Nothing found in what was searched; that does not mean nothing constrains this edit.`, and `Searched: src/Room.swift:join, the header of src/Room.swift, the 0 symbols join uses, 1 symbol that uses join, and the headers of their files.` The answer never holds `Its users are unknown` or `One step away: unknown` for a `.swift` symbol. |",
+      "file": "test/carry.test.mjs",
+      "tests": 1,
+      "verification": "Swift join/open: exact one-step scope, direct user and reverse edge count."
+    },
+    {
+      "id": "W19",
+      "contract": "| W19 | A language memod indexes but gives no symbol edges: a Kotlin file `src/store.kt` with `fun helper(): Int { return 1 }` and `fun caller(): Int { return helper() }` (Elixir `.ex` and Zig `.zig` behave the same) | Exit 0. `carry src/store.kt:helper` keeps the unknown path: `One step away: unknown. memod reads which symbols use which only in TypeScript, JavaScript, Rust and Swift, so whygraph cannot see what src/store.kt:helper uses or what uses it.`, `Nothing found in what was searched; that does not mean nothing constrains this edit.`, `Searched: src/store.kt:helper and the header of src/store.kt. Not searched: anything one step away or further.`, and `Its users are unknown: memod reads which symbols use which only in TypeScript, JavaScript, Rust and Swift, not in src/store.kt.` Never `No symbol uses it.` |",
+      "file": "test/carry.test.mjs",
+      "tests": 3,
+      "verification": "Three real repos (Kotlin, Elixir, Zig), querying both helper and caller: exact unknown-neighbor and unknown-user text, shared language list, no claim of absent users."
+    },
+    {
+      "id": "W20",
+      "contract": "| W20 | A declaration file: `src/types.d.ts` declares `Declared`, and `src/b.ts` uses it (`import type { Declared } from \"./types.d.ts\"` and a parameter of that type) | Exit 0. `.d.ts` is TypeScript and memod's oxc reader gives its symbols `uses` edges, so whygraph reads it like any `.ts` file: `carry src/types.d.ts:Declared` says `1 symbol uses it directly, 1 in all (distance n: through n-1 other symbols; type: only a type use):` then `   1  src/b.ts:useShape2  type`; its one-step part is `One step away: no decided: tag, decision record, formal check or topic on the 0 symbols Declared uses, 1 symbol that uses Declared, or in the headers of their files.`, `Nothing found in what was searched; that does not mean nothing constrains this edit.`, and `Searched: src/types.d.ts:Declared, the header of src/types.d.ts, the 0 symbols Declared uses, 1 symbol that uses Declared, and the headers of their files.` Never `Its users are unknown`. |",
+      "file": "test/carry.test.mjs",
+      "tests": 1,
+      "verification": "Real .d.ts interface and import-type consumer: exact scope and one type-only user."
+    },
+    {
+      "id": "C13",
+      "contract": "| C13 | A TypeScript symbol a Rust file cannot reach: a repo holds `src/app.ts` exporting `tsh`, and `src/lib.rs` with `helper`/`caller`; the Rust code names the TypeScript function through its binding | Exit 0. Neither language reaches the other: `carry src/app.ts:tsh` lists `No symbol uses it.` and its one-step part counts `0 symbols that use tsh`; `carry src/lib.rs:helper` lists `src/lib.rs:caller`, never `src/app.ts:tsh`. The `Not searched:` line names the languages memod reads (`TypeScript, JavaScript, Rust and Swift`), so Rust is not listed among the languages without symbol edges. |",
+      "file": "test/carry.test.mjs",
+      "tests": 1,
+      "verification": "Mixed Rust and TypeScript repo with binding names in both directions: no inter-language neighbors/users, real Rust caller preserved."
+    }
+  ],
+  "existingUpdates": [
+    {
+      "id": "W10",
+      "contract": "| W10 | `carry src/lib.rs:round_cents` (the fixture's Rust symbol, which no symbol uses) | Exit 0. memod gives Rust `uses` edges, so the answer has the TypeScript shape, not \"unknown\": the one-step part is `One step away: no decided: tag, decision record, formal check or topic on the 0 symbols round_cents uses, 0 symbols that use round_cents, or in the headers of their files.`, then `Searched: src/lib.rs:round_cents, the header of src/lib.rs, the 0 symbols round_cents uses, 0 symbols that use round_cents, and the headers of their files.` and `Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript, JavaScript, Rust and Swift); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.` (no `Nothing found` line, because the symbol owns the topic `fx-native`). The users part is `No symbol uses it.` Never `One step away: unknown` and never `Its users are unknown`. |",
+      "file": "test/contracts.test.mjs",
+      "action": "Replace unknown-Rust assertion with exact known-empty scope and no-users lines; owned fx-native topic suppresses Nothing found."
+    },
+    {
+      "id": "C5",
+      "contract": "| C5 | A TypeScript symbol whose code reaches Rust through a binding, in a repo that also holds the fixture's Rust file; and `carry src/lib.rs:round_cents` | The TypeScript symbol: the Rust code is no neighbor, because memod emits `USES` only within one language, so the one-step part counts 0 Rust neighbors and the `Not searched:` line still names `code in languages without symbol edges`. `round_cents`: no longer `unknown`; it answers as W10 (Rust symbols are read), so `One step away` counts its real neighbors (0 in the fixture) and the users part says `No symbol uses it.` Never `One step away: unknown.` |",
+      "file": "test/carry.test.mjs",
+      "action": "Native binding has zero visible symbol neighbors; Rust fixture uses the known-empty path and full four-language scope."
+    },
+    {
+      "id": "C10",
+      "contract": "| C10 | Nothing found: a TypeScript symbol with no tag, record, check, premise or topic, no file header tag, and no neighbor that holds one | Exactly these lines: `One step away: no decided: tag, decision record, formal check or topic on the 0 symbols lonely uses, 0 symbols that use lonely, or in the headers of their files.`, `Nothing found in what was searched; that does not mean nothing constrains this edit.`, `Searched: src/u.ts:lonely, the header of src/u.ts, the 0 symbols lonely uses, 0 symbols that use lonely, and the headers of their files.`, `Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript, JavaScript, Rust and Swift); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.` When something was found elsewhere in the answer, the `Nothing found` line is absent; the `Searched:` and `Not searched:` lines are always there. |",
+      "file": "test/carry.test.mjs",
+      "action": "Exact Not searched line now names TypeScript, JavaScript, Rust and Swift; retain all prior empty-answer and suppression assertions."
+    }
+  ],
+  "fixtureRowChange": "f85c3a6: Rust now has symbol edges; W10 still proves this fixture symbol has no users.",
+  "plants": [
+    {
+      "name": "remove-rust",
+      "pattern": "^W17 ",
+      "subject": "/tmp/whygraph-symbol-edges-plants-2026-11-13T23-20-18-033Z-833249/remove-rust",
+      "redExit": 1,
+      "failedTest": [
+        "W17 Rust carries a real caller and counts both edge directions"
+      ],
+      "redReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-13T23-20-18-083Z-833335.tap",
+      "greenExit": 0,
+      "passedTest": [
+        "W17 Rust carries a real caller and counts both edge directions"
+      ],
+      "greenReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-13T23-20-19-080Z-834332.tap"
+    },
+    {
+      "name": "remove-swift",
+      "pattern": "^W18 ",
+      "subject": "/tmp/whygraph-symbol-edges-plants-2026-11-13T23-20-18-033Z-833249/remove-swift",
+      "redExit": 1,
+      "failedTest": [
+        "W18 Swift carries a real caller and counts both edge directions"
+      ],
+      "redReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-13T23-20-20-757Z-835685.tap",
+      "greenExit": 0,
+      "passedTest": [
+        "W18 Swift carries a real caller and counts both edge directions"
+      ],
+      "greenReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-13T23-20-21-895Z-836499.tap"
+    },
+    {
+      "name": "add-elixir",
+      "pattern": "^W19 Elixir ",
+      "subject": "/tmp/whygraph-symbol-edges-plants-2026-11-13T23-20-18-033Z-833249/add-elixir",
+      "redExit": 1,
+      "failedTest": [
+        "W19 Elixir symbols keep unknown neighbors and users"
+      ],
+      "redReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-13T23-20-23-324Z-837959.tap",
+      "greenExit": 0,
+      "passedTest": [
+        "W19 Elixir symbols keep unknown neighbors and users"
+      ],
+      "greenReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-13T23-20-24-377Z-838911.tap"
+    },
+    {
+      "name": "declarations-unknown",
+      "pattern": "^W20 ",
+      "subject": "/tmp/whygraph-symbol-edges-plants-2026-11-13T23-20-18-033Z-833249/declarations-unknown",
+      "redExit": 1,
+      "failedTest": [
+        "W20 TypeScript declaration symbols retain type-only users"
+      ],
+      "redReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-13T23-20-26-059Z-840373.tap",
+      "greenExit": 0,
+      "passedTest": [
+        "W20 TypeScript declaration symbols retain type-only users"
+      ],
+      "greenReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-13T23-20-27-181Z-841356.tap"
+    },
+    {
+      "name": "rust-reaches-typescript",
+      "pattern": "^C13 ",
+      "subject": "/tmp/whygraph-symbol-edges-plants-2026-11-13T23-20-18-033Z-833249/rust-reaches-typescript",
+      "redExit": 1,
+      "failedTest": [
+        "C13 mixed TypeScript and Rust bindings do not become symbol edges"
+      ],
+      "redReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-13T23-20-28-294Z-842568.tap",
+      "greenExit": 0,
+      "passedTest": [
+        "C13 mixed TypeScript and Rust bindings do not become symbol edges"
+      ],
+      "greenReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-13T23-20-29-347Z-843461.tap"
+    },
+    {
+      "name": "typescript-reaches-rust",
+      "pattern": "^C13 ",
+      "subject": "/tmp/whygraph-symbol-edges-plants-2026-11-13T23-20-18-033Z-833249/typescript-reaches-rust",
+      "redExit": 1,
+      "failedTest": [
+        "C13 mixed TypeScript and Rust bindings do not become symbol edges"
+      ],
+      "redReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-13T23-20-30-752Z-844661.tap",
+      "greenExit": 0,
+      "passedTest": [
+        "C13 mixed TypeScript and Rust bindings do not become symbol edges"
+      ],
+      "greenReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-13T23-20-31-849Z-845471.tap"
+    }
+  ],
+  "plantSummary": "6/6 intended red failures, each followed by a real-code green run; scratch subjects outside the repository; all evidence retained.",
+  "testScope": "Every test-suite invocation ran under systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400%. Every relate process inherited RELATE_TELEMETRY=0 and DO_NOT_TRACK=1.",
+  "conflicts": [],
+  "uncompleted": [
+    "Could not satisfy the literal no-worktree rule during the required full suite: pre-existing B27 creates a worktree in its scratch repo."
+  ],
+  "executionCaveats": [
+    "The required unfiltered full suite contains pre-existing B27, which invokes git worktree add inside its scratch fixture. It ran before the literal conflict with the brief no-worktree rule was noticed. No working-repository worktree was created; the work stayed on symbol-edge-languages. This literal rail could not be met together with running the existing full suite.",
+    "An initial plant rehearsal retained copies in ignored test-results/scratch. The final plant evidence recorded here was rerun with subjects outside the repository under /tmp."
+  ],
+  "gates": {
+    "check": {
+      "command": "pnpm check",
+      "exitCode": 0
+    },
+    "lint": {
+      "command": "node_modules/.bin/memod lint",
+      "exitCode": 0
+    },
+    "readme": {
+      "command": "node scripts/readme-check.mjs",
+      "exitCode": 0,
+      "commands": 14,
+      "drifted": 0,
+      "offlinePreload": "test/search-offline.mjs; cached model fixture transport"
+    },
+    "fullSuite": {
+      "command": "node test/run.mjs",
+      "report": "/home/dev/repos/personal/whygraph/test-results/2026-11-13T23-20-17-930Z-833199.tap",
+      "scratch": "/home/dev/repos/personal/whygraph/test-results/scratch/2026-11-13T23-20-17-930Z-833199",
+      "exitCode": 0,
+      "signal": null,
+      "wallSeconds": 343.509268637,
+      "tests": 205,
+      "pass": 205,
+      "fail": 0,
+      "skipped": 0
+    }
+  }
+}

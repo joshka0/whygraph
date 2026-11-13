@@ -478,9 +478,17 @@ contract('W9', 'dot and duplicate-slash paths normalize identically', 'fixture',
     for (const target of ['./src/money.ts:cents', 'src//money.ts:cents']) assert.equal(ok(s.cli([cmd, target])), expected);
   }
 });
-contract('W10', 'Rust users are unknown rather than absent', 'fixture', s => {
+contract('W10', 'an unused Rust symbol has known empty neighbors and users', 'fixture', s => {
   const text = ok(s.cli(['carry', 'src/lib.rs:round_cents']));
-  assert.match(text, /[Uu]nknown/); has(text, 'TypeScript', 'JavaScript'); assert.ok(!text.includes('No symbol uses it.'));
+  const lines = text.split('\n');
+  for (const line of [
+    'One step away: no decided: tag, decision record, formal check or topic on the 0 symbols round_cents uses, 0 symbols that use round_cents, or in the headers of their files.',
+    'Searched: src/lib.rs:round_cents, the header of src/lib.rs, the 0 symbols round_cents uses, 0 symbols that use round_cents, and the headers of their files.',
+    'Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript, JavaScript, Rust and Swift); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.',
+    'No symbol uses it.',
+  ]) assert.equal(lines.filter(actual => actual === line).length, 1, text);
+  has(text, 'fx-native');
+  assert.doesNotMatch(text, /One step away: unknown|Its users are unknown|Nothing found in what was searched/);
 });
 contract('W11', 'a TypeScript symbol without users says so', 'fixture', s => {
   has(ok(s.cli(['carry', 'src/cart.ts:total'])), 'No symbol uses it.');
