@@ -12,6 +12,8 @@ or you, asks before changing code:
 - **carry**: what must I keep in mind before I edit this symbol?
 - **why**: why is this symbol the way it is?
 - **impact**: this decision changed; what rests on it?
+- **search**: which decision record best matches this change, when no tag or
+  commit links it to the code?
 
 Here is the question an agent asks before it edits `formatCents` in the small
 shop repo that comes with whygraph. The code of `formatCents` mentions no
@@ -105,6 +107,7 @@ whygraph: why the code is the way it is, as a relate graph
   whygraph why <file>:<symbol> [--repo <path>] [--store <path>]
   whygraph impact <decision id> [--repo <path>] [--store <path>]
   whygraph carry <file>:<symbol> [--repo <path>] [--store <path>]
+  whygraph search "<text>" [--repo <path>] [--store <path>]
   whygraph mcp [--repo <path>] [--store <path>]
 
 Exit: 0 answer, 1 failure, 2 usage, 3 target not in the graph.
@@ -571,6 +574,7 @@ jq '{records: (.items | group_by(.memo) | map({
 | `whygraph why <file>:<symbol>` | The `decided:` tags on the symbol and on its file header; the records those tags name; then the records linked only through a commit that cites them and changed the symbol, oldest first, each commit with how many symbols it changed. |
 | `whygraph impact <decision id>` | The record and every record that rests on it, directly or through others; for each, the symbols and files whose `decided:` tags name it, then the commits that cite it and the other symbols those commits changed, with how many symbols use each directly. |
 | `whygraph carry <file>:<symbol>` | Before an edit: the topics the symbol owns and their other owners, the formal checks that cover it, its premise memos, its decisions (as `why`); then one step away, the `decided:` tags, the records they name, the checks and the topics of the symbols it uses and of the symbols that use it, most binding first, each line naming where it sits; then its direct and transitive users, and the commits that changed it. |
+| `whygraph search "<text>"` | The five decision records whose title and statement best match the text, best match first, each a candidate to judge, not a link; then what was searched and what was not. |
 | `whygraph mcp` | The MCP server config that serves the store read-only through `relate serve --mcp stdio`, and every recipe. |
 | `whygraph help` | The usage. |
 
@@ -591,8 +595,9 @@ An agent needs two things: the rule for when to ask, and a way to ask.
 Claude Code and Codex both read (a folder with a `SKILL.md` that has a `name`
 and a `description`). It tells the agent: before you change a symbol, ask
 `carry`; when a decision changes, ask `impact`; when you wonder why code is
-the way it is, ask `why`. It gives the exact commands, how to read a direct
-and a loose link, and what to do on each exit status.
+the way it is, ask `why`; and when a link is missing or `why` finds no record,
+ask `search` with the change in your own words. It gives the exact commands,
+how to read a direct and a loose link, and what to do on each exit status.
 
 Install it into the repo you work on, from that repo's root:
 
@@ -679,7 +684,7 @@ build.
 | `Check` | `name` | | memod `check` |
 | `Memo` | `ref` | | memod `memo` (a `premise:` tag) |
 | `Commit` | `sha` | `short`, `date`, `subject` | memod `commit` |
-| `Decision` | `id` | `title`, `date`, `status`, `source` | a decision record |
+| `Decision` | `id` | `title`, `date`, `status`, `source`, `searchText` | a decision record |
 | `Item` | | `ord`, `label`, `text` | a record's item |
 
 | Relationship | From -> to |
@@ -731,6 +736,11 @@ store rather than merging into it.
   index Markdown, so an ADR file has no node.
 - The recipes use no `CALL { }` subquery: relate's read-only MCP tool rejects
   one.
+- `search` reads only a record's title and statements, by words: it does not
+  look at the code, the commits or the tags, and it ranks by how well the
+  words match, which does not separate a record that governs the change from
+  noise. A listed record is a candidate; read it and judge. A record with an
+  empty title and no statements matches no word.
 
 ## Develop
 

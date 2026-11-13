@@ -149,6 +149,33 @@ line starts with `  - ` and says where it sits and how it relates, such as
 | I4 | A symbol reached through two records | Listed under each record, counted once in "distinct symbols in all". |
 | I5 | A symbol whose tag names the record and that a citing commit also changed | Listed once, among the symbols whose tag names it; not among the other symbols the commits changed. Counted as named by a tag. |
 
+## search
+
+`whygraph search "<text>"` ranks decision records by their text. It never
+links a record to code: a listed record is a candidate to judge. "The fixture
+build" is as above. The word search reads the full-text index
+`decision_search` that `build` creates over each record's title and
+statements.
+
+| ID | Input | Required result |
+| --- | --- | --- |
+| Q1 | `search "money in cents"` on the fixture build | Exit 0. At most 5 records, best match first; `ADR-0001` first. The heading is `Decision records that match "money in cents", best match first (a candidate, not a link: ...)`. Each record shows `YYYY-MM-DD  <id>  <title>`, then `statement:` the first line of its first item, then `source:`. The answer ends with a `Searched:` line naming the words and a `Not searched:` line. A multi-line statement shows only its first line. |
+| Q2 | A request whose words match no record | Exit 0. The first line is `No record matches "<request>".`; then the `Searched:` and `Not searched:` lines; no candidate heading. |
+| Q3 | `search "why (do) we *round* half-to-even?"` and `search "why do we round half to even"` | Exit 0. The same records in the same order: `(`, `)`, `*`, `-` and `?` are dropped, not read as operators. The `Searched:` line names the words `why do we round half to even`. |
+| Q4 | `search "   "` or `search "***"` (a request with no letter or digit) | Exit 2; stderr `search needs a request with at least one word`. No query runs. |
+| Q5 | `search "x"` with no store | Exit 1; stderr `no store at <path>; run whygraph build first`. |
+| Q6 | `search` with no argument, `search a b` (two arguments), or `search --decisions f` | Exit 2 with a usage message naming the bad argument. |
+| Q7 | The indexed text | A record is found by a word in its title or in any of its statements; never by its id, date, status, source or topics. |
+| Q8 | A record with no title and no statements | Loads; its `searchText` is empty and no request finds it. |
+| Q9 | `search` on a store built before this change (no `decision_search` index) | Exit 1; stderr `relate query failed (exit 1): IndexDoesNotExist: decision_search`. |
+| Q10 | `why` on a symbol with no tag, no record and no commit link | Exit 0. The last line starts `No decision is recorded for it.` and names `whygraph search "<the change in your own words>"`. `why` runs no search itself. |
+| Q11 | `why` on a symbol whose `decided:` tag names no record (W16) | No `No decision is recorded` line and no search hint: the tag is the decision. |
+| Q12 | `carry` on a symbol with no decision | The `why` part of the answer carries the same search hint as Q10; the rest of the answer is unchanged. |
+| Q13 | `mcp` with a store, then `read_cypher` with the `search` recipe and `{"text": "money cents"}` | `mcp` prints `== search`; the call returns the same records the CLI renders, and the recipe holds no `CALL { }` subquery. |
+| Q14 | The same request twice, and again after a rebuild | Byte-identical stdout. Records with an equal match order by id. |
+| Q15 | A request with a newline or a tab | The heading echoes it as one line (each whitespace run becomes one space); the words are searched. |
+| Q16 | `search --repo <folder outside any git repo>`, or run outside a repo | Exit 2; stderr `... is not in a git repo`. |
+
 ## mcp
 
 | ID | Input | Required result |

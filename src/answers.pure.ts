@@ -75,7 +75,7 @@ export function whyAnswer(symbolId: string, rows: readonly Row[]): string {
     out.push(`Decision records linked only through a commit that cites them and changed its code or tags, oldest first (a commit that changed many symbols links each of them loosely):`);
     for (const r of viaCommit) out.push(...recordLines(r, (Array.isArray(r.via) ? r.via : []).map((v, i) => `      ${i === 0 ? "changed by:" : "           "} ${viaLine(v)}`)));
   }
-  if (rows.length === 0) out.push("", "No decision is recorded for it. Record one with a decided: tag in its doc comment (naming the record's id links it), or a `Decision: <id>` trailer on the commit that made it.");
+  if (rows.length === 0) out.push("", "No decision is recorded for it. Record one with a decided: tag in its doc comment (naming the record's id links it), or a `Decision: <id>` trailer on the commit that made it. To look for a record the repo already holds, run whygraph search \"<the change in your own words>\".");
   return out.join("\n");
 }
 

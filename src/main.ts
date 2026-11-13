@@ -6,7 +6,7 @@
 import { decisionsAdr } from "./adr-command.ts";
 import { build, fail, type Exit } from "./build.ts";
 import { readArgs } from "./args.pure.ts";
-import { ask, mcp } from "./ask.ts";
+import { ask, mcp, search } from "./ask.ts";
 import { storePath } from "./store.ts";
 import { git, QueryFailed, ToolMissing } from "./tools.ts";
 
@@ -17,6 +17,7 @@ const USAGE = `whygraph: why the code is the way it is, as a relate graph
   whygraph why <file>:<symbol> [--repo <path>] [--store <path>]
   whygraph impact <decision id> [--repo <path>] [--store <path>]
   whygraph carry <file>:<symbol> [--repo <path>] [--store <path>]
+  whygraph search "<text>" [--repo <path>] [--store <path>]
   whygraph mcp [--repo <path>] [--store <path>]
 
 Exit: 0 answer, 1 failure, 2 usage, 3 target not in the graph.`;
@@ -39,6 +40,7 @@ function main(argv: readonly string[]): Exit {
   const store = storePath(root, args.store);
   if (args.command === "build") return build(root, store, args.decisions);
   if (args.command === "mcp") return mcp(store);
+  if (args.command === "search") return search(args.target, store);
   return ask(args.command, args.target, root, store);
 }
 

@@ -9,12 +9,12 @@ export type Args =
   | { readonly command: "help" }
   | { readonly command: "build"; readonly repo?: string; readonly store?: string; readonly decisions: readonly string[] }
   | { readonly command: "decisions"; readonly target: string }
-  | { readonly command: "why" | "impact" | "carry"; readonly target: string; readonly repo?: string; readonly store?: string }
+  | { readonly command: "why" | "impact" | "carry" | "search"; readonly target: string; readonly repo?: string; readonly store?: string }
   | { readonly command: "mcp"; readonly repo?: string; readonly store?: string };
 
 /**
  * owns: [[whygraph-cli]]
- * post: reads `build`, `decisions adr <folder>`, `why|carry <file>:<symbol>`, `impact <id>`, `mcp` and `help`; `--repo` and `--store` take one value each and may appear once; `--decisions` (build only) may repeat.
+ * post: reads `build`, `decisions adr <folder>`, `why|carry <file>:<symbol>`, `impact <id>`, `search <text>`, `mcp` and `help`; `--repo` and `--store` take one value each and may appear once; `--decisions` (build only) may repeat.
  * post: anything else returns a usage message that names the first argument it could not read.
  */
 export function readArgs(argv: readonly string[]): Args | { readonly usage: string } {
@@ -48,7 +48,8 @@ export function readArgs(argv: readonly string[]): Args | { readonly usage: stri
     case "why":
     case "impact":
     case "carry":
-      if (positional[0] === undefined) return { usage: `${command} needs a ${command === "impact" ? "decision id" : "<file>:<symbol>"}` };
+    case "search":
+      if (positional[0] === undefined) return { usage: `${command} needs a ${command === "impact" ? "decision id" : command === "search" ? "request" : "<file>:<symbol>"}` };
       return noDecisions ?? extra(1) ?? { command, target: positional[0], repo, store };
     case "mcp":
       return noDecisions ?? extra(0) ?? { command, repo, store };

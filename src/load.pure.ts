@@ -5,7 +5,7 @@
  */
 import { symbolParts, type CodeGraph } from "./code-graph.pure.ts";
 import type { TagLink } from "./links.pure.ts";
-import type { CheckedRecords } from "./records.pure.ts";
+import type { CheckedRecords, DecisionRecord } from "./records.pure.ts";
 
 /** One load statement; when it reads rows, it reads them as the parameter `param`. */
 export interface LoadStep {
@@ -75,6 +75,11 @@ function chunks<T>(rows: readonly T[]): (readonly T[])[] {
   return out;
 }
 
+/** The text a record is searched by: its title and the text of each of its statements, one per line. */
+function recordText(r: DecisionRecord): string {
+  return [r.title ?? "", ...r.items.map((i) => i.text)].filter((s) => s.trim() !== "").join("\n");
+}
+
 /** Groups edge rows by the labels of their two ends, so each group is one statement shape. */
 function grouped(rows: readonly { readonly from: string; readonly to: string; readonly props: Record<string, unknown> }[]): Map<string, { from: Label; to: Label; rows: Record<string, unknown>[] }> {
   const groups = new Map<string, { from: Label; to: Label; rows: Record<string, unknown>[] }>();
@@ -93,15 +98,16 @@ function grouped(rows: readonly { readonly from: string; readonly to: string; re
 /**
  * The statements that load one code graph and its decision records into an empty store.
  * owns: [[whygraph-store-load]]
- * post: indexes on every node key come first, then every node, then every relationship, so each MATCH of an edge statement finds its ends by index.
+ * post: indexes on every node key come first, then a full-text index `decision_search` over `Decision.searchText`, then every node, then every relationship, so each MATCH of an edge statement finds its ends by index.
  * post: each memod node kind maps to one label (file File, package Package, symbol Symbol, topic Topic, decision DecidedTag, check Check, memo Memo, commit Commit); a kind memod adds later is skipped.
  * post: relationships: File DECLARES Symbol; File IMPORTS File or Package; File OWNS Topic and each named Symbol OWNS Topic; Symbol USES Symbol; Symbol or File DECIDED DecidedTag, VERIFIED Check, PREMISE Memo; Commit CHANGES File or Symbol; DecidedTag NAMES Decision (one per `names` link); Decision STATES Item, ABOUT Topic, RESTS_ON and SUPERSEDES Decision, CITES Commit (one per commit in `checked.cites`).
- * post: a record topic that no code owns still gets a Topic node; a Decision's `source` is its own source or else the decisions file it came from.
+ * post: a record topic that no code owns still gets a Topic node; a Decision's `source` is its own source or else the decisions file it came from; a Decision's `searchText` is its title and the text of each of its statements, one per line, which the full-text index holds.
  * post: no statement holds more than 5000 rows; statement i that reads rows reads them as `$p<i>`, and a statement without rows has no parameter.
  * decided: the store is built with CREATE into an empty directory, not MERGE into an old one, because a rebuild must never keep a node that the repo no longer has
  */
 export function loadPlan(graph: CodeGraph, checked: CheckedRecords, names: readonly TagLink[], recordFiles: ReadonlyMap<string, string>): readonly LoadStep[] {
   const steps: Draft[] = (Object.entries(NODE_KEYS) as [Label, string][]).map(([label, key]) => ({ cypher: `CREATE INDEX ${label.toLowerCase()}_${key} IF NOT EXISTS FOR (n:${label}) ON (n.${key})`, rows: [] }));
+  steps.push({ cypher: "CREATE FULLTEXT INDEX decision_search IF NOT EXISTS FOR (n:Decision) ON EACH [n.searchText]", rows: [] });
   const of = (kind: string) => graph.nodes.filter((n) => n.kind === kind);
   steps.push(...nodeStep("File", ["path"], of("file").map((n) => ({ path: n.name }))));
   steps.push(...nodeStep("Package", ["specifier"], of("package").map((n) => ({ specifier: n.name }))));
@@ -116,8 +122,8 @@ export function loadPlan(graph: CodeGraph, checked: CheckedRecords, names: reado
   steps.push(
     ...nodeStep(
       "Decision",
-      ["id", "title", "date", "status", "source"],
-      checked.records.map((r) => ({ id: r.id, title: r.title, date: r.date, status: r.status, source: r.source ?? recordFiles.get(r.id) ?? null })),
+      ["id", "title", "date", "status", "source", "searchText"],
+      checked.records.map((r) => ({ id: r.id, title: r.title, date: r.date, status: r.status, source: r.source ?? recordFiles.get(r.id) ?? null, searchText: recordText(r) })),
     ),
   );
 
