@@ -557,6 +557,28 @@ agent named, which it did for 27 of the 30:
 | Other words | 4 of 10 | 5 of 10 | 7 of 10 |
 | All | 19 of 30 | 17 of 30 | 23 of 30 |
 
+A third measurement used the same 60 requests and changed no code. It asked
+how much a wider list would add. For each request it pooled the 20 best
+records of the word search, of the meaning search and of the term list of each
+line range, about 62 records in all. A small language model (DeepSeek 4.1
+Flash, no reasoning step) then picked five from their titles and first
+statements, given the request and the code lines. whygraph does not do this:
+it makes no model call of this kind.
+
+| Request wording | `search`, five | `search` or `carry`, ten | Picked from the pool, five |
+| --- | --- | --- | --- |
+| Same words | 20 of 20 | 20 of 20 | 20 of 20 |
+| Some of the words | 9 of 20 | 13 of 20 | 18 of 20 |
+| Other words | 5 of 20 | 13 of 20 | 15 of 20 |
+| All | 34 of 60 | 46 of 60 | 53 of 60 |
+
+The pool held the note for 54 of the 60, and 6 of the 53 came only from a term
+list. So most of what the two commands miss sits just below their five lines,
+and an agent that reads a longer list may find it. The requests were each
+written against one note, which makes the pick easier than a real request
+would; and for 12 requests no code lines were found, so only the two searches
+filled the pool.
+
 What this shows and what it does not:
 
 - The two questions find different notes. On requests in other words, three
