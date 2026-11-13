@@ -255,20 +255,20 @@ search candidate takes exactly two lines: date, id and title, then
 
 | ID | Input | Required result |
 | --- | --- | --- |
-| W1 | A store with fewer than ten decision records (the fixture build holds 5) | `search` lists every fused candidate, in fused-score then id order, and neither list is padded to ten. On the fixture the answer is Q1: 5 records, exit 0. |
-| W2 | A fused-score tie between two records | The two order by id in code-unit order (`a` before `b`), and the answer is the same on a repeat. |
-| W3 | A record the word search and the meaning search both return | Listed once, with `matched: words and meaning`, and scored `1 / (60 + word rank) + 1 / (60 + meaning rank)`; it never appears twice. |
-| W4 | Both lists full and sharing no id | `search` lists exactly 20 candidates. With some ids in both lists it lists fewer; it never lists more than 20 and never pads a short list. |
-| W5 | `read_cypher` with the `search` recipe, over MCP | At most 10 rows (the word search only), the same rows the word list holds. The `meaning` recipe returns at most 10 rows (its vector query's `k`), and the `terms` recipe at most 10; no recipe holds a `CALL { }` subquery. |
-| W6 | `carry <file>:<start>-<end>` (the range form) with more than ten records sharing terms | At most 10 candidates, best BM25 first then id, each on two lines (`  <date>  <id>  <title>`, `      shared terms: ...`); the heading is `Decision records that share the most distinctive terms with these lines (candidates to pick from one list; not links: ...)`. There is no "more" line and no score. |
-| W7 | The same `search` twice and again after a rebuild; the same term section twice and again after a rebuild | Byte-identical stdout (Q17, T16): ties order by id, and the per-list cut is deterministic. |
-| W8 | A store with no vector index (`decision_search_vector` absent) | `search` exits 1: `relate query failed (exit 1): IndexDoesNotExist: decision_search_vector`. It never answers from the word list alone (Q10). |
-| W9 | A store with no word index (`decision_search` absent) | `search` exits 1: `relate query failed (exit 1): IndexDoesNotExist: decision_search`. It never answers from the meaning list alone. |
-| W10 | A store with no decision records | Exit 0. `No record matches "<request>".`, then the `Searched:` and `Not searched:` lines; no candidate heading (Q3). |
-| W11 | A record ranked exactly tenth in one list, and an eleventh record in that list | The tenth record takes part in the fusion; the eleventh is not read, so it is listed only when the other list holds it. A list shorter than ten contributes every row it has. |
-| W12 | More than ten records share a kept term | The term section lists exactly the best 10 (BM25 first, then id); the records below the cut are absent, with no note, because the heading says the list is one to pick from. |
-| W13 | `LIST_SIZE`, and the recipes' row cap | `LIST_SIZE` in `src/search.pure.ts` is 10; `recipes/search.cypher` and `recipes/terms.cypher` say `LIMIT 10`, and `recipes/meaning.cypher` passes `10` as the vector query's `k`. A `search` answer holds at most `2 * LIST_SIZE` candidates. |
-| W14 | A term section with fewer than ten matches (the fixture: `carry src/money.ts:formatCents` lists 2) | Every match is listed; the list is not padded to ten and there is no note about the count. |
+| K1 | A store with fewer than ten decision records (the fixture build holds 5) | `search` lists every fused candidate, in fused-score then id order, and neither list is padded to ten. On the fixture the answer is Q1: 5 records, exit 0. |
+| K2 | A fused-score tie between two records | The two order by id in code-unit order (`a` before `b`), and the answer is the same on a repeat. |
+| K3 | A record the word search and the meaning search both return | Listed once, with `matched: words and meaning`, and scored `1 / (60 + word rank) + 1 / (60 + meaning rank)`; it never appears twice. |
+| K4 | Both lists full and sharing no id | `search` lists exactly 20 candidates. With some ids in both lists it lists fewer; it never lists more than 20 and never pads a short list. |
+| K5 | `read_cypher` with the `search` recipe, over MCP | At most 10 rows (the word search only), the same rows the word list holds. The `meaning` recipe returns at most 10 rows (its vector query's `k`), and the `terms` recipe at most 10; no recipe holds a `CALL { }` subquery. |
+| K6 | `carry <file>:<start>-<end>` (the range form) with more than ten records sharing terms | At most 10 candidates, best BM25 first then id, each on two lines (`  <date>  <id>  <title>`, `      shared terms: ...`); the heading is `Decision records that share the most distinctive terms with these lines (candidates to pick from one list; not links: ...)`. There is no "more" line and no score. |
+| K7 | The same `search` twice and again after a rebuild; the same term section twice and again after a rebuild | Byte-identical stdout (Q17, T16): ties order by id, and the per-list cut is deterministic. |
+| K8 | A store with no vector index (`decision_search_vector` absent) | `search` exits 1: `relate query failed (exit 1): IndexDoesNotExist: decision_search_vector`. It never answers from the word list alone (Q10). |
+| K9 | A store with no word index (`decision_search` absent) | `search` exits 1: `relate query failed (exit 1): IndexDoesNotExist: decision_search`. It never answers from the meaning list alone. |
+| K10 | A store with no decision records | Exit 0. `No record matches "<request>".`, then the `Searched:` and `Not searched:` lines; no candidate heading (Q3). |
+| K11 | A record ranked exactly tenth in one list, and an eleventh record in that list | The tenth record takes part in the fusion; the eleventh is not read, so it is listed only when the other list holds it. A list shorter than ten contributes every row it has. |
+| K12 | More than ten records share a kept term | The term section lists exactly the best 10 (BM25 first, then id); the records below the cut are absent, with no note, because the heading says the list is one to pick from. |
+| K13 | `LIST_SIZE`, and the recipes' row cap | `LIST_SIZE` in `src/search.pure.ts` is 10; `recipes/search.cypher` and `recipes/terms.cypher` say `LIMIT 10`, and `recipes/meaning.cypher` passes `10` as the vector query's `k`. A `search` answer holds at most `2 * LIST_SIZE` candidates. |
+| K14 | A term section with fewer than ten matches (the fixture: `carry src/money.ts:formatCents` lists 2) | Every match is listed; the list is not padded to ten and there is no note about the count. |
 
 ## mcp
 
