@@ -1,14 +1,16 @@
 {
-  "base": "9972acb",
+  "base": "32f6e7c",
   "groundTruth": [
     "docs/failures.md Q1-Q24 and M1",
     "README.md commands, search explanation and limits",
     "docs/adr/0001-record-search.md",
-    "scripts/fixture.sh public records"
+    "scripts/fixture.sh public records",
+    "git show 32f6e7c -- docs/failures.md src/search.pure.ts README.md",
+    "Parent ruling: Q1's prior meaning-only labels for ADR-0002/0003 were a contract error; words and meaning is correct."
   ],
   "scope": "Only test/ changes are committed. Production source and recipes are unchanged. No delegation, deletions, publishing or pushes. Scratch remains under ignored test-results/scratch/ for the parent.",
   "coverage": [
-    { "id": "Q1", "check": "Real CLI fixture order, candidate heading, every date/id/title, first statement line, source, scope and required match labels; separate multiline first-item fixture.", "result": "FAIL: ADR-0002 and ADR-0003 say words and meaning instead of required meaning. All earlier assertions pass." },
+    { "id": "Q1", "check": "Real CLI fixture order, candidate heading, every date/id/title, first statement line, source and scope. Corrected matched values are words and meaning for note-1/ADR-0002/ADR-0003 and meaning for ADR-0001/note-2. Separate multiline and repeated-title fixtures verify that only the first statement line is eligible for display; when it equals the title, no statement line appears and further statement lines stay hidden.", "result": "PASS" },
     { "id": "Q2", "check": "A real MCP word-query miss still yields five meaning-only CLI candidates.", "result": "PASS" },
     { "id": "Q3", "check": "A zero-record store returns exactly the empty-answer line plus the two scope lines.", "result": "PASS" },
     { "id": "Q4", "check": "Both prescribed punctuated/plain requests have the same candidate order and normalized searched words.", "result": "PASS" },
@@ -39,20 +41,19 @@
     "requiredList": ["carry", "impact", "meaning", "names", "search", "users", "why"],
     "reason": "Q15 explicitly adds search and meaning; M1 says every recipe. Existing command/config assertions remain intact, and Q15/Q16 execute the additions over MCP."
   },
-  "contractFailures": [
+  "contractFailures": [],
+  "ambiguities": [],
+  "resolvedContractIssues": [
     {
       "id": "Q1",
-      "test": "Q1 CONTRACT FAILURE: fixture ranking and required match labels",
-      "expected": ["words and meaning", "meaning", "meaning", "meaning", "meaning"],
-      "actual": ["words and meaning", "words and meaning", "words and meaning", "meaning", "meaning"],
+      "test": "Q1 fixture ranking, matching paths and candidate details",
+      "correctedExpected": ["words and meaning", "words and meaning", "words and meaning", "meaning", "meaning"],
       "order": ["note-1", "ADR-0002", "ADR-0003", "ADR-0001", "note-2"],
-      "repro": "node test/run.mjs --test-name-pattern='^Q1 CONTRACT FAILURE'",
-      "cliRepro": "node src/main.ts search 'round tax half to even' --repo test-results/scratch/2026-11-13T09-32-13-592Z-2474484/Q1_CONTRACT_FAILURE__fixture_ranking_and_required_match_labels/repo",
-      "handling": "Ordinary failing assertion, explicitly labelled CONTRACT FAILURE; never skipped or TODO. Production code was not fixed."
+      "repro": "node test/run.mjs --test-name-pattern='^Q1 '",
+      "ruling": "The parent confirmed that the prior contract was wrong: ADR-0002 and ADR-0003 contain tax in their titles and therefore match by words and meaning. Commit 32f6e7c corrects Q1; no product fix is required for those labels.",
+      "repeatedTitle": "Q1 repeated-title uses a first statement Tax policy followed by hiddencontinuation. Searching the continuation returns the record, prints the title once, omits the statement line entirely and keeps the continuation out of the candidate block.",
+      "handling": "Aligned test expectations to the corrected failure list and added the repeated-title CLI regression. Production code was not changed by this tester."
     }
-  ],
-  "ambiguities": [
-    "Q1 and the README example require meaning-only labels on ADR-0002 and ADR-0003, but both titles contain tax and the actual full-text recipe returns them for this request. The required expectation remains the test oracle until the parent decides whether the contract or search behavior should change."
   ],
   "notTested": [
     "No Q item is wholly omitted. Q20 does not contact the real Hugging Face endpoint or establish live endpoint availability/download timing: the brief forbids needing network. Its real model bytes are served through a test-only fetch transport, including range metadata, and the production library performs the actual caching and inference."
@@ -68,14 +69,15 @@
   },
   "plants": {
     "command": "node test/search-plants.mjs",
-    "evidence": "test-results/scratch/search-plants-2026-11-13T09-31-40-919Z-2448037/summary.json",
+    "evidence": "test-results/scratch/search-plants-2026-11-13T10-26-06-813Z-587145/summary.json",
     "outcomes": [
       { "name": "word-index-title-only", "bug": "Omit all statement text from the indexed record text.", "red": "Q8 Q24", "exit": 1 },
       { "name": "fusion-ties-reverse-id", "bug": "Break equal fused ranks by descending instead of ascending id.", "red": "Q17 fusion", "exit": 1 },
       { "name": "empty-build-loads-model", "bug": "Remove the no-text early return so an empty build loads the model.", "red": "Q21", "exit": 1 },
-      { "name": "candidate-prints-score", "bug": "Print a numeric score with every candidate.", "red": "Q23", "exit": 1 }
+      { "name": "candidate-prints-score", "bug": "Print a numeric score with every candidate.", "red": "Q23", "exit": 1 },
+      { "name": "repeated-title-prints-statement", "bug": "Remove the repeated-title guard so a duplicate statement line is printed.", "red": "Q1 repeated-title", "exit": 1 }
     ],
-    "proof": "Each selected test passes on the unmodified subject and fails individually on its planted copy. Runner exit 0 confirms four detected plants. Copies, plant manifests and TAP evidence remain in scratch; none is staged."
+    "proof": "All five plants exited 1 with exactly their selected test failing. The new repeated-title plant prints Tax policy twice instead of once and fails the regression's duplicate-title assertion (actual 2, expected 1). Runner exit 0 confirms five detected plants. Copies, plant manifests and TAP evidence remain in scratch; none is staged."
   },
   "executionNotes": [
     "The sandbox made Node spawnSync report EPERM even for successful git/true children. Tests were rerun with the approved unsandboxed Node command; these infrastructure errors were not counted as contract failures.",
@@ -88,26 +90,19 @@
     "lint": { "command": "pnpm lint", "exit": 0 },
     "suite": {
       "command": "node test/run.mjs",
-      "exit": 1,
-      "tests": 153,
-      "pass": 152,
-      "fail": 1,
+      "exit": 0,
+      "tests": 154,
+      "pass": 154,
+      "fail": 0,
       "skipped": 0,
       "todo": 0,
-      "newSearchTests": 26,
-      "newSearchPass": 25,
-      "newSearchFail": 1,
-      "report": "test-results/2026-11-13T09-30-51-682Z-2405617.tap",
-      "wallSeconds": 159.524,
-      "soleFailure": "Q1 CONTRACT FAILURE: fixture ranking and required match labels"
+      "newSearchTests": 27,
+      "newSearchPass": 27,
+      "newSearchFail": 0,
+      "report": "test-results/2026-11-13T10-26-06-812Z-587144.tap",
+      "wallSeconds": 162.580
     },
-    "focusedFinalQ1": {
-      "command": "node test/run.mjs --test-name-pattern='^Q1 CONTRACT FAILURE'",
-      "exit": 1,
-      "reason": "After adding all five records' metadata assertions, Q1 still fails only on the required match labels.",
-      "report": "test-results/2026-11-13T09-32-13-592Z-2474484.tap"
-    },
-    "plants": { "command": "node test/search-plants.mjs", "exit": 0, "detected": 4, "total": 4 }
+    "plants": { "command": "node test/search-plants.mjs", "exit": 0, "detected": 5, "total": 5 }
   },
-  "memo": "[[whygraph-relate-loader]] Search Q1-Q24 tests cover CLI, indexes, real embeddings and MCP; four fault plants are detected. Q1 alone disagrees: ADR-0002/0003 print words and meaning where the contract requires meaning."
+  "memo": "[[whygraph-relate-loader]] Parent ruled Q1's prior labels wrong; tests now require words and meaning for ADR-0002/0003. Added a CLI test and fault plant for suppressing a statement that repeats its title while keeping later lines hidden."
 }

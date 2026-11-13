@@ -50,7 +50,7 @@ async function wordRows(t, s, text) {
   return client.rows(client.recipes.get('search'), { text });
 }
 
-contract('Q1', 'CONTRACT FAILURE: fixture ranking and required match labels', 'fixture', s => {
+contract('Q1', 'fixture ranking, matching paths and candidate details', 'fixture', s => {
   const result = search(s, 'round tax half to even'); const text = ok(result);
   assert.equal(result.stderr, ''); assert.deepEqual(ids(text), fixtureOrder);
   assert.match(text, /^Decision records that match "round tax half to even", best match first \(a candidate, not a link: /);
@@ -60,12 +60,28 @@ contract('Q1', 'CONTRACT FAILURE: fixture ranking and required match labels', 'f
     has(text, `  ${r.date}  ${r.id}  ${r.title}\n`, `      statement: ${r.items[0].text.split(/\r\n|\r|\n/)[0]}\n`, `      source: ${r.source ?? file}\n`);
   }
   scope(text); noScores(text);
-  assert.deepEqual([...text.matchAll(/^      matched: (.+)$/gm)].map(m => m[1]), ['words and meaning', 'meaning', 'meaning', 'meaning', 'meaning']);
+  assert.deepEqual([...text.matchAll(/^      matched: (.+)$/gm)].map(m => m[1]), ['words and meaning', 'words and meaning', 'words and meaning', 'meaning', 'meaning']);
 });
 contract('Q1 multiline', 'only the first line of the first statement is printed', 'code', s => {
   custom(s, [record('multiline', { title: 'Multiline notes', source: 'public fixture', items: [{ label: 'first', text: 'firstvisible\nsecondhidden' }, { label: 'second', text: 'thirdhidden' }] })]);
   const text = ok(search(s, 'firstvisible')); has(text, 'statement: firstvisible\n', 'source: public fixture');
   assert.doesNotMatch(text, /secondhidden|thirdhidden/);
+});
+contract('Q1 repeated-title', 'a statement repeating its title is omitted without revealing further lines', 'code', s => {
+  custom(s, [record('repeated-title', {
+    title: 'Tax policy', source: 'public repeated-title fixture',
+    items: [{ label: 'choice', text: 'Tax policy\nhiddencontinuation' }],
+  })]);
+  // Even when the request matches the continuation, only the first item line
+  // is eligible for display, and that line already appears as the title.
+  const text = ok(search(s, 'hiddencontinuation'));
+  assert.deepEqual(ids(text), ['repeated-title']);
+  has(text, '  2026-01-01  repeated-title  Tax policy\n', 'matched: words and meaning', 'source: public repeated-title fixture');
+  assert.equal((text.match(/Tax policy/g) ?? []).length, 1);
+  assert.doesNotMatch(text, /^\s+statement:/m);
+  const candidates = text.slice(text.indexOf('\n'), text.lastIndexOf('\nSearched:'));
+  assert.doesNotMatch(candidates, /hiddencontinuation/);
+  scope(text);
 });
 contract('Q2', 'a word miss still returns meaning candidates', 'fixture', async (s, t) => {
   const request = 'quasarzeppelin';

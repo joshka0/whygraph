@@ -30,6 +30,12 @@ const plants = [
     file: 'src/search.pure.ts',
     before: 'out.push(`      matched: ${c.match}`)', after: 'out.push(`      matched: ${c.match}\\n      score: 0.99`)',
   },
+  {
+    name: 'repeated-title-prints-statement', pattern: '^Q1 repeated-title ',
+    file: 'src/search.pure.ts',
+    before: 'if (statement.trim() !== title.trim()) out.push(`      statement: ${statement}`);',
+    after: 'out.push(`      statement: ${statement}`);',
+  },
 ];
 const outcomes = [];
 for (const plant of plants) {
