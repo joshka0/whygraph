@@ -52,7 +52,7 @@ export async function callRerank(settings: RerankSettings, query: string, docume
   if (settings.apiKey !== undefined) headers.authorization = `Bearer ${settings.apiKey}`;
   try {
     const response = await fetch(settings.endpoint, { method: "POST", headers, body: JSON.stringify(rerankBody(settings.model, query, documents)), signal: AbortSignal.timeout(10_000) });
-    if (!response.ok) return { ok: false, reason: `HTTP ${response.status}` };
+    if (response.status !== 200) return { ok: false, reason: `HTTP ${response.status}` };
     try {
       return { ok: true, value: await response.json() };
     } catch {
