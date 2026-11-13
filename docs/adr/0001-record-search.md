@@ -68,3 +68,44 @@ a cosine similarity are not comparable.
   the `search` recipe is the word search and the `meaning` recipe takes a
   vector the host must supply.
 - The `q8` weights trade a little accuracy for a download a quarter the size.
+
+## Amendment: embedding memory (2026-11-13)
+
+A build of the 2,662-record memoryd decisions file made this box unreachable
+for several minutes (load average above 1,000, services restarted) and wrote
+no store. The build passed every record's text to one feature-extraction
+call. The pipeline pads the texts to the longest of the call and runs the
+whole call in one tensor, so the tensor grows with the record count.
+
+Measured here under `systemd-run --user --scope -p MemoryMax=6G -p
+CPUQuota=400%`, peak resident memory from `/usr/bin/time -v`:
+
+| records in one call | peak | time |
+| --- | --- | --- |
+| 8 | 0.28 GB | 1.5 s |
+| 32 | 0.41 GB | 4.8 s |
+| 128 | 0.94 GB | 14.4 s |
+| 512 | 3.1 GB | 48 s |
+| 2,662 | killed at the 6 GB limit | - |
+
+A whole build adds about 0.43 GB for the code graph and the load. Whole
+builds grew the same way: 0.56 GB at 50 records, 1.4 GB at 200 and 6.0 GB at
+800, and the 2,662-record build was not run because 800 was already over the
+2 GB bound.
+
+The choice is one record text per model call. The embedding pass over the
+2,662-record set measured (peak, time): 0.34 GB, 292 s for one text per call;
+0.71 GB, 388 s for 32; 1.1 GB, 367 s for 64; 1.9 GB, 324 s for 128; 2.9 GB,
+303 s for 256. One text per call is the smallest and, under the CPU limit,
+also the fastest, because padding every call to its longest text costs more
+than the per-call overhead. It also makes a record's vector a pure function
+of its text. The `q8` weights scale activations over the whole call, so a
+text embedded with other texts moved by up to 0.014 (cosine 0.995) with the
+content of those texts; one text per call reproduced the same vector byte for
+byte across processes and matched the vector the build stored. A whole build
+is now flat at about 0.44 GB: 2,662 records in 304 s (about 114 s per 1,000),
+1,791 in 209 s.
+
+The thread count was not part of the problem. Over 512 texts in one call,
+peak memory was 3.13 GB at 1 thread, 3.12 GB at 4, 3.13 GB at 16 and 3.13 GB
+at the default, so no thread bound was added.

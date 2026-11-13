@@ -786,6 +786,10 @@ store rather than merging into it.
   it and judge. A record with an empty title and no statements matches no
   word and embeds its empty text. `search` over MCP is the word search only:
   an MCP host has no local model to embed the request.
+- `build` embeds one record text per model call, so its peak memory does not
+  grow with the record count: on this box, under a 6 GB memory and 4-CPU
+  limit, a 2,662-record build stayed at about 0.44 GB and took 304 s, about
+  114 s per 1,000 records. A build of thousands of records stays under 2 GB.
 
 ## Develop
 

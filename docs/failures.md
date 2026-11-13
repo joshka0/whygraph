@@ -190,6 +190,8 @@ same `searchText`). The two ranked lists are fused by reciprocal rank
 | Q22 | The store after a build | Every `Decision` has a `searchText` and a `vector` of 384 floats (`size(d.vector) = 384`); `SHOW VECTOR INDEXES` lists `decision_search_vector` on `Decision.vector`, state `ONLINE`. |
 | Q23 | Any `search` answer | Holds no score: no `score:` line and no similarity number. The order and the `matched:` line are the whole signal. |
 | Q24 | A record whose id, date, status, source or topic holds the request's only word | Not a word match (those fields are not indexed); it may still be a meaning match. |
+| Q25 | `build` on a decisions file of thousands of records | Exit 0 within a stated memory bound. The peak does not grow with the record count, because the model runs on one record text per call: on this box, under a 6 GB memory and 4-CPU limit, 2,662 records peaked at 0.44 GB and took 304 s, against 0.44 GB and 30 s for 50 records. The whole build stays under 2 GB. |
+| Q26 | The `vector` a build stores for a record, against a fresh embedding of the same text (what `search` does for a request) | Byte-identical: max absolute difference 0. A rebuild and a query embed a text the same way, because the model runs on one text per call. The `q8` weights scale activations over the whole call, so a text embedded with other texts in one call would differ by up to 0.014 (cosine 0.995) with the content of those texts; the one-text call is what makes this hold. |
 
 ## mcp
 
