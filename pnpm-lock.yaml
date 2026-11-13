@@ -16,8 +16,8 @@ importers:
         specifier: ^26.6.6
         version: 26.6.6
       memod:
-        specifier: git+file:///home/dev/repos/personal/memod#be6b12674ea4004f75abd5fa86d925255b3967f7
-        version: git+file:///home/dev/repos/personal/memod#be6b12674ea4004f75abd5fa86d925255b3967f7
+        specifier: git+file:///home/dev/repos/personal/memod#740ad96645c0a118b49634251bb5e023b7a71fa2
+        version: git+file:///home/dev/repos/personal/memod#740ad96645c0a118b49634251bb5e023b7a71fa2
       tsrs:
         specifier: 0.23.0-ts7.1.0-beta
         version: 0.23.0-ts7.1.0-beta
@@ -456,8 +456,8 @@ packages:
     resolution: {integrity: sha512-S6x5wmcDmsDRRU/c2dkccDwQPXoFczc5+HpQ2lON8pnvHlnvHAHj5WlLVvw6n6vNyHuVugYrFohYxbS+pvFpKQ==}
     engines: {node: '>=10'}
 
-  memod@git+file:///home/dev/repos/personal/memod#be6b12674ea4004f75abd5fa86d925255b3967f7:
-    resolution: {commit: be6b12674ea4004f75abd5fa86d925255b3967f7, repo: file:///home/dev/repos/personal/memod, type: git}
+  memod@git+file:///home/dev/repos/personal/memod#740ad96645c0a118b49634251bb5e023b7a71fa2:
+    resolution: {commit: 740ad96645c0a118b49634251bb5e023b7a71fa2, repo: file:///home/dev/repos/personal/memod, type: git}
     version: 0.2.0
     engines: {node: '>=24'}
     hasBin: true
@@ -804,7 +804,7 @@ snapshots:
     dependencies:
       escape-string-regexp: 4.0.0
 
-  memod@git+file:///home/dev/repos/personal/memod#be6b12674ea4004f75abd5fa86d925255b3967f7:
+  memod@git+file:///home/dev/repos/personal/memod#740ad96645c0a118b49634251bb5e023b7a71fa2:
     dependencies:
       oxc-parser: 0.157.0
 

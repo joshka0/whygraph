@@ -1,3 +1,6 @@
 # Only these packages may run install scripts. memod builds its dist/ on install.
 allowBuilds:
-  memod: true
+  "memod@git+file:///home/dev/repos/personal/memod#740ad96645c0a118b49634251bb5e023b7a71fa2": true
+# onnxruntime-node (its postinstall fetches CUDA binaries) and protobufjs (a version warning) are
+# deliberately left off; pnpm's strictDepBuilds would otherwise fail the install for ignoring them.
+strictDepBuilds: false
