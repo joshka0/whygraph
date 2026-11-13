@@ -234,6 +234,22 @@ confinement. The scorer only prints more groups (below); every verdict of batch
   run, which is listed and counted as FAIL in the sensitivity lines. A harness
   failure makes a run invalid (`results/_invalid/`); it runs again.
 
+**A runner bug found during the run, before any scoring.** At 186 of 240
+runs, the four runs `memoryd-conflict-reopen-sqlite-owners__none__r1` to `r4`
+ended as `error` with exit 0: each session finished (its debug log says
+`stop=end_turn`), but `output.jsonl` had lost its end, the `result` line with
+it. The runner read the agent's stdout through a pipe in its own event loop,
+and blocked that loop for about 45 s while it copied, snapshotted and built
+memoryd for the next run; an agent that exited in that window lost what was
+still in the pipe. The schedule repeats, so it hit the same cell each round.
+The run was stopped, the four runs moved to `results/_invalid/`, and the
+runner changed to open the agent's stdout and stderr straight onto
+`output.jsonl` and `stderr.txt` (the commit that adds this paragraph). The
+remaining runs ran after that. No run had been scored, and no task, pass rule
+or scorer line changed. A run that has its `result` line lost nothing, since
+that line is the last the CLI writes: every one of the scored runs of batch 1
+has it. Wall times of runs before the fix include time the runner was blocked.
+
 **How the batch 2 rules apply.** Each task's `pass_rule` states it. Where an
 entry asks for something a diff, the final message and the tool log cannot
 show, the closest batch 1 rule applies:

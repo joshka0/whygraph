@@ -12,7 +12,7 @@
  * $WHYGRAPH_EVAL_WORK (default /var/tmp/whygraph-eval) and are deleted after each run.
  */
 import { spawn, spawnSync } from 'node:child_process';
-import { appendFileSync, chmodSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { appendFileSync, chmodSync, closeSync, cpSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readTasks } from './score.mjs';
@@ -342,18 +342,23 @@ function readEvents(text) {
   return text.split('\n').filter((l) => l.trim() !== '').flatMap((l) => { try { return [JSON.parse(l)]; } catch { return []; } });
 }
 
-function runAgent(args, cwd, env, outFile) {
+/**
+ * Runs the agent with its stdout and stderr opened straight onto files, read once it has closed. The
+ * runner blocks its event loop for tens of seconds while it copies and snapshots memoryd for another
+ * run; through a pipe, an agent that exited in that window lost the end of its stream (the result line).
+ */
+function runAgent(args, cwd, env, outFile, errFile) {
   return new Promise((done) => {
     const started = Date.now();
-    const child = spawn(which('claude'), args, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] });
-    let stdout = '';
-    let stderr = '';
-    child.stdout.on('data', (d) => { stdout += d; appendFileSync(outFile, d); });
-    child.stderr.on('data', (d) => { stderr += d; });
+    const out = openSync(outFile, 'w');
+    const err = openSync(errFile, 'w');
+    const child = spawn(which('claude'), args, { cwd, env, stdio: ['ignore', out, err] });
+    closeSync(out);
+    closeSync(err);
     const timer = setTimeout(() => child.kill('SIGTERM'), TIMEOUT_MS);
     child.on('close', (code, signal) => {
       clearTimeout(timer);
-      done({ code, signal, stdout, stderr, wallMs: Date.now() - started });
+      done({ code, signal, stdout: readFileSync(outFile, 'utf8'), stderr: readFileSync(errFile, 'utf8'), wallMs: Date.now() - started });
     });
   });
 }
@@ -381,7 +386,7 @@ export async function runOne(task, condition, repeat, allIds) {
   writeFileSync(join(out, 'prompt.txt'), prompt);
   const args = agentCommand(prompt, repo, denyRead, join(out, 'debug.log'));
   writeFileSync(join(out, 'command.json'), JSON.stringify({ cwd: repo, args, env, confine: readFileSync(confine, 'utf8') }, null, 2));
-  const r = await runAgent(args, repo, env, join(out, 'output.jsonl'));
+  const r = await runAgent(args, repo, env, join(out, 'output.jsonl'), join(out, 'stderr.txt'));
   const events = readEvents(r.stdout);
   const session = sessionSummary(events);
   const init = events.find((e) => e.type === 'system' && e.subtype === 'init');
@@ -391,7 +396,6 @@ export async function runOne(task, condition, repeat, allIds) {
   writeFileSync(join(out, 'final.txt'), session.final);
   writeFileSync(join(out, 'diff.patch'), diff);
   writeFileSync(join(out, 'tools.json'), JSON.stringify(tools, null, 2));
-  writeFileSync(join(out, 'stderr.txt'), r.stderr);
   const meta = {
     id, task: task.id, condition, repeat, model: MODEL, status: r.code === 0 && session.success ? 'done' : 'error',
     exit: r.code, signal: r.signal, wall_ms: r.wallMs, api_ms: session.api_ms, turns: session.turns, replies: session.replies,
