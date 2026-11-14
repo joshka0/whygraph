@@ -1,9 +1,10 @@
-# Which packages may run install scripts. pnpm keys a git dependency by its
-# full spec, so memod's entry names the pinned commit. `true` runs the script
-# (memod builds its dist/); `false` records a deliberate skip, so the default
-# strict mode does not fail the install for ignoring a build that is not needed.
+# Which packages may run install scripts. `true` runs the script (memod
+# builds its dist/); `false` records a deliberate skip, so the default strict
+# mode does not fail the install for ignoring a build that is not needed.
+# A key is a package name: pnpm 10.28 rejects a key that holds a git spec
+# ("Invalid versions union").
 allowBuilds:
-  "memod@git+file:///home/dev/repos/personal/memod#740ad96645c0a118b49634251bb5e023b7a71fa2": true
+  memod: true
   # Its postinstall fetches the CUDA/TensorRT provider binaries from NuGet;
   # the CPU runtime the embedding model uses ships in the package, so none of
   # those files is needed and the download is large.

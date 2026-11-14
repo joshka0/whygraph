@@ -77,12 +77,12 @@ the change reverses `note-2`, instead of making it silently.
 - [relate](https://relatedb.ai) 1.0.1, an embedded Cypher graph database, as
   the `relate` CLI on `PATH`. whygraph stores and queries the graph with it.
   Check with `relate --version`.
-- memod, at commit `740ad96` of its `main` branch. memod is a separate
+- memod, at commit `d0b4d68` of its `main` branch. memod is a separate
   tool by the same author: it reads a repo's code, doc-comment tags and git
   history into a graph (`memod graph --history`), and whygraph loads that
   graph. memod has no public release. This repo gets it as a dev dependency
   pinned in `package.json` to a local clone:
-  `git+file:///home/dev/repos/personal/memod#740ad96...`. To install whygraph
+  `git+file:///home/dev/repos/personal/memod#d0b4d68...`. To install whygraph
   you need a memod clone that holds that commit, at that path or at a path
   you write into `package.json` instead.
 
