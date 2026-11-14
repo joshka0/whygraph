@@ -23,7 +23,6 @@ export interface DecisionRecord {
   /** Where the record lives: a path or a reference. Null means the decisions file itself. */
   readonly source: string | null;
   readonly items: readonly Item[];
-  readonly topics: readonly string[];
   readonly restsOn: readonly string[];
   readonly supersedes: readonly string[];
   readonly commits: readonly string[];
@@ -35,8 +34,8 @@ export interface SourcedRecord {
   readonly file: string;
 }
 
-const FIELDS = ["id", "title", "date", "status", "author", "source", "items", "topics", "restsOn", "supersedes", "commits"];
-const LISTS = ["topics", "restsOn", "supersedes", "commits"] as const;
+const FIELDS = ["id", "title", "date", "status", "author", "source", "items", "restsOn", "supersedes", "commits"];
+const LISTS = ["restsOn", "supersedes", "commits"] as const;
 
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 const nullableString = (v: unknown): v is string | null | undefined => v === undefined || v === null || typeof v === "string";
@@ -44,7 +43,7 @@ const nullableString = (v: unknown): v is string | null | undefined => v === und
 /**
  * owns: [[whygraph-decision-records]]
  * post: returns the records of a decisions file `{ "records": [...] }`, or every problem found, each naming `file` and the record index or id.
- * post: `id` is a non-empty string; `date` is `YYYY-MM-DD` or null and must be present; `title`, `status`, `author` and `source` are strings or null, and `author` must not be empty; `items` holds `{label, text}` strings; `topics`, `restsOn`, `supersedes` and `commits` are string lists. Missing optional fields read as null or empty.
+ * post: `id` is a non-empty string; `date` is `YYYY-MM-DD` or null and must be present; `title`, `status`, `author` and `source` are strings or null, and `author` must not be empty; `items` holds `{label, text}` strings; `restsOn`, `supersedes` and `commits` are string lists. Missing optional fields read as null or empty.
  * post: an unknown field is a problem, so a misspelt field never drops data silently.
  */
 export function readDecisionsFile(file: string, value: unknown): { readonly records: readonly DecisionRecord[] } | { readonly problems: readonly string[] } {
@@ -82,7 +81,6 @@ export function readDecisionsFile(file: string, value: unknown): { readonly reco
       author: (r.author as string | null | undefined) ?? null,
       source: (r.source as string | null | undefined) ?? null,
       items: ((r.items as Item[] | undefined) ?? []).map((it) => ({ label: it.label, text: it.text })),
-      topics: list("topics"),
       restsOn: list("restsOn"),
       supersedes: list("supersedes"),
       commits: list("commits"),

@@ -46,7 +46,7 @@ The request, typed the same way both times:
 
 | # | Time | Typed | Must be on screen | Spoken |
 | --- | --- | --- | --- | --- |
-| 1 | 0:00-0:12 | `cd ~/demo/without && git log --oneline -3` | `Move design notes to the wiki`, `Name every amount by its unit`, `Record notes from the design review` | "A small shop repo. Its design notes moved to a wiki, so the code no longer carries them." |
+| 1 | 0:00-0:12 | `cd ~/demo/without && git log --oneline -3` | `Move design notes to the wiki`, `Add checkout with tax rounded half to even`, `Name every amount by its unit` | "A small shop repo. Its design notes moved to a wiki, so the code no longer carries them." |
 | 2 | 0:12-0:40 | `claude --allowedTools "Bash(whygraph:*)"`, then the request | The agent reads `src/money.ts` and proposes or makes the edit that removes `.toLocaleString("en-US")` | "I ask an agent for a small cleanup. It reads the function, sees nothing against the change, and makes it." |
 | 3 | 0:40-0:48 | exit Claude Code; `git diff --stat` | `src/money.ts | 2 +-` | "One line gone, and with it the thousands separators in every total." |
 | 4 | 0:48-1:05 | `cd ~/demo/with && whygraph carry src/money.ts:formatCents` | `note-2  Show thousands separators in totals`, `changed by: 73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001); that commit changed 1 symbol`, `1  src/cart.ts:total` | "whygraph connects the code, its commits and the decision records, wherever they live. Before an edit, it answers: what must I carry in mind?" |

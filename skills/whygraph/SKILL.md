@@ -60,7 +60,7 @@ section, and the answer says no symbol covers the lines.
 - "named by: a decided: tag" is a direct link: someone wrote the record's id
   next to this code on purpose.
 - "changed by: <commit> ...; that commit changed N symbols" is a loose link:
-  a commit that cites the record changed this symbol. With N = 1 it is
+  a commit in the record's `commits` list changed this symbol. With N = 1 it is
   strong; with a large N the commit may have touched this symbol for another
   reason. These records are listed tightest commit first (the fewest symbols
   any linking commit changed), and a record's own commits are too, so the

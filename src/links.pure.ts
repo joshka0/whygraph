@@ -2,7 +2,7 @@
  * module: [[whygraph-decision-links]]
  * boundary: pure
  * imports: ./code-graph.pure.ts
- * decided: a record links to code only where someone named it on purpose (a decided: tag that names its id, a `Decision: <id>` commit trailer, or a commit listed in the record, which for an ADR is a commit that changed its file), because a passing mention in a commit message tied a record to every symbol that commit changed
+ * decided: a record links to code only where someone named it on purpose (a decided: tag that names its id, a commit listed in the record, which for an ADR is the commit that added its file), because a passing mention in a commit message tied a record to every symbol that commit changed
  */
 import { symbolParts, type CodeGraph } from "./code-graph.pure.ts";
 
@@ -72,31 +72,4 @@ export function tagLinks(graph: CodeGraph, ids: ReadonlySet<string>): { readonly
 function shownSymbol(name: string): string {
   const p = symbolParts(name);
   return `${p.path}:${p.name}`;
-}
-
-/** A commit and the values of its `Decision:` trailers. */
-export interface CommitTrailers {
-  readonly sha: string;
-  readonly decisions: readonly string[];
-}
-
-/**
- * The record ids that commits name through `Decision: <id>` trailers, added to the commits each record lists.
- * owns: [[whygraph-decision-links]]
- * post: a trailer value links its commit to the record whose id equals it exactly, case included, after trimming spaces; a short, partial or differently cased id links nothing.
- * post: `cites` holds, per record id of `cited`, its listed commits and its trailer commits, without repeats, sorted.
- * post: one warning per trailer value that names no record, naming the commit's short id; sorted.
- */
-export function trailerCites(trailers: readonly CommitTrailers[], cited: ReadonlyMap<string, readonly string[]>): { readonly cites: ReadonlyMap<string, readonly string[]>; readonly warnings: readonly string[] } {
-  const cites = new Map([...cited].map(([id, shas]) => [id, new Set(shas)]));
-  const warnings: string[] = [];
-  for (const t of trailers) {
-    for (const raw of t.decisions) {
-      const id = raw.trim();
-      const set = cites.get(id);
-      if (set !== undefined) set.add(t.sha);
-      else warnings.push(`commit ${t.sha.slice(0, 7)}: trailer "Decision: ${id}" names no record; no link`);
-    }
-  }
-  return { cites: new Map([...cites].map(([id, shas]) => [id, [...shas].sort()])), warnings: [...new Set(warnings)].sort() };
 }

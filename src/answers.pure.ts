@@ -76,7 +76,7 @@ export function whyAnswer(symbolId: string, rows: readonly Row[]): string {
     out.push(`Decision records linked only through a commit that cites them and changed its code or tags, tightest commit first (a commit that changed many symbols links each of them loosely):`);
     for (const r of viaCommit) out.push(...recordLines(r, (Array.isArray(r.via) ? r.via : []).map((v, i) => `      ${i === 0 ? "changed by:" : "           "} ${viaLine(v)}`)));
   }
-  if (rows.length === 0) out.push("", "No decision is recorded for it. Record one with a decided: tag in its doc comment (naming the record's id links it), or a `Decision: <id>` trailer on the commit that made it. To look for a record the repo already holds, run whygraph search \"<the change in your own words>\".");
+  if (rows.length === 0) out.push("", "No decision is recorded for it. Record one with a decided: tag in its doc comment (naming the record's id links it), or a commit listed in the record's commits. To look for a record the repo already holds, run whygraph search \"<the change in your own words>\".");
   return out.join("\n");
 }
 
@@ -115,7 +115,7 @@ export function impactAnswer(decision: string, rows: readonly Row[]): string {
     if (files.length > 0) out.push(`  ${plural(files.length, "file")} whose header decided: tag names it: ${files.join(", ")}`);
     const cites = rowsOf(head.cites);
     const changed = rowsOf(head.changed);
-    if (cites.length === 0) out.push("  No commit in this repo's history cites it (a `Decision:` trailer, or a commit the record lists).");
+    if (cites.length === 0) out.push("  No commit in this repo's history cites it (a commit the record lists).");
     else {
       out.push(`  ${cites.length === 1 ? "1 commit cites" : `${cites.length} commits cite`} it:`, ...cites.map((c) => `    ${str(c.commit)} ${str(c.date)} ${str(c.subject)}; it changed ${plural(Number(c.symbols), "symbol")}`));
       if (changed.length === 0) out.push(`  ${cites.length === 1 ? "That commit changed" : "Those commits changed"} no ${tags.length === 0 ? "" : "other "}symbol that exists now.`);
@@ -300,7 +300,7 @@ export function rangeTermLines(section: TermSection, linked: ReadonlySet<string>
 }
 
 /**
- * Every section of one symbol's carry answer after its title: owned topics, formal checks, premise memos, the decisions, what sits one step away, the term section when given (not for the range form, which appends it once), the users, and the commits.
+ * Every section of one symbol's carry answer after its title: owned topics, formal checks, the decisions, what sits one step away, the term section when given (not for the range form, which appends it once), the users, and the commits.
  * owns: [[whygraph-answers]]
  */
 function carrySections(symbolId: string, carry: Row, why: readonly Row[], users: readonly Row[], terms: TermSection | undefined): string[] {
@@ -317,10 +317,8 @@ function carrySections(symbolId: string, carry: Row, why: readonly Row[], users:
   }
   const checks = sorted(list(carry.checks));
   out.push(checks.length === 0 ? "No formal check covers it." : "Formal checks that cover it (run each again after a code change):", ...checks.map((c) => `  - memod verify ${c}`));
-  const premises = sorted(list(carry.premises));
-  out.push(premises.length === 0 ? "Its doc comment names no premise memo." : "Premise memos it rests on:", ...premises.map((p) => `  - ${p}`));
   out.push("", ...whyAnswer(symbolId, why).split("\n").slice(2), "");
-  out.push(...oneStepAway(symbolId, carry, why, why.length > 0 || topics.length > 0 || checks.length > 0 || premises.length > 0), "");
+  out.push(...oneStepAway(symbolId, carry, why, why.length > 0 || topics.length > 0 || checks.length > 0), "");
   if (terms !== undefined) out.push(...termLines(terms, new Set(why.filter((r) => r.kind === "record").map((r) => str(r.id))), TERM_HEADING, TERM_EMPTY), "");
   if (!hasSymbolEdges(file)) out.push(`Its users are unknown: memod reads which symbols use which only in ${SYMBOL_EDGE_LANGUAGE_LIST}, not in ${file}.`);
   else if (users.length === 0) out.push("No symbol uses it.");
@@ -337,7 +335,7 @@ function carrySections(symbolId: string, carry: Row, why: readonly Row[], users:
 /**
  * The answer of `whygraph carry <file>:<symbol>`.
  * owns: [[whygraph-answers]]
- * post: in order: owned topics with their other owning files; formal checks that cover it with the command that re-runs each; premise memos; the decisions as `whyAnswer` lists them; what sits one step away (`oneStepAway`); the term-bridge records that share the most distinctive terms with its code (`TermSection`), a record already listed as a decision of the symbol left out; direct and transitive users with distance; the commits that changed it, newest first.
+ * post: in order: owned topics with their other owning files; formal checks that cover it with the command that re-runs each; the decisions as `whyAnswer` lists them; what sits one step away (`oneStepAway`); the term-bridge records that share the most distinctive terms with its code (`TermSection`), a record already listed as a decision of the symbol left out; direct and transitive users with distance; the commits that changed it, newest first.
  * post: for a symbol in a language whose uses memod does not read, the one-step part and the users part say they are unknown instead of none.
  */
 export function carryAnswer(symbolId: string, carry: Row, why: readonly Row[], users: readonly Row[], terms: TermSection): string {
@@ -357,7 +355,7 @@ export interface RangeSymbol {
 /**
  * The answer of `whygraph carry <file>:<start>-<end>`.
  * owns: [[whygraph-answers]]
- * post: names the range; names every symbol whose stored range overlaps the lines, or says the graph holds no symbol for the file; then, for each named symbol, its full carry body (topics, checks, premises, decisions, what sits one step away, users and commits) under its own name; then the term section over exactly the target lines, with a record any body already lists left out.
+ * post: names the range; names every symbol whose stored range overlaps the lines, or says the graph holds no symbol for the file; then, for each named symbol, its full carry body (topics, checks, decisions, what sits one step away, users and commits) under its own name; then the term section over exactly the target lines, with a record any body already lists left out.
  * decided: the range form renders one body per overlapping symbol rather than merging them, because a neighbour's relation ("which X uses") is relative to one symbol and merging would make it ambiguous
  */
 export function carryRangeAnswer(path: string, start: number, end: number, symbols: readonly RangeSymbol[], terms: TermSection): string {

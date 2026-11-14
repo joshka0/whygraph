@@ -121,12 +121,6 @@ function termSectionForLines(store: string, lines: readonly string[], start: num
 }
 
 /**
- * Whether carry also reads the comment lines directly above a symbol's declaration.
- * decided: carry does not read the comment block above a symbol because the memoryd check ranks the wanted record better without it (full-rank sum 861 against 1,035 over the six targets that name a graph symbol, the same one in the top five; ADR 0002).
- */
-const READ_COMMENT = false;
-
-/**
  * The longest symbol, in source lines, whose term section still lists candidates.
  * decided: a symbol longer than LONG_SYMBOL lines gets a one-line note naming the range form instead, because the memoryd check (ADR 0002) shows a wide span drowns the shared terms: FolderIndex (362 lines) ranked the wanted record 40 and Transcript (329 lines) 580, against 1 for the 13-line privateFiles.
  */
@@ -135,7 +129,7 @@ const LONG_SYMBOL = 40;
 /**
  * The term section of a carry answer: the record candidates from `recipes/terms.cypher`, or one line saying why there are none.
  * owns: [[whygraph-questions]]
- * post: reads the symbol's `line`..`endLine` (and, when READ_COMMENT, the comment block above `line`) from the working tree at `root`, adds its name and file path, tokenizes that, and runs the terms recipe; a graph with no line range, a file that is gone, a span that no longer fits the file, and a symbol with no term each give a one-line note instead of a query.
+ * post: reads the symbol's `line`..`endLine` from the working tree at `root`, adds its name and file path, tokenizes that, and runs the terms recipe; a graph with no line range, a file that is gone, a span that no longer fits the file, and a symbol with no term each give a one-line note instead of a query.
  * post: a symbol whose term list matches no kept term gives a one-line note, and never an empty heading.
  */
 function termSection(store: string, root: string, carry: Row): TermSection {
@@ -151,7 +145,7 @@ function termSection(store: string, root: string, carry: Row): TermSection {
     return { kind: "note", note: `No term section: its file ${file} is not in the working tree.` };
   }
   const lines = text.split("\n");
-  const source = symbolSource(lines, line, endLine, READ_COMMENT);
+  const source = symbolSource(lines, line, endLine);
   if (source === undefined) return { kind: "note", note: `No term section: ${file} has ${lines.length} lines, so the stored range ${line}-${endLine} no longer fits; rebuild the store for the file as it is now.` };
   const span = endLine - line + 1;
   if (span > LONG_SYMBOL) return { kind: "note", note: `This symbol spans ${span} lines; a long symbol gives weak term candidates. Ask with a range: whygraph carry ${file}:<start>-<end>.` };

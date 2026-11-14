@@ -4,13 +4,13 @@
  */
 import { readFileSync } from "node:fs";
 import { readCodeGraph, graphCommits } from "./code-graph.pure.ts";
-import { tagLinks, trailerCites, type CommitTrailers } from "./links.pure.ts";
+import { tagLinks } from "./links.pure.ts";
 import { loadPlan, recordText } from "./load.pure.ts";
 import { checkRecords, readDecisionsFile, type SourcedRecord } from "./records.pure.ts";
 import { termCounts } from "./terms.pure.ts";
 import { buildStore, foreignStore } from "./store.ts";
 import { embedTexts, ModelUnavailable } from "./embed.ts";
-import { git, readQuery, relate, run } from "./tools.ts";
+import { readQuery, relate, run } from "./tools.ts";
 
 /** The outcome of a command: an exit status and what was printed. */
 export type Exit = number;
@@ -19,7 +19,7 @@ export type Exit = number;
  * Builds the store of the repo at `root` from `memod graph --history` and the decisions files.
  * owns: [[whygraph-build]]
  * post: exit 0 and a summary of node and relationship counts by label and type, sorted by name; warnings go to stderr, one per line, sorted.
- * post: a record cites the commits it lists and the commits of HEAD whose `Decision:` trailers name its id; a decided: tag names the records `namedRecords` finds in its text.
+ * post: a record cites only the commits it lists; a decided: tag names the records `namedRecords` finds in its text.
  * post: every record's text is embedded once with the local model and stored on its node, which the vector index holds; the first build downloads the model.
  * post: every record's text is tokenized once, and each kept term becomes a Term node with a MENTIONS edge from each record that uses it, holding how many times; the record holds its total term count.
  * post: exit 1, store unchanged, when relate or memod is missing, memod fails or prints no graph, a decisions file cannot be read or holds a bad record, two records share an id, or records supersede in a cycle, or a load statement fails, or the embedding model is unavailable.
@@ -63,8 +63,7 @@ export async function build(root: string, store: string, decisionFiles: readonly
   if (checked.errors.length > 0) return fail(`decision records rejected; the store is unchanged:\n${checked.errors.join("\n")}`);
   const ids = new Set(checked.records.map((r) => r.id));
   const tags = tagLinks(graph, ids);
-  const trailers = trailerCites(decisionTrailers(root), checked.cites);
-  const warnings = [...checked.warnings, ...tags.warnings, ...trailers.warnings].sort();
+  const warnings = [...checked.warnings, ...tags.warnings].sort();
   for (const w of warnings) process.stderr.write(`warning: ${w}\n`);
   if (commits.length === 0) process.stderr.write("warning: the repo has no commits, so no record links to code and no symbol has a history\n");
 
@@ -78,7 +77,7 @@ export async function build(root: string, store: string, decisionFiles: readonly
     throw e;
   }
   const terms = termCounts(checked.records.map((r) => ({ id: r.id, text: recordText(r) })));
-  const done = buildStore(store, loadPlan(graph, { ...checked, cites: trailers.cites }, tags.links, files, vectors, terms));
+  const done = buildStore(store, loadPlan(graph, checked, tags.links, files, vectors, terms));
   if ("status" in done) return fail(`relate failed while loading (exit ${done.status}); the store is unchanged:\n${done.message}`);
 
   const labels = readQuery(store, "MATCH (n) RETURN labels(n)[0] AS name, count(*) AS n ORDER BY name");
@@ -90,17 +89,6 @@ export async function build(root: string, store: string, decisionFiles: readonly
   console.log(`${total(labels)} nodes:\n${list(labels)}`);
   console.log(`${total(types)} relationships:\n${list(types)}`);
   return 0;
-}
-
-/** The `Decision:` trailers of each commit of HEAD, as git reads trailers (the key in any case, in the message's last paragraph); none in a repo without commits. */
-function decisionTrailers(root: string): readonly CommitTrailers[] {
-  const log = git(root, "log", "--format=%H%x1f%(trailers:key=Decision,valueonly,separator=%x1f)%x1e", "HEAD") ?? "";
-  return log
-    .split("\x1e")
-    .map((entry) => entry.replace(/^\n/, "").split("\x1f"))
-    .filter(([sha]) => sha !== undefined && sha !== "")
-    .map(([sha, ...decisions]) => ({ sha: sha!, decisions: decisions.filter((d) => d.trim() !== "") }))
-    .filter((t) => t.decisions.length > 0);
 }
 
 /**

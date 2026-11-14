@@ -77,7 +77,7 @@ export function searchAnswer(request: string, words: string, meaning: boolean, c
     for (const c of candidates) out.push(...candidateLines(c));
   }
   out.push(`Searched: the title and statement of every decision record in the store, for the words: ${words}${meaning ? ", and for the meaning of the request" : ""}.`);
-  out.push("Not searched: the code, the commits and the tags (run whygraph why or carry on a symbol for the links the graph holds); a record's id, date, status, topics and source (only its title and statement are indexed).");
+  out.push("Not searched: the code, the commits and the tags (run whygraph why or carry on a symbol for the links the graph holds); a record's id, date, status and source (only its title and statement are indexed).");
   return out.join("\n");
 }
 

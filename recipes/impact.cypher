@@ -7,8 +7,8 @@
 //   directly;
 // - files: the files whose header decided: tags name the record;
 //   each record row holds its `author`, null when the record states none;
-// - cites: the commits that cite the record (a `Decision:` trailer, or listed
-//   by the record, such as the commit that added an ADR's file), oldest
+// - cites: the commits that cite the record (listed by the record, such as
+//   the commit that added an ADR's file), oldest
 //   first, each with `symbols`, the number of symbols it changed;
 // - changed: the other symbols those commits changed (not in tagged), most
 //   used first, with `users` and the commits; a loose link, since a commit

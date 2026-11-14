@@ -42,20 +42,13 @@ export function termsOf(text: string): readonly string[] {
 
 /**
  * owns: [[whygraph-term-bridge]]
- * post: the source lines of the symbol whose 1-based span is `line`..`endLine` (both inclusive) of `lines` (a file split at `\n`); when `withComment`, the contiguous comment block directly above `line` is included too, because the doc comment often holds the jargon a record shares.
+ * post: the source lines of the symbol whose 1-based span is `line`..`endLine` (both inclusive) of `lines` (a file split at `\n`).
  * post: undefined when `line` or `endLine` is not an integer, or the span does not fit `lines` (the file changed since the build), so a caller never reads wrong lines.
- * decided: the comment block ends at the first line above the declaration that is not a `//`, `/*`, `*` or `#` comment, because memod's span starts at the declaration and a blank or code line ends the doc comment
+ * decided: carry does not read the comment block above a symbol because the memoryd check ranks the wanted record better without it (full-rank sum 861 against 1,035 over the six targets that name a graph symbol, the same one in the top five; ADR 0002).
  */
-export function symbolSource(lines: readonly string[], line: number, endLine: number, withComment: boolean): readonly string[] | undefined {
+export function symbolSource(lines: readonly string[], line: number, endLine: number): readonly string[] | undefined {
   if (!Number.isInteger(line) || !Number.isInteger(endLine) || line < 1 || endLine < line || endLine > lines.length) return undefined;
-  let first = line - 1;
-  if (withComment) {
-    const isComment = (s: string): boolean => /^\s*(\/\*|\*|\*\/|\/\/|#)/.test(s);
-    let i = line - 2;
-    while (i >= 0 && isComment(lines[i]!)) i--;
-    first = i + 1;
-  }
-  return lines.slice(first, endLine);
+  return lines.slice(line - 1, endLine);
 }
 
 /**

@@ -428,3 +428,5 @@ change. A pass is a mechanical verdict on words and diffs, not a review.
   "exact set" rule are choices made here, not by the task author.
 - `memod-conflict-append-only-lock` scores no exception: its stated exception
   needs a passing `memod verify` run, which a diff cannot show.
+
+The fixture changed after the trial when unused graph parts were cut; whygraph commit `8ee90a9` holds the fixture the trial used.

@@ -6,8 +6,8 @@
 // - `named` holds "doc comment" and/or "file header" when a decided: tag
 //   there names the record's id (a direct link, made on purpose); the record's
 //   `author` is who the record states decided it, null when it states none;
-// - `via` holds the commits that cite the record (a `Decision:` trailer, or
-//   listed by the record, such as the commit that added an ADR's file) and
+// - `via` holds the commits that cite the record (listed by the record, such as
+//   the commit that added an ADR's file) and
 //   changed the symbol's code or tags, tightest commit first, each with
 //   `symbols`, the number of symbols that commit changed in all: a commit that
 //   changed many symbols ties each of them only loosely to the record.

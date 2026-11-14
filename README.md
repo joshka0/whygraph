@@ -31,7 +31,6 @@ Before you edit src/money.ts:formatCents
 Topics it owns (keep its job inside these; another file that owns one and does not import this one is a duplicate):
   - fx-money: no other file owns it
 No formal check covers it.
-Its doc comment names no premise memo.
 
 Its doc comment holds no decided: tag.
 The header of src/money.ts holds no decided: tag.
@@ -41,11 +40,15 @@ Decision records linked only through a commit that cites them and changed its co
       author: R. Chen
       source: decisions/notes.json
       changed by: 73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001); that commit changed 1 symbol
+                  a3bcb76 2026-01-08 Name every amount by its unit; that commit changed 5 symbols
   2026-01-01  ADR-0001  Money in cents
       status: accepted
       source: docs/adr/0001-money-in-cents.md
       changed by: dfb4ff8 2026-01-01 Add money and cart in cents; that commit changed 3 symbols
-                  6214848 2026-01-08 Name every amount by its unit; that commit changed 5 symbols
+  2026-01-02  note-1  Tax is computed once per order, not per line
+      author: A. Lee
+      source: decisions/notes.json
+      changed by: a3bcb76 2026-01-08 Name every amount by its unit; that commit changed 5 symbols
 
 One step away, most binding first (what formatCents uses, then what uses formatCents):
   - topic owned by src/cart.ts:total, which uses formatCents: fx-cart
@@ -62,7 +65,7 @@ Decision records that share the most distinctive terms with its code (candidates
    1  src/cart.ts:total
 
 3 commits changed its code or tags, newest first:
-  6214848 2026-01-08 Name every amount by its unit
+  a3bcb76 2026-01-08 Name every amount by its unit
   73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001)
   dfb4ff8 2026-01-01 Add money and cart in cents
 ```
@@ -138,10 +141,10 @@ it prints the history:
 
 ```console
 $ scripts/fixture.sh ~/try/shop
-* 547f913 2026-01-09 Add checkout with tax rounded half to even
-* 6214848 2026-01-08 Name every amount by its unit
-* 28cff03 2026-01-07 Record notes from the design review
-* f85c3a6 2026-01-06 Add Rust rounding
+* 0ede283 2026-01-09 Add checkout with tax rounded half to even
+* a3bcb76 2026-01-08 Name every amount by its unit
+* 47a233e 2026-01-07 Record notes from the design review
+* 6c572a2 2026-01-06 Add Rust rounding
 *   13d52e8 2026-01-05 Merge branch 'regional'
 |\  
 | * 78884f0 2026-01-03 Tax rate by region
@@ -154,9 +157,10 @@ $ cd ~/try/shop
 
 The shop keeps money in cents (ADR 0001). Tax got one flat rate (ADR 0002),
 then a rate by region on a branch (ADR 0003 replaces ADR 0002). `decided:`
-tags in the code name some of these ADRs, and two commits name ADR-0001 in a
-`Decision:` trailer. `decisions/notes.json` holds two design notes that cite
-commits. The last commit adds a checkout that rounds tax with
+tags in the code name some of these ADRs. `decisions/notes.json` holds two
+design notes: note-1 cites only the large five-symbol commit; note-2 cites
+both the one-symbol separator change and the five-symbol commit. The last
+commit records those links and adds a checkout that rounds tax with
 `roundHalfEven`, which carries a `decided:` tag and a formal check.
 
 Turn the ADRs into a decisions file, then build the graph from the code, its
@@ -177,13 +181,11 @@ from ~/try/shop: 9 commits, 5 decision records from 2 decisions files, 0 warning
   Symbol       8
   Term         45
   Topic        6
-148 relationships:
-  ABOUT        5
+139 relationships:
   CHANGES      27
-  CITES        7
+  CITES        6
   DECIDED      5
   DECLARES     8
-  IMPORTS      3
   MENTIONS     57
   NAMES        3
   OWNS         14
@@ -219,15 +221,12 @@ Decision records that its decided: tags name:
       source: docs/adr/0002-flat-tax.md
       named by: a decided: tag in the header of src/tax.ts
       also cited by: 2a59506 2026-01-02 Add a flat tax; that commit changed 2 symbols
-Decision records linked only through a commit that cites them and changed its code or tags, tightest commit first (a commit that changed many symbols links each of them loosely):
-  2026-01-02  note-1  Tax is computed once per order, not per line
-      author: A. Lee
-      source: decisions/notes.json
-      changed by: 2a59506 2026-01-02 Add a flat tax; that commit changed 2 symbols
+No other decision record cites a commit that changed its code or tags.
 ```
 
-Two records are linked on purpose, by a `decided:` tag that names them. A
-third, `note-1`, is linked loosely: a commit that cites it changed `taxRate`.
+Two records are linked on purpose, by a `decided:` tag that names them.
+Neither note lists a commit that changed `taxRate`. On `formatCents` above,
+note-2 has both a tight and a loose commit link; note-1 has only a loose one.
 
 What rests on `note-1`, if the team changes its mind about it?
 
@@ -241,20 +240,28 @@ The decision itself: note-1 (2026-01-02) Tax is computed once per order, not per
   author: A. Lee
   No decided: tag names it.
   1 commit cites it:
-    2a59506 2026-01-02 Add a flat tax; it changed 2 symbols
-  2 symbols that commit changed, most used first (a loose link: a commit ties every symbol it changed):
-       1 user   src/tax.ts:taxRate  (2a59506)
-       0 users  src/tax.ts:taxOf  (2a59506)
+    a3bcb76 2026-01-08 Name every amount by its unit; it changed 5 symbols
+  5 symbols that commit changed, most used first (a loose link: a commit ties every symbol it changed):
+       2 users  src/money.ts:cents  (a3bcb76)
+       1 user   src/money.ts:formatCents  (a3bcb76)
+       0 users  src/cart.ts:total  (a3bcb76)
+       0 users  src/lib.rs:round_cents  (a3bcb76)
+       0 users  src/tax.ts:taxOf  (a3bcb76)
 
 Rests on it directly: note-2 (2026-01-04) Show thousands separators in totals
   author: R. Chen
   No decided: tag names it.
-  1 commit cites it:
+  2 commits cite it:
     73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001); it changed 1 symbol
-  1 symbol that commit changed, most used first (a loose link: a commit ties every symbol it changed):
-       1 user   src/money.ts:formatCents  (73ebd46)
+    a3bcb76 2026-01-08 Name every amount by its unit; it changed 5 symbols
+  5 symbols those commits changed, most used first (a loose link: a commit ties every symbol it changed):
+       2 users  src/money.ts:cents  (a3bcb76)
+       1 user   src/money.ts:formatCents  (73ebd46, a3bcb76)
+       0 users  src/cart.ts:total  (a3bcb76)
+       0 users  src/lib.rs:round_cents  (a3bcb76)
+       0 users  src/tax.ts:taxOf  (a3bcb76)
 
-3 distinct symbols in all: 0 named by a decided: tag, 3 reached only through a commit.
+5 distinct symbols in all: 0 named by a decided: tag, 5 reached only through a commit.
 ```
 
 And before an edit, the answer from the top of this page:
@@ -266,7 +273,6 @@ Before you edit src/money.ts:formatCents
 Topics it owns (keep its job inside these; another file that owns one and does not import this one is a duplicate):
   - fx-money: no other file owns it
 No formal check covers it.
-Its doc comment names no premise memo.
 
 Its doc comment holds no decided: tag.
 The header of src/money.ts holds no decided: tag.
@@ -276,11 +282,15 @@ Decision records linked only through a commit that cites them and changed its co
       author: R. Chen
       source: decisions/notes.json
       changed by: 73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001); that commit changed 1 symbol
+                  a3bcb76 2026-01-08 Name every amount by its unit; that commit changed 5 symbols
   2026-01-01  ADR-0001  Money in cents
       status: accepted
       source: docs/adr/0001-money-in-cents.md
       changed by: dfb4ff8 2026-01-01 Add money and cart in cents; that commit changed 3 symbols
-                  6214848 2026-01-08 Name every amount by its unit; that commit changed 5 symbols
+  2026-01-02  note-1  Tax is computed once per order, not per line
+      author: A. Lee
+      source: decisions/notes.json
+      changed by: a3bcb76 2026-01-08 Name every amount by its unit; that commit changed 5 symbols
 
 One step away, most binding first (what formatCents uses, then what uses formatCents):
   - topic owned by src/cart.ts:total, which uses formatCents: fx-cart
@@ -297,7 +307,7 @@ Decision records that share the most distinctive terms with its code (candidates
    1  src/cart.ts:total
 
 3 commits changed its code or tags, newest first:
-  6214848 2026-01-08 Name every amount by its unit
+  a3bcb76 2026-01-08 Name every amount by its unit
   73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001)
   dfb4ff8 2026-01-01 Add money and cart in cents
 ```
@@ -313,7 +323,6 @@ Before you edit src/checkout.ts:checkout
 Topics it owns (keep its job inside these; another file that owns one and does not import this one is a duplicate):
   - fx-checkout: no other file owns it
 No formal check covers it.
-Its doc comment names no premise memo.
 
 Decided in its doc comment:
   - decided: checkout adds tax to the net once because the receipt shows one tax line
@@ -339,7 +348,7 @@ Decision records that share the most distinctive terms with its code (candidates
 No symbol uses it.
 
 1 commit changed its code or tags, newest first:
-  547f913 2026-01-09 Add checkout with tax rounded half to even
+  0ede283 2026-01-09 Add checkout with tax rounded half to even
 ```
 
 `carry` also takes an explicit 1-based line range, `<file>:<start>-<end>`. Use
@@ -391,7 +400,7 @@ Decision records that match "round tax half to even", best match first (candidat
   2026-01-04  note-2  Show thousands separators in totals
       matched: meaning; source: decisions/notes.json
 Searched: the title and statement of every decision record in the store, for the words: round tax half to even, and for the meaning of the request.
-Not searched: the code, the commits and the tags (run whygraph why or carry on a symbol for the links the graph holds); a record's id, date, status, topics and source (only its title and statement are indexed).
+Not searched: the code, the commits and the tags (run whygraph why or carry on a symbol for the links the graph holds); a record's id, date, status and source (only its title and statement are indexed).
 ```
 
 A name the graph does not hold exits 3 and lists close names:
@@ -666,17 +675,16 @@ The rate depends on the region of the order.
 `whygraph decisions adr docs/adr` turns each file into a record `ADR-NNNN`:
 
 - the title is the first `# ` heading, without `ADR <n>:`;
-- `Date: YYYY-MM-DD`, `Status: <text>` (or a `## Status` section) and
-  `[[topic]]` links come from the lines between the title and the first `## `
-  heading;
+- `Date: YYYY-MM-DD` and `Status: <text>` (or a `## Status` section) come
+  from the lines between the title and the first `## ` heading;
 - every other `## ` section becomes an item of the record;
 - a line with `Supersedes` or `Replaces` names the ADRs this one replaces; a
   line `Superseded by ADR <n>` in an older ADR says the same from the other
   side;
 - other ADRs the text names (`ADR 3`, `ADR 0003`, `ADR-0003`) with a smaller
   number are the ADRs this one rests on;
-- the record cites the commit that added the file. Nothing else links a
-  commit to it except a `Decision:` trailer (below).
+- the record cites the commit that added the file. Later commits link only
+  when a record lists them in `commits`.
 
 ### `decided:` tags
 
@@ -700,18 +708,13 @@ The doc comment and header syntax of each language is memod's:
 `/** */` and the first doc comment with `module:` in TypeScript, `///` and
 leading `//!` lines in Rust, and so on.
 
-### `Decision:` trailers
+### Commit links
 
-A commit links to a record when the last paragraph of its message holds a
-trailer with the record's id, exactly:
-
-```sh
-git commit -m "Name every amount by its unit" -m "Decision: ADR-0001"
-```
-
-The record is then linked to every symbol that commit changed. Answers give
-the commit's symbol count, so you can weigh the link: one symbol is a strong
-link, sixty a weak one. A trailer that names no record is a build warning.
+A record links to a commit through its `commits` list. A `Decision:` line in
+any part of a commit message is plain text: it creates no link and no warning.
+The record then reaches every symbol the listed commit changed. Answers give
+the commit's symbol count so you can weigh the link: one symbol is a strong
+link, sixty a weak one.
 
 Then build, as on the fixture:
 
@@ -736,7 +739,6 @@ them (`--decisions` repeats); record ids are unique across all of them.
       "title": "Tax is computed once per order, not per line",
       "author": "R. Chen",
       "items": [{ "label": "decided", "text": "tax once per order because per-line rounding adds up to a cent per line" }],
-      "topics": ["fx-tax"],
       "restsOn": ["ADR-0002"],
       "commits": ["2a59506"]
     }
@@ -753,20 +755,19 @@ them (`--decisions` repeats); record ids are unique across all of them.
 | `author` | no | Who decided it, as the source states it. A string that must not be empty. |
 | `source` | no | Where the record lives. Without it, answers name the decisions file. |
 | `items` | no | Statements of the record: `{ "label", "text" }`. |
-| `topics` | no | Topic slugs, as memod's `owns: [[topic]]` tags name them. |
 | `restsOn` | no | Ids of records this one builds on. |
 | `supersedes` | no | Ids of records this one replaces. |
 | `commits` | no | Commit ids, full or short (at least 4 hex digits), that carry out the decision. |
 
-A build rejects, and leaves the store unchanged: an unknown field, a
-malformed field (an empty `author` counts as one), two records with one id,
+A build rejects, and leaves the store unchanged: an unknown field (including
+`topics`), a malformed field (an empty `author` counts as one), two records with one id,
 and records that supersede each other in a cycle. It loads, with a warning on
 stderr: a `restsOn` or `supersedes` id that no record has, a commit that
 matches no commit reachable from `HEAD`, and a short id that matches more than
 one (each such link is dropped).
 
 To bring in another source, convert it with a script or `jq`. For example, a
-memo export with one row per item (`memo`, `date`, `label`, `text`, `topics`,
+memo export with one row per item (`memo`, `date`, `label`, `text`,
 `premises`, `supersedes`, `commits`):
 
 ```sh
@@ -774,7 +775,6 @@ jq '{records: (.items | group_by(.memo) | map({
   id: ("memo-" + .[0].memo), date: .[0].date,
   title: ((map(select(.label == "decided")) + .)[0].text),
   items: map({label, text}),
-  topics: (map(.topics[]) | unique),
   restsOn: (map(.premises[] | "memo-" + .) | unique),
   supersedes: (map(.supersedes[] | "memo-" + .) | unique),
   commits: (map(.commits[]) | unique)}))}' memos.json > memos.decisions.json
@@ -788,7 +788,7 @@ jq '{records: (.items | group_by(.memo) | map({
 | `whygraph decisions adr <folder>` | Prints a decisions file made from the ADRs in the folder. |
 | `whygraph why <file>:<symbol>` | The `decided:` tags on the symbol and on its file header; the records those tags name; then the records linked only through a commit that cites them and changed the symbol, tightest commit first, each commit with how many symbols it changed. |
 | `whygraph impact <decision id>` | The record and every record that rests on it, directly or through others; for each, the symbols and files whose `decided:` tags name it, then the commits that cite it and the other symbols those commits changed, with how many symbols use each directly. |
-| `whygraph carry <file>:<symbol>\|<file>:<start>-<end>` | Before an edit: the topics the symbol owns and their other owners, the formal checks that cover it, its premise memos, its decisions (as `why`); then one step away, the `decided:` tags, the records they name, the checks and the topics of the symbols it uses and of the symbols that use it, most binding first, each line naming where it sits; then the decision records that share the most distinctive terms with its code (candidates, not links), each naming its shared terms; then its direct and transitive users, and the commits that changed it. The range form reads exactly those lines for the term section and takes the linked parts from every symbol whose stored range overlaps them. |
+| `whygraph carry <file>:<symbol>\|<file>:<start>-<end>` | Before an edit: the topics the symbol owns and their other owners, the formal checks that cover it, its decisions (as `why`); then one step away, the `decided:` tags, the records they name, the checks and the topics of the symbols it uses and of the symbols that use it, most binding first, each line naming where it sits; then the decision records that share the most distinctive terms with its code (candidates, not links), each naming its shared terms; then its direct and transitive users, and the commits that changed it. The range form reads exactly those lines for the term section and takes the linked parts from every symbol whose stored range overlaps them. |
 | `whygraph search "<text>" [--at <file>:<start>-<end>]` | Up to twenty decision records that best match the text: the word search and the meaning search each rank at most ten, fused by reciprocal rank; each candidate takes two lines, its date, id and title, then `matched: <words\|meaning\|words and meaning>; source: <source>`, each a candidate to pick from, not a link; then what was searched and what was not. `--at` adds the term list of those lines (the same terms `carry` uses for a range) as further candidates, under the term section's heading. When `WHYGRAPH_RERANK` names a model, a reranker cuts the candidates to five instead (below). |
 | `whygraph mcp` | The MCP server config that serves the store read-only through `relate serve --mcp stdio`, and every recipe. |
 | `whygraph help` | The usage. |
@@ -918,12 +918,10 @@ build.
 | Label | Key | Other properties | From |
 | --- | --- | --- | --- |
 | `File` | `path` | | memod `file` |
-| `Package` | `specifier` | | memod `package` |
 | `Symbol` | `id` (`<file>#<name>`) | `path`, `name`, `line`, `endLine` | memod `symbol` |
-| `Topic` | `slug` | | memod `topic`, record `topics` |
+| `Topic` | `slug` | | memod `topic` |
 | `DecidedTag` | `hash` | `what`, `because` | memod `decision` (a `decided:` tag) |
 | `Check` | `name` | | memod `check` |
-| `Memo` | `ref` | | memod `memo` (a `premise:` tag) |
 | `Commit` | `sha` | `short`, `date`, `subject` | memod `commit` |
 | `Decision` | `id` | `title`, `date`, `status`, `author`, `source`, `searchText`, `vector`, `termCount` | a decision record |
 | `Item` | | `ord`, `label`, `text` | a record's item |
@@ -932,13 +930,12 @@ build.
 | Relationship | From -> to |
 | --- | --- |
 | `DECLARES` | File -> Symbol |
-| `IMPORTS` (`specifier`, `line`, `typeOnly`) | File -> File or Package |
 | `OWNS` | File -> Topic, and each Symbol that the tag names -> Topic |
 | `USES` (`typeOnly`) | Symbol -> Symbol (TypeScript, JavaScript, Rust and Swift) |
-| `DECIDED`, `VERIFIED`, `PREMISE` | Symbol or File -> DecidedTag, Check, Memo |
+| `DECIDED`, `VERIFIED` | Symbol or File -> DecidedTag, Check |
 | `NAMES` | DecidedTag -> Decision (the tag's text names the record) |
 | `CHANGES` | Commit -> File or Symbol (a changed code hash or tag, by memod's rule) |
-| `STATES`, `ABOUT` | Decision -> Item, Topic |
+| `STATES` | Decision -> Item |
 | `MENTIONS` (`count`) | Decision -> Term (how many times the record's text holds the term) |
 | `RESTS_ON`, `SUPERSEDES` | Decision -> Decision |
 | `CITES` | Decision -> Commit |

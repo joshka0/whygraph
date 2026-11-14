@@ -24,12 +24,10 @@ interface Draft {
 /** Node labels and the property that keys each, as the store and the recipes name them. */
 const NODE_KEYS = {
   File: "path",
-  Package: "specifier",
   Symbol: "id",
   Topic: "slug",
   DecidedTag: "hash",
   Check: "name",
-  Memo: "ref",
   Commit: "sha",
   Decision: "id",
   Term: "text",
@@ -42,12 +40,10 @@ const CHUNK = 5000;
 
 const LABEL_OF: Readonly<Record<string, Label>> = {
   file: "File",
-  package: "Package",
   symbol: "Symbol",
   topic: "Topic",
   decision: "DecidedTag",
   check: "Check",
-  memo: "Memo",
   commit: "Commit",
 };
 
@@ -104,11 +100,11 @@ function grouped(rows: readonly { readonly from: string; readonly to: string; re
  * The statements that load one code graph and its decision records into an empty store.
  * owns: [[whygraph-store-load]]
  * post: indexes on every node key come first, then a full-text index `decision_search` over `Decision.searchText` and a vector index `decision_search_vector` over `Decision.vector` (384 dimensions, cosine), then every node, then every relationship, so each MATCH of an edge statement finds its ends by index.
- * post: each memod node kind maps to one label (file File, package Package, symbol Symbol, topic Topic, decision DecidedTag, check Check, memo Memo, commit Commit); a kind memod adds later is skipped.
+ * post: the loaded memod kinds map to labels (file File, symbol Symbol, topic Topic, decision DecidedTag, check Check, commit Commit); package, memo and unknown kinds are skipped.
  * post: a Symbol holds `line` and `endLine`, the 1-based inclusive source span memod gives it (without its doc comment), or null when memod gave no span.
- * post: relationships: File DECLARES Symbol; File IMPORTS File or Package; File OWNS Topic and each named Symbol OWNS Topic; Symbol USES Symbol; Symbol or File DECIDED DecidedTag, VERIFIED Check, PREMISE Memo; Commit CHANGES File or Symbol; DecidedTag NAMES Decision (one per `names` link); Decision STATES Item, ABOUT Topic, MENTIONS Term (one per kept term of the record's text, with how many times that text holds it), RESTS_ON and SUPERSEDES Decision, CITES Commit (one per commit in `checked.cites`).
+ * post: relationships: File DECLARES Symbol; File OWNS Topic and each named Symbol OWNS Topic; Symbol USES Symbol; Symbol or File DECIDED DecidedTag, VERIFIED Check; Commit CHANGES File or Symbol; DecidedTag NAMES Decision (one per `names` link); Decision STATES Item, MENTIONS Term (one per kept term of the record's text, with how many times that text holds it), RESTS_ON and SUPERSEDES Decision, CITES Commit (one per commit in `checked.cites`).
  * post: a Term node per kept term (`termNodes`), keyed by its text, holding `records`, the number of records that use it; a record's `termCount` is every term of its text, before the common-term rule, so the average record length a BM25 query needs counts dropped terms too.
- * post: a record topic that no code owns still gets a Topic node; a Decision's `source` is its own source or else the decisions file it came from; a Decision's `author` is the record's author, or null when the record has none; a Decision's `searchText` is its title and the text of each of its statements, one per line, which the full-text index holds, and its `vector` is `vectors`' 384-float embedding of that text, which the vector index holds.
+ * post: a Decision's `source` is its own source or else the decisions file it came from; a Decision's `author` is the record's author, or null when the record has none; a Decision's `searchText` is its title and the text of each of its statements, one per line, which the full-text index holds, and its `vector` is `vectors`' 384-float embedding of that text, which the vector index holds.
  * post: `vectors` holds one embedding per record id, from `recordText` of that record; the caller embeds, so this plan stays pure.
  * post: `terms` holds the term counts of `recordText` of every record; the caller tokenizes, so this plan stays pure, and a term the common-term rule drops gets no node and no edge.
  * post: no statement holds more than 5000 rows; statement i that reads rows reads them as `$p<i>`, and a statement without rows has no parameter.
@@ -120,14 +116,11 @@ export function loadPlan(graph: CodeGraph, checked: CheckedRecords, names: reado
   steps.push({ cypher: 'CREATE VECTOR INDEX decision_search_vector IF NOT EXISTS FOR (n:Decision) ON (n.vector) OPTIONS {indexConfig: {`vector.dimensions`: 384, `vector.similarity_function`: "cosine"}}', rows: [] });
   const of = (kind: string) => graph.nodes.filter((n) => n.kind === kind);
   steps.push(...nodeStep("File", ["path"], of("file").map((n) => ({ path: n.name }))));
-  steps.push(...nodeStep("Package", ["specifier"], of("package").map((n) => ({ specifier: n.name }))));
   steps.push(...nodeStep("Symbol", ["id", "path", "name", "line", "endLine"], of("symbol").map((n) => ({ id: n.name, ...symbolParts(n.name), line: n.line ?? null, endLine: n.endLine ?? null }))));
   const codeTopics = new Set(of("topic").map((n) => n.name));
-  const recordTopics = checked.records.flatMap((r) => r.topics).filter((t) => !codeTopics.has(t));
-  steps.push(...nodeStep("Topic", ["slug"], [...codeTopics, ...new Set(recordTopics)].sort().map((slug) => ({ slug }))));
+  steps.push(...nodeStep("Topic", ["slug"], [...codeTopics].sort().map((slug) => ({ slug }))));
   steps.push(...nodeStep("DecidedTag", ["hash", "what", "because"], of("decision").map((n) => ({ hash: n.id.slice("decision:".length), what: n.what ?? n.name, because: n.because ?? "" }))));
   steps.push(...nodeStep("Check", ["name"], of("check").map((n) => ({ name: n.name }))));
-  steps.push(...nodeStep("Memo", ["ref"], of("memo").map((n) => ({ ref: n.name }))));
   steps.push(...nodeStep("Commit", ["sha", "short", "date", "subject"], of("commit").map((n) => ({ sha: n.name, short: n.name.slice(0, 7), date: n.date ?? null, subject: n.subject ?? null }))));
   steps.push(
     ...nodeStep(
@@ -141,9 +134,6 @@ export function loadPlan(graph: CodeGraph, checked: CheckedRecords, names: reado
 
   steps.push(...edgeStep("DECLARES", "File", "Symbol", [], of("symbol").map((n) => ({ from: symbolParts(n.name).path, to: n.name }))));
   const edges = (kind: string) => graph.edges.filter((e) => e.kind === kind);
-  for (const g of grouped(edges("imports").map((e) => ({ from: e.from, to: e.to, props: { specifier: e.specifier ?? null, line: e.line ?? null, typeOnly: e.typeOnly ?? false } }))).values()) {
-    steps.push(...edgeStep("IMPORTS", g.from, g.to, ["specifier", "line", "typeOnly"], g.rows));
-  }
   const owns = edges("owns");
   steps.push(...edgeStep("OWNS", "File", "Topic", [], owns.map((e) => ({ from: e.from.slice("file:".length), to: e.to.slice("topic:".length) }))));
   steps.push(
@@ -159,7 +149,6 @@ export function loadPlan(graph: CodeGraph, checked: CheckedRecords, names: reado
   for (const [kind, type] of [
     ["decided", "DECIDED"],
     ["verified", "VERIFIED"],
-    ["premise", "PREMISE"],
     ["changes", "CHANGES"],
   ] as const) {
     for (const g of grouped(edges(kind).map((e) => ({ from: e.from, to: e.to, props: {} }))).values()) steps.push(...edgeStep(type, g.from, g.to, [], g.rows));
@@ -170,7 +159,6 @@ export function loadPlan(graph: CodeGraph, checked: CheckedRecords, names: reado
     steps.push({ cypher: "UNWIND $rows AS r MATCH (d:Decision {id: r.id}) CREATE (d)-[:STATES]->(:Item {ord: r.ord, label: r.label, text: r.text})", rows: c });
   }
   steps.push(...edgeStep("NAMES", "DecidedTag", "Decision", [], names.map((l) => ({ from: l.hash, to: l.id }))));
-  steps.push(...edgeStep("ABOUT", "Decision", "Topic", [], checked.records.flatMap((r) => r.topics.map((t) => ({ from: r.id, to: t })))));
   steps.push(...edgeStep("RESTS_ON", "Decision", "Decision", [], checked.records.flatMap((r) => r.restsOn.map((t) => ({ from: r.id, to: t })))));
   steps.push(...edgeStep("SUPERSEDES", "Decision", "Decision", [], checked.records.flatMap((r) => r.supersedes.map((t) => ({ from: r.id, to: t })))));
   steps.push(...edgeStep("CITES", "Decision", "Commit", [], checked.records.flatMap((r) => (checked.cites.get(r.id) ?? []).map((sha) => ({ from: r.id, to: sha })))));

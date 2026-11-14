@@ -6,7 +6,7 @@
 // the other files that own each
 // (a second owner is a duplicate unless one imports the other); the formal
 // checks that cover it (verified: tags, re-run them after a code change);
-// the fleet memos its premise: tags rest on; the commits that changed it,
+// the commits that changed it,
 // newest first; and `neighbors`, the symbols one step away.
 // A neighbor is a symbol that this one uses or that uses this one (a USES
 // edge either way; memod reads them in TypeScript, JavaScript, Rust and
@@ -29,18 +29,15 @@ WITH s, collect(CASE WHEN t IS NULL THEN null ELSE {topic: t.slug, otherOwners: 
 OPTIONAL MATCH (s)-[:VERIFIED]->(c:Check)
 WITH s, topics, c ORDER BY c.name
 WITH s, topics, collect(c.name) AS checks
-OPTIONAL MATCH (s)-[:PREMISE]->(m:Memo)
-WITH s, topics, checks, m ORDER BY m.ref
-WITH s, topics, checks, collect(m.ref) AS premises
 OPTIONAL MATCH (k:Commit)-[:CHANGES]->(s)
-WITH s, topics, checks, premises, k ORDER BY k.date DESC, k.sha
-WITH s, topics, checks, premises, collect(CASE WHEN k IS NULL THEN null ELSE k.short + ' ' + substring(k.date, 0, 10) + ' ' + k.subject END) AS commits
+WITH s, topics, checks, k ORDER BY k.date DESC, k.sha
+WITH s, topics, checks, collect(CASE WHEN k IS NULL THEN null ELSE k.short + ' ' + substring(k.date, 0, 10) + ' ' + k.subject END) AS commits
 OPTIONAL MATCH (s)-[:USES]-(n:Symbol) WHERE n <> s
-WITH DISTINCT s, topics, checks, premises, commits, n
+WITH DISTINCT s, topics, checks, commits, n
 OPTIONAL MATCH (f:File)-[:DECLARES]->(n)
-WITH s, topics, checks, premises, commits, n, f, [(s)-[r:USES]->(n) | r.typeOnly] AS out, [(n)-[r:USES]->(s) | r.typeOnly] AS inn
+WITH s, topics, checks, commits, n, f, [(s)-[r:USES]->(n) | r.typeOnly] AS out, [(n)-[r:USES]->(s) | r.typeOnly] AS inn
 ORDER BY n.id
-RETURN s.id AS symbol, s.path AS file, s.line AS line, s.endLine AS endLine, topics, checks, premises, commits,
+RETURN s.id AS symbol, s.path AS file, s.line AS line, s.endLine AS endLine, topics, checks, commits,
   collect(CASE WHEN n IS NULL THEN null ELSE {
     symbol: n.id, file: f.path,
     uses: size(out) > 0, usesTypeOnly: size(out) > 0 AND all(x IN out WHERE x),

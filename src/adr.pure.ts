@@ -39,7 +39,7 @@ function namedAdrs(text: string): readonly number[] {
  * owns: [[whygraph-adr-reader]]
  * post: title is the first `# ` heading without a leading `ADR <n>:`; the preamble is the text between it and the first `## ` heading.
  * post: date is the first `Date: YYYY-MM-DD` in the preamble, status the text after `Status:` in the preamble up to the end of its sentence, else the first line of a `## Status` section; each is null when absent.
- * post: topics are the `[[slug]]` links of the preamble; items are the `## ` sections other than Status, labelled by their heading in lower case, in file order; `author` is null, because an ADR file states none.
+ * post: items are the `## ` sections other than Status, labelled by their heading in lower case, in file order; `author` is null, because an ADR file states none.
  * post: supersedes holds the ADRs named after `Supersedes` or `Replaces` on one line; an ADR that says `Superseded by ADR <n>` is listed in ADR <n>'s supersedes by `adrRecords`, not here.
  * post: restsOn holds every other ADR the text names with a smaller number than its own, and not in supersedes.
  * decided: an ADR rests only on ADRs numbered before it, because a mention of a later ADR is a note added afterwards, and counting it would make two ADRs rest on each other
@@ -74,7 +74,6 @@ export function adrRecord(file: AdrFile, commits: readonly string[]): DecisionRe
     author: null,
     source: file.path,
     items: sections.filter((s) => s.label !== "status").map((s) => ({ label: s.label, text: s.text })),
-    topics: [...new Set([...preamble.matchAll(/\[\[([^\]]+)\]\]/g)].map((m) => m[1]!))],
     restsOn: [...restsOn].sort((a, b) => a - b).map(adrId),
     supersedes: [...supersedes].sort((a, b) => a - b).map(adrId),
     commits,
@@ -86,7 +85,7 @@ export function adrRecord(file: AdrFile, commits: readonly string[]): DecisionRe
  * owns: [[whygraph-adr-reader]]
  * post: one record per file named `NNNN-<title>.md`, sorted by number; other files are returned in `skipped`.
  * post: a record's commits are the commits that added its file (`addedBy[path]`, renames followed), without repeats, in the order given.
- * decided: an ADR cites only the commit that added its file, not a later commit that edits it or a commit whose message mentions it, because such a commit (a note that a later ADR replaces part of it) tied the ADR to every symbol it changed; every later link is a `Decision:` trailer, which the build reads
+ * decided: an ADR cites only the commit that added its file, not a later commit that edits it or a commit whose message mentions it, because such a commit (a note that a later ADR replaces part of it) tied the ADR to every symbol it changed; a later commit links only when a record lists it in `commits`
  * post: `Superseded by ADR <n>` in ADR m adds m to ADR n's supersedes when ADR n is in the folder.
  */
 export function adrRecords(files: readonly AdrFile[], addedBy: ReadonlyMap<string, readonly string[]>): { readonly records: readonly DecisionRecord[]; readonly skipped: readonly string[] } {
