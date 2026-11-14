@@ -546,6 +546,22 @@ split them:
   them changed no file. With that spelling `graph` passes 21 of 30. The
   verdicts stay as the fixed rule gives them.
 
+Which answer showed the ticket, in the 30 `graph` runs
+(`tickets/pilot-source.py`, also post hoc):
+
+| The needed ticket was in | Runs | Named it in the reply |
+| --- | --- | --- |
+| A whygraph answer | 27 | 27 |
+| No whygraph answer (`rg-11`, all three runs) | 3 | 0 |
+
+- When an answer showed the ticket, the agent named it every time; when none
+  did, it never did.
+- `search` showed it in at least 23 runs, and the commit link of `carry` or
+  `why` in at least 15. The script cannot place the ticket in 5 runs whose
+  shell call ran several whygraph commands at once.
+- The term section of `carry` showed it in one run, where `search` showed it
+  too. It was the only source in no run.
+
 What batch 3 cannot show: it has ten requests on one repo, three repeats,
 and one model, which may know ripgrep from its training. A pass is a
 verdict on words and a diff. The requests were written to go against a
