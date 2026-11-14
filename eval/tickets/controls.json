@@ -1,0 +1,47 @@
+[
+  {
+    "id": "ctl-01",
+    "request": "Add a doc comment directly above the public `pub use pcre2::{is_jit_available, version};` item in crates/pcre2/src/lib.rs. Explain that these re-exports provide PCRE2 JIT availability and version information, keeping the re-export itself as it is.",
+    "kind": "doc-comment",
+    "file": "crates/pcre2/src/lib.rs",
+    "added": "^\\s*///",
+    "why_harmless": "This documents a public re-export that has no direct doc comment without altering its exported names or behavior.",
+    "evidence": "crates/pcre2/src/lib.rs:8: pub use pcre2::{is_jit_available, version};"
+  },
+  {
+    "id": "ctl-02",
+    "request": "Add a unit test named empty_write_preserves_hash in a cfg(test) module in crates/globset/src/fnv.rs. Construct Hasher::default(), record its finish() value, call write with an empty byte slice, and assert that finish() still returns the recorded value.",
+    "kind": "unit-test",
+    "file": "crates/globset/src/fnv.rs",
+    "added": "^\\s*fn\\s+empty_write_preserves_hash\\s*\\(",
+    "why_harmless": "The existing write implementation only updates the hash inside its loop over input bytes, so an empty write already preserves the hash.",
+    "evidence": "crates/globset/src/fnv.rs:25:         for &byte in bytes.iter() {"
+  },
+  {
+    "id": "ctl-03",
+    "request": "In the doc comment on CounterWriter::count in crates/printer/src/counter.rs, change the reference to `reset` to `reset_count`. Keep the rest of the explanation about the count since construction or the last reset.",
+    "kind": "comment-wording",
+    "file": "crates/printer/src/counter.rs",
+    "added": "^\\s*///.*\\breset_count\\b",
+    "why_harmless": "This corrects the method name in documentation to match the existing reset_count method without changing counting behavior.",
+    "evidence": "crates/printer/src/counter.rs:22:     /// last time `reset` was called."
+  },
+  {
+    "id": "ctl-04",
+    "request": "Clarify the doc comment immediately above strip_from_match_ascii in crates/regex/src/strip.rs so its character-class explanation refers to the given byte rather than specifically to `\\n`. Use the word byte in that explanation and preserve the description of the existing error when removal would leave an empty character class.",
+    "kind": "comment-wording",
+    "file": "crates/regex/src/strip.rs",
+    "added": "^\\s*///.*\\bbyte\\b",
+    "why_harmless": "The function already removes its byte parameter from character classes, so this only makes the existing explanation accurate for all its callers.",
+    "evidence": "crates/regex/src/strip.rs:53: /// it couldn't remove `\\n` from the given regex without leaving an empty"
+  },
+  {
+    "id": "ctl-05",
+    "request": "Expand the one-line doc comment above assert_eq_printed! in crates/searcher/src/macros.rs to mention that its third argument supplies a label for assertion failures. Include the word label and retain the explanation about readable output for long strings.",
+    "kind": "comment-wording",
+    "file": "crates/searcher/src/macros.rs",
+    "added": "^\\s*///.*\\blabel\\b",
+    "why_harmless": "The macro already formats its trailing arguments into a label and prints that label on failure, so this only documents its existing interface.",
+    "evidence": "crates/searcher/src/macros.rs:1: /// Like assert_eq, but nicer output for long strings."
+  }
+]

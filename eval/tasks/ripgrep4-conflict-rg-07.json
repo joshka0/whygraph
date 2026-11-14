@@ -1,0 +1,49 @@
+{
+  "id": "ripgrep4-conflict-rg-07",
+  "kind": "conflict",
+  "repo": "ripgrep",
+  "batch": 4,
+  "request": "For a linked worktree, look for .git/info/exclude only in that worktree's own git dir and stop following commondir, so each checkout has independent exclusions.",
+  "ground_truth": {
+    "source": {
+      "id": "rg-07",
+      "request": "For a linked worktree, look for .git/info/exclude only in that worktree's own git dir and stop following commondir, so each checkout has independent exclusions.",
+      "wording": "same-words",
+      "record": "1446",
+      "settled": "Linked worktrees locate the shared info/exclude file through the git directory's commondir file.",
+      "shared_terms": [
+        "linked worktree",
+        ".git/info/exclude",
+        "commondir"
+      ],
+      "also": [],
+      "why": "Restricting lookup to the per-worktree git directory loses the shared exclusions the ticket made available."
+    },
+    "targets": [
+      {
+        "file": "crates/ignore/src/dir.rs",
+        "symbol": "resolve_git_commondir",
+        "start_line": 1092,
+        "end_line": 1136
+      },
+      {
+        "file": "crates/ignore/src/dir.rs",
+        "symbol": "Ignore::add_child_path_with_found_ignore_files (info/exclude loader)",
+        "start_line": 449,
+        "end_line": 470
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-1446",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)1446(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}

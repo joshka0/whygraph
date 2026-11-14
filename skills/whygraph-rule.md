@@ -18,3 +18,12 @@ candidates to judge, not links. For a symbol longer than 40 lines, ask
 `carry <file>:<start>-<end>` with the lines you will touch; on the symbol form
 that part is one line naming the range form instead. The whygraph skill says
 how to read the answers.
+
+A change goes against a record when it reverses, removes or weakens what the
+record decided or added. Do not make that change, even when the request asks
+plainly and nobody can answer: name the record, say what the change would
+undo and what you would change if the user confirms, then stop. Make it only
+when the request itself names the record and says to reverse it; then change
+the record together with the code when the repo holds it. A record the change
+does not go against is no reason to stop: make the change, naming the record
+only if it helps the reader.

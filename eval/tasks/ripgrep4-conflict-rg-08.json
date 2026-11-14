@@ -1,0 +1,56 @@
+{
+  "id": "ripgrep4-conflict-rg-08",
+  "kind": "conflict",
+  "repo": "ripgrep",
+  "batch": 4,
+  "request": "With --crlf and --replace together, normalize every matched line terminator to \\r\\n even if it originally used only \\n, so our Windows export pipeline gets uniform endings.",
+  "ground_truth": {
+    "source": {
+      "id": "rg-08",
+      "request": "With --crlf and --replace together, normalize every matched line terminator to \\r\\n even if it originally used only \\n, so our Windows export pipeline gets uniform endings.",
+      "wording": "same-words",
+      "record": "3100",
+      "settled": "Replacement with --crlf preserves existing line terminators instead of converting LF endings to CRLF.",
+      "shared_terms": [
+        "--crlf",
+        "--replace",
+        "line terminator",
+        "\\r\\n"
+      ],
+      "also": [],
+      "why": "Normalizing existing LF endings to CRLF reverses the terminator-preservation fix."
+    },
+    "targets": [
+      {
+        "file": "crates/printer/src/util.rs",
+        "symbol": "Replacer::replace_all",
+        "start_line": 51,
+        "end_line": 109
+      },
+      {
+        "file": "crates/printer/src/util.rs",
+        "symbol": "replace_with_captures_in_context",
+        "start_line": 557,
+        "end_line": 589
+      },
+      {
+        "file": "crates/printer/src/util.rs",
+        "symbol": "trim_line_terminator",
+        "start_line": 535,
+        "end_line": 552
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-3100",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)3100(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}

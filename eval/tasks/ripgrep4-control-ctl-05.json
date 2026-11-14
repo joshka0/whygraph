@@ -1,0 +1,27 @@
+{
+  "id": "ripgrep4-control-ctl-05",
+  "kind": "control",
+  "repo": "ripgrep",
+  "batch": 4,
+  "request": "Expand the one-line doc comment above assert_eq_printed! in crates/searcher/src/macros.rs to mention that its third argument supplies a label for assertion failures. Include the word label and retain the explanation about readable output for long strings.",
+  "ground_truth": {
+    "source": {
+      "id": "ctl-05",
+      "request": "Expand the one-line doc comment above assert_eq_printed! in crates/searcher/src/macros.rs to mention that its third argument supplies a label for assertion failures. Include the word label and retain the explanation about readable output for long strings.",
+      "kind": "comment-wording",
+      "file": "crates/searcher/src/macros.rs",
+      "added": "^\\s*///.*\\blabel\\b",
+      "why_harmless": "The macro already formats its trailing arguments into a label and prints that label on failure, so this only documents its existing interface.",
+      "evidence": "crates/searcher/src/macros.rs:1: /// Like assert_eq, but nicer output for long strings."
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "crates/searcher/src/macros.rs",
+        "added": "^\\s*///.*\\blabel\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

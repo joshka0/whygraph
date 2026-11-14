@@ -567,6 +567,86 @@ and one model, which may know ripgrep from its training. A pass is a
 verdict on words and a diff. The requests were written to go against a
 ticket, so the share of real requests that do is not measured.
 
+## Batch 4, fixed before its first run
+
+Batch 4 tests the skill change made after batch 3 was seen: six graph runs
+named the ticket and still changed code, which the old "do not make the
+change silently" allowed. Rule 1 and the startup rule now require stopping
+when a change reverses, removes or weakens what a record decided or added,
+even for a plain request with nobody available to answer. Only a request
+that itself names the record and says to reverse it authorizes that change;
+update a record held in the repo together with the code. Relevant records
+that do not oppose the change are no reason to stop.
+
+**Unchanged setup.** Batch 3's ripgrep repo, 3,042 records, ready template and
+store at `$WHYGRAPH_EVAL_WORK/_ripgrep` (default `/var/tmp/whygraph-eval/_ripgrep`)
+are reused as they are, without rebuilding the store. No `src/` or `recipes/`
+change. The same none, graph and stub conditions, sonnet model, wrapper,
+confinement, 20-minute timeout and retry/exclusion rules apply, with three
+repeats. Graph and stub receive the skill and rule from this branch. No
+trial agent starts during preparation. Every relate call sets
+`RELATE_TELEMETRY=0` and `DO_NOT_TRACK=1`.
+
+**Tasks and pass rules.** `node eval/tickets/make-tasks.mjs --batch 4` writes
+19 conflict tasks, `ripgrep4-conflict-<request id>`, from every request with a
+line range that batch 3 did not use: rg-04 through rg-10, rg-15 through
+rg-20, rg-24 through rg-26, rg-28 through rg-30. There is no retrieval or
+outcome filter. They have batch 4, unchanged request entries under
+`ground_truth.source` and target lists under `ground_truth.targets`.
+Batch 3 task files remain byte-identical. Its pass rule applies, with the
+additional spelling `ticket N` (a space, any case, optional #). Name the
+source or an also ticket and change no file; no amendment exception.
+
+Five harmless controls come from `/home/dev/scratch/rg-controls/controls.json`,
+written by an agent that knew nothing about whygraph or the tickets. That
+file is copied verbatim to `tickets/controls.json`. Each entry becomes
+`ripgrep4-control-<id>` with batch 4, kind control and its complete entry
+verbatim in `ground_truth.source`. A control passes exactly when its diff
+adds a line matching `added` (case insensitive) in `file`. The scorer's
+existing added-line rule expresses this; batch 4 controls do not additionally
+score objections in the reply. A skill that refuses every request fails
+these controls.
+
+**Runs.** (19 conflicts + 5 controls) x 3 conditions x 3 repeats = 216 runs.
+Generate tasks, inspect the plan, then run under the same resource scope as
+batch 3 (the final command starts agents; it was not run during preparation):
+
+```sh
+node eval/tickets/make-tasks.mjs --batch 4
+ids="$(node --input-type=module -e 'import {readTasks} from "./eval/score.mjs"; console.log([...readTasks().values()].filter(t => t.batch === 4).map(t => t.id).join(","))')"
+node eval/run.mjs --plan --only "$ids" --repeats 3
+systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/run.mjs --only "$ids" --repeats 3
+```
+
+**Fixed reports.** Primary is graph - stub over conflicts, the mean of
+per-task differences with the existing seeded bootstrap 95% interval over
+tasks. Secondary is graph - none; rates for each of the three wording
+groups; per condition, control pass rates and unchanged-run counts; and,
+over conflicts, counts of runs that changed no file, named the ticket,
+named it and changed a file, or changed no file without naming it. For graph
+conflicts report how many runs had a whygraph answer showing the needed
+ticket and how many of those named it, with source placement as in
+`pilot-source.py`. Those counts and `pilot-posthoc.py`'s naming/edit counts
+are now in the scorer for batch 4; the scripts and batch 3 numbers stay as
+they were. Report runs calling each of carry symbol, carry range, search,
+why and impact (once per kind per finished run, controls included), and
+tokens. Tool results are the runner's saved first 4,000 characters, so a
+ticket beyond that limit is not counted as shown. Errors are listed outside
+normal rates; conflict sensitivity counts them as FAIL. Append batch 4
+blocks only if a batch 4 result exists; every earlier report byte stays
+unchanged. JSON includes finished verdicts without text blocks.
+
+**Limits fixed before the run.** The skill was changed for a fault observed
+in batch 3; batch 4 tests that change on requests new to it. One model only,
+which may know ripgrep from training. These requests are the remaining
+eligible requests, not a random sample. The five controls check harmless
+edits, not all possible harmless work. Pass rules score words and diffs,
+not the quality of the explanation or the time the conflict was noticed.
+
+[Batch 4 failure cases](tickets/batch4-failures.md) specify exact outcomes
+for an independent test author. No tests under `selftest/` or `test/` were
+written or changed for this implementation.
+
 ## What the numbers can and cannot show
 
 They can show whether, on these 14 requests with this model, an agent with the

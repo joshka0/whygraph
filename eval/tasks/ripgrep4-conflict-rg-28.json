@@ -1,0 +1,53 @@
+{
+  "id": "ripgrep4-conflict-rg-28",
+  "kind": "conflict",
+  "repo": "ripgrep",
+  "batch": 4,
+  "request": "Use SeqCst for every atomic read and write in the project, so reviewers can reason about one global order without auditing weaker memory guarantees.",
+  "ground_truth": {
+    "source": {
+      "id": "rg-28",
+      "request": "Use SeqCst for every atomic read and write in the project, so reviewers can reason about one global order without auditing weaker memory guarantees.",
+      "wording": "partial",
+      "record": "2706",
+      "settled": "Atomic operations use Relaxed ordering for independent signals and counters, and Acquire/Release for the traversal quit flag instead of blanket SeqCst.",
+      "shared_terms": [
+        "SeqCst"
+      ],
+      "also": [],
+      "why": "Blanket sequential consistency removes the targeted weaker orderings chosen by the ticket."
+    },
+    "targets": [
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "symbol": "Worker::deactivate_worker",
+        "start_line": 2022,
+        "end_line": 2024
+      },
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "symbol": "Worker::activate_worker",
+        "start_line": 2027,
+        "end_line": 2029
+      },
+      {
+        "file": "crates/core/messages.rs",
+        "symbol": "set_errored",
+        "start_line": 137,
+        "end_line": 139
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-2706",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)2706(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}

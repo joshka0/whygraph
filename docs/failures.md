@@ -416,6 +416,11 @@ it" installs it.
 | S6 | README `claude mcp add` and `codex mcp add` lines | Each writes a `whygraph` server entry that runs `relate serve --mcp stdio --database <absolute store> --read-only` with `RELATE_TELEMETRY=0` and `DO_NOT_TRACK=1`. |
 | S7 | `WHYGRAPH` unset; or the skill installed a second time | Unset: `cp` exits 1, "cannot stat '/skills/whygraph'", and installs nothing. Again: the folder's `SKILL.md` is overwritten in place, no nested `whygraph/whygraph`. |
 
+| S8 | A change reverses, removes or weakens what a record decided or added | Both skill and startup rule define this as going against the record. Do not make the change; name the record, explain what it would undo and what would change if confirmed, then stop. |
+| S9 | The request plainly asks for a conflicting change; nobody can answer | The same stop applies; an explicit change request and an unavailable user do not authorize reversal of an unnamed record. |
+| S10 | The request itself names the record and says to reverse it | Make the change; update the record with the code when the repo holds the record. An external record does not require inventing a local copy. |
+| S11 | A record is relevant but the change does not reverse, remove or weaken it | Make the change; name the record only if it helps the reader. Relevance alone is no reason to stop. |
+
 ## Unused graph parts removed (ADR 0007)
 
 | ID | Input | Required result |

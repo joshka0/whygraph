@@ -28,8 +28,15 @@ section, and the answer says no symbol covers the lines.
 ## Rules
 
 1. Before you change a symbol, run `carry` on it. Read every decision record
-   in the answer before you edit. If your change goes against a record, say so
-   to the user and name the record; do not make the change silently.
+   in the answer before you edit. A change goes against a record when it
+   reverses, removes or weakens what the record decided or added. Do not make
+   that change, even when the request asks plainly and nobody can answer:
+   name the record, say what the change would undo and what you would change
+   if the user confirms, then stop. Make it only when the request itself
+   names the record and says to reverse it; then change the record together
+   with the code when the repo holds it. A record the change does not go
+   against is no reason to stop: make the change, naming the record only if
+   it helps the reader.
 2. Before a change, also run `whygraph search "<the change in your own words>"`.
    A record that governs the change may have no tag or commit that links it to
    the code; `search` lists up to twenty records, the ten best by words and the
