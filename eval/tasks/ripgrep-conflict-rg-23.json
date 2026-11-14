@@ -1,0 +1,41 @@
+{
+  "id": "ripgrep-conflict-rg-23",
+  "kind": "conflict",
+  "repo": "ripgrep",
+  "batch": 3,
+  "request": "Remove the original-expression accessor from GlobMatcher; I would like callers to keep their own copy so the compiled object has a smaller public interface.",
+  "ground_truth": {
+    "source": {
+      "id": "rg-23",
+      "request": "Remove the original-expression accessor from GlobMatcher; I would like callers to keep their own copy so the compiled object has a smaller public interface.",
+      "wording": "partial",
+      "record": "1454",
+      "settled": "GlobMatcher exposes a reference to its original Glob through a getter.",
+      "shared_terms": [
+        "GlobMatcher"
+      ],
+      "also": [],
+      "why": "Removing that accessor eliminates the original-pattern access the ticket introduced."
+    },
+    "targets": [
+      {
+        "file": "crates/globset/src/glob.rs",
+        "symbol": "GlobMatcher::glob",
+        "start_line": 155,
+        "end_line": 158
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-1454",
+        "any": [
+          "(?:#|\\b(?:ticket-|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)1454(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored."
+}

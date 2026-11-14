@@ -1,0 +1,45 @@
+{
+  "id": "ripgrep-conflict-rg-13",
+  "kind": "conflict",
+  "repo": "ripgrep",
+  "batch": 3,
+  "request": "When loading an ancestor folder, independently check for version-control metadata in both setup phases instead of carrying the first answer forward, so our tracing can show each phase doing its own discovery.",
+  "ground_truth": {
+    "source": {
+      "id": "rg-13",
+      "request": "When loading an ancestor folder, independently check for version-control metadata in both setup phases instead of carrying the first answer forward, so our tracing can show each phase doing its own discovery.",
+      "wording": "other-words",
+      "record": "3556",
+      "settled": "Loading an absolute parent reuses its initial repository-marker detection instead of checking the same markers twice.",
+      "shared_terms": [],
+      "also": [],
+      "why": "Independent discovery in both phases reinstates the duplicate metadata checks the ticket removed."
+    },
+    "targets": [
+      {
+        "file": "crates/ignore/src/dir.rs",
+        "symbol": "Ignore::add_parents (ancestor setup)",
+        "start_line": 241,
+        "end_line": 250
+      },
+      {
+        "file": "crates/ignore/src/dir.rs",
+        "symbol": "Ignore::add_child_path_with_found_ignore_files (VCS discovery)",
+        "start_line": 374,
+        "end_line": 386
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-3556",
+        "any": [
+          "(?:#|\\b(?:ticket-|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)3556(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored."
+}

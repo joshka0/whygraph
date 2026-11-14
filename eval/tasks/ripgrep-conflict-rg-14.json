@@ -1,0 +1,39 @@
+{
+  "id": "ripgrep-conflict-rg-14",
+  "kind": "conflict",
+  "repo": "ripgrep",
+  "batch": 3,
+  "request": "Allocate a separate compiled exclusion object for every visited folder, even when it contributes no local settings and stays in the same project, so our profiler can attribute one object to each location.",
+  "ground_truth": {
+    "source": {
+      "id": "rg-14",
+      "request": "Allocate a separate compiled exclusion object for every visited folder, even when it contributes no local settings and stays in the same project, so our profiler can attribute one object to each location.",
+      "wording": "other-words",
+      "record": "3560",
+      "settled": "A directory that introduces neither ignore rules nor a repository boundary reuses its parent matcher.",
+      "shared_terms": [],
+      "also": [],
+      "why": "Allocating an object for every such folder prevents the matcher reuse that the ticket introduced."
+    },
+    "targets": [
+      {
+        "file": "crates/ignore/src/dir.rs",
+        "symbol": "Ignore::add_child_with_possible_reuse",
+        "start_line": 289,
+        "end_line": 309
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-3560",
+        "any": [
+          "(?:#|\\b(?:ticket-|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)3560(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored."
+}

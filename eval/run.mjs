@@ -12,7 +12,7 @@
  * $WHYGRAPH_EVAL_WORK (default /var/tmp/whygraph-eval) and are deleted after each run.
  */
 import { spawn, spawnSync } from 'node:child_process';
-import { appendFileSync, chmodSync, closeSync, cpSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { appendFileSync, chmodSync, closeSync, cpSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readTasks } from './score.mjs';
@@ -23,6 +23,8 @@ const RESULTS = join(EVAL, 'results');
 // On disk, not in /tmp: /tmp is an 8 GB tmpfs on this box, and three memoryd copies with their snapshots do not fit in it.
 const WORK = process.env.WHYGRAPH_EVAL_WORK ?? '/var/tmp/whygraph-eval';
 const MEMOD_REPO = '/home/dev/scratch/whygraph-eval/tasks2/memod';
+const RIPGREP_REPO = '/home/dev/scratch/whygraph-eval/tickets/ripgrep';
+const RIPGREP_DECISIONS = '/home/dev/scratch/whygraph-eval/tickets/ripgrep.decisions.json';
 const MEMORYD_REPO = '/home/dev/scratch/whygraph-eval/tasks2/memoryd';
 /**
  * ADR files left out of a repo's decisions file. memoryd numbers two test contracts like the ADRs they
@@ -134,11 +136,35 @@ export function memorydTemplate() {
   return repo;
 }
 
+/**
+ * The ripgrep repo and ticket store, built once outside the repo so none and stub copies have no
+ * store. No dependency install or cargo build. A graph run copies the resolved store directory.
+ * owns: [[whygraph-eval-runner]]
+ */
+export function ripgrepTemplate() {
+  const base = join(WORK, '_ripgrep');
+  const repo = join(base, 'repo');
+  const store = join(base, 'store');
+  if (existsSync(join(base, 'ready'))) return { repo, store };
+  mkdirSync(base, { recursive: true });
+  if (!existsSync(repo)) cpSync(RIPGREP_REPO, repo, { recursive: true, verbatimSymlinks: true });
+  if (sh('git', ['status', '--porcelain'], { cwd: repo }).trim() !== '') throw new Error(`the ripgrep copy in ${repo} is not clean`);
+  if (existsSync(join(repo, '.git/whygraph'))) throw new Error(`the ripgrep template repo must have no store: ${repo}`);
+  const started = Date.now();
+  sh(join(WHYGRAPH, 'bin/whygraph'), ['build', '--decisions', RIPGREP_DECISIONS, '--store', store], {
+    cwd: repo, env: { PATH: `${join(WHYGRAPH, 'node_modules/.bin')}:${process.env.PATH}` },
+  });
+  writeFileSync(join(base, 'build.json'), JSON.stringify({ build_ms: Date.now() - started }, null, 2));
+  writeFileSync(join(base, 'ready'), '');
+  return { repo, store };
+}
+
 /** The template a task's repo is copied from. */
 function template(task) {
   if (task.repo === 'fixture') return fixtureTemplate().repo;
   if (task.repo === 'memod') return memodTemplate();
   if (task.repo === 'memoryd') return memorydTemplate();
+  if (task.repo === 'ripgrep') return ripgrepTemplate().repo;
   throw new Error(`task ${task.id}: unknown repo ${task.repo}`);
 }
 
@@ -217,7 +243,12 @@ export function prepare(task, condition, work) {
   }
   if (condition === 'graph') {
     const env = { PATH: `${bin}:${process.env.PATH}` };
-    if (fixture) {
+    if (task.repo === 'ripgrep') {
+      const dir = join(repo, '.git/whygraph');
+      mkdirSync(dir, { recursive: true });
+      cpSync(realpathSync(ripgrepTemplate().store), join(dir, 'ticket-store'), { recursive: true, verbatimSymlinks: true });
+      symlinkSync('ticket-store', join(dir, 'store'));
+    } else if (fixture) {
       sh(join(bin, 'whygraph'), ['build', '--decisions', join(fixture.decisions, 'adrs.json'), '--decisions', join(fixture.decisions, 'notes.json')], { cwd: repo, env });
     } else {
       const adrs = join(repo, '.git/whygraph-adrs.json');

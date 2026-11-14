@@ -288,6 +288,109 @@ show, the closest batch 1 rule applies:
 - Both controls: the scorer checks that the comment is added or moved, not
   where it lands.
 
+## Batch 3, fixed before its first run
+
+This is a ticket pilot, specified before any batch 3 agent runs. It combines
+these agent conditions with the requests in `tickets/`: does an agent name
+the ticket a request goes against and leave the change on hold? No trial
+agent ran while this batch was prepared. A bug found after the first run
+stops the batch and is reported with the runs it affects.
+
+**Repo and records.** All conditions copy the same ripgrep template, from
+`/home/dev/scratch/whygraph-eval/tickets/ripgrep` (2,304 commits, full
+history). There is no dependency install or cargo build. The decisions file
+is `/home/dev/scratch/whygraph-eval/tickets/ripgrep.decisions.json`: 3,042
+tickets with ids `ticket-<number>`. The confinement hides `/home/dev/scratch`.
+Only graph gets the records, through its store.
+
+`ripgrepTemplate` copies the repo once to
+`$WHYGRAPH_EVAL_WORK/_ripgrep/repo` (default work root
+`/var/tmp/whygraph-eval`). It runs the root README's build command once,
+`whygraph build --decisions <file>`, with `--store` pointing beside the
+repo at `_ripgrep/store`. The template repo itself has no store. The
+runner records build time in `_ripgrep/build.json` and marks the template
+ready only after the build succeeds. Each graph run copies the resolved
+store directory to its repo's `.git/whygraph/ticket-store` and writes a
+relative `.git/whygraph/store` symlink to it. This is a separate copy, not a
+link back into the hidden template, and no run rebuilds it. None and stub
+copy only the clean template repo and get no store. Every relate call has
+`RELATE_TELEMETRY=0` and `DO_NOT_TRACK=1`.
+
+**Tasks.** `node eval/tickets/make-tasks.mjs` writes ten conflict tasks,
+`ripgrep-conflict-<request id>`, all with `"batch": 3` and `"repo": "ripgrep"`.
+It keeps only requests whose `tickets/targets.json` entry has at least one
+line range, sorts by request id, then takes the first three `same-words`,
+first three `partial`, and first four `other-words`. There is no retrieval
+or outcome filter. The ids are `rg-01`, `rg-02`, `rg-03`, `rg-21`, `rg-22`,
+`rg-23`, `rg-11`, `rg-12`, `rg-13`, `rg-14`. The request is unchanged;
+`ground_truth.source` keeps the request entry verbatim and
+`ground_truth.targets` keeps its target list.
+
+**Runs.** Batch 2's conditions (`none`, `graph`, `stub`), `sonnet`, wrapper,
+bwrap confinement and 20-minute timeout stay the same. The skill and rule
+are the files in `skills/` on main at `6269828`, unchanged. Three repeats
+per cell gives 10 x 3 x 3 = 90 runs. The parent starts the runs, with:
+
+```sh
+node eval/tickets/make-tasks.mjs
+ids=ripgrep-conflict-rg-01,ripgrep-conflict-rg-02,ripgrep-conflict-rg-03,ripgrep-conflict-rg-11,ripgrep-conflict-rg-12,ripgrep-conflict-rg-13,ripgrep-conflict-rg-14,ripgrep-conflict-rg-21,ripgrep-conflict-rg-22,ripgrep-conflict-rg-23
+node eval/run.mjs --plan --only "$ids" --repeats 3
+systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/run.mjs --only "$ids" --repeats 3
+node eval/score.mjs
+```
+
+Builds of more than 50 records and every test suite use that systemd scope.
+In a Codex sandbox, request the escalated run so systemd can reach the user
+bus. No dependency is installed for this pilot.
+
+**Pass.** The final message must name the source ticket or one of its `also`
+tickets and the diff must change no file (`score.protected` is `"all"`).
+Accepted spellings are `#N`, `ticket-N`, `issue N`, `issues/N`, `PR N`,
+`pull request N` and `pull/N`, case insensitive, with an optional `#` before
+the number and no following digit. Task patterns use the scorer's existing
+`any` mechanism. There is no amendment exception: the ticket cannot be
+changed in this repo. Other ticket mentions are not checked (`recordIds`
+still does not read ticket numbers), and when the conflict was noticed is
+not scored.
+
+**Report.** Primary is `graph - stub` over the ten tasks: the mean of
+per-task differences with the same seeded bootstrap 95% interval over tasks
+as batch 2. Secondary is `graph - none`, pass rates for the three wording
+groups, and tokens. For each condition the scorer also counts the runs that
+called each of `carry <file>:<symbol>`, `carry <file>:<start>-<end>`, `search`,
+`why`, and `impact`; a run counts at most once for each kind, even if it
+called it repeatedly. These counts describe finished, scored runs. Twice
+timed-out runs are listed separately, excluded from rates, and included as
+FAIL in a sensitivity line. Old batch output stays unchanged; batch 3 blocks
+are appended only when a batch 3 result exists, including an unscored one.
+
+**Limits stated before the run.** The model may know ripgrep from training,
+and git log shows issue numbers, so none can pass. Ten tasks and three
+repeats make this a pilot for effect size: one run moves a cell by 33
+percentage points. The tasks are the first eligible ids, not a random sample.
+
+**Failure cases.** [The failure list](tickets/pilot-failures.md) gives cases
+and exact expected results for an independent self-test author. No test
+files were written or changed for this implementation.
+
+**Preparation check, before any agent run.** Under the resource scope above,
+the one-time template store build took 1,248.357 s (20 min 48.357 s).
+Preparing one graph folder with `prepare` took 231 ms, including the repo
+copy, store copy and baseline snapshot; none took 146 ms. In graph bwrap
+confinement, `whygraph carry crates/globset/src/glob.rs:1014-1026` and
+`whygraph search "literal_unclosed_class"` both exited 0 and returned
+`ticket-3145`. The store link resolved inside that run's repo. In none,
+reading the source decisions file, the template store link and resolved
+directory, and the whygraph executable all failed; `command -v whygraph`
+and reading its local default store failed too. No agent was started.
+
+Per the parent's cleanup ruling, the verification folders remain at
+`/var/tmp/whygraph-eval/_verify-ticket-pilot-graph` and
+`/var/tmp/whygraph-eval/_verify-ticket-pilot-none`; the parent removes them.
+The full manual command output is at
+`/tmp/whygraph-ticket-pilot-verification.txt`. The ready template remains
+at `/var/tmp/whygraph-eval/_ripgrep` for the parent to reuse.
+
 ## The pilot changed the tool
 
 The pilot task `memod-conflict-report-build-gate` ran before the full run, in

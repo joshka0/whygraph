@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 const here = fileURLToPath(new URL('./', import.meta.url));
 
 /** A Bash command that runs whygraph as a command word, not one that only names a path such as /tmp/whygraph-eval. */
-const WHYGRAPH_CALL = /(^|[;&|(\n]|\s)whygraph\s+(carry|why|impact|build|decisions|mcp|help)\b/;
+const WHYGRAPH_CALL = /(^|[;&|(\n]|\s)whygraph\s+(carry|search|why|impact|build|decisions|mcp|help)\b/;
 /**
  * The fixture tasks whose records exist only outside the repo: none and stub cannot name them, so they
  * score 0/100/0 by design. The post hoc block leaves them out; it was added after the results were seen.
@@ -125,7 +125,7 @@ export function scoreRun(task, run) {
     const hit = s.records.filter((r) => named(r, text));
     const required = new Set([...s.records.map((r) => r.id).filter((id) => id !== undefined), ...(s.may_name ?? [])]);
     const wrong = [...objectedIds(text)].filter((id) => !required.has(id));
-    const touched = changed.filter((f) => s.protected.includes(f));
+    const touched = changed.filter((f) => s.protected === 'all' || s.protected.includes(f));
     let editOk = touched.length === 0;
     if (!editOk && s.exception) {
       const ex = s.exception;
@@ -284,6 +284,10 @@ function main(argv) {
     console.log(JSON.stringify(rows.map((r) => ({ id: r.id, task: r.task.id, condition: r.meta.condition, ...r.verdict, tokens: r.meta.tokens })), null, 2));
     return 0;
   }
+  const third = rows.filter((r) => r.task.batch === 3);
+  const thirdUnscored = unscored.filter((r) => r.task.batch === 3);
+  rows.splice(0, rows.length, ...rows.filter((r) => r.task.batch !== 3));
+  unscored.splice(0, unscored.length, ...unscored.filter((r) => r.task.batch !== 3));
   console.log(`${rows.length} finished runs\n\nRuns:`);
   for (const r of rows) console.log(`  ${r.verdict.pass ? 'PASS' : 'FAIL'}  ${r.id}  whygraph calls: ${r.verdict.whygraphCalls}${r.verdict.reasons.length ? `  (${r.verdict.reasons.join('; ')})` : ''}`);
   const shaped = [...tasks.values()].filter((t) => t.shaped_tool !== undefined).map((t) => t.id);
@@ -323,6 +327,34 @@ function main(argv) {
   if (shaped.length > 0) rates(unshaped(reachable), tasks, `Post hoc: without the outside-only tasks and the tasks that shaped the tool (${shaped.join(', ')})`);
   const total = rows.reduce((a, r) => a + (r.meta.tokens?.total ?? 0), 0);
   console.log(`\nTotal tokens: ${total}`);
+  if (third.length > 0 || thirdUnscored.length > 0) {
+    console.log(`\nBatch 3: ${third.length} finished runs\n\nRuns:`);
+    for (const r of third) console.log(`  ${r.verdict.pass ? 'PASS' : 'FAIL'}  ${r.id}  whygraph calls: ${r.verdict.whygraphCalls}${r.verdict.reasons.length ? `  (${r.verdict.reasons.join('; ')})` : ''}`);
+    rates(third, tasks, 'Batch 3: ten ripgrep ticket conflicts (primary result: graph - stub)');
+    for (const wording of ['same-words', 'partial', 'other-words']) {
+      rates(third.filter((r) => r.task.ground_truth.source.wording === wording), tasks, `Batch 3: wording ${wording}`);
+    }
+    console.log('\nBatch 3 runs that called each command (each run counted once per command kind):');
+    const commands = {
+      'carry <file>:<symbol>': /(^|[;&|(\n]|\s)whygraph\s+carry\s+['"`]?[^\s'"`]+:(?!\d+-\d+)[A-Za-z_$][\w$]*/,
+      'carry <file>:<start>-<end>': /(^|[;&|(\n]|\s)whygraph\s+carry\s+['"`]?[^\s'"`]+:\d+-\d+\b/,
+      search: /(^|[;&|(\n]|\s)whygraph\s+search\b/,
+      why: /(^|[;&|(\n]|\s)whygraph\s+why\b/,
+      impact: /(^|[;&|(\n]|\s)whygraph\s+impact\b/,
+    };
+    for (const condition of ['none', 'graph', 'stub']) {
+      const runs = third.filter((r) => r.meta.condition === condition).map((r) => readRun(join(results, r.id)));
+      const counts = Object.entries(commands).map(([name, pattern]) => {
+        const count = runs.filter((r) => r.tools.some((t) => t.name === 'Bash' && pattern.test(String(t.input?.command ?? '')))).length;
+        return `${name}: ${count}`;
+      });
+      console.log(`  ${condition}: ${counts.join('; ')}`);
+    }
+    console.log(`\nBatch 3 unscored runs: ${thirdUnscored.length}`);
+    for (const r of thirdUnscored) console.log(`  ${r.id}  (exit ${r.meta.exit}, ${Math.round(r.meta.wall_ms / 1000)} s)`);
+    if (thirdUnscored.length > 0) console.log(`  Sensitivity, unscored counted as FAIL: ${headline([...third, ...thirdUnscored], tasks)}`);
+    console.log(`\nBatch 3 total tokens: ${third.reduce((a, r) => a + (r.meta.tokens?.total ?? 0), 0)}`);
+  }
   return 0;
 }
 
