@@ -29,6 +29,7 @@ function tagLines(rows: readonly Row[]): string[] {
 function recordLines(r: Row, extra: readonly string[] = []): string[] {
   const out = [`  ${str(r.date) || "undated   "}  ${str(r.id)}  ${str(r.what) || "(no title)"}`];
   if (str(r.status) !== "") out.push(`      status: ${str(r.status)}`);
+  if (str(r.author) !== "") out.push(`      author: ${str(r.author)}`);
   const by = sorted(list(r.supersededBy));
   if (by.length > 0) out.push(`      superseded by: ${by.join(", ")}`);
   out.push(`      source: ${str(r.source) || "(not stated)"}`);
@@ -48,7 +49,7 @@ function viaLine(v: unknown): string {
  * The answer of `whygraph why`.
  * owns: [[whygraph-answers]]
  * post: four parts in order: decided tags in the symbol's doc comment; decided tags in its file's header; the decision records that those tags name (doc comment first), each saying which tag names it; the other records, linked only through a commit that changed the symbol, tightest commit first (the fewest symbols any linking commit changed), ties by date with undated last.
- * post: each record shows date, id, title, status when stated, the records that supersede it, its source, and every commit that cites it and changed the symbol, tightest commit first, with how many symbols that commit changed, so a reader can weigh the link; a record is listed once.
+ * post: each record shows date, id, title, status and author when stated, the records that supersede it, its source, and every commit that cites it and changed the symbol, tightest commit first, with how many symbols that commit changed, so a reader can weigh the link; a record is listed once.
  * post: an empty part says it is empty; when nothing at all links, a last line says no decision is recorded and how one gets recorded.
  */
 export function whyAnswer(symbolId: string, rows: readonly Row[]): string {
@@ -82,7 +83,7 @@ export function whyAnswer(symbolId: string, rows: readonly Row[]): string {
 /**
  * The answer of `whygraph impact`.
  * owns: [[whygraph-answers]]
- * post: names the decision with its date and title, then each record that rests on it (the decision first, depth 0), in depth then id order, with the records that supersede it.
+ * post: names the decision with its date, title and author when stated, then each record that rests on it (the decision first, depth 0), in depth then id order, with the records that supersede it.
  * post: under each record, first the direct links: the symbols whose decided: tags name it, most used first with direct user count, and the files whose header tags name it; then the commits that cite it, each with how many symbols it changed, and the other symbols those commits changed, most used first with user count and commits; each empty part says so.
  * post: a total line counts distinct symbols across records, and how many of them a tag names and how many only a commit reaches.
  */
@@ -98,6 +99,7 @@ export function impactAnswer(decision: string, rows: readonly Row[]): string {
   for (const head of rows) {
     const depth = Number(head.depth);
     out.push("", `${depth === 0 ? "The decision itself" : depth === 1 ? "Rests on it directly" : `Rests on it through ${depth - 1} other record${depth === 2 ? "" : "s"}`}: ${str(head.record)} (${str(head.date) || "undated"}) ${str(head.title)}`);
+    if (str(head.author) !== "") out.push(`  author: ${str(head.author)}`);
     const by = sorted(list(head.supersededBy));
     if (by.length > 0) out.push(`  superseded by: ${by.join(", ")}`);
     const tags = rowsOf(head.tagged);

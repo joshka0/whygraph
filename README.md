@@ -38,13 +38,14 @@ The header of src/money.ts holds no decided: tag.
 No decided: tag names a decision record.
 Decision records linked only through a commit that cites them and changed its code or tags, tightest commit first (a commit that changed many symbols links each of them loosely):
   2026-01-04  note-2  Show thousands separators in totals
+      author: R. Chen
       source: decisions/notes.json
       changed by: 73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001); that commit changed 1 symbol
   2026-01-01  ADR-0001  Money in cents
       status: accepted
       source: docs/adr/0001-money-in-cents.md
       changed by: dfb4ff8 2026-01-01 Add money and cart in cents; that commit changed 3 symbols
-                  395b8c0 2026-01-08 Name every amount by its unit; that commit changed 5 symbols
+                  6214848 2026-01-08 Name every amount by its unit; that commit changed 5 symbols
 
 One step away, most binding first (what formatCents uses, then what uses formatCents):
   - topic owned by src/cart.ts:total, which uses formatCents: fx-cart
@@ -61,7 +62,7 @@ Decision records that share the most distinctive terms with its code (candidates
    1  src/cart.ts:total
 
 3 commits changed its code or tags, newest first:
-  395b8c0 2026-01-08 Name every amount by its unit
+  6214848 2026-01-08 Name every amount by its unit
   73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001)
   dfb4ff8 2026-01-01 Add money and cart in cents
 ```
@@ -137,9 +138,9 @@ it prints the history:
 
 ```console
 $ scripts/fixture.sh ~/try/shop
-* 17078bb 2026-01-09 Add checkout with tax rounded half to even
-* 395b8c0 2026-01-08 Name every amount by its unit
-* 6bed2fd 2026-01-07 Record notes from the design review
+* 547f913 2026-01-09 Add checkout with tax rounded half to even
+* 6214848 2026-01-08 Name every amount by its unit
+* 28cff03 2026-01-07 Record notes from the design review
 * f85c3a6 2026-01-06 Add Rust rounding
 *   13d52e8 2026-01-05 Merge branch 'regional'
 |\  
@@ -220,6 +221,7 @@ Decision records that its decided: tags name:
       also cited by: 2a59506 2026-01-02 Add a flat tax; that commit changed 2 symbols
 Decision records linked only through a commit that cites them and changed its code or tags, tightest commit first (a commit that changed many symbols links each of them loosely):
   2026-01-02  note-1  Tax is computed once per order, not per line
+      author: A. Lee
       source: decisions/notes.json
       changed by: 2a59506 2026-01-02 Add a flat tax; that commit changed 2 symbols
 ```
@@ -236,6 +238,7 @@ What rests on note-1 (2026-01-02) Tax is computed once per order, not per line
 1 record rests on it, directly or through others.
 
 The decision itself: note-1 (2026-01-02) Tax is computed once per order, not per line
+  author: A. Lee
   No decided: tag names it.
   1 commit cites it:
     2a59506 2026-01-02 Add a flat tax; it changed 2 symbols
@@ -244,6 +247,7 @@ The decision itself: note-1 (2026-01-02) Tax is computed once per order, not per
        0 users  src/tax.ts:taxOf  (2a59506)
 
 Rests on it directly: note-2 (2026-01-04) Show thousands separators in totals
+  author: R. Chen
   No decided: tag names it.
   1 commit cites it:
     73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001); it changed 1 symbol
@@ -269,13 +273,14 @@ The header of src/money.ts holds no decided: tag.
 No decided: tag names a decision record.
 Decision records linked only through a commit that cites them and changed its code or tags, tightest commit first (a commit that changed many symbols links each of them loosely):
   2026-01-04  note-2  Show thousands separators in totals
+      author: R. Chen
       source: decisions/notes.json
       changed by: 73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001); that commit changed 1 symbol
   2026-01-01  ADR-0001  Money in cents
       status: accepted
       source: docs/adr/0001-money-in-cents.md
       changed by: dfb4ff8 2026-01-01 Add money and cart in cents; that commit changed 3 symbols
-                  395b8c0 2026-01-08 Name every amount by its unit; that commit changed 5 symbols
+                  6214848 2026-01-08 Name every amount by its unit; that commit changed 5 symbols
 
 One step away, most binding first (what formatCents uses, then what uses formatCents):
   - topic owned by src/cart.ts:total, which uses formatCents: fx-cart
@@ -292,7 +297,7 @@ Decision records that share the most distinctive terms with its code (candidates
    1  src/cart.ts:total
 
 3 commits changed its code or tags, newest first:
-  395b8c0 2026-01-08 Name every amount by its unit
+  6214848 2026-01-08 Name every amount by its unit
   73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001)
   dfb4ff8 2026-01-01 Add money and cart in cents
 ```
@@ -334,7 +339,7 @@ Decision records that share the most distinctive terms with its code (candidates
 No symbol uses it.
 
 1 commit changed its code or tags, newest first:
-  17078bb 2026-01-09 Add checkout with tax rounded half to even
+  547f913 2026-01-09 Add checkout with tax rounded half to even
 ```
 
 `carry` also takes an explicit 1-based line range, `<file>:<start>-<end>`. Use
@@ -723,6 +728,7 @@ them (`--decisions` repeats); record ids are unique across all of them.
       "id": "note-1",
       "date": "2026-01-02",
       "title": "Tax is computed once per order, not per line",
+      "author": "R. Chen",
       "items": [{ "label": "decided", "text": "tax once per order because per-line rounding adds up to a cent per line" }],
       "topics": ["fx-tax"],
       "restsOn": ["ADR-0002"],
@@ -738,6 +744,7 @@ them (`--decisions` repeats); record ids are unique across all of them.
 | `date` | yes | `YYYY-MM-DD`, or `null` when the source states none. Undated records sort last. |
 | `title` | no | One line that names the decision. |
 | `status` | no | As the source states it, such as `accepted`. |
+| `author` | no | Who decided it, as the source states it. A string that must not be empty. |
 | `source` | no | Where the record lives. Without it, answers name the decisions file. |
 | `items` | no | Statements of the record: `{ "label", "text" }`. |
 | `topics` | no | Topic slugs, as memod's `owns: [[topic]]` tags name them. |
@@ -746,11 +753,11 @@ them (`--decisions` repeats); record ids are unique across all of them.
 | `commits` | no | Commit ids, full or short (at least 4 hex digits), that carry out the decision. |
 
 A build rejects, and leaves the store unchanged: an unknown field, a
-malformed field, two records with one id, and records that supersede each
-other in a cycle. It loads, with a warning on stderr: a `restsOn` or
-`supersedes` id that no record has, a commit that matches no commit reachable
-from `HEAD`, and a short id that matches more than one (each such link is
-dropped).
+malformed field (an empty `author` counts as one), two records with one id,
+and records that supersede each other in a cycle. It loads, with a warning on
+stderr: a `restsOn` or `supersedes` id that no record has, a commit that
+matches no commit reachable from `HEAD`, and a short id that matches more than
+one (each such link is dropped).
 
 To bring in another source, convert it with a script or `jq`. For example, a
 memo export with one row per item (`memo`, `date`, `label`, `text`, `topics`,
@@ -912,7 +919,7 @@ build.
 | `Check` | `name` | | memod `check` |
 | `Memo` | `ref` | | memod `memo` (a `premise:` tag) |
 | `Commit` | `sha` | `short`, `date`, `subject` | memod `commit` |
-| `Decision` | `id` | `title`, `date`, `status`, `source`, `searchText`, `vector`, `termCount` | a decision record |
+| `Decision` | `id` | `title`, `date`, `status`, `author`, `source`, `searchText`, `vector`, `termCount` | a decision record |
 | `Item` | | `ord`, `label`, `text` | a record's item |
 | `Term` | `text` | `records` | a record's text (title and statements) |
 

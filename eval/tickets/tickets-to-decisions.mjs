@@ -5,7 +5,7 @@
 //   node tickets-to-decisions.mjs --repo <path> --tickets <tickets.json> --out <decisions.json>
 //        [--key '<regex with one group>'] [--prefix <text>] [--max-symbol-commits <n>]
 //
-// tickets.json: [{ "key": "ABC-123", "date": "2026-01-02", "title": "...", "body": "...", "source": "..." }]
+// tickets.json: [{ "key": "ABC-123", "date": "2026-01-02", "title": "...", "body": "...", "author": "...", "source": "..." }]
 // --key: how a commit message cites a key. The first group must equal a ticket's key,
 //        after --prefix is added in front. Default '#(\d+)' (GitHub: keys are numbers).
 //        JIRA: --key '\b([A-Z][A-Z0-9]+-\d+)\b'.  Azure DevOps: --key 'AB#(\d+)'.
@@ -39,6 +39,7 @@ const records = tickets.map((t) => {
   const body = String(t.body ?? "").trim();
   if (body) record.items = [{ label: "ticket", text: body.slice(0, 4000) }];
   if (t.source) record.source = String(t.source);
+  if (t.author) record.author = String(t.author);
   const commits = cites.get(String(t.key));
   if (commits) record.commits = commits;
   return record;

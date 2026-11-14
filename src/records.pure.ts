@@ -18,6 +18,8 @@ export interface DecisionRecord {
   /** `YYYY-MM-DD`, or null when the source states no date. */
   readonly date: string | null;
   readonly status: string | null;
+  /** Who decided it, as the source states it; null when the source states none. */
+  readonly author: string | null;
   /** Where the record lives: a path or a reference. Null means the decisions file itself. */
   readonly source: string | null;
   readonly items: readonly Item[];
@@ -33,7 +35,7 @@ export interface SourcedRecord {
   readonly file: string;
 }
 
-const FIELDS = ["id", "title", "date", "status", "source", "items", "topics", "restsOn", "supersedes", "commits"];
+const FIELDS = ["id", "title", "date", "status", "author", "source", "items", "topics", "restsOn", "supersedes", "commits"];
 const LISTS = ["topics", "restsOn", "supersedes", "commits"] as const;
 
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -42,7 +44,7 @@ const nullableString = (v: unknown): v is string | null | undefined => v === und
 /**
  * owns: [[whygraph-decision-records]]
  * post: returns the records of a decisions file `{ "records": [...] }`, or every problem found, each naming `file` and the record index or id.
- * post: `id` is a non-empty string; `date` is `YYYY-MM-DD` or null and must be present; `title`, `status` and `source` are strings or null; `items` holds `{label, text}` strings; `topics`, `restsOn`, `supersedes` and `commits` are string lists. Missing optional fields read as null or empty.
+ * post: `id` is a non-empty string; `date` is `YYYY-MM-DD` or null and must be present; `title`, `status`, `author` and `source` are strings or null, and `author` must not be empty; `items` holds `{label, text}` strings; `topics`, `restsOn`, `supersedes` and `commits` are string lists. Missing optional fields read as null or empty.
  * post: an unknown field is a problem, so a misspelt field never drops data silently.
  */
 export function readDecisionsFile(file: string, value: unknown): { readonly records: readonly DecisionRecord[] } | { readonly problems: readonly string[] } {
@@ -62,6 +64,8 @@ export function readDecisionsFile(file: string, value: unknown): { readonly reco
     if (!("date" in r)) problems.push(`${where}: "date" is missing (write null when the source states none)`);
     else if (r.date !== null && (typeof r.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(r.date))) problems.push(`${where}: "date" must be YYYY-MM-DD or null`);
     for (const k of ["title", "status", "source"]) if (!nullableString(r[k])) problems.push(`${where}: "${k}" must be a string or null`);
+    if (!nullableString(r.author)) problems.push(`${where}: "author" must be a string or null`);
+    else if (typeof r.author === "string" && r.author.trim() === "") problems.push(`${where}: "author" must not be empty`);
     const items = r.items ?? [];
     if (!Array.isArray(items) || !items.every((it) => isObject(it) && typeof it.label === "string" && typeof it.text === "string")) problems.push(`${where}: "items" must be a list of {"label", "text"} strings`);
     for (const k of LISTS) {
@@ -75,6 +79,7 @@ export function readDecisionsFile(file: string, value: unknown): { readonly reco
       title: (r.title as string | null | undefined) ?? null,
       date: r.date as string | null,
       status: (r.status as string | null | undefined) ?? null,
+      author: (r.author as string | null | undefined) ?? null,
       source: (r.source as string | null | undefined) ?? null,
       items: ((r.items as Item[] | undefined) ?? []).map((it) => ({ label: it.label, text: it.text })),
       topics: list("topics"),

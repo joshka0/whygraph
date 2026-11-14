@@ -17,4 +17,4 @@ while url:
     items += json.load(r)
     m = re.search(r'<([^>]+)>; rel="next"', r.headers.get("Link", "")); url = m.group(1) if m else None
     print(len(items), file=sys.stderr); time.sleep(2)
-json.dump([{"key": str(x["number"]), "date": x["created_at"][:10], "title": x["title"], "body": x.get("body") or "", "source": x["html_url"]} for x in items], open(sys.argv[2], "w"))
+json.dump([{"key": str(x["number"]), "date": x["created_at"][:10], "title": x["title"], "body": x.get("body") or "", "author": x["user"]["login"], "source": x["html_url"]} for x in items], open(sys.argv[2], "w"))

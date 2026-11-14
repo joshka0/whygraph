@@ -108,7 +108,7 @@ function grouped(rows: readonly { readonly from: string; readonly to: string; re
  * post: a Symbol holds `line` and `endLine`, the 1-based inclusive source span memod gives it (without its doc comment), or null when memod gave no span.
  * post: relationships: File DECLARES Symbol; File IMPORTS File or Package; File OWNS Topic and each named Symbol OWNS Topic; Symbol USES Symbol; Symbol or File DECIDED DecidedTag, VERIFIED Check, PREMISE Memo; Commit CHANGES File or Symbol; DecidedTag NAMES Decision (one per `names` link); Decision STATES Item, ABOUT Topic, MENTIONS Term (one per kept term of the record's text, with how many times that text holds it), RESTS_ON and SUPERSEDES Decision, CITES Commit (one per commit in `checked.cites`).
  * post: a Term node per kept term (`termNodes`), keyed by its text, holding `records`, the number of records that use it; a record's `termCount` is every term of its text, before the common-term rule, so the average record length a BM25 query needs counts dropped terms too.
- * post: a record topic that no code owns still gets a Topic node; a Decision's `source` is its own source or else the decisions file it came from; a Decision's `searchText` is its title and the text of each of its statements, one per line, which the full-text index holds, and its `vector` is `vectors`' 384-float embedding of that text, which the vector index holds.
+ * post: a record topic that no code owns still gets a Topic node; a Decision's `source` is its own source or else the decisions file it came from; a Decision's `author` is the record's author, or null when the record has none; a Decision's `searchText` is its title and the text of each of its statements, one per line, which the full-text index holds, and its `vector` is `vectors`' 384-float embedding of that text, which the vector index holds.
  * post: `vectors` holds one embedding per record id, from `recordText` of that record; the caller embeds, so this plan stays pure.
  * post: `terms` holds the term counts of `recordText` of every record; the caller tokenizes, so this plan stays pure, and a term the common-term rule drops gets no node and no edge.
  * post: no statement holds more than 5000 rows; statement i that reads rows reads them as `$p<i>`, and a statement without rows has no parameter.
@@ -132,8 +132,8 @@ export function loadPlan(graph: CodeGraph, checked: CheckedRecords, names: reado
   steps.push(
     ...nodeStep(
       "Decision",
-      ["id", "title", "date", "status", "source", "searchText", "vector", "termCount"],
-      checked.records.map((r) => ({ id: r.id, title: r.title, date: r.date, status: r.status, source: r.source ?? recordFiles.get(r.id) ?? null, searchText: recordText(r), vector: vectors.get(r.id) ?? null, termCount: terms.totals.get(r.id) ?? 0 })),
+      ["id", "title", "date", "status", "author", "source", "searchText", "vector", "termCount"],
+      checked.records.map((r) => ({ id: r.id, title: r.title, date: r.date, status: r.status, author: r.author, source: r.source ?? recordFiles.get(r.id) ?? null, searchText: recordText(r), vector: vectors.get(r.id) ?? null, termCount: terms.totals.get(r.id) ?? 0 })),
     ),
   );
   steps.push(...nodeStep("Term", ["text", "records"], termNodes(terms)));

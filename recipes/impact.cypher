@@ -6,6 +6,7 @@
 //   most used first, each with `users`, the symbols whose code names it
 //   directly;
 // - files: the files whose header decided: tags name the record;
+//   each record row holds its `author`, null when the record states none;
 // - cites: the commits that cite the record (a `Decision:` trailer, or listed
 //   by the record, such as the commit that added an ADR's file), oldest
 //   first, each with `symbols`, the number of symbols it changed;
@@ -38,5 +39,5 @@ WITH r, depth, tagged, files, cites, collect(CASE WHEN s IS NULL THEN null ELSE 
 OPTIONAL MATCH (n:Decision)-[:SUPERSEDES]->(r)
 WITH r, depth, tagged, files, cites, changed, n ORDER BY n.id
 WITH r, depth, tagged, files, cites, changed, collect(n.id) AS supersededBy
-RETURN depth, r.id AS record, r.date AS date, r.title AS title, r.source AS source, supersededBy, tagged, files, cites, changed
+RETURN depth, r.id AS record, r.date AS date, r.title AS title, r.author AS author, r.source AS source, supersededBy, tagged, files, cites, changed
 ORDER BY depth, record

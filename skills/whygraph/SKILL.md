@@ -66,6 +66,9 @@ section, and the answer says no symbol covers the lines.
   any linking commit changed), and a record's own commits are too, so the
   strongest link comes first.
 - "superseded by: X" means the record was replaced; read X too.
+- A record's `author:` line, when it has one, names who decided it, as the
+  record states. It is not indexed and is never sent to the reranker: a
+  `search` answer never prints it.
 - In a `search` answer, `matched: words` means the record shares a word with
   the change, `matched: meaning` means the local model ranked it near, and
   `words and meaning` means both; that line also names the record's source.

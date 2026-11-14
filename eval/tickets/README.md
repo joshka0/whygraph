@@ -57,7 +57,7 @@ What this does not show:
 You need the whygraph commands on `PATH` (root README, "Set up") and Python 3.
 
 1. Export your tickets to `tickets.json`:
-   `[{"key": "ABC-123", "date": "2026-01-02", "title": "...", "body": "...", "source": "..."}]`.
+   `[{"key": "ABC-123", "date": "2026-01-02", "title": "...", "body": "...", "author": "...", "source": "..."}]`.
 2. Convert, with the pattern your commits use to cite a key:
 
    ```sh

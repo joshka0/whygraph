@@ -12,7 +12,7 @@
       "src/money.ts:formatCents",
       "src/checkout.ts:checkout"
     ],
-    "derivation": "note-2 rests on note-1 (restsOn in decisions/notes.json of the fixture script) and is carried out by commit 73ebd46, which changed only formatCents. note-1 itself is carried out by taxOf (it taxes the order total once), so taxOf must change. taxRate, which the same commit touched, holds a rate and is not affected; naming it does not fail the run. Commit 17078bb adds checkout, whose decided: tag says it adds tax to the net once because the receipt shows one tax line: the same once-per-order rule, so tax per line changes it. roundHalfEven rounds whatever it is given and does not change."
+    "derivation": "note-2 rests on note-1 (restsOn in decisions/notes.json of the fixture script) and is carried out by commit 73ebd46, which changed only formatCents. note-1 itself is carried out by taxOf (it taxes the order total once), so taxOf must change. taxRate, which the same commit touched, holds a rate and is not affected; naming it does not fail the run. Commit 547f913 adds checkout, whose decided: tag says it adds tax to the net once because the receipt shows one tax line: the same once-per-order rule, so tax per line changes it. roundHalfEven rounds whatever it is given and does not change."
   },
   "score": {
     "symbols": [

@@ -16,7 +16,8 @@
 // - usedBy / usedByTypeOnly: it uses this symbol (only as a type);
 // - tags: the decided: tags in its doc comment, each with the records it
 //   names; header: the same for its file's header, empty when it is this
-//   symbol's own file (why.cypher lists that header);
+//   symbol's own file (why.cypher lists that header); each named record holds
+//   its `author`, null when the record states none;
 // - checks: the formal checks that cover it; topics: the topics it owns.
 // A record reached only through a commit that changed a neighbor is not here.
 MATCH (s:Symbol {id: $symbol})
@@ -44,8 +45,8 @@ RETURN s.id AS symbol, s.path AS file, s.line AS line, s.endLine AS endLine, top
     symbol: n.id, file: f.path,
     uses: size(out) > 0, usesTypeOnly: size(out) > 0 AND all(x IN out WHERE x),
     usedBy: size(inn) > 0, usedByTypeOnly: size(inn) > 0 AND all(x IN inn WHERE x),
-    tags: [(n)-[:DECIDED]->(t:DecidedTag) | {hash: t.hash, what: t.what, because: t.because, records: [(t)-[:NAMES]->(d:Decision) | {id: d.id, date: d.date, title: d.title, status: d.status, source: d.source, supersededBy: [(x:Decision)-[:SUPERSEDES]->(d) | x.id]}]}],
-    header: CASE WHEN f.path = s.path THEN [] ELSE [(f)-[:DECIDED]->(t:DecidedTag) | {hash: t.hash, what: t.what, because: t.because, records: [(t)-[:NAMES]->(d:Decision) | {id: d.id, date: d.date, title: d.title, status: d.status, source: d.source, supersededBy: [(x:Decision)-[:SUPERSEDES]->(d) | x.id]}]}] END,
+    tags: [(n)-[:DECIDED]->(t:DecidedTag) | {hash: t.hash, what: t.what, because: t.because, records: [(t)-[:NAMES]->(d:Decision) | {id: d.id, date: d.date, title: d.title, status: d.status, author: d.author, source: d.source, supersededBy: [(x:Decision)-[:SUPERSEDES]->(d) | x.id]}]}],
+    header: CASE WHEN f.path = s.path THEN [] ELSE [(f)-[:DECIDED]->(t:DecidedTag) | {hash: t.hash, what: t.what, because: t.because, records: [(t)-[:NAMES]->(d:Decision) | {id: d.id, date: d.date, title: d.title, status: d.status, author: d.author, source: d.source, supersededBy: [(x:Decision)-[:SUPERSEDES]->(d) | x.id]}]}] END,
     checks: [(n)-[:VERIFIED]->(c:Check) | c.name],
     topics: [(n)-[:OWNS]->(t:Topic) | t.slug]
   } END) AS neighbors

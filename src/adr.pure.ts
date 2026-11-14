@@ -39,7 +39,7 @@ function namedAdrs(text: string): readonly number[] {
  * owns: [[whygraph-adr-reader]]
  * post: title is the first `# ` heading without a leading `ADR <n>:`; the preamble is the text between it and the first `## ` heading.
  * post: date is the first `Date: YYYY-MM-DD` in the preamble, status the text after `Status:` in the preamble up to the end of its sentence, else the first line of a `## Status` section; each is null when absent.
- * post: topics are the `[[slug]]` links of the preamble; items are the `## ` sections other than Status, labelled by their heading in lower case, in file order.
+ * post: topics are the `[[slug]]` links of the preamble; items are the `## ` sections other than Status, labelled by their heading in lower case, in file order; `author` is null, because an ADR file states none.
  * post: supersedes holds the ADRs named after `Supersedes` or `Replaces` on one line; an ADR that says `Superseded by ADR <n>` is listed in ADR <n>'s supersedes by `adrRecords`, not here.
  * post: restsOn holds every other ADR the text names with a smaller number than its own, and not in supersedes.
  * decided: an ADR rests only on ADRs numbered before it, because a mention of a later ADR is a note added afterwards, and counting it would make two ADRs rest on each other
@@ -71,6 +71,7 @@ export function adrRecord(file: AdrFile, commits: readonly string[]): DecisionRe
     title,
     date,
     status,
+    author: null,
     source: file.path,
     items: sections.filter((s) => s.label !== "status").map((s) => ({ label: s.label, text: s.text })),
     topics: [...new Set([...preamble.matchAll(/\[\[([^\]]+)\]\]/g)].map((m) => m[1]!))],

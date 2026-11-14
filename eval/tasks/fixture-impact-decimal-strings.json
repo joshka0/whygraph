@@ -13,7 +13,7 @@
       "src/checkout.ts:checkout",
       "src/rounding.ts:roundHalfEven"
     ],
-    "derivation": "Read from scripts/fixture.sh, not from whygraph impact. cents rounds to integer cents (its tag names adr-0001); formatCents splits an integer of cents; total sums integer cents and formats them; taxOf multiplies cents(units) by the rate and rounds to integer cents; round_cents (lib.rs, commit trailer Decision: ADR-0001) rounds to integer cents. taxRate returns a rate, not an amount, and does not change. The records ADR-0002 and ADR-0003 restate the cents rule in their text; they are records, not symbols, and do not count for or against. Commit 17078bb adds two more: checkout(netCents, rate) adds tax to an amount in cents, and roundHalfEven(inCents) rounds a fractional amount of cents to an integer cent; with decimal strings both change their parameter and result."
+    "derivation": "Read from scripts/fixture.sh, not from whygraph impact. cents rounds to integer cents (its tag names adr-0001); formatCents splits an integer of cents; total sums integer cents and formats them; taxOf multiplies cents(units) by the rate and rounds to integer cents; round_cents (lib.rs, commit trailer Decision: ADR-0001) rounds to integer cents. taxRate returns a rate, not an amount, and does not change. The records ADR-0002 and ADR-0003 restate the cents rule in their text; they are records, not symbols, and do not count for or against. Commit 547f913 adds two more: checkout(netCents, rate) adds tax to an amount in cents, and roundHalfEven(inCents) rounds a fractional amount of cents to an integer cent; with decimal strings both change their parameter and result."
   },
   "score": {
     "symbols": [
