@@ -1,0 +1,52 @@
+{
+ "all": {
+  "requests": 30,
+  "located": 29,
+  "search": 28,
+  "terms": 12,
+  "link": 24,
+  "link_tight": 23,
+  "search_or_terms": 29,
+  "any": 29,
+  "link_only": 0
+ },
+ "by_wording": {
+  "other-words": {
+   "requests": 10,
+   "located": 10,
+   "search": 8,
+   "terms": 5,
+   "link": 8,
+   "link_tight": 8,
+   "search_or_terms": 9,
+   "any": 9,
+   "link_only": 0
+  },
+  "partial": {
+   "requests": 10,
+   "located": 9,
+   "search": 10,
+   "terms": 3,
+   "link": 9,
+   "link_tight": 9,
+   "search_or_terms": 10,
+   "any": 10,
+   "link_only": 0
+  },
+  "same-words": {
+   "requests": 10,
+   "located": 10,
+   "search": 10,
+   "terms": 4,
+   "link": 7,
+   "link_tight": 6,
+   "search_or_terms": 10,
+   "any": 10,
+   "link_only": 0
+  }
+ },
+ "median_records_linked_per_range": 1,
+ "median_search_seconds": 1.2,
+ "median_carry_seconds": 1.8,
+ "failed_search_calls": 0
+}

@@ -52,6 +52,27 @@ What this does not show:
 - The second model had the git history in its folder and was told not to read
   it. That was not checked.
 
+## The same requests on a small store
+
+How much of the `search` column depends on the number of records? A control
+ran the same 30 requests and lines on a store that holds 161 tickets, not
+3,042: the 33 tickets that a request needs, and 128 drawn at random from the
+other tickets that a commit cites (`small-store.py`, seed 1). The counts are
+in `report-small-store.json`.
+
+| Store | `search` | `carry` term section | `carry` link through a commit | Any | Link only |
+| --- | --- | --- | --- | --- | --- |
+| 3,042 tickets | 22 of 30 | 7 of 30 | 24 of 30 | 29 of 30 | 6 |
+| 161 tickets | 28 of 30 | 12 of 30 | 24 of 30 | 29 of 30 | 0 |
+
+- The two lists that rank records, `search` and the term section, find more
+  on the small store: each lists up to 20 or 10 of only 161 records.
+- The commit link finds the same 24 on both stores. It does not rank, so the
+  number of other records does not change it.
+- So a test on a store of a few hundred records cannot show what the link
+  adds: `search` already finds almost every ticket there. Load all the
+  tickets of the tracker, not only the ones that commits cite.
+
 ## Run it on your repo
 
 You need the whygraph commands on `PATH` (root README, "Set up") and Python 3.

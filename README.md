@@ -630,6 +630,12 @@ were found in no other way. The sample holds only tickets that a commit
 cites; in ripgrep that is about one ticket in seven. And it is again a list,
 not an agent acting on it.
 
+The size of the store decides how much the link adds. On a store cut down to
+161 of those tickets, the same requests gave `search` 28 of 30 and the link
+24 of 30 again, and no request was found by the link only: `search` ranks
+among few records there, and the link does not rank at all
+(`eval/tickets/README.md`, "The same requests on a small store").
+
 ## Your own repo
 
 whygraph runs on any git repo that memod reads (TypeScript, JavaScript,
