@@ -4,7 +4,7 @@
  * Expectations come from tickets/pilot-failures.md and README.md, not implementation.
  */
 import assert from 'node:assert/strict';
-import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, readdirSync } from 'node:fs';
+import { cpSync, readFileSync, writeFileSync, mkdirSync, mkdtempSync, readdirSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -19,8 +19,8 @@ const targets = read(join(root, 'eval/tickets/targets.json'));
 const generator = readFileSync(join(root, 'eval/tickets/make-tasks.mjs'), 'utf8');
 const scorer = readFileSync(join(root, 'eval/score.mjs'), 'utf8');
 
-function node(script, args = []) {
-  const result = spawnSync(process.execPath, [script, ...args], { cwd: root, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+function node(script, args = [], env = process.env) {
+  const result = spawnSync(process.execPath, [script, ...args], { cwd: root, env, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
   assert.ifError(result.error);
   return result;
 }
@@ -235,10 +235,11 @@ export async function ticketChecks({ tasks, scoreRun, recordIds }) {
     selected(generatedFixture(scratch, 'order-control'));
     assert.throws(() => selected(generatedFixture(scratch, 'plant-order', requests, targets, reorder)), { code: 'ERR_ASSERTION' });
   });
-  add('saved batches 1 and 2 report remains byte-identical without batch 3 blocks', () => {
-    const result = node(join(root, 'eval/score.mjs'));
-    assert.equal(result.status, 0, result.stderr);
-    assert.equal(result.stdout, readFileSync(join(root, 'eval/score.txt'), 'utf8'));
+  add('fixed batches 1 and 2 report remains byte-identical without batch 3 blocks', () => {
+    const at = join(scratch, 'batches-1-2-results');
+    save(at, 'fixture-conflict-format-separators', 'graph', 1, 'note-2', 101);
+    save(at, 'memod2-conflict-merge-first-parent', 'graph', 1, 'ADR-0004', 103);
+    assert.equal(report(at), readFileSync(new URL('./batches-1-2.txt', import.meta.url), 'utf8'));
   });
   function save(at, taskId, condition, repeat, final, tokens, tools = [], status = 'done') {
     const id = `${taskId}__${condition}__r${repeat}`;
@@ -330,14 +331,63 @@ export async function ticketChecks({ tasks, scoreRun, recordIds }) {
     }
     assert.deepEqual(report(at, true), []);
   });
+  const plannedIds = taskIds.flatMap((id) => ['none', 'graph', 'stub'].flatMap((condition) => [1, 2, 3].map((repeat) => `${id}__${condition}__r${repeat}`)));
+  function verifyPlan(output, done) {
+    const [summary, ...lines] = output.trim().split('\n');
+    assert.equal(summary, `90 runs planned, ${done.size} already done, ${90 - done.size} to start`);
+    const pending = lines.map((line) => line.trim());
+    assert.equal(new Set(pending).size, pending.length, 'plan repeats a run id');
+    assert.deepEqual(pending.sort(), plannedIds.filter((id) => !done.has(id)).sort(), 'plan must list every unfinished run exactly once');
+  }
+  function snapshot(at) {
+    return readdirSync(at, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name)).map((entry) => [
+      entry.name, entry.isDirectory() ? snapshot(join(at, entry.name)) : readFileSync(join(at, entry.name)),
+    ]);
+  }
+  function planCheck(name, repeats = '3') {
+    // Keep the runner unchanged: only its documented CLI and result files are used.
+    const base = join(scratch, name);
+    const at = join(base, 'eval');
+    const results = join(at, 'results');
+    mkdirSync(results, { recursive: true });
+    for (const file of ['run.mjs', 'score.mjs', 'tasks']) cpSync(join(root, 'eval', file), join(at, file), { recursive: true });
+    let emptyPlan;
+    const done = new Set();
+    for (const count of [0, 17, 90]) {
+      for (const id of plannedIds.slice(done.size, count)) {
+        const [taskId, condition, repeat] = id.split('__');
+        save(results, taskId, condition, Number(repeat.slice(1)), '', 0);
+        done.add(id);
+      }
+      const before = snapshot(base);
+      const result = node(join(at, 'run.mjs'), ['--plan', '--only', taskIds.join(','), '--repeats', repeats], {
+        ...process.env, WHYGRAPH_EVAL_WORK: join(base, 'work'),
+      });
+      assert.equal(result.status, 0, result.stderr);
+      assert.deepEqual(snapshot(base), before, '--plan must not prepare templates or write run artifacts');
+      writeFileSync(join(scratch, `${name}-${count}.txt`), result.stdout);
+      verifyPlan(result.stdout, done);
+      emptyPlan ??= result.stdout;
+    }
+    return emptyPlan;
+  }
   add('plan lists exactly 90 distinct runs without starting agents', () => {
-    const result = node(join(root, 'eval/run.mjs'), ['--plan', '--only', taskIds.join(','), '--repeats', '3']);
-    assert.equal(result.status, 0, result.stderr);
-    assert.match(result.stdout, /90 runs planned/);
-    const runs = result.stdout.match(/ripgrep-conflict-rg-\d+__(?:none|graph|stub)__r[123]/g) ?? [];
-    assert.equal(runs.length, 90);
-    assert.equal(new Set(runs).size, 90);
-    writeFileSync(join(scratch, 'plan.txt'), result.stdout);
+    planCheck('plan');
+  });
+  add('plant two repeats caught by: plan lists exactly 90 distinct runs', () => {
+    assert.throws(() => planCheck('plant-two-repeats', '2'), {
+      code: 'ERR_ASSERTION',
+      actual: '60 runs planned, 0 already done, 60 to start',
+      expected: '90 runs planned, 0 already done, 90 to start',
+    });
+  });
+  add('plant repeated run id caught by: plan lists exactly 90 distinct runs', () => {
+    const output = planCheck('duplicate-control');
+    const lines = output.trimEnd().split('\n');
+    lines[lines.length - 1] = lines[1];
+    const faulty = `${lines.join('\n')}\n`;
+    writeFileSync(join(scratch, 'plant-repeated-run.txt'), faulty);
+    assert.throws(() => verifyPlan(faulty, new Set()), { code: 'ERR_ASSERTION', message: /^plan repeats a run id\n/ });
   });
   return checks;
 }
