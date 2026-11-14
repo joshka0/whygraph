@@ -1,0 +1,43 @@
+{
+  "id": "ripgrep5-conflict-rg-06",
+  "kind": "conflict",
+  "repo": "ripgrep",
+  "batch": 5,
+  "request": "Treat surrounding double quotes in a .gitconfig core.excludesFile value as part of the path, so our configuration validator can flag quoted paths as invalid.",
+  "ground_truth": {
+    "source": {
+      "id": "rg-06",
+      "request": "Treat surrounding double quotes in a .gitconfig core.excludesFile value as part of the path, so our configuration validator can flag quoted paths as invalid.",
+      "wording": "same-words",
+      "record": "2629",
+      "settled": "The global exclusion configuration parser accepts paths surrounded by double quotes.",
+      "shared_terms": [
+        "double quotes",
+        ".gitconfig",
+        "core.excludesFile"
+      ],
+      "also": [],
+      "why": "Keeping the quotes as filename characters prevents valid quoted exclusion paths from being loaded."
+    },
+    "targets": [
+      {
+        "file": "crates/ignore/src/gitignore.rs",
+        "symbol": "parse_excludes_file",
+        "start_line": 667,
+        "end_line": 690
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-2629",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)2629(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}

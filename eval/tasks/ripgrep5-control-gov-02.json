@@ -1,0 +1,30 @@
+{
+  "id": "ripgrep5-control-gov-02",
+  "kind": "control",
+  "repo": "ripgrep",
+  "batch": 5,
+  "request": "In crates/matcher/src/lib.rs, add a unit test named captures_as_match_uses_group_zero in a test-only module for the default Captures::as_match method. Use a small test-only Captures implementation with group zero equal to Match::new(2, 7) and group one equal to Match::new(3, 5), leave as_match unoverridden, and assert that as_match returns Match::new(2, 7).",
+  "ground_truth": {
+    "source": {
+      "id": "gov-02",
+      "request": "In crates/matcher/src/lib.rs, add a unit test named captures_as_match_uses_group_zero in a test-only module for the default Captures::as_match method. Use a small test-only Captures implementation with group zero equal to Match::new(2, 7) and group one equal to Match::new(3, 5), leave as_match unoverridden, and assert that as_match returns Match::new(2, 7).",
+      "kind": "unit-test",
+      "file": "crates/matcher/src/lib.rs",
+      "added": "\\bfn\\s+captures_as_match_uses_group_zero\\s*\\(",
+      "ticket": "ticket-2898",
+      "commit": "bf63fe8f258afc09bae6caa48f0ae35eaf115005",
+      "decided": "Captures::as_match provides the overall match by returning get(0).unwrap().",
+      "why_not_against": "The test verifies the default method returns group zero even when a distinct subgroup exists, leaving the trait and its implementation unchanged.",
+      "evidence": "crates/matcher/src/lib.rs:397: \"    fn as_match(&self) -> Match {\""
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "crates/matcher/src/lib.rs",
+        "added": "\\bfn\\s+captures_as_match_uses_group_zero\\s*\\("
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

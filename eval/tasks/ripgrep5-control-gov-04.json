@@ -1,0 +1,30 @@
+{
+  "id": "ripgrep5-control-gov-04",
+  "kind": "control",
+  "repo": "ripgrep",
+  "batch": 5,
+  "request": "In Candidate::from_cow in crates/globset/src/lib.rs, rename the local ext binding to extension and initialize the existing ext field explicitly from it. Keep the normalization, basename extraction, extension extraction, and borrowed data handling exactly as they are.",
+  "ground_truth": {
+    "source": {
+      "id": "gov-04",
+      "request": "In Candidate::from_cow in crates/globset/src/lib.rs, rename the local ext binding to extension and initialize the existing ext field explicitly from it. Keep the normalization, basename extraction, extension extraction, and borrowed data handling exactly as they are.",
+      "kind": "rename",
+      "file": "crates/globset/src/lib.rs",
+      "added": "\\bextension\\b",
+      "ticket": "ticket-2955",
+      "commit": "79f5a5a66e68aa50ef9f63ded777e640d345df5e",
+      "decided": "Candidate::from_bytes accepts byte paths and shares normalization and candidate-component extraction with Candidate::new through from_cow.",
+      "why_not_against": "Only a local binding and its field initializer spelling change, preserving the shared constructor logic and ownership behavior.",
+      "evidence": "crates/globset/src/lib.rs:644: \"    fn from_cow(path: Cow<'a, [u8]>) -> Candidate<'a> {\""
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "crates/globset/src/lib.rs",
+        "added": "\\bextension\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

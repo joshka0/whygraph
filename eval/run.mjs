@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * module: [[whygraph-eval-runner]]
- * Runs the eval: one headless Claude Code agent per (task, condition, repeat), each in a fresh copy
+ * Runs the eval: one headless agent per (task, condition, repeat), each in a fresh copy
  * of its task repo, and saves what it did under eval/results/<run id>/.
  *
  *   node eval/run.mjs [--only <task id>[,<task id>...]] [--conditions none,graph,stub] [--repeats 5] [--jobs 3] [--plan]
@@ -12,10 +12,11 @@
  * $WHYGRAPH_EVAL_WORK (default /var/tmp/whygraph-eval) and are deleted after each run.
  */
 import { spawn, spawnSync } from 'node:child_process';
-import { appendFileSync, chmodSync, closeSync, cpSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { appendFileSync, chmodSync, closeSync, cpSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, realpathSync, renameSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readTasks } from './score.mjs';
+import { randomUUID } from 'node:crypto';
 
 const EVAL = fileURLToPath(new URL('./', import.meta.url));
 const WHYGRAPH = join(EVAL, '..');
@@ -198,9 +199,10 @@ function sharedTools() {
  * its own sandbox cannot start on this box, where AppArmor restricts unprivileged user namespaces.
  * owns: [[whygraph-eval-runner]]
  */
-export function confinement(condition, work) {
+export function confinement(condition, work, agent = 'claude') {
   const home = process.env.HOME;
   const hide = [
+    ...(agent === 'opencode' ? [join(process.env.XDG_DATA_HOME ?? join(home, '.local/share'), 'opencode'), join(home, '.config/opencode'), join(home, '.opencode'), join(home, '.agents')] : []),
     join(home, '.claude'), join(home, '.optmem'), join(home, '.local/bin'), join(home, '.config/spec-ledger'),
     '/home/dev/scratch', '/home/dev/repos/personal/memod',
     ...(condition === 'none' ? [WHYGRAPH] : ['eval', 'scripts', 'test', 'test-results', 'docs', '.git'].map((d) => join(WHYGRAPH, d))),
@@ -222,31 +224,34 @@ export function confinement(condition, work) {
  * baseline snapshot of the work tree (in a git dir outside the repo) to diff against afterwards.
  * owns: [[whygraph-eval-runner]]
  */
-export function prepare(task, condition, work) {
+export function prepare(task, condition, work, source) {
+  const agent = task.batch === 5 ? 'opencode' : 'claude';
+  if (task.batch === 5 && !source && !existsSync(join(WORK, '_ripgrep/ready'))) throw new Error('batch 5 requires the ready ripgrep template and store; do not rebuild');
   rmSync(work, { recursive: true, force: true });
   mkdirSync(join(work, 'bin'), { recursive: true });
   mkdirSync(join(work, 'tmp'), { recursive: true });
   mkdirSync(join(work, 'systmp'), { recursive: true });
   const repo = join(work, 'repo');
   const fixture = task.repo === 'fixture' ? fixtureTemplate() : undefined;
-  cpSync(template(task), repo, { recursive: true, verbatimSymlinks: true });
+  cpSync(source?.repo ?? template(task), repo, { recursive: true, verbatimSymlinks: true });
   const bin = join(work, 'bin');
   if (condition !== 'none') {
     // graph and stub share every tool and every line of instructions; only `whygraph` differs.
     wrapper(join(bin, 'memod'), `exec ${join(WHYGRAPH, 'node_modules/.bin/memod')} "$@"`);
     wrapper(join(bin, 'relate'), `exec ${join(sharedTools(), 'relate')} "$@"`);
-    if (condition === 'graph') wrapper(join(bin, 'whygraph'), `export RELATE_TELEMETRY=0 DO_NOT_TRACK=1\nexec ${join(WHYGRAPH, 'bin/whygraph')} "$@"`);
+    if (condition === 'graph' || condition === 'graph-nosearch') wrapper(join(bin, 'whygraph'), `export RELATE_TELEMETRY=0 DO_NOT_TRACK=1\n${condition === 'graph-nosearch' ? 'if [ "$1" = search ]; then echo "no result"; exit 0; fi\n' : ''}exec ${join(WHYGRAPH, 'bin/whygraph')} "$@"`);
     else wrapper(join(bin, 'whygraph'), 'echo "no result"\nexit 0');
-    mkdirSync(join(repo, '.claude/skills'), { recursive: true });
-    cpSync(join(WHYGRAPH, 'skills/whygraph'), join(repo, '.claude/skills/whygraph'), { recursive: true });
-    appendFileSync(join(repo, 'CLAUDE.md'), readFileSync(join(WHYGRAPH, 'skills/whygraph-rule.md'), 'utf8'));
+    const skillDir = agent === 'opencode' ? '.opencode/skills' : '.claude/skills';
+    mkdirSync(join(repo, skillDir), { recursive: true });
+    cpSync(join(WHYGRAPH, 'skills/whygraph'), join(repo, skillDir, 'whygraph'), { recursive: true });
+    appendFileSync(join(repo, agent === 'opencode' ? 'AGENTS.md' : 'CLAUDE.md'), readFileSync(join(WHYGRAPH, 'skills/whygraph-rule.md'), 'utf8'));
   }
-  if (condition === 'graph') {
+  if (condition === 'graph' || condition === 'graph-nosearch') {
     const env = { PATH: `${bin}:${process.env.PATH}` };
-    if (task.repo === 'ripgrep') {
+    if (task.repo === 'ripgrep' || source?.store) {
       const dir = join(repo, '.git/whygraph');
       mkdirSync(dir, { recursive: true });
-      cpSync(realpathSync(ripgrepTemplate().store), join(dir, 'ticket-store'), { recursive: true, verbatimSymlinks: true });
+      cpSync(realpathSync(source?.store ?? ripgrepTemplate().store), join(dir, 'ticket-store'), { recursive: true, verbatimSymlinks: true });
       symlinkSync('ticket-store', join(dir, 'store'));
     } else if (fixture) {
       sh(join(bin, 'whygraph'), ['build', '--decisions', join(fixture.decisions, 'adrs.json'), '--decisions', join(fixture.decisions, 'notes.json')], { cwd: repo, env });
@@ -263,7 +268,7 @@ export function prepare(task, condition, work) {
   sh('git', [...base, 'add', '-A'], { env: GIT_ENV });
   sh('git', [...base, 'commit', '-q', '--allow-empty', '-m', 'baseline'], { env: GIT_ENV });
   const confine = join(work, 'confine.sh');
-  wrapper(confine, `exec ${confinement(condition, work).map(q).join(' ')} -- /bin/bash -c "$1"`);
+  wrapper(confine, `${agent === 'opencode' ? `export HOME=${q(process.env.HOME)}\nif [ "$1" = -c ]; then shift; fi\n` : ''}exec ${confinement(condition, work, agent).map(q).join(' ')} -- /bin/bash -c "$1"`);
   return { repo, bin, base, confine };
 }
 
@@ -378,20 +383,46 @@ function readEvents(text) {
  * runner blocks its event loop for tens of seconds while it copies and snapshots memoryd for another
  * run; through a pipe, an agent that exited in that window lost the end of its stream (the result line).
  */
-function runAgent(args, cwd, env, outFile, errFile) {
+function runAgent(args, cwd, env, outFile, errFile, agent = 'claude') {
   return new Promise((done) => {
     const started = Date.now();
     const out = openSync(outFile, 'w');
     const err = openSync(errFile, 'w');
-    const child = spawn(which('claude'), args, { cwd, env, stdio: ['ignore', out, err] });
+    const child = spawn(which(agent), args, { cwd, env, stdio: ['ignore', out, err] });
     closeSync(out);
     closeSync(err);
-    const timer = setTimeout(() => child.kill('SIGTERM'), TIMEOUT_MS);
+    let timedOut = false;
+    let killTimer;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      child.kill('SIGTERM');
+      if (agent === 'opencode') killTimer = setTimeout(() => child.kill('SIGKILL'), 5000);
+    }, TIMEOUT_MS);
+    let spawnError;
+    child.on('error', error => { spawnError = error.message; });
     child.on('close', (code, signal) => {
       clearTimeout(timer);
-      done({ code, signal, stdout: readFileSync(outFile, 'utf8'), stderr: readFileSync(errFile, 'utf8'), wallMs: Date.now() - started });
+      clearTimeout(killTimer);
+      done({ code, signal, timedOut, spawnError, stdout: readFileSync(outFile, 'utf8'), stderr: readFileSync(errFile, 'utf8'), wallMs: Date.now() - started });
     });
   });
+}
+
+function archiveResult(out, group) {
+  const dest = join(RESULTS, group, `${out.split('/').at(-1)}__${Date.now()}__${randomUUID()}`);
+  mkdirSync(join(RESULTS, group), { recursive: true });
+  renameSync(out, dest);
+  return dest;
+}
+
+function invalidRun(out, work, meta, details, reason = 'isolation breach') {
+  // Keep the evidence and work copy; neither a retry nor the scorer can mistake it for a result.
+  const keptWork = existsSync(work) ? `${work}__invalid__${randomUUID()}` : undefined;
+  if (keptWork) renameSync(work, keptWork);
+  Object.assign(meta, { status: 'invalid', reason, isolation: details, work: keptWork });
+  writeFileSync(join(out, 'meta.json'), JSON.stringify(meta, null, 2));
+  const archived = archiveResult(out, '_invalid');
+  return { ...meta, archived };
 }
 
 /**
@@ -401,11 +432,22 @@ function runAgent(args, cwd, env, outFile, errFile) {
 export async function runOne(task, condition, repeat, allIds) {
   const id = `${task.id}__${condition}__r${repeat}`;
   const out = join(RESULTS, id);
-  rmSync(out, { recursive: true, force: true });
+  const opencode = task.batch === 5 ? await import('./opencode.mjs') : undefined;
+  if (opencode && existsSync(out)) archiveResult(out, '_attempts');
+  else rmSync(out, { recursive: true, force: true });
   mkdirSync(out, { recursive: true });
   const work = join(WORK, id);
   const { repo, bin, base, confine } = prepare(task, condition, work);
-  const env = agentEnv(bin, confine, join(work, 'tmp'));
+  if (opencode) {
+    const escaped = opencode.escapingSymlinks(repo);
+    if (escaped.length) return invalidRun(out, work, {
+      id, task: task.id, condition, repeat, agent: 'opencode', model: opencode.OPENCODE_MODEL,
+      phase: 'preflight', wall_ms: 0, tokens: { total: 0 },
+    }, escaped);
+    if (sh(which('opencode'), ['--version']).trim() !== '1.18.29') throw new Error('batch 5 requires opencode 1.18.29');
+  }
+  const launch = opencode ? opencode.opencodeLaunch(wrap(task.request), repo, bin, confine, work) : undefined;
+  const env = launch?.env ?? agentEnv(bin, confine, join(work, 'tmp'));
   const denyRead = [
     join(process.env.HOME, '.claude'), join(process.env.HOME, '.claude.json'), join(process.env.HOME, '.optmem'),
     join(process.env.HOME, '.config/spec-ledger'), '/home/dev/scratch', '/home/dev/repos/personal/memod',
@@ -415,24 +457,37 @@ export async function runOne(task, condition, repeat, allIds) {
   ];
   const prompt = wrap(task.request);
   writeFileSync(join(out, 'prompt.txt'), prompt);
-  const args = agentCommand(prompt, repo, denyRead, join(out, 'debug.log'));
+  const args = launch?.args ?? agentCommand(prompt, repo, denyRead, join(out, 'debug.log'));
   writeFileSync(join(out, 'command.json'), JSON.stringify({ cwd: repo, args, env, confine: readFileSync(confine, 'utf8') }, null, 2));
-  const r = await runAgent(args, repo, env, join(out, 'output.jsonl'), join(out, 'stderr.txt'));
+  const r = await runAgent(args, repo, env, join(out, 'output.jsonl'), join(out, 'stderr.txt'), launch?.agent);
   const events = readEvents(r.stdout);
-  const session = sessionSummary(events);
+  const session = launch ? opencode.opencodeSession(events) : sessionSummary(events);
   const init = events.find((e) => e.type === 'system' && e.subtype === 'init');
-  const tools = toolCalls(events);
-  sh('git', [...base, 'add', '-A'], { env: GIT_ENV });
-  const diff = sh('git', [...base, 'diff', '--cached', 'HEAD'], { env: GIT_ENV });
+  const tools = session.tools ?? toolCalls(events);
   writeFileSync(join(out, 'final.txt'), session.final);
-  writeFileSync(join(out, 'diff.patch'), diff);
   writeFileSync(join(out, 'tools.json'), JSON.stringify(tools, null, 2));
   const meta = {
-    id, task: task.id, condition, repeat, model: MODEL, status: r.code === 0 && session.success ? 'done' : 'error',
+    id, task: task.id, condition, repeat, ...(launch ? { agent: launch.agent } : {}), model: launch?.model ?? MODEL,
+    status: r.code === 0 && session.success && !(launch && r.timedOut) ? 'done' : 'error',
     exit: r.code, signal: r.signal, wall_ms: r.wallMs, api_ms: session.api_ms, turns: session.turns, replies: session.replies,
     cost_usd: session.cost_usd, tokens: session.tokens, model_usage: session.model_usage,
+    ...(launch ? { timed_out: r.timedOut, spawn_error: r.spawnError } : {}),
     init: init && { model: init.model, tools: init.tools, mcp_servers: init.mcp_servers, skills: init.skills, slash_commands: init.slash_commands, plugins: init.plugins, agents: init.agents, permissionMode: init.permissionMode, cwd: init.cwd },
   };
+  if (opencode) {
+    const breaches = opencode.isolationBreaches(repo, tools);
+    if (breaches.length) return invalidRun(out, work, meta, breaches);
+    const malformed = r.stdout.split('\n').filter(line => line.trim()).some(line => {
+      try { JSON.parse(line); return false; } catch { return true; }
+    });
+    if (malformed) return invalidRun(out, work, meta, [], 'harness failure: malformed JSONL');
+    if (r.spawnError) {
+      return invalidRun(out, work, meta, [], `harness failure: ${r.spawnError}`);
+    }
+  }
+  sh('git', [...base, 'add', '-A'], { env: GIT_ENV });
+  const diff = sh('git', [...base, 'diff', '--cached', 'HEAD'], { env: GIT_ENV });
+  writeFileSync(join(out, 'diff.patch'), diff);
   writeFileSync(join(out, 'meta.json'), JSON.stringify(meta, null, 2));
   rmSync(work, { recursive: true, force: true });
   return meta;
@@ -446,14 +501,16 @@ function option(argv, name, fallback) {
 async function main(argv) {
   const tasks = readTasks();
   const only = option(argv, '--only', undefined)?.split(',');
-  const conditions = option(argv, '--conditions', 'none,graph,stub').split(',');
+  const chosenConditions = option(argv, '--conditions', undefined)?.split(',');
   const repeats = Number(option(argv, '--repeats', '5'));
   const jobs = Math.min(3, Number(option(argv, '--jobs', '3')));
-  for (const c of conditions) if (!['none', 'graph', 'stub'].includes(c)) throw new Error(`unknown condition ${c}`);
+  for (const c of chosenConditions ?? []) if (!['none', 'graph', 'stub', 'graph-nosearch'].includes(c)) throw new Error(`unknown condition ${c}`);
   for (const t of only ?? []) if (!tasks.has(t)) throw new Error(`unknown task ${t}`);
   const plan = [];
   for (const t of tasks.values()) {
     if (only && !only.includes(t.id)) continue;
+    const conditions = chosenConditions ?? (t.batch === 5 ? ['none', 'stub', 'graph', 'graph-nosearch'] : ['none', 'graph', 'stub']);
+    if (t.batch !== 5 && conditions.includes('graph-nosearch')) throw new Error('graph-nosearch is batch 5 only');
     for (let r = 1; r <= repeats; r++) for (const c of conditions) plan.push({ task: t, condition: c, repeat: r, id: `${t.id}__${c}__r${r}` });
   }
   if (argv.includes('--reextract')) {
@@ -463,10 +520,13 @@ async function main(argv) {
       const dir = join(RESULTS, id);
       if (!existsSync(join(dir, 'output.jsonl')) || !existsSync(join(dir, 'meta.json'))) continue;
       const meta = JSON.parse(readFileSync(join(dir, 'meta.json'), 'utf8'));
-      const session = sessionSummary(readEvents(readFileSync(join(dir, 'output.jsonl'), 'utf8')));
+      if (meta.status === 'invalid') continue;
+      const events = readEvents(readFileSync(join(dir, 'output.jsonl'), 'utf8'));
+      const session = meta.agent === 'opencode' ? (await import('./opencode.mjs')).opencodeSession(events) : sessionSummary(events);
+      if (session.tools) writeFileSync(join(dir, 'tools.json'), JSON.stringify(session.tools, null, 2));
       writeFileSync(join(dir, 'final.txt'), session.final);
       Object.assign(meta, {
-        status: meta.exit === 0 && session.success ? 'done' : 'error',
+        status: meta.exit === 0 && session.success && !meta.timed_out ? 'done' : 'error',
         api_ms: session.api_ms, turns: session.turns, replies: session.replies,
         cost_usd: session.cost_usd, tokens: session.tokens, model_usage: session.model_usage,
       });
@@ -478,12 +538,16 @@ async function main(argv) {
   }
   const isDone = (p) => {
     const m = join(RESULTS, p.id, 'meta.json');
-    return existsSync(m) && JSON.parse(readFileSync(m, 'utf8')).status === 'done';
+    if (!existsSync(m)) return false;
+    const meta = JSON.parse(readFileSync(m, 'utf8'));
+    return meta.status === 'done' || (p.task.batch === 5 && meta.unscored === true);
   };
   const todo = plan.filter((p) => !isDone(p));
   console.log(`${plan.length} runs planned, ${plan.length - todo.length} already done, ${todo.length} to start`);
   if (argv.includes('--plan')) {
     for (const p of todo) console.log(`  ${p.id}`);
+    if (plan.some(p => p.task.batch !== 5)) console.error('Agent: Claude Code (claude --model sonnet)');
+    if (plan.some(p => p.task.batch === 5)) console.error(`Agent: opencode --model ${(await import('./opencode.mjs')).OPENCODE_MODEL}`);
     return 0;
   }
   const allIds = plan.map((p) => p.id);
@@ -493,7 +557,23 @@ async function main(argv) {
     while (next < todo.length) {
       const p = todo[next++];
       console.log(`start ${p.id}`);
-      const m = await runOne(p.task, p.condition, p.repeat, allIds);
+      let m = await runOne(p.task, p.condition, p.repeat, allIds);
+      if (p.task.batch === 5) {
+        if (m.status === 'invalid') {
+          console.error(`invalid ${p.id}: ${m.reason}; archived ${m.archived}; retrying once`);
+          m = await runOne(p.task, p.condition, p.repeat, allIds);
+          if (m.status === 'invalid') throw new Error(`repeated harness failure ${p.id}: ${m.reason}; archived ${m.archived}`);
+        }
+        if (m.timed_out) {
+          console.error(`timeout ${p.id}; retrying once`);
+          m = await runOne(p.task, p.condition, p.repeat, allIds);
+          if (m.status === 'invalid') throw new Error(`harness failure on timeout retry ${p.id}: ${m.reason}; archived ${m.archived}`);
+          if (m.timed_out) {
+            m.unscored = true;
+            writeFileSync(join(RESULTS, p.id, 'meta.json'), JSON.stringify(m, null, 2));
+          }
+        }
+      }
       if (m.status !== 'done') failed++;
       console.log(`${m.status.padEnd(5)} ${p.id}  ${Math.round(m.wall_ms / 1000)}s  ${m.tokens.total} tokens`);
     }

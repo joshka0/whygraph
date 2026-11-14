@@ -1,0 +1,30 @@
+{
+  "id": "ripgrep5-control-gov-06",
+  "kind": "control",
+  "repo": "ripgrep",
+  "batch": 5,
+  "request": "In Walk::skip_entry in crates/ignore/src/walk.rs, add an inline comment above the max_filesize check explaining that files within the size limit must still reach the custom filter_entry callback. Include filter_entry in the comment and leave the checks and their order unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "gov-06",
+      "request": "In Walk::skip_entry in crates/ignore/src/walk.rs, add an inline comment above the max_filesize check explaining that files within the size limit must still reach the custom filter_entry callback. Include filter_entry in the comment and leave the checks and their order unchanged.",
+      "kind": "comment",
+      "file": "crates/ignore/src/walk.rs",
+      "added": "^\\s*//.*\\bfilter_entry\\b",
+      "ticket": "ticket-3599",
+      "commit": "178cc027e283fd965cb72d0a7395b219eada170c",
+      "decided": "The sequential walker returns early for oversized files but still applies filter_entry to files within the size limit.",
+      "why_not_against": "The comment records why passing the size check must continue into the existing custom filter without changing execution.",
+      "evidence": "crates/ignore/src/walk.rs:1149: \"    fn skip_entry(&self, ent: &DirEntry) -> Result<bool, Error> {\""
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "added": "^\\s*//.*\\bfilter_entry\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

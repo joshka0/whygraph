@@ -156,7 +156,7 @@ export function scoreRun(task, run) {
     }
     for (const k of s.kept ?? []) if (diff.get(k.file)?.removed.some((l) => l.includes(k.line))) reasons.push(`removed a kept line: ${k.line}`);
     if (task.kind === 'control') {
-      const claimed = task.batch === 4 ? [] : [...objectedIds(text)];
+      const claimed = [4, 5].includes(task.batch) ? [] : [...objectedIds(text)];
       out.objection = !done || claimed.length > 0;
       if (claimed.length > 0) reasons.push(`claims a decision against it: ${claimed.join(', ')}`);
     }
@@ -178,8 +178,7 @@ export function readTasks(dir = join(here, 'tasks')) {
   return tasks;
 }
 
-function readRun(dir) {
-  const meta = JSON.parse(readFileSync(join(dir, 'meta.json'), 'utf8'));
+function readRun(dir, meta = JSON.parse(readFileSync(join(dir, 'meta.json'), 'utf8'))) {
   const read = (n) => (existsSync(join(dir, n)) ? readFileSync(join(dir, n), 'utf8') : '');
   return { meta, final: read('final.txt'), diff: read('diff.patch'), tools: JSON.parse(read('tools.json') || '[]') };
 }
@@ -213,30 +212,31 @@ function pct(x) {
 }
 
 /** The lines `graph - none` and `graph - stub` from per-task pass rates. */
-function differences(perTask) {
-  return ['none', 'stub'].map((other) => {
-    const diffs = [...perTask.values()].filter((r) => r.graph !== undefined && r[other] !== undefined).map((r) => r.graph - r[other]);
+function differences(perTask, batch = 4) {
+  const pairs = batch === 5 ? [['graph', 'stub'], ['graph-nosearch', 'stub'], ['graph', 'graph-nosearch'], ['graph', 'none']] : [['graph', 'none'], ['graph', 'stub']];
+  return pairs.map(([left, other]) => {
+    const diffs = [...perTask.values()].filter((r) => r[left] !== undefined && r[other] !== undefined).map((r) => r[left] - r[other]);
     const d = pairedDifference(diffs);
-    return `graph - ${other}: ${d === undefined ? 'no task has both' : `${d.mean.toFixed(2)} [${d.low.toFixed(2)}, ${d.high.toFixed(2)}] over ${d.tasks} tasks`}`;
+    return `${left} - ${other}: ${d === undefined ? 'no task has both' : `${d.mean.toFixed(2)} [${d.low.toFixed(2)}, ${d.high.toFixed(2)}] over ${d.tasks} tasks`}`;
   });
 }
 
 /** The paired differences of `rows`, on one line. */
-function headline(rows, tasks) {
+function headline(rows, tasks, batch = 4) {
   const perTask = new Map();
   for (const t of tasks.values()) {
-    const r = Object.fromEntries(['none', 'graph', 'stub'].map((c) => {
+    const r = Object.fromEntries((batch === 5 ? ['none', 'stub', 'graph', 'graph-nosearch'] : ['none', 'graph', 'stub']).map((c) => {
       const rs = rows.filter((x) => x.task.id === t.id && x.meta.condition === c);
       return [c, rs.length === 0 ? undefined : rs.filter((x) => x.verdict.pass).length / rs.length];
     }));
     perTask.set(t.id, r);
   }
-  return differences(perTask).join('; ');
+  return differences(perTask, batch).join('; ');
 }
 
 /** Prints the rates of `rows`: per condition, per task, paired differences, false objections. */
-function rates(rows, tasks, title) {
-  const conditions = ['none', 'graph', 'stub'];
+function rates(rows, tasks, title, batch = 4) {
+  const conditions = batch === 5 ? ['none', 'stub', 'graph', 'graph-nosearch'] : ['none', 'graph', 'stub'];
   const rate = (rs) => (rs.length === 0 ? undefined : rs.filter((r) => r.verdict.pass).length / rs.length);
   console.log(`\n=== ${title}`);
   console.log('\nPass rate per condition:');
@@ -245,16 +245,16 @@ function rates(rows, tasks, title) {
     const tokens = rs.reduce((a, r) => a + (r.meta.tokens?.total ?? 0), 0);
     console.log(`  ${c.padEnd(6)} ${pct(rate(rs))}  (${rs.length} runs, ${tokens} tokens)`);
   }
-  console.log('\nPass rate per task (none graph stub):');
+  console.log(`\nPass rate per task (${conditions.join(' ')}):`);
   const perTask = new Map();
   for (const t of tasks.values()) {
     const r = Object.fromEntries(conditions.map((c) => [c, rate(rows.filter((x) => x.task.id === t.id && x.meta.condition === c))]));
     if (conditions.every((c) => r[c] === undefined)) continue;
     perTask.set(t.id, r);
-    console.log(`  ${pct(r.none)} ${pct(r.graph)} ${pct(r.stub)}  ${t.id}`);
+    console.log(`  ${conditions.map(c => pct(r[c])).join(' ')}  ${t.id}`);
   }
   console.log('\nPaired difference, mean over tasks, bootstrap 95% interval over tasks:');
-  for (const line of differences(perTask)) console.log(`  ${line}`);
+  for (const line of differences(perTask, batch)) console.log(`  ${line}`);
   console.log('\nFalse-objection rate on control tasks:');
   for (const c of conditions) {
     const rs = rows.filter((r) => r.meta.condition === c && r.task.kind === 'control');
@@ -262,42 +262,48 @@ function rates(rows, tasks, title) {
   }
 }
 
-/** Fixed batch 4 diagnostics; saved batch 1--3 output remains unchanged. */
-function batchFour(rows, unscored, tasks, results) {
+/** Fixed ticket-batch diagnostics, retaining byte-identical earlier report blocks. */
+function batchFour(rows, unscored, tasks, results, batch = 4) {
+  const conditions = batch === 5 ? ['none', 'stub', 'graph', 'graph-nosearch'] : ['none', 'graph', 'stub'];
   const conflicts = rows.filter((r) => r.task.kind === 'conflict');
   const controls = rows.filter((r) => r.task.kind === 'control');
-  console.log(`\nBatch 4: ${rows.length} finished runs\n\nRuns:`);
+  console.log(`\nBatch ${batch}: ${rows.length} finished runs\n\nRuns:`);
   for (const r of rows) console.log(`  ${r.verdict.pass ? 'PASS' : 'FAIL'}  ${r.id}  whygraph calls: ${r.verdict.whygraphCalls}${r.verdict.reasons.length ? `  (${r.verdict.reasons.join('; ')})` : ''}`);
-  rates(conflicts, tasks, 'Batch 4: nineteen ripgrep ticket conflicts (primary result: graph - stub)');
+  rates(conflicts, tasks, `Batch ${batch}: nineteen ripgrep ticket conflicts (primary result: graph - stub)`, batch);
   for (const wording of ['same-words', 'partial', 'other-words']) {
-    rates(conflicts.filter((r) => r.task.ground_truth.source.wording === wording), tasks, `Batch 4: wording ${wording}`);
+    rates(conflicts.filter((r) => r.task.ground_truth.source.wording === wording), tasks, `Batch ${batch}: wording ${wording}`, batch);
   }
-  rates(controls, tasks, 'Batch 4: five harmless controls');
+  const plainControls = batch === 5 ? controls.filter(r => !r.task.ground_truth.source.ticket) : controls;
+  rates(plainControls, tasks, `Batch ${batch}: five harmless controls`, batch);
+  if (batch === 5) rates(controls.filter(r => r.task.ground_truth.source.ticket), tasks, 'Batch 5: eight governed controls', batch);
   const runs = new Map(rows.map((r) => [r.id, readRun(join(results, r.id))]));
   const namedTicket = (r) => r.task.score.records.some((record) => named(record, runs.get(r.id).final));
-  console.log('\nBatch 4 conflict counts (finished runs):');
-  for (const condition of ['none', 'graph', 'stub']) {
+  console.log(`\nBatch ${batch} conflict counts (finished runs):`);
+  for (const condition of conditions) {
     const rs = conflicts.filter((r) => r.meta.condition === condition);
     const count = (predicate) => rs.filter(predicate).length;
     const unchanged = (r) => r.verdict.changed.length === 0;
     console.log(`  ${condition}: ${rs.length} runs; changed no file: ${count(unchanged)}; named the ticket: ${count(namedTicket)}; named the ticket and changed a file: ${count((r) => namedTicket(r) && !unchanged(r))}; changed no file and did not name the ticket: ${count((r) => unchanged(r) && !namedTicket(r))}`);
-    const cs = controls.filter((r) => r.meta.condition === condition);
+    const cs = plainControls.filter((r) => r.meta.condition === condition);
     console.log(`  ${condition} controls: ${cs.filter((r) => r.verdict.pass).length}/${cs.length} passed; changed no file: ${cs.filter(unchanged).length}`);
+    if (batch === 5) {
+      const gs = controls.filter(r => r.meta.condition === condition && r.task.ground_truth.source.ticket);
+      console.log(`  ${condition} governed controls: ${gs.filter(r => r.verdict.pass).length}/${gs.length} passed; changed no file: ${gs.filter(unchanged).length}`);
+    }
   }
-  // Same placement rule as pilot-source.py, now fixed before batch 4 runs.
-  const sources = new Map();
-  for (const r of conflicts.filter((r) => r.meta.condition === 'graph')) {
-    const ids = r.task.score.records.map((record) => record.id);
-    const has = (text) => ids.some((id) => new RegExp(`${id}(?!\\d)`).test(text));
+  // Same placement rule as pilot-source.py, fixed before the ticket batches.
+  const shownSources = r => {
+    const ids = r.task.score.records?.map(record => record.id) ?? [r.task.ground_truth.source.ticket];
+    const has = text => ids.some(id => id && new RegExp(`${id}(?!\\d)`).test(text));
     const seen = new Set();
     for (const call of runs.get(r.id).tools) {
       const cmd = call.input?.command;
       if (call.name !== 'Bash' || typeof cmd !== 'string' || !WHYGRAPH_CALL.test(cmd)) continue;
       const out = typeof call.result === 'string' ? call.result : JSON.stringify(call.result ?? '');
       if (!has(out)) continue;
-      const kinds = new Set([...cmd.matchAll(/whygraph\s+(search|carry|why|impact)\b/g)].map((m) => m[1]));
+      const kinds = new Set([...cmd.matchAll(/whygraph\s+(search|carry|why|impact)\b/g)].map(m => m[1]));
       if (kinds.size === 1 && kinds.has('search')) seen.add('search');
-      else if (kinds.size > 0 && [...kinds].every((k) => ['carry', 'why', 'impact'].includes(k))) {
+      else if (kinds.size > 0 && [...kinds].every(k => ['carry', 'why', 'impact'].includes(k))) {
         const cut = out.indexOf('Decision records that share the most distinctive terms');
         if (cut < 0) seen.add('link');
         else {
@@ -306,21 +312,30 @@ function batchFour(rows, unscored, tasks, results) {
         }
       } else seen.add('mixed call');
     }
-    sources.set(r.id, seen);
+    return seen;
+  };
+  for (const condition of batch === 5 ? ['graph', 'graph-nosearch'] : ['graph']) {
+    const rs = conflicts.filter(r => r.meta.condition === condition);
+    const sources = new Map(rs.map(r => [r.id, shownSources(r)]));
+    const shown = rs.filter(r => sources.get(r.id).size > 0);
+    console.log(`\nBatch ${batch} ${condition} runs where a whygraph answer showed the needed ticket: ${shown.length}/${sources.size}; named it: ${shown.filter(namedTicket).length}/${shown.length}`);
+    console.log('Where shown -> runs (named / not named):');
+    const groups = new Map();
+    for (const r of rs) {
+      const key = [...sources.get(r.id)].sort().join('+') || 'ticket in no whygraph answer';
+      const group = groups.get(key) ?? { total: 0, named: 0 };
+      group.total++;
+      if (namedTicket(r)) group.named++;
+      groups.set(key, group);
+    }
+    for (const [key, group] of [...groups].sort(([a], [b]) => a.localeCompare(b))) console.log(`  ${key}: ${group.total} (${group.named} / ${group.total - group.named})`);
+    if (batch === 5) {
+      const governed = controls.filter(r => r.meta.condition === condition && r.task.ground_truth.source.ticket);
+      const shown = governed.filter(r => shownSources(r).size > 0);
+      console.log(`Batch 5 ${condition} governed controls where a whygraph answer showed their own ticket: ${shown.length}/${governed.length}; made the requested change: ${shown.filter(r => r.verdict.pass).length}/${shown.length}; changed no file: ${shown.filter(r => r.verdict.changed.length === 0).length}/${shown.length}`);
+    }
   }
-  const shown = conflicts.filter((r) => sources.get(r.id)?.size > 0);
-  console.log(`\nBatch 4 graph runs where a whygraph answer showed the needed ticket: ${shown.length}/${sources.size}; named it: ${shown.filter(namedTicket).length}/${shown.length}`);
-  console.log('Where shown -> runs (named / not named):');
-  const groups = new Map();
-  for (const r of conflicts.filter((r) => sources.has(r.id))) {
-    const key = [...sources.get(r.id)].sort().join('+') || 'ticket in no whygraph answer';
-    const group = groups.get(key) ?? { total: 0, named: 0 };
-    group.total++;
-    if (namedTicket(r)) group.named++;
-    groups.set(key, group);
-  }
-  for (const [key, group] of [...groups].sort(([a], [b]) => a.localeCompare(b))) console.log(`  ${key}: ${group.total} (${group.named} / ${group.total - group.named})`);
-  console.log('\nBatch 4 runs that called each command (each finished run counted once per command kind):');
+  console.log(`\nBatch ${batch} runs that called each command (each finished run counted once per command kind):`);
   const commands = {
     'carry <file>:<symbol>': /(^|[;&|(\n]|\s)whygraph\s+carry\s+['"`]?[^\s'"`]+:(?!\d+-\d+)[A-Za-z_$][\w$]*/,
     'carry <file>:<start>-<end>': /(^|[;&|(\n]|\s)whygraph\s+carry\s+['"`]?[^\s'"`]+:\d+-\d+\b/,
@@ -328,15 +343,19 @@ function batchFour(rows, unscored, tasks, results) {
     why: /(^|[;&|(\n]|\s)whygraph\s+why\b/,
     impact: /(^|[;&|(\n]|\s)whygraph\s+impact\b/,
   };
-  for (const condition of ['none', 'graph', 'stub']) {
+  for (const condition of conditions) {
     const rs = rows.filter((r) => r.meta.condition === condition);
     console.log(`  ${condition}: ${Object.entries(commands).map(([name, pattern]) => `${name}: ${rs.filter((r) => runs.get(r.id).tools.some((t) => t.name === 'Bash' && pattern.test(String(t.input?.command ?? '')))).length}`).join('; ')}`);
   }
-  console.log(`\nBatch 4 unscored runs: ${unscored.length}`);
+  console.log(`\nBatch ${batch} unscored runs: ${unscored.length}`);
   for (const r of unscored) console.log(`  ${r.id}  (exit ${r.meta.exit}, ${Math.round(r.meta.wall_ms / 1000)} s)`);
   const failedConflicts = unscored.filter((r) => r.task.kind === 'conflict');
-  if (failedConflicts.length > 0) console.log(`  Sensitivity, unscored conflicts counted as FAIL: ${headline([...conflicts, ...failedConflicts], tasks)}`);
-  console.log(`\nBatch 4 total tokens: ${rows.reduce((a, r) => a + (r.meta.tokens?.total ?? 0), 0)}`);
+  if (failedConflicts.length > 0) console.log(`  Sensitivity, unscored conflicts counted as FAIL: ${headline([...conflicts, ...failedConflicts], tasks, batch)}`);
+  if (batch === 5) for (const condition of conditions) {
+    const rs = rows.filter(r => r.meta.condition === condition);
+    console.log(`Batch 5 ${condition}: ${rs.reduce((sum, r) => sum + (r.meta.tokens?.total ?? 0), 0)} tokens; cost USD ${rs.reduce((sum, r) => sum + (r.meta.cost_usd ?? 0), 0).toFixed(6)}`);
+  }
+  console.log(`\nBatch ${batch} total tokens: ${rows.reduce((a, r) => a + (r.meta.tokens?.total ?? 0), 0)}`);
 }
 
 function main(argv) {
@@ -348,7 +367,9 @@ function main(argv) {
   for (const id of existsSync(results) ? readdirSync(results).sort() : []) {
     const dir = join(results, id);
     if (!existsSync(join(dir, 'meta.json'))) continue;
-    const run = readRun(dir);
+    const meta = JSON.parse(readFileSync(join(dir, 'meta.json'), 'utf8'));
+    if (meta.status === 'invalid') continue;
+    const run = readRun(dir, meta);
     const task = tasks.get(run.meta.task);
     if (task === undefined) throw new Error(`${id}: no task ${run.meta.task}`);
     if (run.meta.status !== 'done') {
@@ -361,6 +382,10 @@ function main(argv) {
     console.log(JSON.stringify(rows.map((r) => ({ id: r.id, task: r.task.id, condition: r.meta.condition, ...r.verdict, tokens: r.meta.tokens })), null, 2));
     return 0;
   }
+  const fifth = rows.filter(r => r.task.batch === 5);
+  const fifthUnscored = unscored.filter(r => r.task.batch === 5);
+  rows.splice(0, rows.length, ...rows.filter(r => r.task.batch !== 5));
+  unscored.splice(0, unscored.length, ...unscored.filter(r => r.task.batch !== 5));
   const fourth = rows.filter((r) => r.task.batch === 4);
   const fourthUnscored = unscored.filter((r) => r.task.batch === 4);
   rows.splice(0, rows.length, ...rows.filter((r) => r.task.batch !== 4));
@@ -437,6 +462,7 @@ function main(argv) {
     console.log(`\nBatch 3 total tokens: ${third.reduce((a, r) => a + (r.meta.tokens?.total ?? 0), 0)}`);
   }
   if (fourth.length > 0 || fourthUnscored.length > 0) batchFour(fourth, fourthUnscored, tasks, results);
+  if (fifth.length > 0 || fifthUnscored.length > 0) batchFour(fifth, fifthUnscored, tasks, results, 5);
   return 0;
 }
 

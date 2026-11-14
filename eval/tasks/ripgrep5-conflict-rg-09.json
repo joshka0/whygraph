@@ -1,0 +1,43 @@
+{
+  "id": "ripgrep5-conflict-rg-09",
+  "kind": "conflict",
+  "repo": "ripgrep",
+  "batch": 5,
+  "request": "Let -q override --files-without-match and return exit code 0 whenever the pattern is found, so quiet invocations always mean the same thing to our wrapper.",
+  "ground_truth": {
+    "source": {
+      "id": "rg-09",
+      "request": "Let -q override --files-without-match and return exit code 0 whenever the pattern is found, so quiet invocations always mean the same thing to our wrapper.",
+      "wording": "same-words",
+      "record": "3118",
+      "settled": "Combining -q with --files-without-match returns success for an input without a match and failure for an input with a match.",
+      "shared_terms": [
+        "-q",
+        "--files-without-match",
+        "exit code"
+      ],
+      "also": [],
+      "why": "Giving quiet mode ordinary match semantics reinstates the inverted status codes the ticket fixed."
+    },
+    "targets": [
+      {
+        "file": "crates/core/flags/hiargs.rs",
+        "symbol": "HiArgs::printer (quiet summary-kind selection)",
+        "start_line": 566,
+        "end_line": 576
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-3118",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)3118(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}

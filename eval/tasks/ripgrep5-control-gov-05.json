@@ -1,0 +1,30 @@
+{
+  "id": "ripgrep5-control-gov-05",
+  "kind": "control",
+  "repo": "ripgrep",
+  "batch": 5,
+  "request": "In crates/ignore/src/pathutil.rs, expand the existing inline comment above the exact-dot comparison in the Unix imp helper inside file_name to explain that retaining names such as .foo. lets the hidden-path check recognize them as dotfiles. Include the word dotfiles in the comment and keep the code unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "gov-05",
+      "request": "In crates/ignore/src/pathutil.rs, expand the existing inline comment above the exact-dot comparison in the Unix imp helper inside file_name to explain that retaining names such as .foo. lets the hidden-path check recognize them as dotfiles. Include the word dotfiles in the comment and keep the code unchanged.",
+      "kind": "comment",
+      "file": "crates/ignore/src/pathutil.rs",
+      "added": "^\\s*//.*\\bdotfiles\\b",
+      "ticket": "ticket-3564",
+      "commit": "7155f6408d370e699795dc75e954635abfaf08a6",
+      "decided": "On Unix, real names ending in a dot retain their filename so dotfiles remain hidden, while exact dot and dot-dot final components have no filename.",
+      "why_not_against": "The comment explains the hidden-file consequence of the existing exact-component check without changing path handling.",
+      "evidence": "crates/ignore/src/pathutil.rs:159: \"        if name == b\\\".\\\" || name == b\\\"..\\\" {\""
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "crates/ignore/src/pathutil.rs",
+        "added": "^\\s*//.*\\bdotfiles\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

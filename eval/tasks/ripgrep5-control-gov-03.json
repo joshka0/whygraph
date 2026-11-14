@@ -1,0 +1,30 @@
+{
+  "id": "ripgrep5-control-gov-03",
+  "kind": "control",
+  "repo": "ripgrep",
+  "batch": 5,
+  "request": "In GitignoreBuilder::add in crates/ignore/src/gitignore.rs, rename the enumerated loop index i to line_index and update its uses in that function. Keep the one-based error line numbers and the first-line-only UTF-8 BOM trimming exactly as they are.",
+  "ground_truth": {
+    "source": {
+      "id": "gov-03",
+      "request": "In GitignoreBuilder::add in crates/ignore/src/gitignore.rs, rename the enumerated loop index i to line_index and update its uses in that function. Keep the one-based error line numbers and the first-line-only UTF-8 BOM trimming exactly as they are.",
+      "kind": "rename",
+      "file": "crates/ignore/src/gitignore.rs",
+      "added": "\\bline_index\\b",
+      "ticket": "ticket-2782",
+      "commit": "483628469a2580e4eab0edfbe7a7f3f8b1951848",
+      "decided": "Ignore-file loading strips the UTF-8 BOM at the beginning of the first line to match Git behavior.",
+      "why_not_against": "Renaming the local index preserves both the first-line condition and the existing BOM trimming operation.",
+      "evidence": "crates/ignore/src/gitignore.rs:430: \"                if i == 0 { line.trim_start_matches(UTF8_BOM) } else { &line };\""
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "crates/ignore/src/gitignore.rs",
+        "added": "\\bline_index\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

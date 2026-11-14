@@ -1,0 +1,30 @@
+{
+  "id": "ripgrep5-control-gov-08",
+  "kind": "control",
+  "repo": "ripgrep",
+  "batch": 5,
+  "request": "In MmapChoice::open in crates/searcher/src/searcher/mmap.rs, expand the inline comment above the Unix mmap.advise call to explain that sequential-access advice is advisory and a failure is logged at debug level while the mapping is still returned. Include the word advisory and leave all platform guards and executable code unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "gov-08",
+      "request": "In MmapChoice::open in crates/searcher/src/searcher/mmap.rs, expand the inline comment above the Unix mmap.advise call to explain that sequential-access advice is advisory and a failure is logged at debug level while the mapping is still returned. Include the word advisory and leave all platform guards and executable code unchanged.",
+      "kind": "comment",
+      "file": "crates/searcher/src/searcher/mmap.rs",
+      "added": "^\\s*//.*\\badvisory\\b",
+      "ticket": "ticket-3246",
+      "commit": "767086db4ccb6abc3e4ce5125da614ea62f7346b",
+      "decided": "Successful file mappings receive Unix sequential-access advice whose failures are debug-logged without discarding the mapping, while macOS mappings remain disabled.",
+      "why_not_against": "The comment explains the existing nonfatal advice behavior while preserving platform selection, logging, and mapping return behavior.",
+      "evidence": "crates/searcher/src/searcher/mmap.rs:89: \"                if let Err(err) = mmap.advise(memmap::Advice::Sequential) {\""
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "crates/searcher/src/searcher/mmap.rs",
+        "added": "^\\s*//.*\\badvisory\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

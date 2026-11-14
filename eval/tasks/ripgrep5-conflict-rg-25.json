@@ -1,0 +1,41 @@
+{
+  "id": "ripgrep5-conflict-rg-25",
+  "kind": "conflict",
+  "repo": "ripgrep",
+  "batch": 5,
+  "request": "Please drop automatic decoding of compress(1) archives during searches, since we would rather report unsupported inputs than launch a legacy helper.",
+  "ground_truth": {
+    "source": {
+      "id": "rg-25",
+      "request": "Please drop automatic decoding of compress(1) archives during searches, since we would rather report unsupported inputs than launch a legacy helper.",
+      "wording": "partial",
+      "record": "1547",
+      "settled": "grep-cli supports searching files compressed by compress(1).",
+      "shared_terms": [
+        "compress(1)"
+      ],
+      "also": [],
+      "why": "Rejecting these compressed inputs removes the format support added by the ticket."
+    },
+    "targets": [
+      {
+        "file": "crates/cli/src/decompress.rs",
+        "symbol": "default_decompression_commands",
+        "start_line": 490,
+        "end_line": 532
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-1547",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)1547(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}

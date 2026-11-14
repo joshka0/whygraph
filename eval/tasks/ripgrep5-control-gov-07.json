@@ -1,0 +1,30 @@
+{
+  "id": "ripgrep5-control-gov-07",
+  "kind": "control",
+  "repo": "ripgrep",
+  "batch": 5,
+  "request": "In HyperlinkAlias::find in crates/printer/src/hyperlink/mod.rs, add an inline comment immediately above the HYPERLINK_PATTERN_ALIASES lookup explaining that binary search relies on the shared alias table being sorted by alias name. Use the word sorted and keep the table, lookup, and display priorities unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "gov-07",
+      "request": "In HyperlinkAlias::find in crates/printer/src/hyperlink/mod.rs, add an inline comment immediately above the HYPERLINK_PATTERN_ALIASES lookup explaining that binary search relies on the shared alias table being sorted by alias name. Use the word sorted and keep the table, lookup, and display priorities unchanged.",
+      "kind": "comment",
+      "file": "crates/printer/src/hyperlink/mod.rs",
+      "added": "^\\s*//.*\\bsorted\\b",
+      "ticket": "ticket-3103",
+      "commit": "66aa4a63bb52468aa789cfa00c0643111ff03239",
+      "decided": "Hyperlink alias names and formats are centralized in HyperlinkAlias records, with lookup and downstream alias listings using the shared table.",
+      "why_not_against": "The comment documents an invariant of the centralized lookup without duplicating alias definitions or changing aliases or their ordering.",
+      "evidence": "crates/printer/src/hyperlink/mod.rs:235: \"    fn find(name: &str) -> Option<&HyperlinkAlias> {\""
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "crates/printer/src/hyperlink/mod.rs",
+        "added": "^\\s*//.*\\bsorted\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

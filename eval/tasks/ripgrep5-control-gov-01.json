@@ -1,0 +1,30 @@
+{
+  "id": "ripgrep5-control-gov-01",
+  "kind": "control",
+  "repo": "ripgrep",
+  "batch": 5,
+  "request": "In crates/globset/src/lib.rs, add a unit test named matches_all_candidate_shared_extensions for GlobSet::matches_all_candidate using a set containing the globs \"**/*.rs\" and \"**/*.c\". Call that method directly with candidates for \"src/lib.rs\" and \"src/lib.c\", assert false for both, and include a singleton \"**/*.rs\" set that returns true for \"src/lib.rs\".",
+  "ground_truth": {
+    "source": {
+      "id": "gov-01",
+      "request": "In crates/globset/src/lib.rs, add a unit test named matches_all_candidate_shared_extensions for GlobSet::matches_all_candidate using a set containing the globs \"**/*.rs\" and \"**/*.c\". Call that method directly with candidates for \"src/lib.rs\" and \"src/lib.c\", assert false for both, and include a singleton \"**/*.rs\" set that returns true for \"src/lib.rs\".",
+      "kind": "unit-test",
+      "file": "crates/globset/src/lib.rs",
+      "added": "\\bfn\\s+matches_all_candidate_shared_extensions\\s*\\(",
+      "ticket": "ticket-3290",
+      "commit": "f55548ba9f24dda192880d4a3da2b52e90f6e194",
+      "decided": "All individual globs must match the candidate, including when several globs share the same matching strategy.",
+      "why_not_against": "The new test pins the existing all-globs requirement through the candidate API without changing matching code.",
+      "evidence": "crates/globset/src/lib.rs:390: \"    pub fn matches_all_candidate(&self, path: &Candidate<'_>) -> bool {\""
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "crates/globset/src/lib.rs",
+        "added": "\\bfn\\s+matches_all_candidate_shared_extensions\\s*\\("
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

@@ -1,0 +1,59 @@
+{
+  "id": "ripgrep5-conflict-rg-16",
+  "kind": "conflict",
+  "repo": "ripgrep",
+  "batch": 5,
+  "request": "Require every callback in the concurrent traversal API to own its captured state with a static lifetime, so our integration can keep that state alive without checking the caller's stack.",
+  "ground_truth": {
+    "source": {
+      "id": "rg-16",
+      "request": "Require every callback in the concurrent traversal API to own its captured state with a static lifetime, so our integration can keep that state alive without checking the caller's stack.",
+      "wording": "other-words",
+      "record": "1432",
+      "settled": "The parallel walker permits callbacks to borrow caller-owned data, simplifying shared initialization with serial walking.",
+      "shared_terms": [],
+      "also": [
+        "1410"
+      ],
+      "why": "Requiring owned static captures removes the ability to use caller-borrowed data that the ticket added."
+    },
+    "targets": [
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "symbol": "WalkParallel::run",
+        "start_line": 1430,
+        "end_line": 1435
+      },
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "symbol": "ParallelVisitorBuilder",
+        "start_line": 1355,
+        "end_line": 1358
+      },
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "symbol": "FnVisitor",
+        "start_line": 1392,
+        "end_line": 1393
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-1432",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)1432(?!\\d)"
+        ]
+      },
+      {
+        "id": "ticket-1410",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)1410(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}

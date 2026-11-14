@@ -1,0 +1,47 @@
+{
+  "id": "ripgrep5-conflict-rg-24",
+  "kind": "conflict",
+  "repo": "ripgrep",
+  "batch": 5,
+  "request": "Make from_iter start from the current working directory when supplied with zero inputs, so our job does not silently do nothing when its input list is blank.",
+  "ground_truth": {
+    "source": {
+      "id": "rg-24",
+      "request": "Make from_iter start from the current working directory when supplied with zero inputs, so our job does not silently do nothing when its input list is blank.",
+      "wording": "partial",
+      "record": "3261",
+      "settled": "WalkBuilder::from_iter yields an empty walk for an empty iterator, producing zero items.",
+      "shared_terms": [
+        "from_iter"
+      ],
+      "also": [],
+      "why": "Searching the current directory for zero inputs violates the explicitly empty traversal behavior."
+    },
+    "targets": [
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "symbol": "WalkBuilder::from_iter",
+        "start_line": 582,
+        "end_line": 590
+      },
+      {
+        "file": "crates/ignore/src/walk.rs",
+        "symbol": "Walk::from_iter",
+        "start_line": 1143,
+        "end_line": 1147
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-3261",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)3261(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}

@@ -1,0 +1,51 @@
+{
+  "id": "ripgrep5-conflict-rg-18",
+  "kind": "conflict",
+  "repo": "ripgrep",
+  "batch": 5,
+  "request": "Make diagnostic reporting a required transitive library even for consumers who disable all default features, so dependency graphs stay identical across our products.",
+  "ground_truth": {
+    "source": {
+      "id": "rg-18",
+      "request": "Make diagnostic reporting a required transitive library even for consumers who disable all default features, so dependency graphs stay identical across our products.",
+      "wording": "other-words",
+      "record": "1910",
+      "settled": "The log dependency is optional but enabled by default, allowing consumers to build globset without it.",
+      "shared_terms": [],
+      "also": [],
+      "why": "Making the reporting library mandatory removes the dependency opt-out that the ticket introduced."
+    },
+    "targets": [
+      {
+        "file": "crates/globset/Cargo.toml",
+        "symbol": "dependencies.log",
+        "start_line": 26,
+        "end_line": 26
+      },
+      {
+        "file": "crates/globset/Cargo.toml",
+        "symbol": "features",
+        "start_line": 43,
+        "end_line": 49
+      },
+      {
+        "file": "crates/globset/src/lib.rs",
+        "symbol": "debug macro feature branches",
+        "start_line": 145,
+        "end_line": 153
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-1910",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)1910(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}

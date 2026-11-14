@@ -1,0 +1,98 @@
+[
+  {
+    "id": "gov-01",
+    "request": "In crates/globset/src/lib.rs, add a unit test named matches_all_candidate_shared_extensions for GlobSet::matches_all_candidate using a set containing the globs \"**/*.rs\" and \"**/*.c\". Call that method directly with candidates for \"src/lib.rs\" and \"src/lib.c\", assert false for both, and include a singleton \"**/*.rs\" set that returns true for \"src/lib.rs\".",
+    "kind": "unit-test",
+    "file": "crates/globset/src/lib.rs",
+    "added": "\\bfn\\s+matches_all_candidate_shared_extensions\\s*\\(",
+    "ticket": "ticket-3290",
+    "commit": "f55548ba9f24dda192880d4a3da2b52e90f6e194",
+    "decided": "All individual globs must match the candidate, including when several globs share the same matching strategy.",
+    "why_not_against": "The new test pins the existing all-globs requirement through the candidate API without changing matching code.",
+    "evidence": "crates/globset/src/lib.rs:390: \"    pub fn matches_all_candidate(&self, path: &Candidate<'_>) -> bool {\""
+  },
+  {
+    "id": "gov-02",
+    "request": "In crates/matcher/src/lib.rs, add a unit test named captures_as_match_uses_group_zero in a test-only module for the default Captures::as_match method. Use a small test-only Captures implementation with group zero equal to Match::new(2, 7) and group one equal to Match::new(3, 5), leave as_match unoverridden, and assert that as_match returns Match::new(2, 7).",
+    "kind": "unit-test",
+    "file": "crates/matcher/src/lib.rs",
+    "added": "\\bfn\\s+captures_as_match_uses_group_zero\\s*\\(",
+    "ticket": "ticket-2898",
+    "commit": "bf63fe8f258afc09bae6caa48f0ae35eaf115005",
+    "decided": "Captures::as_match provides the overall match by returning get(0).unwrap().",
+    "why_not_against": "The test verifies the default method returns group zero even when a distinct subgroup exists, leaving the trait and its implementation unchanged.",
+    "evidence": "crates/matcher/src/lib.rs:397: \"    fn as_match(&self) -> Match {\""
+  },
+  {
+    "id": "gov-03",
+    "request": "In GitignoreBuilder::add in crates/ignore/src/gitignore.rs, rename the enumerated loop index i to line_index and update its uses in that function. Keep the one-based error line numbers and the first-line-only UTF-8 BOM trimming exactly as they are.",
+    "kind": "rename",
+    "file": "crates/ignore/src/gitignore.rs",
+    "added": "\\bline_index\\b",
+    "ticket": "ticket-2782",
+    "commit": "483628469a2580e4eab0edfbe7a7f3f8b1951848",
+    "decided": "Ignore-file loading strips the UTF-8 BOM at the beginning of the first line to match Git behavior.",
+    "why_not_against": "Renaming the local index preserves both the first-line condition and the existing BOM trimming operation.",
+    "evidence": "crates/ignore/src/gitignore.rs:430: \"                if i == 0 { line.trim_start_matches(UTF8_BOM) } else { &line };\""
+  },
+  {
+    "id": "gov-04",
+    "request": "In Candidate::from_cow in crates/globset/src/lib.rs, rename the local ext binding to extension and initialize the existing ext field explicitly from it. Keep the normalization, basename extraction, extension extraction, and borrowed data handling exactly as they are.",
+    "kind": "rename",
+    "file": "crates/globset/src/lib.rs",
+    "added": "\\bextension\\b",
+    "ticket": "ticket-2955",
+    "commit": "79f5a5a66e68aa50ef9f63ded777e640d345df5e",
+    "decided": "Candidate::from_bytes accepts byte paths and shares normalization and candidate-component extraction with Candidate::new through from_cow.",
+    "why_not_against": "Only a local binding and its field initializer spelling change, preserving the shared constructor logic and ownership behavior.",
+    "evidence": "crates/globset/src/lib.rs:644: \"    fn from_cow(path: Cow<'a, [u8]>) -> Candidate<'a> {\""
+  },
+  {
+    "id": "gov-05",
+    "request": "In crates/ignore/src/pathutil.rs, expand the existing inline comment above the exact-dot comparison in the Unix imp helper inside file_name to explain that retaining names such as .foo. lets the hidden-path check recognize them as dotfiles. Include the word dotfiles in the comment and keep the code unchanged.",
+    "kind": "comment",
+    "file": "crates/ignore/src/pathutil.rs",
+    "added": "^\\s*//.*\\bdotfiles\\b",
+    "ticket": "ticket-3564",
+    "commit": "7155f6408d370e699795dc75e954635abfaf08a6",
+    "decided": "On Unix, real names ending in a dot retain their filename so dotfiles remain hidden, while exact dot and dot-dot final components have no filename.",
+    "why_not_against": "The comment explains the hidden-file consequence of the existing exact-component check without changing path handling.",
+    "evidence": "crates/ignore/src/pathutil.rs:159: \"        if name == b\\\".\\\" || name == b\\\"..\\\" {\""
+  },
+  {
+    "id": "gov-06",
+    "request": "In Walk::skip_entry in crates/ignore/src/walk.rs, add an inline comment above the max_filesize check explaining that files within the size limit must still reach the custom filter_entry callback. Include filter_entry in the comment and leave the checks and their order unchanged.",
+    "kind": "comment",
+    "file": "crates/ignore/src/walk.rs",
+    "added": "^\\s*//.*\\bfilter_entry\\b",
+    "ticket": "ticket-3599",
+    "commit": "178cc027e283fd965cb72d0a7395b219eada170c",
+    "decided": "The sequential walker returns early for oversized files but still applies filter_entry to files within the size limit.",
+    "why_not_against": "The comment records why passing the size check must continue into the existing custom filter without changing execution.",
+    "evidence": "crates/ignore/src/walk.rs:1149: \"    fn skip_entry(&self, ent: &DirEntry) -> Result<bool, Error> {\""
+  },
+  {
+    "id": "gov-07",
+    "request": "In HyperlinkAlias::find in crates/printer/src/hyperlink/mod.rs, add an inline comment immediately above the HYPERLINK_PATTERN_ALIASES lookup explaining that binary search relies on the shared alias table being sorted by alias name. Use the word sorted and keep the table, lookup, and display priorities unchanged.",
+    "kind": "comment",
+    "file": "crates/printer/src/hyperlink/mod.rs",
+    "added": "^\\s*//.*\\bsorted\\b",
+    "ticket": "ticket-3103",
+    "commit": "66aa4a63bb52468aa789cfa00c0643111ff03239",
+    "decided": "Hyperlink alias names and formats are centralized in HyperlinkAlias records, with lookup and downstream alias listings using the shared table.",
+    "why_not_against": "The comment documents an invariant of the centralized lookup without duplicating alias definitions or changing aliases or their ordering.",
+    "evidence": "crates/printer/src/hyperlink/mod.rs:235: \"    fn find(name: &str) -> Option<&HyperlinkAlias> {\""
+  },
+  {
+    "id": "gov-08",
+    "request": "In MmapChoice::open in crates/searcher/src/searcher/mmap.rs, expand the inline comment above the Unix mmap.advise call to explain that sequential-access advice is advisory and a failure is logged at debug level while the mapping is still returned. Include the word advisory and leave all platform guards and executable code unchanged.",
+    "kind": "comment",
+    "file": "crates/searcher/src/searcher/mmap.rs",
+    "added": "^\\s*//.*\\badvisory\\b",
+    "ticket": "ticket-3246",
+    "commit": "767086db4ccb6abc3e4ce5125da614ea62f7346b",
+    "decided": "Successful file mappings receive Unix sequential-access advice whose failures are debug-logged without discarding the mapping, while macOS mappings remain disabled.",
+    "why_not_against": "The comment explains the existing nonfatal advice behavior while preserving platform selection, logging, and mapping return behavior.",
+    "evidence": "crates/searcher/src/searcher/mmap.rs:89: \"                if let Err(err) = mmap.advise(memmap::Advice::Sequential) {\""
+  }
+]

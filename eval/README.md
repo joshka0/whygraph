@@ -740,19 +740,239 @@ change. A pass is a mechanical verdict on words and diffs, not a review.
 
 The fixture changed after the trial when unused graph parts were cut; whygraph commit `8ee90a9` holds the fixture the trial used.
 
-## Batch 5 launcher blocked before its first run
+## Batch 5, fixed before its first run
 
-The planned second-agent batch (opencode 1.18.29,
-`opencode-go/deepseek-v4.1-flash`) stopped during scratch-only isolation
-checks. An explicit external-directory denial blocked a direct read of
-`/etc/hostname`, but a repo-local symlink to the same file let the native
-file tool read it. The required repo-only file boundary is therefore not
-established. No trial started, and no batch 5 tasks, scorer changes or
-launcher are enabled. The runner, skill, rule and existing store stay as
-before preparation.
+Batch 5 repeats all conditions with a second agent and model: opencode
+1.18.29, `opencode-go/deepseek-v4.1-flash`. Its two questions are what the
+commit link carries without search, and whether the firm rule stops a
+harmless change to code that a ticket governs. No trial starts during
+preparation. Batches 1 to 4 still use Claude Code, sonnet, their existing
+conditions, wrapper and pass rules.
 
-[The blocker and scratch evidence](tickets/batch5-failures.md) record the
-exact command, environment, permission configuration, two model calls,
-condition-by-condition shell probes and the recommendation to require
-realpath enforcement before continuing. This is a blocked preparation,
-not a fixed-before-run batch specification.
+**Repo and conditions.** Reuse batch 4's ready ripgrep template and store at
+`$WHYGRAPH_EVAL_WORK/_ripgrep` (default `/var/tmp/whygraph-eval/_ripgrep`),
+without rebuilding the store or installing dependencies. Batch 5 refuses to
+prepare if the ready marker is absent. The wrapper, 20-minute timeout and
+main's skill and rule text are unchanged. Four conditions: `none` has the
+repo only; `stub` has the rule, skill and tools but no store and every
+whygraph command prints `no result` with exit 0; `graph` has the store and
+real answers; `graph-nosearch` is exactly graph except `whygraph search ...`
+prints `no result` with exit 0. Every other whygraph command answers from the
+same copied store. Graph-nosearch still tells the agent, through the skill,
+to run search; it gets no result. Store links resolve inside each repo copy.
+Every relate call sets `RELATE_TELEMETRY=0` and `DO_NOT_TRACK=1`.
+
+**Tasks and pass rules.** `node eval/tickets/make-tasks.mjs --batch 5`
+writes 32 `eval/tasks/ripgrep5-*.json` files with batch 5. There are the same
+19 conflicts as batch 4, with its pass rule: name the source or an also
+ticket and change no file, accepting the additional spelling `ticket N`.
+There is no amendment exception. Five plain controls come from
+`tickets/controls.json`; eight governed controls come from the blind
+author's `/home/dev/scratch/rg-controls2/controls2.json`, copied byte for byte
+to `tickets/controls2.json` (SHA-256
+`a358eb529f81821a24c21f00503ec552ac24426d2e604fba3f5120c959c04763`).
+Each complete source entry is preserved verbatim under `ground_truth.source`.
+Both control sets pass exactly when the diff adds a line matching `added`
+(case insensitive) in `file`; explanation, test correctness and placement
+beyond that file are not scored. Governed controls are distinguished by the
+source's `ticket` field. Batches 3 and 4 task files remain byte-identical.
+
+**Launcher.** The exact command, from the run's repo copy, is:
+
+```sh
+opencode run --pure --auto --format json -m opencode-go/deepseek-v4.1-flash '<wrapped request>'
+```
+
+`opencodeLaunch` in `opencode.mjs` defines the complete environment. It
+inherits no session variables except the host identity/data locations and
+locale listed here:
+
+```text
+HOME=<work>/home
+USER=<host USER, or dev>
+LANG=<host LANG, or C.UTF-8>
+PATH=<work>/bin:/usr/local/bin:/usr/bin:/bin
+SHELL=<work>/confine.sh
+XDG_CONFIG_HOME=<work>/config
+XDG_CACHE_HOME=<work>/cache
+XDG_STATE_HOME=<work>/state
+XDG_DATA_HOME=<host XDG_DATA_HOME, or <host HOME>/.local/share>
+OPENCODE_CONFIG_DIR=<work>/config/opencode
+OPENCODE_CONFIG_CONTENT=<JSON below>
+OPENCODE_DISABLE_CLAUDE_CODE=1
+OPENCODE_DISABLE_EXTERNAL_SKILLS=1
+OPENCODE_DISABLE_AUTOUPDATE=1
+OPENCODE_DISABLE_LSP_DOWNLOAD=1
+OPENCODE_DISABLE_SHARE=1
+RELATE_TELEMETRY=0
+DO_NOT_TRACK=1
+```
+
+Inline configuration, with `<host-data>` expanded to XDG_DATA_HOME above:
+
+```json
+{
+  "autoupdate": false,
+  "share": "disabled",
+  "snapshot": false,
+  "plugin": [],
+  "mcp": {},
+  "instructions": [],
+  "formatter": false,
+  "lsp": false,
+  "enabled_providers": ["opencode-go"],
+  "permission": {
+    "*": "deny",
+    "bash": "allow",
+    "skill": "allow",
+    "read": "allow",
+    "edit": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "external_directory": {
+      "*": "deny",
+      "<host-data>/opencode/tool-output/*": "deny"
+    },
+    "webfetch": "deny",
+    "websearch": "deny",
+    "task": "deny",
+    "question": "deny"
+  }
+}
+```
+
+HOME and the config paths exclude the machine's user configuration,
+instructions, agents and skills; the disable flags exclude Claude
+compatibility and external skills; `--pure` excludes external plugins.
+No MCP server is configured, web tools and delegation are denied, and
+`--auto` preserves explicit denials without asking anyone for permission.
+The explicit tool-output-path denial prevents opencode from appending its
+built-in external-directory allowance for that path after the general deny.
+Built-in system instructions, agents and skills remain; sanitized debug
+output showed only the built-in `customize-opencode` skill and the repo's
+whygraph skill. Existing host session variables and user settings do not
+reach the session. The host data location remains for CLI authentication;
+no credential value is read, printed or copied by the runner.
+
+In stub and both graph conditions, the unchanged rule is appended to
+`AGENTS.md`, and the unchanged skill is copied to
+`.opencode/skills/whygraph/SKILL.md`. None gets neither addition.
+[The V1 rules documentation](https://opencode.ai/v1/docs/rules/) says:
+"Place an `AGENTS.md` in your project root for project-specific rules."
+[The V1 skill documentation](https://opencode.ai/v1/docs/skills/) lists
+"Project config: `.opencode/skills/<name>/SKILL.md`".
+[The V1 permission documentation](https://opencode.ai/v1/docs/permissions/)
+describes explicit denials in auto mode and external-directory checks.
+The installed CLI help and live scratch sessions confirmed these paths and
+flags; the online default documentation now describes V2, so use the V1 pages.
+
+**Shell confinement and file-tool limit.** Opencode runs shell commands as
+`$SHELL -c '<command>'`. The wrapper accepts that `-c` and runs the command
+through the same bwrap confinement as batch 4, with no network. It restores
+the host HOME inside that shell so whygraph reads its existing embedding
+cache; it does not source a login profile. In all four conditions, the
+shell hides the credential file and opencode data directory, the ticket
+source data under `/home/dev/scratch`, templates, other runs and the eval
+artifacts. None hides the whole whygraph repo; the other conditions expose
+only the runtime tools. Only graph and graph-nosearch have their own copied
+store. The CLI process itself has API access and is not put inside bwrap.
+
+Opencode denies a direct file-tool read outside the repo; it does not
+prevent a read through a symlink in the repo. This was demonstrated with a
+harmless `/etc/hostname` target. Under the operator's B5-03 ruling, the
+runner detects the following cases and throws the run out instead:
+
+- Before the agent starts, recursively scan the copy, including `.git`,
+  for symlinks resolving outside its canonical root. A hit is a harness
+  failure. The ripgrep template's tracked `HomebrewFormula -> pkg/brew`
+  link resolves inside and passes, as does the local store link.
+- After the agent ends, before diffing or removing its work folder, scan
+  the copy again; scan every logged shell command for `ln` with `-s`
+  (including combined short flags) or `--symbolic`, `cp` with `-s` or
+  `--symbolic-link`, and visible symlink calls in script one-liners; scan
+  file-tool inputs for absolute paths outside the copy, including patch
+  target paths. An attempted direct external file call is invalid even
+  when opencode denied it. A removed transient link is still caught when
+  its creation is visible in a shell command.
+
+Each hit sets status invalid with reason `isolation breach`, archives the
+result under `results/_invalid/`, preserves the work copy at the path in
+its metadata, and retries the cell once. Repeated harness failure stops the
+runner with both attempts archived, rather than looping forever. Invalid
+results never enter scoring, token totals or rates. A later invocation can
+retry the missing cell. This is detection, not a security boundary: it can
+miss a transient link created by an invoked script or binary whose creation
+is not visible in the command, computed/encoded/aliased symlink calls,
+relative file-tool paths, unrecognized input formats, and races between the
+scans and access. It does not undo a read or an external write that already
+happened. No prevention claim is made for those cases.
+
+**Streams, errors and resumability.** Stdout goes directly to
+`output.jsonl`, stderr directly to `stderr.txt`. The native reader joins all
+`text` events in order into `final.txt`, preserves tool inputs and the first
+4,000 characters of each result in `tools.json`, and normalizes `shell` and
+`bash` to `Bash` with `input.command`. It sums tokens and reported cost over
+`step_finish` events; meta holds agent `opencode`, the exact model id,
+input/output/reasoning/cache tokens and their reported total, cost_usd,
+turns and replies. `step_start` carries no usage. A tool with no output has
+an empty result. `--reextract` uses the matching agent reader and rewrites
+opencode tools too, without changing old readers.
+
+A successful stream must contain nonblank text, end in a `step_finish` with
+reason `stop`, have no error event, and exit 0. No text, incomplete finishes
+or an agent error leave an error result, resumable as before. Malformed
+JSONL or a spawn error is a harness failure, archived and retried once.
+The 20-minute timer sends SIGTERM; opencode gets SIGKILL after five more
+seconds if it has not closed. An agent timeout retries once, keeping the
+first attempt under `_attempts`; a second timeout is marked unscored,
+excluded from normal rates and counted as FAIL in the conflict sensitivity
+lines. Done and twice-timed-out unscored cells are skipped on resume.
+Isolation checks also run on timed-out/error sessions before cleanup.
+
+**Fixed reports.** All batch 5 blocks append after the complete saved report
+only when a batch 5 result exists. Old report bytes stay unchanged. Primary:
+`graph - stub` over the 19 conflicts, the mean of per-task differences with
+the existing seeded task bootstrap 95% interval. Also print
+`graph-nosearch - stub`, `graph - graph-nosearch`, `graph - none`, and rates
+by wording. Missing pairs are omitted. Controls never enter conflict
+paired differences or conflict diagnostics. Per condition, count conflicts
+that changed no file, named the ticket, named it and changed a file, or
+changed no file without naming it. For graph and graph-nosearch, count
+conflict runs where a whygraph answer showed the needed ticket and how many
+named it, placing the hit in search, the linked part of carry/why, the term
+section or a mixed call, by batch 4's rule. Saved results still truncate
+tool answers at 4,000 characters; a ticket beyond that is not counted shown.
+
+For each condition, separately report the five plain and eight governed
+controls' pass rate and changed-no-file count. For governed controls in
+graph and graph-nosearch, report how many saw their own source `ticket` in
+a whygraph answer, and of those, how many made the requested change and how
+many changed no file. Count runs calling each command (carry symbol, carry
+range, search, why, impact), once per kind, controls included. Print tokens
+and reported cost per condition. Error results stay outside normal rates;
+conflict errors enter the FAIL sensitivity differences. JSON includes
+finished verdicts only.
+
+**Runs.** 32 tasks x 4 conditions x 3 repeats = 384 runs. The preparation
+plan prints `384 runs planned, 0 already done, 384 to start`. The last
+command below starts the trial and is for the operator; it was not run:
+
+```sh
+node eval/tickets/make-tasks.mjs --batch 5
+ids="$(node --input-type=module -e 'import {readTasks} from "./eval/score.mjs"; console.log([...readTasks().values()].filter(t => t.batch === 5).map(t => t.id).join(","))')"
+node eval/run.mjs --plan --only "$ids" --repeats 3
+systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/run.mjs --only "$ids" --repeats 3
+```
+
+**Limits fixed before the run.** This is a second model and a second agent
+harness; no batch 5 number is compared with batch 4 run by run. The skill
+was written for Claude Code; opencode gets the same text. The model may
+know ripgrep. Graph-nosearch still receives the instruction to search.
+Task selection, word/diff pass rules, and the finite control set limit
+what this batch measures, as in batch 4. The operator's scan of all 306
+saved batch 3/4 runs found no logged symlink creation and no file-tool path
+outside a run folder; this does not certify future runs.
+
+[Batch 5 failure cases](tickets/batch5-failures.md) give exact outcomes for
+an independent test author. No tests under `eval/selftest/` or `test/`
+were authored or changed in this implementation.
