@@ -36,15 +36,15 @@ Its doc comment names no premise memo.
 Its doc comment holds no decided: tag.
 The header of src/money.ts holds no decided: tag.
 No decided: tag names a decision record.
-Decision records linked only through a commit that cites them and changed its code or tags, oldest first (a commit that changed many symbols links each of them loosely):
+Decision records linked only through a commit that cites them and changed its code or tags, tightest commit first (a commit that changed many symbols links each of them loosely):
+  2026-01-04  note-2  Show thousands separators in totals
+      source: decisions/notes.json
+      changed by: 73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001); that commit changed 1 symbol
   2026-01-01  ADR-0001  Money in cents
       status: accepted
       source: docs/adr/0001-money-in-cents.md
       changed by: dfb4ff8 2026-01-01 Add money and cart in cents; that commit changed 3 symbols
                   395b8c0 2026-01-08 Name every amount by its unit; that commit changed 5 symbols
-  2026-01-04  note-2  Show thousands separators in totals
-      source: decisions/notes.json
-      changed by: 73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001); that commit changed 1 symbol
 
 One step away, most binding first (what formatCents uses, then what uses formatCents):
   - topic owned by src/cart.ts:total, which uses formatCents: fx-cart
@@ -218,7 +218,7 @@ Decision records that its decided: tags name:
       source: docs/adr/0002-flat-tax.md
       named by: a decided: tag in the header of src/tax.ts
       also cited by: 2a59506 2026-01-02 Add a flat tax; that commit changed 2 symbols
-Decision records linked only through a commit that cites them and changed its code or tags, oldest first (a commit that changed many symbols links each of them loosely):
+Decision records linked only through a commit that cites them and changed its code or tags, tightest commit first (a commit that changed many symbols links each of them loosely):
   2026-01-02  note-1  Tax is computed once per order, not per line
       source: decisions/notes.json
       changed by: 2a59506 2026-01-02 Add a flat tax; that commit changed 2 symbols
@@ -267,15 +267,15 @@ Its doc comment names no premise memo.
 Its doc comment holds no decided: tag.
 The header of src/money.ts holds no decided: tag.
 No decided: tag names a decision record.
-Decision records linked only through a commit that cites them and changed its code or tags, oldest first (a commit that changed many symbols links each of them loosely):
+Decision records linked only through a commit that cites them and changed its code or tags, tightest commit first (a commit that changed many symbols links each of them loosely):
+  2026-01-04  note-2  Show thousands separators in totals
+      source: decisions/notes.json
+      changed by: 73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001); that commit changed 1 symbol
   2026-01-01  ADR-0001  Money in cents
       status: accepted
       source: docs/adr/0001-money-in-cents.md
       changed by: dfb4ff8 2026-01-01 Add money and cart in cents; that commit changed 3 symbols
                   395b8c0 2026-01-08 Name every amount by its unit; that commit changed 5 symbols
-  2026-01-04  note-2  Show thousands separators in totals
-      source: decisions/notes.json
-      changed by: 73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001); that commit changed 1 symbol
 
 One step away, most binding first (what formatCents uses, then what uses formatCents):
   - topic owned by src/cart.ts:total, which uses formatCents: fx-cart
@@ -773,7 +773,7 @@ jq '{records: (.items | group_by(.memo) | map({
 | --- | --- |
 | `whygraph build [--repo <path>] [--store <path>] [--decisions <file>]...` | Runs `memod graph --history` in the repo, reads the decisions files, and writes a new store. Prints the node and relationship counts; warnings go to stderr. |
 | `whygraph decisions adr <folder>` | Prints a decisions file made from the ADRs in the folder. |
-| `whygraph why <file>:<symbol>` | The `decided:` tags on the symbol and on its file header; the records those tags name; then the records linked only through a commit that cites them and changed the symbol, oldest first, each commit with how many symbols it changed. |
+| `whygraph why <file>:<symbol>` | The `decided:` tags on the symbol and on its file header; the records those tags name; then the records linked only through a commit that cites them and changed the symbol, tightest commit first, each commit with how many symbols it changed. |
 | `whygraph impact <decision id>` | The record and every record that rests on it, directly or through others; for each, the symbols and files whose `decided:` tags name it, then the commits that cite it and the other symbols those commits changed, with how many symbols use each directly. |
 | `whygraph carry <file>:<symbol>\|<file>:<start>-<end>` | Before an edit: the topics the symbol owns and their other owners, the formal checks that cover it, its premise memos, its decisions (as `why`); then one step away, the `decided:` tags, the records they name, the checks and the topics of the symbols it uses and of the symbols that use it, most binding first, each line naming where it sits; then the decision records that share the most distinctive terms with its code (candidates, not links), each naming its shared terms; then its direct and transitive users, and the commits that changed it. The range form reads exactly those lines for the term section and takes the linked parts from every symbol whose stored range overlaps them. |
 | `whygraph search "<text>" [--at <file>:<start>-<end>]` | Up to twenty decision records that best match the text: the word search and the meaning search each rank at most ten, fused by reciprocal rank; each candidate takes two lines, its date, id and title, then `matched: <words\|meaning\|words and meaning>; source: <source>`, each a candidate to pick from, not a link; then what was searched and what was not. `--at` adds the term list of those lines (the same terms `carry` uses for a range) as further candidates, under the term section's heading. When `WHYGRAPH_RERANK` names a model, a reranker cuts the candidates to five instead (below). |

@@ -47,8 +47,8 @@ function viaLine(v: unknown): string {
 /**
  * The answer of `whygraph why`.
  * owns: [[whygraph-answers]]
- * post: four parts in order: decided tags in the symbol's doc comment; decided tags in its file's header; the decision records that those tags name (doc comment first), each saying which tag names it; the other records, linked only through a commit that changed the symbol, oldest first with undated records last.
- * post: each record shows date, id, title, status when stated, the records that supersede it, its source, and every commit that cites it and changed the symbol, with how many symbols that commit changed, so a reader can weigh the link; a record is listed once.
+ * post: four parts in order: decided tags in the symbol's doc comment; decided tags in its file's header; the decision records that those tags name (doc comment first), each saying which tag names it; the other records, linked only through a commit that changed the symbol, tightest commit first (the fewest symbols any linking commit changed), ties by date with undated last.
+ * post: each record shows date, id, title, status when stated, the records that supersede it, its source, and every commit that cites it and changed the symbol, tightest commit first, with how many symbols that commit changed, so a reader can weigh the link; a record is listed once.
  * post: an empty part says it is empty; when nothing at all links, a last line says no decision is recorded and how one gets recorded.
  */
 export function whyAnswer(symbolId: string, rows: readonly Row[]): string {
@@ -72,7 +72,7 @@ export function whyAnswer(symbolId: string, rows: readonly Row[]): string {
   }
   if (viaCommit.length === 0) out.push(`No ${named.length === 0 ? "" : "other "}decision record cites a commit that changed its code or tags.`);
   else {
-    out.push(`Decision records linked only through a commit that cites them and changed its code or tags, oldest first (a commit that changed many symbols links each of them loosely):`);
+    out.push(`Decision records linked only through a commit that cites them and changed its code or tags, tightest commit first (a commit that changed many symbols links each of them loosely):`);
     for (const r of viaCommit) out.push(...recordLines(r, (Array.isArray(r.via) ? r.via : []).map((v, i) => `      ${i === 0 ? "changed by:" : "           "} ${viaLine(v)}`)));
   }
   if (rows.length === 0) out.push("", "No decision is recorded for it. Record one with a decided: tag in its doc comment (naming the record's id links it), or a `Decision: <id>` trailer on the commit that made it. To look for a record the repo already holds, run whygraph search \"<the change in your own words>\".");
