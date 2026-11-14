@@ -212,7 +212,8 @@ contract('Q15 Q16', 'printed word and vector recipes work over read-only MCP and
   const vector = rows(s, "MATCH (d:Decision {id: 'ADR-0001'}) RETURN d.vector AS vector")[0].vector;
   const meaning = await client.rows(client.recipes.get('meaning'), { vector });
   assert.equal(meaning.length, 5); assert.equal(meaning[0].id, 'ADR-0001');
-  for (const row of [...words, ...meaning]) assert.deepEqual(Object.keys(row).sort(), ['date', 'id', 'source', 'statement', 'title']);
+  for (const row of [...words, ...meaning]) assert.deepEqual(Object.keys(row).sort(), ['author', 'date', 'id', 'source', 'statement', 'title']);
+  for (const row of [...words, ...meaning]) assert.equal(row.author, ({ 'note-1': 'A. Lee', 'note-2': 'R. Chen' })[row.id] ?? null);
   const missing = await client.request('tools/call', { name: 'read_cypher', arguments: { statement: client.recipes.get('meaning'), parameters: {} } });
   assert.equal(missing.isError, true); const text = JSON.stringify(missing);
   assert.match(text, /vector/); assert.match(text, /missing|parameter|not found|not provided/i);

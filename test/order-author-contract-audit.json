@@ -1,0 +1,336 @@
+{
+  "contract": "/home/dev/scratch/whygraph-eval/order-author-tests-brief.md",
+  "branch": "order-and-author",
+  "implementationCommits": [
+    "a3cae87",
+    "8ee90a9"
+  ],
+  "briefCommitNote": "The brief names 0e84fa1 for the author change; the existing branch contains 8ee90a9 with that change. Tests use the named ADRs and the diff against main as the contract.",
+  "addedTests": [
+    {
+      "items": [
+        "W21",
+        "W22",
+        "W23",
+        "W25",
+        "W26",
+        "W27"
+      ],
+      "file": "test/order-author.test.mjs",
+      "evidence": "Real commits changing 1, 2, 3, 7 and 9 symbols; smallest of multiple links; dated/undated/id record ties; commit date/SHA ties; symbol and range carry match why; live read-only MCP rows; repeat and rebuild determinism."
+    },
+    {
+      "items": [
+        "W24"
+      ],
+      "file": "test/order-author.test.mjs",
+      "evidence": "Doc-comment record before older header record, both above commit-only links; one occurrence per record; also-cited lines tightest first."
+    },
+    {
+      "items": [
+        "B30",
+        "B31",
+        "B32",
+        "B35",
+        "B36"
+      ],
+      "file": "test/order-author.test.mjs",
+      "evidence": "Two files with different authors and absent/null fields; exact Decision node author values; absent/null impact lines omitted; ADR conversion author null."
+    },
+    {
+      "items": [
+        "B33"
+      ],
+      "file": "test/order-author.test.mjs",
+      "evidence": "Empty and whitespace authors both rejected with exact per-file/index/id diagnostics; prior store link and answer preserved."
+    },
+    {
+      "items": [
+        "B34"
+      ],
+      "file": "test/order-author.test.mjs",
+      "evidence": "Number and array authors both rejected with exact per-file/index/id diagnostics; prior store link and answer preserved."
+    },
+    {
+      "items": [
+        "W28",
+        "W29",
+        "I6"
+      ],
+      "file": "test/order-author.test.mjs",
+      "evidence": "Named and commit-only record author after status and before superseded/source; exact impact placement; no line for absent author; carry symbol/range; populated neighbor and term sections omit authors while recipe rows retain them."
+    },
+    {
+      "items": [
+        "Q27",
+        "N27"
+      ],
+      "file": "test/rerank.test.mjs",
+      "evidence": "Six authored candidates; exactly two search lines each; search and meaning recipe rows retain author; strict fake reranker sees exact title/first-statement documents and no author field or value; reranked output omits authors."
+    }
+  ],
+  "changedTests": [
+    {
+      "item": "A1",
+      "change": "Assert ADR conversion produces author null."
+    },
+    {
+      "item": "A4",
+      "change": "note-1 precedes ADR-0001 by commit size; refresh five-symbol commit id."
+    },
+    {
+      "item": "A6",
+      "change": "Refresh five-symbol commit id while preserving oldest-first impact assertions."
+    },
+    {
+      "item": "A7",
+      "change": "Refresh five-symbol commit id; newest-first history unchanged."
+    },
+    {
+      "item": "A8",
+      "change": "note-2 precedes ADR-0001 by tightest commit; refresh five-symbol commit id."
+    },
+    {
+      "item": "B16",
+      "change": "State equal-size tie precondition and query that both tightest counts are 2."
+    },
+    {
+      "item": "C9",
+      "change": "Assert the refreshed fixture commit still carries the already-listed record."
+    },
+    {
+      "item": "I3",
+      "change": "Refresh zero-symbol notes commit id after fixture authors changed its contents."
+    },
+    {
+      "item": "L14",
+      "change": "Refresh five-symbol commit id in exact why and impact text."
+    },
+    {
+      "item": "L15",
+      "change": "Refresh deterministic fixture HEAD id."
+    },
+    {
+      "items": [
+        "Q15",
+        "Q16"
+      ],
+      "change": "Include the ADR 0006 author column in the exact MCP search/meaning row shape and assert each fixture author/null value."
+    },
+    {
+      "items": [
+        "T7",
+        "T18"
+      ],
+      "change": "Include the ADR 0006 author column in the exact terms row shape and assert fixture author/null values."
+    },
+    {
+      "items": [
+        "T8",
+        "T20"
+      ],
+      "change": "Refresh the linked-record prefix order under ADR 0005; term candidate order stays unchanged."
+    },
+    {
+      "item": "T14",
+      "change": "Refresh linked-record order when the working-tree source is missing."
+    },
+    {
+      "items": [
+        "T22",
+        "T28"
+      ],
+      "change": "Refresh taxOf linked-record order inside a multi-symbol range answer."
+    }
+  ],
+  "plants": {
+    "scratch": "/tmp/whygraph-order-author-plants-2026-11-14T12-51-14-459Z-1174493",
+    "outcomes": [
+      {
+        "name": "oldest-first-restored",
+        "group": "W21",
+        "exitCode": 1,
+        "signal": null,
+        "red": [
+          "W21 W22 W23 W25 W26 W27 tightest linking commit ranks real records, commit ties and MCP rows deterministically"
+        ],
+        "pass": 0,
+        "detected": true
+      },
+      {
+        "name": "id-before-date",
+        "group": "W21",
+        "exitCode": 1,
+        "signal": null,
+        "red": [
+          "W21 W22 W23 W25 W26 W27 tightest linking commit ranks real records, commit ties and MCP rows deterministically"
+        ],
+        "pass": 0,
+        "detected": true
+      },
+      {
+        "name": "named-commits-oldest-first",
+        "group": "W24",
+        "exitCode": 1,
+        "signal": null,
+        "red": [
+          "W24 doc and header named records retain priority and tightest also-cited lines without duplication"
+        ],
+        "pass": 0,
+        "detected": true
+      },
+      {
+        "name": "author-not-stored",
+        "group": "B30",
+        "exitCode": 1,
+        "signal": null,
+        "red": [
+          "B30 B31 B32 B35 B36 authors and absent/null authors persist independently across decisions files"
+        ],
+        "pass": 0,
+        "detected": true
+      },
+      {
+        "name": "empty-author-accepted",
+        "group": "B33",
+        "exitCode": 1,
+        "signal": null,
+        "red": [
+          "B33 invalid authors report every file/index/id and preserve the previous store"
+        ],
+        "pass": 0,
+        "detected": true
+      },
+      {
+        "name": "invalid-author-accepted",
+        "group": "B34",
+        "exitCode": 1,
+        "signal": null,
+        "red": [
+          "B34 invalid authors report every file/index/id and preserve the previous store"
+        ],
+        "pass": 0,
+        "detected": true
+      },
+      {
+        "name": "author-line-with-none",
+        "group": "W28",
+        "exitCode": 1,
+        "signal": null,
+        "red": [
+          "W28 W29 I6 author placement is exact in named and commit-only answers while neighbors and terms stay compact"
+        ],
+        "pass": 0,
+        "detected": true
+      },
+      {
+        "name": "impact-author-lost",
+        "group": "W28",
+        "exitCode": 1,
+        "signal": null,
+        "red": [
+          "W28 W29 I6 author placement is exact in named and commit-only answers while neighbors and terms stay compact"
+        ],
+        "pass": 0,
+        "detected": true
+      },
+      {
+        "name": "search-adds-author-line",
+        "group": "Q27",
+        "exitCode": 1,
+        "signal": null,
+        "red": [
+          "Q27 N27 authors remain local recipe data and never enter search lines or the fake rerank request"
+        ],
+        "pass": 0,
+        "detected": true
+      },
+      {
+        "name": "record-author-sent-to-reranker",
+        "group": "Q27",
+        "exitCode": 1,
+        "signal": null,
+        "red": [
+          "Q27 N27 authors remain local recipe data and never enter search lines or the fake rerank request"
+        ],
+        "pass": 0,
+        "detected": true
+      }
+    ],
+    "real": {
+      "exitCode": 0,
+      "signal": null,
+      "red": [],
+      "pass": 7
+    }
+  },
+  "initialFocusedRun": {
+    "report": "test-results/2026-11-14T12-48-20-948Z-1035877.tap",
+    "note": "Five new groups passed. B33/B34 initially overcounted the existing generic error-summary line; the final assertions include it plus the exact two per-record diagnostics."
+  },
+  "gates": {
+    "pnpm check": {
+      "exitCode": 0
+    },
+    "node_modules/.bin/memod lint": {
+      "exitCode": 0,
+      "note": "Rerun with sandbox escalation to allow its .git event log; clean output."
+    },
+    "node scripts/readme-check.mjs": {
+      "exitCode": 0,
+      "commands": 14,
+      "drifted": 0,
+      "log": "/tmp/whygraph-order-author-readme.log"
+    },
+    "node test/run.mjs": {
+      "status": "passed",
+      "report": "test-results/2026-11-14T12-57-18-495Z-1444209.tap",
+      "log": "/tmp/whygraph-order-author-full-final.log",
+      "exitCode": 0,
+      "tests": 212,
+      "pass": 212,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "wallSeconds": 392.199813362
+    }
+  },
+  "suiteLimits": "Every suite, README gate, and individual plant test runs under systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400%.",
+  "scope": "Only test/ files changed. No installs, delegation, pushes, publications or new worktrees; B27 owns its expected scratch worktree. No cleanup deletes files.",
+  "codeVersusListConflicts": [],
+  "couldNotDo": [],
+  "initialFullRun": {
+    "report": "test-results/2026-11-14T12-49-16-952Z-1081965.tap",
+    "exitCode": 1,
+    "tests": 212,
+    "pass": 206,
+    "fail": 6,
+    "wallSeconds": 399.565,
+    "failures": [
+      "C9",
+      "Q15 Q16",
+      "T7 T18",
+      "T8 T20",
+      "T14",
+      "T22 T28"
+    ],
+    "resolution": "C9 incorrectly required the first-line changed-by label on a continuation; fixed to assert the full five-symbol commit text. The other existing tests retained old ordering or row shapes; updated to ADRs 0005/0006 without dropping assertions."
+  },
+  "correctedC9Run": {
+    "exitCode": 0,
+    "log": "/tmp/whygraph-order-author-c9.log",
+    "matchingContracts": 1,
+    "note": "The runner also counts eight files with no matching test as successful file tests."
+  },
+  "contractInterpretation": "W26 preserves the order change's row shape; ADR 0006 explicitly adds author to record rows, so the combined row shape includes author and no extra ordering column. T7 enumerates required fields and bans scores; ADR 0006 adds author alongside those fields.",
+  "totals": {
+    "newContractGroups": 7,
+    "newFailureListItems": 19,
+    "changedExistingTestGroups": 15,
+    "plantsDetected": 10,
+    "plantsTotal": 10,
+    "subsequentRealCodeGroupsPassed": 7,
+    "fullSuitePassed": 212
+  },
+  "result": "DONE"
+}

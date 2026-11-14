@@ -135,7 +135,9 @@ contract('C9', 'shared neighbor facts merge their carriers and suppress facts al
   has(topics[0], 'topic owned by src/a-pair.ts:a and src/a-pair.ts:b, which target uses:');
   assert.ok(!lines.some(line => line.startsWith('  - record ') && line.includes(': record-already ')));
   assert.ok(!lines.some(line => line.includes('self-check') || line.endsWith(': repeat-topic')));
-  const total = items(carry(s, 'src/cart.ts:total'));
+  const totalAnswer = carry(s, 'src/cart.ts:total');
+  has(totalAnswer, '6214848 2026-01-08 Name every amount by its unit; that commit changed 5 symbols');
+  const total = items(totalAnswer);
   assert.ok(total.some(line => line.includes('decided on src/money.ts:cents,')));
   assert.ok(!total.some(line => line.startsWith('  - record ') && line.includes(': ADR-0001 ')));
   const pair = join(s.repo, 'src/a-pair.ts');

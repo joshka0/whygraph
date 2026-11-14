@@ -89,7 +89,8 @@ contract('T7 T18', 'printed terms recipe runs on read-only MCP without a model a
   const rows = await client.rows(statement, { terms: ['tax', 'rounding'] });
   assert.deepEqual(rows.map(r => r.id), ['note-1', 'ADR-0002', 'ADR-0003']);
   assert.deepEqual(rows.map(r => r.shared), [['rounding', 'tax'], ['tax'], ['tax']]);
-  for (const row of rows) assert.deepEqual(Object.keys(row).sort(), ['date', 'id', 'shared', 'source', 'termCount', 'title']);
+  for (const row of rows) assert.deepEqual(Object.keys(row).sort(), ['author', 'date', 'id', 'shared', 'source', 'termCount', 'title']);
+  assert.deepEqual(rows.map(r => r.author), ['A. Lee', null, null]);
   assert.deepEqual(query(s, statement, { terms: ['tax', 'rounding'] }), rows);
   const missing = await client.request('tools/call', { name: 'read_cypher', arguments: { statement, parameters: {} } });
   assert.equal(missing.isError, true); has(JSON.stringify(missing), 'terms');
@@ -104,7 +105,7 @@ contract('T8 T20', 'formatCents candidates follow scope, name shared terms and n
   assert.deepEqual(ids(part), ['ADR-0002', 'ADR-0003']); has(part, heading);
   assert.equal((part.match(/shared terms: cents$/gm) ?? []).length, 2); noScores(part);
   assert.match(text, /Not searched:[^\n]+\n\nDecision records that share/);
-  assert.deepEqual(ids(text.slice(0, text.indexOf(heading))), ['ADR-0001', 'note-2']);
+  assert.deepEqual(ids(text.slice(0, text.indexOf(heading))), ['note-2', 'ADR-0001']);
   for (const id of ['ADR-0001', 'note-2']) assert.equal(ids(text).filter(x => x === id).length, 1);
 });
 contract('T9', 'taxOf suppresses both tag and commit links from candidates', 'fixture', s => {
@@ -140,7 +141,7 @@ contract('T14', 'missing working-tree files preserve linked answers and give one
   renameSync(join(s.repo, 'src/money.ts'), join(s.repo, 'src/money.saved'));
   const text = carry(s, 'src/money.ts:formatCents');
   has(text, 'No term section: its file src/money.ts is not in the working tree.');
-  assert.deepEqual(ids(text), ['ADR-0001', 'note-2']);
+  assert.deepEqual(ids(text), ['note-2', 'ADR-0001']);
 });
 contract('T15', 'ASCII token filtering handles tiny and non-ASCII identifiers without an empty heading', 'empty', s => {
   s.write(join(s.repo, 'a.rs'), 'fn a() { 42; }\nfn naïve() { 42; }\n');
@@ -186,7 +187,7 @@ contract('T22 T28', 'overlapping symbol bodies retain their own links and suppre
   const first = text.indexOf('Symbol src/tax.ts:taxRate (11-13)'); const second = text.indexOf('Symbol src/tax.ts:taxOf (18-20)');
   assert.ok(first >= 0 && second > first, text);
   const rate = text.slice(first, second); const tax = text.slice(second);
-  assert.deepEqual(ids(rate), ['ADR-0003', 'ADR-0002', 'note-1']); assert.deepEqual(ids(tax), ['ADR-0002', 'ADR-0001', 'note-1']);
+  assert.deepEqual(ids(rate), ['ADR-0003', 'ADR-0002', 'note-1']); assert.deepEqual(ids(tax), ['ADR-0002', 'note-1', 'ADR-0001']);
   for (const body of [rate, tax]) has(body, 'No formal check covers it.', 'One step away', 'Searched:', 'Not searched:', 'commits changed it');
   has(rate, 'fx-tax', 'src/tax.ts:taxOf'); has(tax, 'fx-tax', 'src/money.ts:cents');
   has(text, 'No decision record other than those above shares a distinctive term with these lines.');

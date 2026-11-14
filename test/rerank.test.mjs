@@ -1,4 +1,4 @@
-/** Optional-reranker contracts independently derived from ADR 0004 and N1-N26. */
+/** Optional-reranker contracts independently derived from ADR 0004 and N1-N27. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
@@ -311,4 +311,39 @@ contract('N24 N26', 'a closed local port and a disconnected fake give network er
   assert.equal(read(trace), 'local request\n'); assert.equal(closed.requests.length, 0);
   const disconnected = await fake(t, { key, disconnect: true });
   fallback(await cli(s, args, disconnected.env), baseline, 'network error'); assert.equal(disconnected.requests.length, 1);
+});
+
+contract('Q27 N27', 'authors remain local recipe data and never enter search lines or the fake rerank request', 'code', async (s, t) => {
+  s.commit('Public author search fixture');
+  const records = Array.from({ length: 6 }, (_, i) => record(`author-${i}`, {
+    title: `authorneedle policy ${i}`, author: 'R. Chen', source: `source-${i}`,
+    items: [{ label: 'choice', text: `First statement ${i}\nPrivate second line` }],
+  }));
+  ok(s.build([s.decisions(records)]));
+  const args = ['search', 'authorneedle']; const baseline = wideOnly(await cli(s, args));
+  assert.equal(ids(baseline).length, 6);
+  const lines = baseline.trimEnd().split('\n');
+  assert.equal(lines.length, 15);
+  for (let i = 1; i < 13; i += 2) {
+    assert.match(lines[i], /^  2026-01-01  author-\d  authorneedle policy \d$/);
+    assert.match(lines[i + 1], /^      matched: (?:words|meaning|words and meaning); source: source-\d$/);
+  }
+  assert.doesNotMatch(baseline, /author:|R\. Chen/);
+  const { recipes } = h.config(ok(s.cli(['mcp'])));
+  const words = query(s, recipes.get('search').replaceAll('$text', JSON.stringify('authorneedle')));
+  assert.equal(words.length, 6); assert.ok(words.every(r => r.author === 'R. Chen'));
+  const vector = query(s, "MATCH (d:Decision {id: 'author-0'}) RETURN d.vector AS vector")[0].vector;
+  const meaning = query(s, recipes.get('meaning').replaceAll('$vector', JSON.stringify(vector)));
+  assert.equal(meaning.length, 6); assert.ok(meaning.every(r => r.author === 'R. Chen'));
+  const f = await fake(t);
+  const answer = ranked(await cli(s, args, f.env), f, baseline);
+  assert.equal(f.requests.length, 1);
+  const body = f.requests[0].body;
+  assert.deepEqual(Object.keys(body).sort(), ['model', 'query', 'documents', 'top_n'].sort());
+  assert.doesNotMatch(JSON.stringify(body), /R\. Chen|"author"|Private second line/);
+  const byId = new Map(records.map(r => [r.id, r]));
+  assert.deepEqual(body.documents, ids(baseline).map(id => {
+    const r = byId.get(id); return `${r.title} | ${r.items[0].text.split('\n')[0]}`;
+  }));
+  assert.doesNotMatch(answer, /author:|R\. Chen/);
 });
