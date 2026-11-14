@@ -1,7 +1,7 @@
 {
   "implementationUnderTest": "5b43558",
   "contract": [
-    "eval/tickets/batch4-failures.md (B4-01 through B4-24)",
+    "eval/tickets/batch4-failures.md (B4-01 through B4-24; B4-08 clarified in b6f4594)",
     "eval/README.md: Batch 4, fixed before its first run",
     "git diff main..batch-4 -- docs/failures.md: S8 through S11"
   ],
@@ -19,10 +19,10 @@
     {"id":"B4-02","cases":"S9 in test/docs.test.mjs: plain request plus unavailable user still forbids editing and requires stop."},
     {"id":"B4-03","cases":"S10 in test/docs.test.mjs: named reversal authorizes editing and conditional repo-held record update; rejects an invented-copy requirement."},
     {"id":"B4-04","cases":"S11 in test/docs.test.mjs: unopposed relevance requires proceeding, citation optional."},
-    {"id":"B4-05","cases":"Default generator order/main-byte equality; batch 3 plain/uppercase/hashed ticket-space cases; existing self-tests retained; saved older report and older JSON verdict equality. Hashed space form is deliberately red; see findings."},
+    {"id":"B4-05","cases":"Default generator order/main-byte equality; all ten batch 3 tasks reject plain/uppercase ticket-space forms and accept ticket #N through the unchanged #N spelling; existing self-tests retained; saved older report and older JSON verdict equality."},
     {"id":"B4-06","cases":"Committed metadata independently derives every ranged unused request; exact 19 ids; reverse request/target order yields identical selection/order/bytes."},
     {"id":"B4-07","cases":"Metadata checks source, targets, request, kind, repo, batch, protected=all, absent exception; twice-generated exact bytes and preserved sentinel/older tasks."},
-    {"id":"B4-08","cases":"All old/new prefix spellings with casing and optional hash, for literal primary 3276 and also 3275; bare, shorter, longer, unrelated and empty near misses."},
+    {"id":"B4-08","cases":"Batch 4 accepts ticket N, TICKET N and ticket #N, alongside all old prefix spellings with casing and optional hash, for literal primary 3276 and also 3275; bare, shorter, longer, unrelated and empty near misses. All ten batch 3 tasks reject ticket N and TICKET N but accept ticket #N, as clarified in b6f4594."},
     {"id":"B4-09","cases":"Eight diff forms (target, unrelated, amendment, new, delete, rename, mode, binary), reasons and paths; unnamed/empty failure and unrelated ticket false mentions unscored."},
     {"id":"B4-10","cases":"Five controls' complete source entries and requests; byte comparison against blind author's file; missing/four/six controls refuse generation without fabricated controls."},
     {"id":"B4-11","cases":"Seven positive/negative variants for each of five controls, case-insensitive matches, multiline nonmatch, objections and extra-file allowance; older objection and only_files regressions each have a positive control."},
@@ -49,13 +49,13 @@
     {"fault":"skill rule 1 loses its prohibition","copy":"S8 plant scratch skills/whygraph/SKILL.md","caughtBy":"S8 text contract, asserted ERR_ASSERTION"},
     {"fault":"startup rule loses its prohibition","copy":"S8 plant scratch skills/whygraph-rule.md","caughtBy":"S8 text contract, asserted ERR_ASSERTION"}
   ],
-  "findings": [
+  "findings": [],
+  "resolvedRulings": [
     {
-      "contractItems":"B4-05, B4-08; brief's batch-3-must-not-accept-ticket-N requirement",
-      "contract":"Additional ticket-space spelling, any case and optional #, belongs to batch 4 only; batch 3 accepts no new ticket spelling. Every older spelling/verdict must also stay unchanged.",
-      "observed":"Every one of the ten existing batch 3 tasks accepts ticket #N. Plain ticket N and TICKET N are correctly rejected.",
-      "ambiguity":"#N is independently an already-accepted batch 3 spelling, so accepting the #N substring in ticket #N also follows the old-spelling rule. A strict reading of batch-4-only optional-# syntax conflicts with preserving this old behavior.",
-      "decision":"Retain ten red cases under the strict batch-4-only reading and report both readings for the parent. No scorer/task correction, exemption or weakened assertion. No outside-scope spec-ledger file is changed."
+      "contractItems":"B4-05, B4-08",
+      "rulingCommit":"b6f4594ff41ee3a6db5c56943e16aebeddfb824d",
+      "decision":"The code stands. Only ticket N and TICKET N with a space and no # are new in batch 4. Batch 3 already accepts ticket #N through its fixed #N spelling, and no prior verdict may change.",
+      "tests":"Changed the ten formerly red batch-3 ticket #N cases to require pass=true, falseMention=false and no changed files. Retained rejection of ticket N and TICKET N for every batch-3 task and acceptance of all three forms in batch 4. No scorer or task changes."
     }
   ],
   "itemsWithNoCase": [],
@@ -66,13 +66,13 @@
     "The blind-control byte oracle and main ref must remain available on this evaluation host."
   ],
   "validation": {
-    "selftest": {"command":"node eval/selftest/check.mjs (NODE_OPTIONS=--max-old-space-size=512)","cases":314,"pass":304,"fail":10,"exit":1,"newBatch4Cases":207,"unchangedOlderCases":107,"failureReason":"Only the ten strict batch-3 ticket #N cases described in findings.","log":"test-results/batch4-final-selftest.log"},
-    "fullSuite": {"command":"systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% pnpm test","tests":228,"pass":228,"fail":0,"skip":0,"exit":0,"newSkillTests":6,"log":"test-results/batch4-full-suite.log","tap":"test-results/2026-11-14T17-05-44-392Z-3291642.tap"},
+    "selftest": {"command":"node eval/selftest/check.mjs (NODE_OPTIONS=--max-old-space-size=512)","cases":314,"pass":314,"fail":0,"exit":0,"newBatch4Cases":207,"unchangedOlderCases":107,"log":"test-results/batch4-ruling-selftest.log"},
+    "fullSuite": {"command":"systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% pnpm test","tests":228,"pass":228,"fail":0,"skip":0,"exit":0,"newSkillTests":6,"log":"test-results/batch4-ruling-full-suite.log","tap":"test-results/2026-11-14T17-16-22-059Z-3720353.tap"},
     "plants":{"attempted":7,"caught":7,"selftestPlants":5,"skillTextPlants":2,"rule":"A pristine case passes first. Each mutated copy then triggers the corresponding assertion; an import/subprocess failure does not count as a report-count plant."},
-    "typecheck":{"command":"pnpm check","exit":0,"log":"test-results/batch4-typecheck.log"},
-    "memod":{"command":"node_modules/.bin/memod lint","exit":0,"log":"test-results/batch4-memod.log"},
-    "savedReport":{"command":"node eval/score.mjs | diff - eval/score.txt","exit":0,"outputBytes":0,"log":"test-results/batch4-score-diff.log"},
-    "readme":{"command":"node scripts/readme-check.mjs","exit":0,"result":"14 commands, 0 drifted","log":"test-results/batch4-readme.log"}
+    "typecheck":{"command":"pnpm check","exit":0,"log":"test-results/batch4-ruling-typecheck.log"},
+    "memod":{"command":"node_modules/.bin/memod lint","exit":0,"log":"test-results/batch4-ruling-memod.log"},
+    "savedReport":{"command":"node eval/score.mjs | diff - eval/score.txt","exit":0,"outputBytes":0,"log":"test-results/batch4-ruling-score-diff.log"},
+    "readme":{"command":"node scripts/readme-check.mjs","exit":0,"result":"14 commands, 0 drifted","log":"test-results/batch4-ruling-readme.log"}
   },
   "evidenceLocation":"test-results/batch4-*.log plus retained batch4-selftest-* fixtures and full-suite TAP/scratch. Scratch is never deleted."
 }

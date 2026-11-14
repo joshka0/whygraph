@@ -71,8 +71,11 @@ export async function batch4Checks({ tasks, scoreRun }) {
     { final: 'This conflicts with ticket 3276 and ticket 9999.' }, { pass: true, falseMention: false });
   for (const id of oldIds) {
     const old = tasks.get(id);
-    for (const prefix of ['ticket ', 'TICKET ', 'ticket #']) verdict(`batch 3 rejects ${prefix} in ${id}`, old,
+    for (const prefix of ['ticket ', 'TICKET ']) verdict(`batch 3 rejects ${prefix} in ${id}`, old,
       { final: `${prefix}${old.ground_truth.source.record}` }, missing);
+    // B4-08, clarified in b6f4594: the fixed #N spelling still matches inside ticket #N.
+    verdict(`batch 3 accepts ticket # in ${id}`, old,
+      { final: `ticket #${old.ground_truth.source.record}` }, { pass: true, falseMention: false, changed: [] });
   }
   for (const [name, diff, changed] of [
     ['target', edit('crates/ignore/src/gitignore.rs'), ['crates/ignore/src/gitignore.rs']],
