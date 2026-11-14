@@ -1,0 +1,735 @@
+{
+  "implementation": "716228a",
+  "branch": "cut-unused",
+  "groundTruth": [
+    "docs/failures.md at cut-unused",
+    "git diff main..cut-unused -- docs/failures.md",
+    "docs/adr/0007-unused-graph-parts-removed.md",
+    "README.md graph and decisions-file tables"
+  ],
+  "newTestCount": 10,
+  "newEntries": [
+    {
+      "id": "U1",
+      "contract": "| U1 | A decisions file with `topics` on a record, whether null, empty, shared with code or record-only | Build exit 1; `unknown field \"topics\"` names the file, record index and id; the prior store still answers. No ABOUT edge and no record-only Topic are loaded. ADR conversion emits no `topics` key even when the preamble has `[[topic]]`. |",
+      "tests": [
+        {
+          "file": "test/unused.test.mjs",
+          "test": "U1 all record topics values reject atomically without record-only topics or ABOUT"
+        },
+        {
+          "file": "test/unused.test.mjs",
+          "test": "U1 ADR preamble topics never become decisions-file fields"
+        }
+      ],
+      "verification": "Four prohibited topics values report every file/index/id atomically; prior answer and store link survive, no ABOUT or record-only Topic; separate ADR preamble conversion has no topics key and builds."
+    },
+    {
+      "id": "U2",
+      "contract": "| U2 | A commit with `Decision:` lines naming existing or missing records, in any case or paragraph, not listed in any record | Build exit 0; no CITES edge from any record to this commit, and no trailer warning. If the record lists the commit, exactly one CITES edge, irrespective of its message (L13). |",
+      "tests": [
+        {
+          "file": "test/unused.test.mjs",
+          "test": "U2 messages never supply citations or warnings while explicit lists deduplicate"
+        }
+      ],
+      "verification": "Existing/missing ids, upper/lowercase keys and values, final/earlier/prose paragraphs create no CITES or warnings; explicit full/short duplicate commit lists create exactly one edge per commit."
+    },
+    {
+      "id": "U3",
+      "contract": "| U3 | Code with a `premise:` tag that memod includes in its graph | Build exit 0; zero Memo nodes and PREMISE edges, no load statement or index for Memo; the carry recipe returns no `premises` column. Symbol and range carry print no premise-memo line. The tag alone does not suppress `Nothing found in what was searched` when there is no other constraint. |",
+      "tests": [
+        {
+          "file": "test/unused.test.mjs",
+          "test": "U3 premise tags do not load memos or suppress empty scope in either carry form"
+        }
+      ],
+      "verification": "Real numeric premise tag confirmed in memod graph; empty Memo/PREMISE counts, no Memo index or captured load statement, no premises column in returned carry row, both carry forms omit memo text and retain Nothing found."
+    },
+    {
+      "id": "U4",
+      "contract": "| U4 | A code file importing a package and another code file | Build exit 0; zero Package nodes and IMPORTS edges, no Package index. File, Symbol and USES rows remain those of memod, and code-owned Topic and OWNS remain. The memod graph is not modified. |",
+      "tests": [
+        {
+          "file": "test/unused.test.mjs",
+          "test": "U4 imports lose only Package and IMPORTS while preserving memod code and ownership rows"
+        }
+      ],
+      "verification": "Real package and local import confirmed in memod graph; Package/IMPORTS omitted, no Package index/load statement; retained file/symbol/use/topic/expanded ownership rows match independently read memod graph, which remains byte-equivalent after build."
+    },
+    {
+      "id": "U5",
+      "contract": "| U5 | The fixture build summary and direct label/type counts | Exactly the sorted label and relationship counts of A2; neither list names Package, Memo, IMPORTS, ABOUT or PREMISE. Total 93 nodes and 139 relationships; 0 warnings. |",
+      "tests": [
+        {
+          "file": "test/unused.test.mjs",
+          "test": "U5 fixture summaries and direct graph counts exactly match the reduced graph"
+        }
+      ],
+      "verification": "Every sorted summary label/type count equals A2, every direct graph count matches it independently; 93 nodes, 139 relationships, zero warnings and no removed labels/types."
+    },
+    {
+      "id": "U6",
+      "contract": "| U6 | Generate the fixture twice, build twice, repeat why, impact, carry (symbol and range), search, decisions adr and mcp | Same fixture ids (HEAD `0ede283`); byte-identical stdout for each answer and ADR conversion, also after rebuild. Build counts and sorted warnings repeat; mcp prints the same revised carry recipe. |",
+      "tests": [
+        {
+          "file": "test/unused.test.mjs",
+          "test": "U6 two fixtures and rebuilds repeat every command including both carry forms"
+        }
+      ],
+      "verification": "Two separately generated fixture histories, fixed HEAD; two builds and repeated reads of why, impact, symbol/range carry, search, ADR conversion and MCP. Only unavoidable absolute repo/store paths are normalized across separate repos."
+    },
+    {
+      "id": "U7",
+      "contract": "| U7 | A symbol whose doc comment shares a term with a record but whose declaration, name and path do not | No term candidate from the comment in symbol carry; a range explicitly covering the comment still uses those lines. symbolSource returns only the inclusive declaration span, or undefined for an invalid span. No READ_COMMENT switch or withComment argument. |",
+      "tests": [
+        {
+          "file": "test/unused.test.mjs",
+          "test": "U7 symbol terms exclude doc comments while explicit comment ranges include them"
+        }
+      ],
+      "verification": "Comment-only term is absent in symbol carry and present in explicit comment range; stored declaration bounds exclude comment and all inclusive declaration lines contribute terms. Existing T12/T13/T24 cover absent/stale/invalid source-span behavior."
+    },
+    {
+      "id": "U8",
+      "contract": "| U8 | The fixture's note-2 lists `73ebd46` and `a3bcb76`; note-1 lists only `a3bcb76` | For formatCents, note-2 lists 1-symbol then 5-symbol commits, before ADR-0001 (3) and note-1 (5), in why and both carry forms; the why MCP rows have that same order. The record lists, rather than message trailers, supply all those links. |",
+      "tests": [
+        {
+          "file": "test/unused.test.mjs",
+          "test": "U8 fixture explicit citations rank records and commits identically in CLI and MCP"
+        }
+      ],
+      "verification": "Exact note commit lists; exact linked-record order and per-record commit order/counts in why, symbol/range carry and printed why recipe over real read-only MCP."
+    },
+    {
+      "id": "U9",
+      "contract": "| U9 | why or impact on code or a record with no commit link | The why hint suggests a decided tag or a commit listed in the record; impact says `No commit in this repo's history cites it (a commit the record lists).` Neither suggests a trailer. |",
+      "tests": [
+        {
+          "file": "test/unused.test.mjs",
+          "test": "U9 unlinked why and impact explain only supported ways to cite commits"
+        }
+      ],
+      "verification": "Unlinked why suggests decided tag or record commit list; exact impact no-cites sentence; combined outputs contain neither trailer nor Decision: suggestion."
+    }
+  ],
+  "existingUpdates": [
+    {
+      "id": "A1",
+      "contract": "| A1 | `decisions adr docs/adr` | Exit 0. Records `ADR-0001`..`ADR-0003` in that order. ADR-0001 commits: `[dfb4ff8...]` only (full id; `73ebd46` names it in free text and is not cited). ADR-0002: restsOn `[ADR-0001]`, commits `[2a59506...]`. ADR-0003: supersedes `[ADR-0002]`, restsOn `[ADR-0001]`, commits `[78884f0...]`. Each has status `accepted`, its date, and items `context` and `choice`. |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "A1 fixture ADR records, metadata and full cited commits"
+        }
+      ],
+      "verification": "Retain ids, full cited commits, restsOn/supersedes, dates/status/items and author; assert topics is absent."
+    },
+    {
+      "id": "A2",
+      "contract": "| A2 | the fixture build | Exit 0. 93 nodes: Check 1, Commit 9, DecidedTag 5, Decision 5, File 6, Item 8, Symbol 8, Term 45, Topic 6. 139 relationships: CHANGES 27, CITES 6, DECIDED 5, DECLARES 8, MENTIONS 57, NAMES 3, OWNS 14, RESTS_ON 4, STATES 8, SUPERSEDES 1, USES 5, VERIFIED 1. No warning. |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "A2 fixture node and relationship counts without warnings"
+        }
+      ],
+      "verification": "Retain all label/type checks, add omitted term and relationship counts, assert exact new totals."
+    },
+    {
+      "id": "A3",
+      "contract": "| A3 | `why src/tax.ts:taxRate` | Exit 0. Doc-comment tag \"the rate depends on the region ...\", header tag \"tax lives apart from the cart ... (ADR-0002)\". Named records: ADR-0003 (doc comment, also cited by `78884f0`, 1 symbol), then ADR-0002 (header, superseded by ADR-0003, also cited by `2a59506`, 2 symbols). No records linked only through commits. Each record appears once. |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "A3 taxRate doc links precede header links and loose commit links"
+        }
+      ],
+      "verification": "Exact new record list, named/loose split and both direct link reasons/counts; no loose records."
+    },
+    {
+      "id": "A4",
+      "contract": "| A4 | `why src/tax.ts:taxOf` | Named by a tag: ADR-0002 (header). Linked only through a commit, tightest first: note-1 then note-2 (both `a3bcb76`, 5 symbols, date breaks the tie). Neither ADR-0001 nor ADR-0003 links: their listed commits did not change taxOf, and no taxOf tag names them. |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "A4 taxOf is not linked to the regional change"
+        }
+      ],
+      "verification": "Exact header-only named record, note-1/note-2 loose order, large-commit count; neither unrelated ADR links."
+    },
+    {
+      "id": "A5",
+      "contract": "| A5 | `impact ADR-0002` | Exit 0. ADR-0002 itself (superseded by ADR-0003): no symbol tag names it; file `src/tax.ts` named by its header tag; commit `2a59506` (2 symbols): taxRate 1 user, taxOf 0. note-1 directly: no tag, `a3bcb76` (5 symbols): cents 2 users, formatCents 1, total 0, taxOf 0, round_cents 0. note-2 through 1 other record: `73ebd46` (1 symbol) and `a3bcb76` (5 symbols), same five symbols. \"6 distinct symbols in all: 0 named by a decided: tag, 6 reached only through a commit.\" |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "A5 impact traverses premises and counts distinct symbols"
+        }
+      ],
+      "verification": "New six-symbol union; retain file-header/direct/depth/commit assertions; each downstream note exposes all five changed symbols and user counts."
+    },
+    {
+      "id": "A6",
+      "contract": "| A6 | `impact ADR-0001` | ADR-0001: cents named by its tag (2 users); only `dfb4ff8` cites it (3 symbols); formatCents (1 user) and total (0) are other changed symbols. ADR-0002 and ADR-0003 rest on it directly; ADR-0003 names taxRate and its commit changed no other current symbol. note-1 and note-2 rest on it through others and cite commits as A5. \"6 distinct symbols in all: 2 named by a decided: tag, 4 reached only through a commit.\" |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "A6 a superseding record still rests on ADR-0001"
+        }
+      ],
+      "verification": "ADR-0001 cites only initial three-symbol commit and its two other symbols; retain rest-on depths and six-symbol distinct union."
+    },
+    {
+      "id": "A7",
+      "contract": "| A7 | `carry src/money.ts:cents` | Topic `fx-money`, no other owner; no check; ADR-0001 named by its doc-comment tag; note-1 then note-2 linked only through `a3bcb76` (5 symbols each); users: `src/cart.ts:total` and `src/tax.ts:taxOf` at distance 1; commits `a3bcb76` then `dfb4ff8`. |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "A7 carry cents has its topic, no check and two direct users"
+        }
+      ],
+      "verification": "Retain topic/check/users/history assertions, now also note-1 and note-2 via explicit large-commit lists."
+    },
+    {
+      "id": "A8",
+      "contract": "| A8 | `carry src/money.ts:formatCents` | Commits `a3bcb76`, `73ebd46`, `dfb4ff8` (newest first); no tag names a record; records linked only through a commit, tightest first: note-2 (`73ebd46`, 1 symbol, then `a3bcb76`, 5 symbols), ADR-0001 (`dfb4ff8`, 3 symbols), note-1 (`a3bcb76`, 5 symbols). No premise-memo line. |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "A8 carry formatCents lists newest commits and all three records"
+        }
+      ],
+      "verification": "Exact three-record loose order, all three newest-first commits and counts, plus U3 no-premise assertion."
+    },
+    {
+      "id": "B4",
+      "contract": "| B4 | `build` without `--decisions` | Exit 0; 0 Decision nodes; 0 NAMES and 0 CITES. `impact X` exits 3 and says the store holds no decision records. On the fixture, stderr warns once for each tag that names an ADR (L4): 3 warnings, sorted. |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "B4 no decisions loads no record links and warns for each unknown tag"
+        }
+      ],
+      "verification": "Exactly three sorted unknown-tag warnings, no trailer warning, zero Decision/NAMES/CITES and missing-impact diagnostic."
+    },
+    {
+      "id": "B17",
+      "contract": "| B17 | A record with a `topics` field, even an empty list | Exit 1; stderr names the decisions file, record index and id, and `unknown field \"topics\"`. Store unchanged (U1). |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "B17 decision topics are rejected and preserve the old store"
+        }
+      ],
+      "verification": "Reject topics with exact file/index/id diagnostic, preserve old store link and byte-identical answer, no unowned Topic."
+    },
+    {
+      "id": "D14",
+      "contract": "| D14 | A commit message \"see ADR 4\", one naming `0004-x.md`, one \"See ADR 40\", none adding the ADR file | None is cited by ADR-0004: `decisions adr` cites only the commit that added the ADR file. Message text creates no link. |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "D14 free-text ADR and filename mentions are not cited"
+        }
+      ],
+      "verification": "Existing free-text and filename tests retain exact original-addition-only citation."
+    },
+    {
+      "id": "D16",
+      "contract": "| D16 | A later commit edits ADR 0003 and changes code, with or without `Decision: ADR-0003` | Not cited by the generated ADR-0003 record (memod: `1fa2df7` edits `0003-graph-output-contract.md` and is cited only by ADR-0004, which it added). A later commit links only if a record lists it in `commits`. |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "D16 editing an old ADR links code only through the record commit list"
+        }
+      ],
+      "verification": "Later ADR edits do not link with or without trailer; explicit record commit list then produces the new link."
+    },
+    {
+      "id": "C9",
+      "contract": "| C9 | One decision reached two ways: a header tag of a file that declares two callees; a record that tags on two neighbors name; a check that covers four callees; a topic two callees own; a record that the `why` part already lists | Each is one line: `the file of <a> and <b>, which <name> uses`; `record named by a decided: tag on <a>, ...; and on <b>, ...`; `check on <a>, <b>, <c> and <d>, which <name> uses: memod verify <check>`; `topic owned by <a> and <b>, ...`. A record the `why` part lists, a check that covers the symbol itself, and a topic it owns are not repeated (fixture: `carry src/cart.ts:total` shows the tag on `cents`, not ADR-0001, which its `why` part lists through `dfb4ff8`). |",
+      "tests": [
+        {
+          "file": "test/carry.test.mjs",
+          "test": "C9 shared neighbor facts merge their carriers and suppress facts already above"
+        }
+      ],
+      "verification": "Shared facts still deduplicate and suppress previously listed records; use initial dfb4ff8 three-symbol link in fixture assertion."
+    },
+    {
+      "id": "C10",
+      "contract": "| C10 | Nothing found: a TypeScript symbol with no tag, record, check or topic, no file header tag, and no neighbor that holds one | Exactly these lines: `One step away: no decided: tag, decision record, formal check or topic on the 0 symbols lonely uses, 0 symbols that use lonely, or in the headers of their files.`, `Nothing found in what was searched; that does not mean nothing constrains this edit.`, `Searched: src/u.ts:lonely, the header of src/u.ts, the 0 symbols lonely uses, 0 symbols that use lonely, and the headers of their files.`, `Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript, JavaScript, Rust and Swift); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.` When something was found elsewhere in the answer, the `Nothing found` line is absent; the `Searched:` and `Not searched:` lines are always there. |",
+      "tests": [
+        {
+          "file": "test/carry.test.mjs",
+          "test": "C10 empty answers state the search scope and never imply that no constraint exists"
+        }
+      ],
+      "verification": "Existing exact scope, empty-answer disclaimer and suppression assertions retained unchanged; premise removed from prose only."
+    },
+    {
+      "id": "I3",
+      "contract": "| I3 | A record that cites no commit, or whose commits changed no symbol | Exit 0. No commit: \"No commit in this repo's history cites it (a commit the record lists).\" Commits that changed no symbol: the commits with \"it changed 0 symbols\", then \"That commit changed no symbol that exists now.\" (or \"Those commits ...\"). |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "I3 records without symbol changes print the empty explanation"
+        }
+      ],
+      "verification": "Exact revised no-cites sentence; current unchanged-code fixture commit id yields zero changed symbols."
+    },
+    {
+      "id": "Q8",
+      "contract": "| Q8 | The word-indexed text | The word search finds a record by a word in its title or in any of its statements; never by its id, date, status or source. |",
+      "tests": [
+        {
+          "file": "test/search.test.mjs",
+          "test": "Q8 Q24 words index title and every statement, excluding record metadata"
+        }
+      ],
+      "verification": "Remove prohibited topics field/query from record metadata fixture; preserve every title/statement and remaining non-indexed field assertion."
+    },
+    {
+      "id": "Q24",
+      "contract": "| Q24 | A record whose id, date, status or source holds the request's only word | Not a word match (those fields are not indexed); it may still be a meaning match. |",
+      "tests": [
+        {
+          "file": "test/search.test.mjs",
+          "test": "Q8 Q24 words index title and every statement, excluding record metadata"
+        }
+      ],
+      "verification": "Same combined Q8/Q24 test; metadata remains meaning-only, with no word matches."
+    },
+    {
+      "id": "T9",
+      "contract": "| T9 | `carry src/tax.ts:taxOf` (fixture: a record lists it) | The term section lists `ADR-0003` (`shared terms: rate, cents, tax`), then `ADR-0001` (`shared terms: cents`); `ADR-0002`, note-1 and note-2 are already linked in its `why` part and are not repeated. |",
+      "tests": [
+        {
+          "file": "test/terms.test.mjs",
+          "test": "T9 taxOf suppresses both tag and commit links from candidates"
+        }
+      ],
+      "verification": "Exact new two-candidate order and shared terms; linked header/note records remain suppressed."
+    },
+    {
+      "id": "T22",
+      "contract": "| T22 | `carry src/tax.ts:11-20` (fixture: a range overlapping two symbols) | Exit 0. `Symbols whose stored range overlaps these lines: src/tax.ts#taxRate (11-13), src/tax.ts#taxOf (18-20)`, then a `Symbol src/tax.ts:taxRate (11-13)` body and a `Symbol src/tax.ts:taxOf (18-20)` body, in line order, each with its own topics, checks, decisions, one-step neighbours, users and commits. The final term section lists only ADR-0001, with `shared terms: cents`; the other matching records are already linked in the bodies. |",
+      "tests": [
+        {
+          "file": "test/terms.test.mjs",
+          "test": "T22 T28 overlapping symbol bodies retain their own links and suppress candidates already in either body"
+        }
+      ],
+      "verification": "Exact bodies, per-body links/topics/checks/neighbors/users/commits, plus one ADR-0001 term candidate and no repeated notes."
+    },
+    {
+      "id": "M3",
+      "contract": "| M3 | `read_cypher` with the `why` recipe and `{\"symbol\": \"src/tax.ts#taxRate\"}` | The rows that `whygraph why src/tax.ts:taxRate` renders (A3): kinds `tag`, `file tag`, then records ADR-0003 (`named: [\"doc comment\"]`) and ADR-0002 (`named: [\"file header\"]`); no note-1 row. |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "M3 the printed why recipe returns the fixture rows over MCP"
+        }
+      ],
+      "verification": "Exact revised four-row shape and direct records, named places, supersession and one-/two-symbol citations match CLI."
+    },
+    {
+      "id": "L8",
+      "contract": "| L8 | A commit whose last paragraph is `Decision: note-9` (no such record) | Build exit 0; no link and no warning from that line (U2). |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "L8 unknown trailer values neither warn nor link"
+        }
+      ],
+      "verification": "Unknown trailer creates neither warning nor citation."
+    },
+    {
+      "id": "L9",
+      "contract": "| L9 | A commit with two trailers `Decision: ADR-0004` and `Decision: note-1`, not listed by either record | Neither record cites it; no warning (U2). |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "L9 two unlisted Decision trailers cite neither record"
+        }
+      ],
+      "verification": "Neither of two unlisted trailer-named records cites commit, no warning."
+    },
+    {
+      "id": "L10",
+      "contract": "| L10 | Trailers `Decision: ADR-4`, `Decision: ADR 0004`, `Decision: adr-0004`, `Decision: 0004`, or a lowercase `decision:` key | No link and no warning: all commit-message lines are plain text. |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "L10 all trailer values and key cases remain plain text"
+        }
+      ],
+      "verification": "All value spellings and lowercase key ignored, no warning or citation."
+    },
+    {
+      "id": "L11",
+      "contract": "| L11 | `Decision: ADR-0004` anywhere in a commit message, with no record listing the commit | No link, no warning. |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "L11 a Decision line before the last paragraph is ordinary text"
+        }
+      ],
+      "verification": "Earlier-paragraph Decision line retains no-cites/no-warning assertions."
+    },
+    {
+      "id": "L12",
+      "contract": "| L12 | A commit message naming `ADR 0004`, `ADR-0004` or `0004-x.md` in free text, with no trailer, that does not add the ADR's file (fixture: `73ebd46`) | The message adds no CITES edge; only a record's explicit `commits` list can cite it (on the fixture, note-2 explicitly lists `73ebd46`). |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "L12 free-text ADR and filename mentions do not link the code they change"
+        }
+      ],
+      "verification": "Free-text message mentions never add citation; original ADR addition still only explicit converted citation."
+    },
+    {
+      "id": "L14",
+      "contract": "| L14 | A record linked only by a large commit (fixture: note-1 lists only `a3bcb76`) | `why` on each changed symbol lists note-1 with \"changed by: a3bcb76 2026-01-08 Name every amount by its unit; that commit changed 5 symbols\". `impact note-1`: \"a3bcb76 2026-01-08 Name every amount by its unit; it changed 5 symbols\". |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "L14 loose links expose the number of symbols a large commit changed"
+        }
+      ],
+      "verification": "All five changed symbols link note-1 with exact large-commit/count line; impact note-1 exposes it too."
+    },
+    {
+      "id": "L15",
+      "contract": "| L15 | Determinism: `scripts/fixture.sh` run twice; the fixture build run twice | The same commit ids (HEAD `0ede283`). The same NAMES and CITES edges, byte-identical `why` and `impact` answers, warnings identical and sorted. |",
+      "tests": [
+        {
+          "file": "test/contracts.test.mjs",
+          "test": "L15 two independently generated fixtures and their rebuilds have identical links and answers"
+        }
+      ],
+      "verification": "Two fixtures and rebuilds keep exact history, fixed new HEAD, three NAMES/six CITES, warnings and byte-identical answers."
+    }
+  ],
+  "additionalFixtureUpdates": [
+    {
+      "ids": [
+        "B6",
+        "B15"
+      ],
+      "file": "test/contracts.test.mjs",
+      "action": "Remove obsolete topics normalization from B6; B15 keeps malformed-list validation using the supported commits field."
+    },
+    {
+      "ids": [
+        "W21",
+        "W22",
+        "W23",
+        "W24",
+        "W25",
+        "W26",
+        "W27"
+      ],
+      "file": "test/order-author.test.mjs",
+      "action": "Ordering fixture lists the exact old trailer-derived commits in each record; all prior rank/date/id/commit/CLI/MCP/rebuild assertions remain unchanged."
+    },
+    {
+      "ids": [
+        "T2",
+        "T8",
+        "T14",
+        "T20",
+        "T28"
+      ],
+      "file": "test/terms.test.mjs",
+      "action": "Drop invalid topics metadata; revise linked-record lists and preserve candidate uniqueness, missing-source, shared-term and no-score checks."
+    },
+    {
+      "ids": [
+        "R1",
+        "R2",
+        "R3",
+        "R6"
+      ],
+      "file": "test/docs.test.mjs",
+      "action": "Retained unchanged: tests already meet the current contract and pass. No removed item justified removing a test."
+    }
+  ],
+  "fixtureChanges": {
+    "firstFiveCommits": "unchanged",
+    "laterCommits": [
+      "6c572a2",
+      "47a233e",
+      "a3bcb76",
+      "0ede283"
+    ],
+    "note-1": [
+      "a3bcb76"
+    ],
+    "note-2": [
+      "73ebd46",
+      "a3bcb76"
+    ]
+  },
+  "removedTests": [],
+  "fullyUntestedItems": [],
+  "untestedPortions": [
+    {
+      "id": "U7",
+      "portion": "Literal absence of READ_COMMENT and withComment, and direct symbolSource return value undefined for every invalid span.",
+      "reason": "The brief requires src/ and recipes/ to remain black boxes exercised through the command. CLI tests cover comment exclusion, explicit-comment inclusion and stored/source-span boundary behavior; dead switches/unused argument presence and private return values are not CLI-observable."
+    },
+    {
+      "id": "U4",
+      "portion": "Identity or in-memory immutability of the parsed memod object.",
+      "reason": "Not observable through the CLI; instead tests compare the external memod graph before/after and every retained graph kind in the store."
+    }
+  ],
+  "policyRulings": [
+    "Parent allowed B27 worktree creation inside its own scratch fixture, while prohibiting agent worktrees for this repo.",
+    "Parent authorized sandbox escalation for the required systemd user scope."
+  ],
+  "conventions": {
+    "scope": "Only test/ changes; src/recipe text inspected solely for isolated fault-plant anchors after all expected values were derived from contract artifacts.",
+    "deletions": "No tracked file or test removed; no scratch cleanup.",
+    "telemetry": "Every relate process inherits RELATE_TELEMETRY=0 and DO_NOT_TRACK=1.",
+    "suiteLimits": "Every suite and plant-runner invocation runs under systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400%.",
+    "modelTransport": "Existing search-offline.mjs fixture transport uses cached public model artifacts, including README check."
+  },
+  "plants": [
+    {
+      "name": "U1-accept-topics",
+      "pattern": "^U1 all ",
+      "subject": "/home/dev/repos/personal/whygraph/test-results/scratch/unused-plants-2026-11-14T15-26-36-331Z-3719987/U1-accept-topics",
+      "failedTests": [
+        "U1 all record topics values reject atomically without record-only topics or ABOUT"
+      ],
+      "firstFailingAssertion": "Build exits 0 rather than the required 1.",
+      "assertionDiagnostic": "|-\n    {\n      \"code\": 0,\n      \"signal\": null,\n      \"stdout\": \"Built /home/dev/repos/personal/whygraph/test-results/scratch/2026-11-14T15-26-36-388Z-3720096/U1_all_record_topics_values_reject_atomically_without_record-only_topics_or_ABOUT/repo/.git/whygraph/store\\nfrom /home/dev/repos/personal/whygraph/test-results/scratch/2026-11-14T15-26-36-388Z-3720096/U1_all_record_topics_values_reject_atomically_without_record-only_topics_or_ABOUT/repo: 9 commits, 4 decision records from 1 decisions files, 3 warnings.\\n39 nodes:\\n  Check        1\\n  Commit       9\\n  DecidedTag   5\\n  Decision     4\\n  File         6\\n  Symbol       8\\n  Topic        6\\n60 relationships:\\n  CHANGES      27\\n  DECIDED      5\\n  DECLARES     8\\n  OWNS         14\\n  USES         5\\n  VERIFIED     1\\n\",\n      \"stderr\": \"warning: decided tag on src/money.ts:cents names ADR-0001, which no record has; no link\\nwarning: decided tag on src/tax.ts names ADR-0002, which no record has; no link\\nwarning: decided tag on src/tax.ts:taxRate names ADR-0003, which no record has; no link\\n\"\n    }\n    \n    0 !== 1",
+      "redExit": 1,
+      "redReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-26-36-388Z-3720096.tap",
+      "greenExit": 0,
+      "passedTests": [
+        "U1 all record topics values reject atomically without record-only topics or ABOUT"
+      ],
+      "greenReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-26-41-025Z-3723583.tap"
+    },
+    {
+      "name": "U1-ADR-topics-again",
+      "pattern": "^U1 ADR ",
+      "subject": "/home/dev/repos/personal/whygraph/test-results/scratch/unused-plants-2026-11-14T15-26-36-331Z-3719987/U1-ADR-topics-again",
+      "failedTests": [
+        "U1 ADR preamble topics never become decisions-file fields"
+      ],
+      "firstFailingAssertion": "ADR record has a topics key: true, expected false.",
+      "assertionDiagnostic": "|-\n    Expected values to be strictly equal:\n    \n    true !== false",
+      "redExit": 1,
+      "redReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-26-45-037Z-3726633.tap",
+      "greenExit": 0,
+      "passedTests": [
+        "U1 ADR preamble topics never become decisions-file fields"
+      ],
+      "greenReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-26-45-928Z-3727579.tap"
+    },
+    {
+      "name": "U2-read-trailers-again",
+      "pattern": "^U2 ",
+      "subject": "/home/dev/repos/personal/whygraph/test-results/scratch/unused-plants-2026-11-14T15-26-36-331Z-3719987/U2-read-trailers-again",
+      "failedTests": [
+        "U2 messages never supply citations or warnings while explicit lists deduplicate"
+      ],
+      "firstFailingAssertion": "Unlisted messages create 3 CITES edges, expected 0.",
+      "assertionDiagnostic": "|-\n    Expected values to be strictly equal:\n    \n    3 !== 0",
+      "redExit": 1,
+      "redReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-26-48-245Z-3729525.tap",
+      "greenExit": 0,
+      "passedTests": [
+        "U2 messages never supply citations or warnings while explicit lists deduplicate"
+      ],
+      "greenReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-26-50-133Z-3730992.tap"
+    },
+    {
+      "name": "U3-load-memos-again",
+      "pattern": "^U3 ",
+      "subject": "/home/dev/repos/personal/whygraph/test-results/scratch/unused-plants-2026-11-14T15-26-36-331Z-3719987/U3-load-memos-again",
+      "failedTests": [
+        "U3 premise tags do not load memos or suppress empty scope in either carry form"
+      ],
+      "firstFailingAssertion": "Memo node count 1, expected 0.",
+      "assertionDiagnostic": "|-\n    Memo nodes\n    \n    1 !== 0",
+      "redExit": 1,
+      "redReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-26-53-723Z-3734053.tap",
+      "greenExit": 0,
+      "passedTests": [
+        "U3 premise tags do not load memos or suppress empty scope in either carry form"
+      ],
+      "greenReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-26-55-158Z-3735244.tap"
+    },
+    {
+      "name": "U3-premise-line-again",
+      "pattern": "^U3 ",
+      "subject": "/home/dev/repos/personal/whygraph/test-results/scratch/unused-plants-2026-11-14T15-26-36-331Z-3719987/U3-premise-line-again",
+      "failedTests": [
+        "U3 premise tags do not load memos or suppress empty scope in either carry form"
+      ],
+      "firstFailingAssertion": "Carry output matches the forbidden whole-word premise/memo line.",
+      "assertionDiagnostic": "|-\n    The input was expected to not match the regular expression /\\bpremise\\b|\\bmemo\\b|1234\\+1/i. Input:\n    \n    'Before you edit src/a.ts:lonely\\n' +\n      '\\n' +\n      'It owns no topic.\\n' +\n      'No premise memo is recorded for it.\\n' +\n      'No formal check covers it.\\n' +\n      '\\n' +\n      'Its doc comment holds no decided: tag.\\n' +\n      'The header of src/a.ts holds no decided: tag.\\n' +\n      'No decided: tag names a decision record.\\n' +\n      'No decision record cites a commit that changed its code or tags.\\n' +\n      '\\n' +\n      `No decision is recorded for it. Record one with a decided: tag in its doc comment (naming the record's id links it), or a commit listed in the record's commits. To look for a record the repo already holds, run whygraph search \"<the change in your own words>\".\\n` +\n      '\\n' +\n      'One step away: no decided: tag, decision record, formal check or topic on the 0 symbols lonely uses, 0 symbols that use lonely, or in the headers of their files.\\n' +\n      'Nothing found in what was searched; that does not mean nothing constrains this edit.\\n' +\n      'Searched: src/a.ts:lonely, the header of src/a.ts, the 0 symbols lonely uses, 0 symbols that use lonely, and the headers of their files.\\n' +\n      'Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript, JavaScript, Rust and Swift); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.\\n' +\n   ",
+      "redExit": 1,
+      "redReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-26-57-616Z-3737151.tap",
+      "greenExit": 0,
+      "passedTests": [
+        "U3 premise tags do not load memos or suppress empty scope in either carry form"
+      ],
+      "greenReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-26-59-845Z-3739190.tap"
+    },
+    {
+      "name": "U4-load-packages-and-imports-again",
+      "pattern": "^U4 ",
+      "subject": "/home/dev/repos/personal/whygraph/test-results/scratch/unused-plants-2026-11-14T15-26-36-331Z-3719987/U4-load-packages-and-imports-again",
+      "failedTests": [
+        "U4 imports lose only Package and IMPORTS while preserving memod code and ownership rows"
+      ],
+      "firstFailingAssertion": "Package node count 1, expected 0.",
+      "assertionDiagnostic": "|-\n    Package nodes\n    \n    1 !== 0",
+      "redExit": 1,
+      "redReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-27-02-385Z-3741227.tap",
+      "greenExit": 0,
+      "passedTests": [
+        "U4 imports lose only Package and IMPORTS while preserving memod code and ownership rows"
+      ],
+      "greenReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-27-03-789Z-3742534.tap"
+    },
+    {
+      "name": "U5-ABOUT-again",
+      "pattern": "^U5 ",
+      "subject": "/home/dev/repos/personal/whygraph/test-results/scratch/unused-plants-2026-11-14T15-26-36-331Z-3719987/U5-ABOUT-again",
+      "failedTests": [
+        "U5 fixture summaries and direct graph counts exactly match the reduced graph"
+      ],
+      "firstFailingAssertion": "Exact sorted summary differs: unexpected ABOUT count 5.",
+      "assertionDiagnostic": "|-\n    Expected values to be strictly deep-equal:\n    + actual - expected\n    ... Skipped lines\n    \n      [\n        [\n          'Check',\n          1\n        ],\n    ...\n        [\n    +     'ABOUT',\n    +     5\n    +   ],\n    +   [\n          'CHANGES',\n          27\n        ],\n        [\n          'CITES',",
+      "redExit": 1,
+      "redReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-27-05-732Z-3744282.tap",
+      "greenExit": 0,
+      "passedTests": [
+        "U5 fixture summaries and direct graph counts exactly match the reduced graph"
+      ],
+      "greenReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-27-10-589Z-3748476.tap"
+    },
+    {
+      "name": "U6-nondeterministic-build-summary",
+      "pattern": "^U6 ",
+      "subject": "/home/dev/repos/personal/whygraph/test-results/scratch/unused-plants-2026-11-14T15-26-36-331Z-3719987/U6-nondeterministic-build-summary",
+      "failedTests": [
+        "U6 two fixtures and rebuilds repeat every command including both carry forms"
+      ],
+      "firstFailingAssertion": "Repeated normalized build stdout differs because a random line changed.",
+      "assertionDiagnostic": "|-\n    Expected values to be strictly deep-equal:\n    + actual - expected\n    ... Skipped lines\n    \n      {\n        answers: [\n          'Why src/money.ts:formatCents is the way it is\\n' +\n            '\\n' +\n            'Its doc comment holds no decided: tag.\\n' +\n    ...\n          'from <repo>: 9 commits, 5 decision records from 2 decisions files, 0 warnings.\\n' +\n    +     '0.02123932450961863\\n' +\n    -     '0.3908182779201419\\n' +\n          '93 nodes:\\n' +\n          '  Check        1\\n' +\n          '  Commit       9\\n' +\n          '  DecidedTag   5\\n' +\n          '  Decision     5\\n' +",
+      "redExit": 1,
+      "redReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-27-15-278Z-3752299.tap",
+      "greenExit": 0,
+      "passedTests": [
+        "U6 two fixtures and rebuilds repeat every command including both carry forms"
+      ],
+      "greenReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-27-46-805Z-3776606.tap"
+    },
+    {
+      "name": "U7-read-comments-again",
+      "pattern": "^U7 ",
+      "subject": "/home/dev/repos/personal/whygraph/test-results/scratch/unused-plants-2026-11-14T15-26-36-331Z-3719987/U7-read-comments-again",
+      "failedTests": [
+        "U7 symbol terms exclude doc comments while explicit comment ranges include them"
+      ],
+      "firstFailingAssertion": "Symbol candidate ids include comment, expected no candidates.",
+      "assertionDiagnostic": "|-\n    Expected values to be strictly deep-equal:\n    + actual - expected\n    \n    + [\n    +   'comment'\n    + ]\n    - []",
+      "redExit": 1,
+      "redReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-28-17-492Z-3800691.tap",
+      "greenExit": 0,
+      "passedTests": [
+        "U7 symbol terms exclude doc comments while explicit comment ranges include them"
+      ],
+      "greenReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-28-19-566Z-3802403.tap"
+    },
+    {
+      "name": "U8-largest-commit-first",
+      "pattern": "^U8 ",
+      "subject": "/home/dev/repos/personal/whygraph/test-results/scratch/unused-plants-2026-11-14T15-26-36-331Z-3719987/U8-largest-commit-first",
+      "failedTests": [
+        "U8 fixture explicit citations rank records and commits identically in CLI and MCP"
+      ],
+      "firstFailingAssertion": "Record ids are ADR-0001, note-1, note-2 instead of note-2, ADR-0001, note-1.",
+      "assertionDiagnostic": "|-\n    Expected values to be strictly deep-equal:\n    + actual - expected\n    \n      [\n    -   'note-2',\n        'ADR-0001',\n        'note-1',\n    +   'note-2'\n      ]",
+      "redExit": 1,
+      "redReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-28-23-679Z-3805599.tap",
+      "greenExit": 0,
+      "passedTests": [
+        "U8 fixture explicit citations rank records and commits identically in CLI and MCP"
+      ],
+      "greenReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-28-26-761Z-3808164.tap"
+    },
+    {
+      "name": "U9-suggest-trailers-again",
+      "pattern": "^U9 ",
+      "subject": "/home/dev/repos/personal/whygraph/test-results/scratch/unused-plants-2026-11-14T15-26-36-331Z-3719987/U9-suggest-trailers-again",
+      "failedTests": [
+        "U9 unlinked why and impact explain only supported ways to cite commits"
+      ],
+      "firstFailingAssertion": "Required exact impact no-commit sentence is replaced by the obsolete trailer hint.",
+      "assertionDiagnostic": "|-\n    Expected \"No commit in this repo's history cites it (a commit the record lists).\" in:\n    What rests on unlinked (2026-01-01) \n    \n    No other record rests on it.\n    \n    The decision itself: unlinked (2026-01-01) \n      No decided: tag names it.\n      No commit in this repo's history cites it (a `Decision:` trailer, or a commit the record lists).\n    \n    0 distinct symbols in all: 0 named by a decided: tag, 0 reached only through a commit.",
+      "redExit": 1,
+      "redReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-28-30-603Z-3811274.tap",
+      "greenExit": 0,
+      "passedTests": [
+        "U9 unlinked why and impact explain only supported ways to cite commits"
+      ],
+      "greenReport": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-28-32-809Z-3813165.tap"
+    }
+  ],
+  "gates": {
+    "fullSuite": {
+      "command": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% pnpm test",
+      "report": "/home/dev/repos/personal/whygraph/test-results/2026-11-14T15-23-52-703Z-3586918.tap",
+      "scratch": "/home/dev/repos/personal/whygraph/test-results/scratch/2026-11-14T15-23-52-703Z-3586918",
+      "exitCode": 0,
+      "signal": null,
+      "wallSeconds": 423.965599088,
+      "tests": 222,
+      "pass": 222,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "check": {
+      "command": "pnpm check",
+      "exitCode": 0
+    },
+    "lint": {
+      "command": "node_modules/.bin/memod lint",
+      "exitCode": 0,
+      "note": "Sandbox denied its optional .git/memod/events.jsonl event-log write (EROFS); lint itself exited 0."
+    },
+    "readme": {
+      "command": "node scripts/readme-check.mjs",
+      "exitCode": 0,
+      "commands": 14,
+      "drifted": 0,
+      "offlinePreload": "test/search-offline.mjs; WHYGRAPH_TEST_MODEL_FIXTURE_CACHE=/home/dev/.cache/whygraph",
+      "execution": "Escalated: sandbox refused the child bash process with EPERM."
+    },
+    "whitespace": {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  },
+  "conflicts": [],
+  "plantSummary": {
+    "caught": 11,
+    "total": 11,
+    "greenControls": 11,
+    "evidence": "test-results/scratch/unused-plants-2026-11-14T15-26-36-331Z-3719987/summary.json",
+    "command": "systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node test/unused-plants.mjs",
+    "exitCode": 0
+  },
+  "testRetention": "All pre-existing contract groups in the five modified test files are retained; none removed."
+}

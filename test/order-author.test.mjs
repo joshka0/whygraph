@@ -64,6 +64,12 @@ function ordering(s, named = false) {
     record('A-later', { date: '2027-01-01' }), record('R-two', { date: '2026-02-01' }),
     record('R-tight', { date: '2099-01-01' }), ...(named ? [record('R-header', { date: '1900-01-01' })] : []),
   ];
+  const commits = {
+    'R-many': [seven], R: [nine, twoEarly, twoA, twoB, ...(named ? [one] : [])],
+    'R-one': [twoEarly, twoA, twoB], 'R-tight': [one],
+    ...Object.fromEntries(['R-a', 'R-b', 'R-undated', 'Z-earlier', 'A-later', 'R-two'].map(id => [id, [three]])),
+  };
+  for (const r of records) r.commits = commits[r.id] ?? [];
   const file = s.decisions(records); ok(s.build([file]));
   const rangeLine = code().split('\n').findIndex(line => line.startsWith('export function s')) + 1;
   return { file, range: `src/order.ts:${rangeLine}-${rangeLine}`, nine, seven, three, twoEarly, twoA, twoB, one };

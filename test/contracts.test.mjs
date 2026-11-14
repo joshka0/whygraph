@@ -80,51 +80,60 @@ contract('A1', 'fixture ADR records, metadata and full cited commits', 'fixture-
   assert.deepEqual(records.map(r => r.supersedes), [[], [], ['ADR-0002']]);
   for (const [i, r] of records.entries()) {
     assert.equal(r.author, null); assert.equal(r.status, 'accepted'); assert.equal(r.date, `2026-01-0${i + 1}`);
-    assert.deepEqual(r.topics, [i === 0 ? 'fx-money' : 'fx-tax']);
+    assert.equal(Object.hasOwn(r, 'topics'), false);
     assert.deepEqual(r.items.map(item => item.label), ['context', 'choice']);
     assert.ok(r.items.every(item => item.text.length > 0));
   }
 });
 contract('A2', 'fixture node and relationship counts without warnings', 'fixture', s => {
   const result = s.build(); const text = ok(result); assert.equal(result.stderr, '');
-  for (const [label, n] of Object.entries({ Check: 1, Commit: 9, DecidedTag: 5, Decision: 5, File: 6, Item: 8, Symbol: 8, Topic: 6, CHANGES: 27, CITES: 7, NAMES: 3, SUPERSEDES: 1, RESTS_ON: 4, USES: 5, VERIFIED: 1 })) countLine(text, label, n);
-  has(text, '0 warnings');
+  for (const [label, n] of Object.entries({ Check: 1, Commit: 9, DecidedTag: 5, Decision: 5, File: 6, Item: 8, Symbol: 8, Term: 45, Topic: 6, CHANGES: 27, CITES: 6, DECIDED: 5, DECLARES: 8, MENTIONS: 57, OWNS: 14, STATES: 8, NAMES: 3, SUPERSEDES: 1, RESTS_ON: 4, USES: 5, VERIFIED: 1 })) countLine(text, label, n);
+  has(text, '93 nodes', '139 relationships', '0 warnings');
 });
 contract('A3', 'taxRate doc links precede header links and loose commit links', 'fixture', s => {
   const text = ok(s.cli(['why', tax]));
-  ordered(text, ['the rate depends on the region', 'tax lives apart from the cart', '2026-01-03  ADR-0003', '2026-01-02  ADR-0002', '2026-01-02  note-1']);
-  assert.deepEqual(ids(text), ['ADR-0003', 'ADR-0002', 'note-1']);
+  ordered(text, ['the rate depends on the region', 'tax lives apart from the cart', '2026-01-03  ADR-0003', '2026-01-02  ADR-0002']);
+  assert.deepEqual(ids(text), ['ADR-0003', 'ADR-0002']);
   const parts = whyParts(text);
-  assert.deepEqual(ids(parts.direct), ['ADR-0003', 'ADR-0002']); assert.deepEqual(ids(parts.loose), ['note-1']);
+  assert.deepEqual(ids(parts.direct), ['ADR-0003', 'ADR-0002']); assert.deepEqual(ids(parts.loose), []);
   has(parts.direct, 'named by: a decided: tag in its doc comment', 'named by: a decided: tag in the header of src/tax.ts', 'superseded by: ADR-0003', 'also cited by: 78884f0', 'that commit changed 1 symbol', 'also cited by: 2a59506', 'that commit changed 2 symbols');
-  has(parts.loose, 'changed by: 2a59506', 'that commit changed 2 symbols');
+  assert.equal(parts.loose, '');
 });
 contract('A4', 'taxOf is not linked to the regional change', 'fixture', s => {
   const text = ok(s.cli(['why', 'src/tax.ts:taxOf']));
-  assert.deepEqual(ids(text), ['ADR-0002', 'note-1', 'ADR-0001']);
+  assert.deepEqual(ids(text), ['ADR-0002', 'note-1', 'note-2']);
   const parts = whyParts(text);
-  assert.deepEqual(ids(parts.direct), ['ADR-0002']); assert.deepEqual(ids(parts.loose), ['note-1', 'ADR-0001']);
+  assert.deepEqual(ids(parts.direct), ['ADR-0002']); assert.deepEqual(ids(parts.loose), ['note-1', 'note-2']);
   has(parts.direct, 'named by: a decided: tag in the header of src/tax.ts');
-  has(parts.loose, 'changed by: 6214848', 'that commit changed 5 symbols', 'changed by: 2a59506');
-  assert.ok(!ids(text).includes('ADR-0003')); assert.ok(!text.includes('78884f0'));
+  has(parts.loose, 'changed by: a3bcb76', 'that commit changed 5 symbols');
+  assert.ok(!ids(text).includes('ADR-0001')); assert.ok(!ids(text).includes('ADR-0003')); assert.ok(!text.includes('78884f0'));
 });
 contract('A5', 'impact traverses premises and counts distinct symbols', 'fixture', s => {
   const text = ok(s.cli(['impact', 'ADR-0002']));
-  has(text, 'The decision itself: ADR-0002', 'superseded by: ADR-0003', '1 file whose header decided: tag names it: src/tax.ts', 'Rests on it directly: note-1', 'through 1 other record: note-2', '3 distinct symbols in all: 0 named by a decided: tag, 3 reached only through a commit.');
+  has(text, 'The decision itself: ADR-0002', 'superseded by: ADR-0003', '1 file whose header decided: tag names it: src/tax.ts', 'Rests on it directly: note-1', 'through 1 other record: note-2', '6 distinct symbols in all: 0 named by a decided: tag, 6 reached only through a commit.');
   assert.match(text, /2a59506[^\n]+; it changed 2 symbols/); assert.match(text, /73ebd46[^\n]+; it changed 1 symbol/);
   assert.doesNotMatch(text, /symbol(?:s)? whose decided: tag names it/);
   assert.match(text, /1 user\s+src\/tax.ts:taxRate/); assert.match(text, /0 users\s+src\/tax.ts:taxOf/);
   assert.match(text, /1 user\s+src\/money.ts:formatCents/);
+  const notes = text.slice(text.indexOf('Rests on it directly: note-1')).split(/(?=Rests on it through 1 other record: note-2)/);
+  assert.equal(notes.length, 2, text);
+  for (const part of notes) {
+    assert.match(part, /a3bcb76[^\n]+; it changed 5 symbols/);
+    for (const [symbol, users] of [['src/money.ts:cents', 2], ['src/money.ts:formatCents', 1], ['src/cart.ts:total', 0], ['src/tax.ts:taxOf', 0], ['src/lib.rs:round_cents', 0]]) {
+      assert.match(part, new RegExp(`${users} users?\\s+${symbol.replaceAll('.', '\\.')}`));
+    }
+  }
 });
 contract('A6', 'a superseding record still rests on ADR-0001', 'fixture', s => {
   const text = ok(s.cli(['impact', 'ADR-0001']));
   has(text, 'The decision itself: ADR-0001', 'Rests on it directly: ADR-0002', 'Rests on it directly: ADR-0003', 'through 1 other record: note-1', 'through 2 other records: note-2', 'That commit changed no other symbol that exists now.', '6 distinct symbols in all: 2 named by a decided: tag, 4 reached only through a commit.');
   const base = text.slice(text.indexOf('The decision itself:'), text.indexOf('Rests on it directly:'));
   assert.match(base, /2 users\s+src\/money.ts:cents/);
-  ordered(base, ['dfb4ff8', 'f85c3a6', '6214848']);
-  for (const [sha, n] of [['dfb4ff8', 3], ['f85c3a6', 1], ['6214848', 5]]) assert.match(base, new RegExp(`${sha}[^\\n]+; it changed ${n} symbol`));
-  has(base, '4 other symbols', 'src/money.ts:formatCents', 'src/cart.ts:total', 'src/lib.rs:round_cents', 'src/tax.ts:taxOf');
-  assert.match(base, /1 user\s+src\/money.ts:formatCents\s+\(6214848, dfb4ff8\)/);
+  has(base, '1 commit cites it:');
+  for (const [sha, n] of [['dfb4ff8', 3]]) assert.match(base, new RegExp(`${sha}[^\\n]+; it changed ${n} symbol`));
+  has(base, '2 other symbols', 'src/money.ts:formatCents', 'src/cart.ts:total');
+  assert.doesNotMatch(base, /a3bcb76|6c572a2|src\/lib.rs:round_cents|src\/tax.ts:taxOf/);
+  assert.match(base, /1 user\s+src\/money.ts:formatCents\s+\(dfb4ff8\)/);
   assert.equal((base.match(/src\/money.ts:cents/g) ?? []).length, 1); assert.ok(!base.includes('73ebd46'));
 });
 contract('A7', 'carry cents has its topic, no check and two direct users', 'fixture', s => {
@@ -132,20 +141,20 @@ contract('A7', 'carry cents has its topic, no check and two direct users', 'fixt
   const text = output.split('Decision records that share the most distinctive terms')[0];
   assert.deepEqual(ids(output.slice(text.length)), ['ADR-0002', 'ADR-0003']);
   has(output, 'fx-money: no other file owns it', 'No formal check covers it.');
-  assert.deepEqual(ids(text), ['ADR-0001']); has(text, 'named by: a decided: tag in its doc comment');
-  ordered(output.slice(output.indexOf('2 commits changed')), ['6214848', 'dfb4ff8']);
+  assert.deepEqual(ids(text), ['ADR-0001', 'note-1', 'note-2']); has(text, 'named by: a decided: tag in its doc comment');
+  ordered(output.slice(output.indexOf('2 commits changed')), ['a3bcb76', 'dfb4ff8']);
   assert.match(output, /^\s+1\s+src\/cart.ts:total$/m); assert.match(output, /^\s+1\s+src\/tax.ts:taxOf$/m);
 });
-contract('A8', 'carry formatCents lists newest commits and both records', 'fixture', s => {
+contract('A8', 'carry formatCents lists newest commits and all three records', 'fixture', s => {
   const output = ok(s.cli(['carry', 'src/money.ts:formatCents']));
   const text = output.split('Decision records that share the most distinctive terms')[0];
   assert.deepEqual(ids(output.slice(text.length)), ['ADR-0002', 'ADR-0003']);
-  assert.deepEqual(ids(text), ['note-2', 'ADR-0001']);
+  assert.deepEqual(ids(text), ['note-2', 'ADR-0001', 'note-1']);
   const commits = output.slice(output.indexOf('3 commits changed'));
-  ordered(commits, ['6214848', '73ebd46', 'dfb4ff8']);
+  ordered(commits, ['a3bcb76', '73ebd46', 'dfb4ff8']);
   has(text, 'No decided: tag names a decision record.');
-  assert.deepEqual(ids(whyParts(text).loose), ['note-2', 'ADR-0001']);
-  for (const [sha, n] of [['dfb4ff8', 3], ['6214848', 5], ['73ebd46', 1]]) assert.match(whyParts(text).loose, new RegExp(`${sha}[^\\n]+; that commit changed ${n} symbol`));
+  assert.deepEqual(ids(whyParts(text).loose), ['note-2', 'ADR-0001', 'note-1']);
+  for (const [sha, n] of [['dfb4ff8', 3], ['a3bcb76', 5], ['73ebd46', 1]]) assert.match(whyParts(text).loose, new RegExp(`${sha}[^\\n]+; that commit changed ${n} symbol`));
 });
 
 contract('B1', 'an unborn repo still loads files and symbols', 'code', s => {
@@ -162,12 +171,12 @@ contract('B3', 'empty repo builds an empty store', 'empty', s => {
   has(ok(s.build([])), '0 nodes', '(none)');
   assert.match(failure(s.cli(['why', 'x.ts:f']), 3), /[Nn]o file x\.ts/);
 });
-contract('B4', 'no decisions loads no record links and warns for each unknown tag and trailer', 'fixture-unbuilt', s => {
+contract('B4', 'no decisions loads no record links and warns for each unknown tag', 'fixture-unbuilt', s => {
   const result = s.build([]); ok(result); assert.equal(query(s, 'MATCH (d:Decision) RETURN count(d) AS n')[0].n, 0);
   assert.equal(query(s, 'MATCH ()-[r:NAMES|CITES]->() RETURN count(r) AS n')[0].n, 0);
-  const warnings = result.stderr.trim().split('\n'); assert.equal(warnings.length, 5); assert.deepEqual(warnings, [...warnings].sort());
+  const warnings = result.stderr.trim().split('\n'); assert.equal(warnings.length, 3); assert.deepEqual(warnings, [...warnings].sort());
   assert.equal(warnings.filter(line => line.includes('decided tag on')).length, 3);
-  assert.equal(warnings.filter(line => line.includes('trailer')).length, 2);
+  assert.equal(warnings.filter(line => line.includes('trailer')).length, 0);
   failure(s.cli(['impact', 'X']), 3, 'store holds no decision records');
 });
 contract('B5', 'unreachable and unknown commits warn once per id', 'fixture-unbuilt', s => {
@@ -186,7 +195,7 @@ contract('B6', 'ambiguous short commit uses the public pure contract', 'empty', 
   const { matchCommit, checkRecords } = await import(pathToFileURL(join(h.subject, 'src/records.pure.ts')));
   const shas = ['abcd' + 'f'.repeat(36), 'abcd' + '0'.repeat(36)];
   assert.deepEqual(matchCommit('ABCD', shas), { ambiguous: [...shas].sort() });
-  const normalized = { title: null, status: null, source: null, items: [], topics: [], restsOn: [], supersedes: [], ...record('collision', { commits: ['abcd'] }) };
+  const normalized = { title: null, status: null, source: null, items: [], restsOn: [], supersedes: [], ...record('collision', { commits: ['abcd'] }) };
   const checked = checkRecords([{ file: 'collision.json', record: normalized }], shas);
   assert.deepEqual(checked.cites.get('collision'), []); assert.equal(checked.warnings.length, 1);
   ordered(checked.warnings[0], ['collision', 'abcd', ...[...shas].sort()]);
@@ -235,7 +244,7 @@ contract('B14', 'bad JSON and envelopes preserve the store', 'fixture', s => {
 contract('B15', 'each malformed record field reports its file, index and id', 'fixture', s => {
   const records = [
     record('colour', { colour: 'red' }), { id: 'missing-date' }, record('bad-date', { date: '2026-1-1' }),
-    record(''), record('bad-items', { items: [{ label: 'choice', text: 4 }] }), record('bad-list', { topics: ['good', 3] }),
+    record(''), record('bad-items', { items: [{ label: 'choice', text: 4 }] }), record('bad-list', { commits: ['good', 3] }),
   ];
   const file = s.decisions(records);
   const result = unchanged(s, () => s.build([file])); failure(result, 1);
@@ -252,9 +261,10 @@ contract('B16', 'undated records follow dated records when tightest counts tie',
   const rows = query(s, recipes.get('why').replaceAll('$symbol', JSON.stringify('src/tax.ts#taxRate'))).filter(r => r.kind === 'record');
   assert.deepEqual(rows.map(r => r.via[0].symbols), [2, 2]);
 });
-contract('B17', 'decision topics load without a code owner', 'fixture-unbuilt', s => {
-  ok(s.build([s.decisions([record('lonely', { topics: ['unowned-topic'] })])]));
-  assert.deepEqual(query(s, "MATCH (:Decision {id: 'lonely'})-[:ABOUT]->(t:Topic) RETURN t.slug AS slug"), [{ slug: 'unowned-topic' }]);
+contract('B17', 'decision topics are rejected and preserve the old store', 'fixture', s => {
+  const file = s.decisions([record('lonely', { topics: ['unowned-topic'] })]);
+  failure(unchanged(s, () => s.build([file])), 1, `${file}: record 0 (lonely): unknown field "topics"`);
+  assert.deepEqual(query(s, "MATCH (t:Topic {slug: 'unowned-topic'}) RETURN t.slug AS slug"), []);
 });
 contract('B18', 'missing decisions file is named', 'fixture-unbuilt', s => {
   const path = join(s.dir, 'does-not-exist.json'); failure(s.build([path]), 1, path);
@@ -423,7 +433,7 @@ contract('D14', 'free-text ADR and filename mentions are not cited', 'code', s =
 contract('D15', 'ADR conversion is byte deterministic', 'fixture-unbuilt', s => {
   assert.equal(ok(s.cli(['decisions', 'adr', 'docs/adr'])), ok(s.cli(['decisions', 'adr', 'docs/adr'])));
 });
-contract('D16', 'editing an old ADR links code only when a Decision trailer cites it', 'code', s => {
+contract('D16', 'editing an old ADR links code only through the record commit list', 'code', s => {
   const a = adr(s, { '0003-old.md': heading(3, 'Date: 2026-01-01') });
   const initial = s.commit('Add code and the original ADR');
   s.write(join(a.folder, '0003-old.md'), heading(3, 'Date: 2026-01-01\nADR 0004 replaces part of this choice.'));
@@ -440,6 +450,9 @@ contract('D16', 'editing an old ADR links code only when a Decision trailer cite
   const trailer = s.commit('Edit with an explicit citation\n\nDecision: ADR-0003');
   converted = JSON.parse(ok(a.result())).records;
   assert.deepEqual(converted.find(r => r.id === 'ADR-0003').commits, [initial]);
+  ok(s.build([s.decisions(converted)]));
+  assert.deepEqual(citedCommits(s, 'ADR-0003'), [initial]);
+  converted.find(r => r.id === 'ADR-0003').commits.push(trailer);
   ok(s.build([s.decisions(converted)]));
   assert.deepEqual(citedCommits(s, 'ADR-0003'), [initial, trailer].sort());
   assert.ok(!citedCommits(s, 'ADR-0003').includes(edit));
@@ -531,15 +544,15 @@ for (const [id, target] of [['I1', 'ADR-4'], ['I2', 'adr-0004']]) {
   });
 }
 contract('I3', 'records without symbol changes print the empty explanation', 'fixture-unbuilt', s => {
-  ok(s.build([s.decisions([record('no-cites'), record('no-changes', { commits: ['28cff03'] })])]));
-  has(ok(s.cli(['impact', 'no-cites'])), "No commit in this repo's history cites it (a `Decision:` trailer, or a commit the record lists).");
-  has(ok(s.cli(['impact', 'no-changes'])), '28cff03', 'it changed 0 symbols', 'That commit changed no symbol that exists now.');
+  ok(s.build([s.decisions([record('no-cites'), record('no-changes', { commits: ['47a233e'] })])]));
+  has(ok(s.cli(['impact', 'no-cites'])), "No commit in this repo's history cites it (a commit the record lists).");
+  has(ok(s.cli(['impact', 'no-changes'])), '47a233e', 'it changed 0 symbols', 'That commit changed no symbol that exists now.');
 });
 contract('I4', 'symbols reached through multiple records count once', 'fixture', s => {
   const text = ok(s.cli(['impact', 'ADR-0002']));
-  assert.equal((text.match(/\d+ user[s]?\s+src\/tax.ts:taxRate/g) ?? []).length, 2);
-  assert.equal((text.match(/\d+ user[s]?\s+src\/tax.ts:taxOf/g) ?? []).length, 2);
-  has(text, '3 distinct symbols in all:');
+  assert.equal((text.match(/\d+ user[s]?\s+src\/tax.ts:taxRate/g) ?? []).length, 1);
+  assert.equal((text.match(/\d+ user[s]?\s+src\/tax.ts:taxOf/g) ?? []).length, 3);
+  has(text, '6 distinct symbols in all:');
 });
 contract('I5', 'impact counts a symbol reached by both tag and commit once as direct', 'fixture', s => {
   const text = ok(s.cli(['impact', 'ADR-0003']));
@@ -568,12 +581,12 @@ contract('M2', 'the printed server exposes exactly two read-only tools and a sch
 contract('M3', 'the printed why recipe returns the fixture rows over MCP', 'fixture', async (s, t) => {
   const client = await h.mcp(t, s);
   const rows = await client.rows(client.recipes.get('why'), { symbol: 'src/tax.ts#taxRate' });
-  assert.deepEqual(rows.map(row => row.kind), ['tag', 'file tag', 'record', 'record', 'record']);
-  assert.deepEqual(rows.filter(row => row.kind === 'record').map(row => row.id), ['ADR-0003', 'ADR-0002', 'note-1']);
+  assert.deepEqual(rows.map(row => row.kind), ['tag', 'file tag', 'record', 'record']);
+  assert.deepEqual(rows.filter(row => row.kind === 'record').map(row => row.id), ['ADR-0003', 'ADR-0002']);
   has(rows[0].what, 'the rate depends on the region'); has(rows[1].what, 'tax lives apart from the cart');
   assert.deepEqual(rows[3].supersededBy, ['ADR-0003']);
-  assert.deepEqual(rows.slice(2).map(row => row.named), [['doc comment'], ['file header'], []]);
-  for (const [i, sha, n] of [[2, '78884f0', 1], [3, '2a59506', 2], [4, '2a59506', 2]]) {
+  assert.deepEqual(rows.slice(2).map(row => row.named), [['doc comment'], ['file header']]);
+  for (const [i, sha, n] of [[2, '78884f0', 1], [3, '2a59506', 2]]) {
     assert.equal(rows[i].via.length, 1); assert.ok(rows[i].via[0].commit.startsWith(`${sha} `)); assert.equal(rows[i].via[0].symbols, n);
   }
   const cli = ok(s.cli(['why', tax]));
@@ -656,25 +669,26 @@ contract('L7', 'a record reached by tag and commit appears once with both link r
   const parts = whyParts(text); assert.ok(ids(parts.direct).includes('ADR-0003')); assert.ok(!ids(parts.loose).includes('ADR-0003'));
   has(parts.direct, 'named by: a decided: tag in its doc comment', 'also cited by: 78884f0');
 });
-contract('L8', 'unknown trailer values warn with their commit and do not link', 'code', s => {
+contract('L8', 'unknown trailer values neither warn nor link', 'code', s => {
   const sha = s.commit('Unknown trailer\n\nDecision: note-9');
   const result = s.build(linkFiles(s)); ok(result);
-  assert.equal(result.stderr, `warning: commit ${sha.slice(0, 7)}: trailer "Decision: note-9" names no record; no link\n`);
+  assert.equal(result.stderr, '');
+  assert.deepEqual(citedCommits(s, 'ADR-0004'), []);
   assert.equal(query(s, 'MATCH ()-[r:CITES]->() RETURN count(r) AS n')[0].n, 0);
 });
-contract('L9', 'two Decision trailers cite the same commit from both records', 'code', s => {
+contract('L9', 'two unlisted Decision trailers cite neither record', 'code', s => {
   const sha = s.commit('Two citations\n\nDecision: ADR-0004\nDecision: note-1');
   const result = s.build(linkFiles(s)); ok(result); assert.equal(result.stderr, '');
-  for (const id of ['ADR-0004', 'note-1']) assert.deepEqual(citedCommits(s, id), [sha]);
+  for (const id of ['ADR-0004', 'note-1']) assert.deepEqual(citedCommits(s, id), []);
 });
-contract('L10', 'trailer values require exact ids while trailer keys ignore case', 'code', s => {
+contract('L10', 'all trailer values and key cases remain plain text', 'code', s => {
   const values = ['ADR-4', 'ADR 0004', 'adr-0004', '0004'];
   const bad = s.commit(`Wrong values\n\n${values.map(value => `Decision: ${value}`).join('\n')}`);
   s.write(join(s.repo, 'src/code.ts'), 'export function f() { return 2; }\n');
   const good = s.commit('Lowercase trailer key\n\ndecision: ADR-0004');
   const result = s.build(linkFiles(s)); ok(result);
-  assert.deepEqual(result.stderr.trim().split('\n'), values.map(value => `warning: commit ${bad.slice(0, 7)}: trailer "Decision: ${value}" names no record; no link`).sort());
-  assert.deepEqual(citedCommits(s, 'ADR-0004'), [good]); assert.deepEqual(citedCommits(s, 'note-1'), []);
+  assert.equal(result.stderr, '');
+  assert.deepEqual(citedCommits(s, 'ADR-0004'), []); assert.deepEqual(citedCommits(s, 'note-1'), []);
 });
 contract('L11', 'a Decision line before the last paragraph is ordinary text', 'code', s => {
   s.commit('An ordinary message\n\nDecision: ADR-0004\n\nThis final paragraph is prose, not a trailer.');
@@ -701,15 +715,18 @@ contract('L13', 'a listed commit with a matching trailer yields one CITES edge',
   assert.deepEqual(citedCommits(s, 'ADR-0004'), [sha]); assert.equal(citeCount(s, 'ADR-0004'), 1);
 });
 contract('L14', 'loose links expose the number of symbols a large commit changed', 'fixture', s => {
-  const why = ok(s.cli(['why', 'src/tax.ts:taxOf']));
-  has(why, 'changed by: 6214848 2026-01-08 Name every amount by its unit; that commit changed 5 symbols');
-  const impact = ok(s.cli(['impact', 'ADR-0001']));
-  has(impact, '6214848 2026-01-08 Name every amount by its unit; it changed 5 symbols');
+  for (const symbol of ['src/money.ts:cents', 'src/money.ts:formatCents', 'src/cart.ts:total', 'src/tax.ts:taxOf', 'src/lib.rs:round_cents']) {
+    const why = ok(s.cli(['why', symbol]));
+    has(why, 'changed by: a3bcb76 2026-01-08 Name every amount by its unit; that commit changed 5 symbols');
+    assert.ok(ids(why).includes('note-1'));
+  }
+  const impact = ok(s.cli(['impact', 'note-1']));
+  has(impact, 'a3bcb76 2026-01-08 Name every amount by its unit; it changed 5 symbols');
 });
 contract('L15', 'two independently generated fixtures and their rebuilds have identical links and answers', 'fixture-unbuilt', s => {
   const other = join(s.dir, 'second-fixture'); ok(s.run('/bin/bash', [join(h.root, 'scripts/fixture.sh'), other], s.dir));
   const history = cwd => ok(s.run('git', ['log', '--format=%H'], cwd));
-  assert.equal(history(s.repo), history(other)); assert.equal(ok(s.run('git', ['rev-parse', '--short=7', 'HEAD'], other)).trim(), '547f913');
+  assert.equal(history(s.repo), history(other)); assert.equal(ok(s.run('git', ['rev-parse', '--short=7', 'HEAD'], other)).trim(), '0ede283');
   const snapshots = [];
   for (const cwd of [s.repo, other]) {
     s.write(join(cwd, 'adrs.json'), ok(s.cli(['decisions', 'adr', 'docs/adr'], { cwd })));
@@ -725,7 +742,7 @@ contract('L15', 'two independently generated fixtures and their rebuilds have id
       });
     }
   }
-  assert.equal(snapshots[0].names.length, 3); assert.equal(snapshots[0].cites.length, 7);
+  assert.equal(snapshots[0].names.length, 3); assert.equal(snapshots[0].cites.length, 6);
   for (const snapshot of snapshots.slice(1)) assert.deepEqual(snapshot, snapshots[0]);
 });
 

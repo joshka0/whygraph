@@ -144,14 +144,14 @@ contract('Q7', 'search rejects missing, multiple and build-only arguments', 'cod
 contract('Q8 Q24', 'words index title and every statement, excluding record metadata', 'code', async (s, t) => {
   const records = [
     record('content', { title: 'titleneedle', items: [{ label: 'labelneedle', text: 'firstneedle' }, { label: 'second', text: 'lastneedle' }] }),
-    record('idneedle', { date: '2026-08-19', title: 'ordinary prose', status: 'statusneedle', source: 'sourceneedle', topics: ['topicneedle'] }),
+    record('idneedle', { date: '2026-08-19', title: 'ordinary prose', status: 'statusneedle', source: 'sourceneedle' }),
   ];
   custom(s, records); const client = await h.mcp(t, s);
   for (const text of ['titleneedle', 'firstneedle', 'lastneedle']) {
     assert.deepEqual((await client.rows(client.recipes.get('search'), { text })).map(r => r.id), ['content']);
     has(ok(search(s, text)), 'matched: words and meaning');
   }
-  for (const text of ['idneedle', '2026', '08', '19', 'statusneedle', 'sourceneedle', 'topicneedle', 'labelneedle']) {
+  for (const text of ['idneedle', '2026', '08', '19', 'statusneedle', 'sourceneedle', 'labelneedle']) {
     assert.deepEqual(await client.rows(client.recipes.get('search'), { text }), [], text);
     const answer = ok(search(s, text));
     assert.ok(ids(answer).includes('idneedle')); assert.doesNotMatch(answer, /matched: words/);
