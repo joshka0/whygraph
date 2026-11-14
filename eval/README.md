@@ -771,7 +771,7 @@ There is no amendment exception. Five plain controls come from
 author's `/home/dev/scratch/rg-controls2/controls2.json`, copied byte for byte
 to `tickets/controls2.json` (SHA-256
 `a358eb529f81821a24c21f00503ec552ac24426d2e604fba3f5120c959c04763`).
-Each complete source entry is preserved verbatim under `ground_truth.source`.
+Before writing any task, the generator checks all inputs, including both controls files: exactly five plain and eight governed entries, all required source fields, unique ids, valid added regexes, and the recorded byte SHA-256 of controls2.json. It validates request selection and every conflict record before writing too. A missing file, wrong count, missing field or hash mismatch writes no file, including no conflict files (B5-39). Each complete source entry is preserved verbatim under `ground_truth.source`.
 Both control sets pass exactly when the diff adds a line matching `added`
 (case insensitive) in `file`; explanation, test correctness and placement
 beyond that file are not scored. Governed controls are distinguished by the
@@ -891,14 +891,25 @@ runner detects the following cases and throws the run out instead:
   (including combined short flags) or `--symbolic`, `cp` with `-s` or
   `--symbolic-link`, and visible symlink calls in script one-liners; scan
   file-tool inputs for absolute paths outside the copy, including patch
-  target paths. An attempted direct external file call is invalid even
+  target paths. The whole shell command text counts, including creation forms
+  inside quotes, comments or search patterns (B5-08/B5-10); this is broad
+  on purpose. For read/edit/write, filePath/file_path or path names the file;
+  for glob/grep/list, path/directory names the folder. The path aliases
+  paths, dir, root, cwd, workdir, target_file/targetFile, old_path/oldPath
+  and new_path/newPath also count, including nested fields. Patterns, queries,
+  globs, include filters, file content and edit text never count as paths
+  (B5-12). An attempted direct external file call is invalid even
   when opencode denied it. A removed transient link is still caught when
   its creation is visible in a shell command.
 
 Each hit sets status invalid with reason `isolation breach`, archives the
 result under `results/_invalid/`, preserves the work copy at the path in
-its metadata, and retries the cell once. Repeated harness failure stops the
-runner with both attempts archived, rather than looping forever. Invalid
+its metadata, and retries the cell once. A second isolation breach, including
+a false shell-text hit, leaves both attempts archived and an error/unscored
+metadata marker at the cell id (B5-56). It is excluded from normal rates,
+tokens and costs, listed among unscored runs, counted as FAIL for conflict
+sensitivity, and skipped on resume, as a second timeout is. Repeated other
+harness failure stops the runner with both attempts archived. Invalid
 results never enter scoring, token totals or rates. A later invocation can
 retry the missing cell. This is detection, not a security boundary: it can
 miss a transient link created by an invoked script or binary whose creation
@@ -921,12 +932,14 @@ opencode tools too, without changing old readers.
 A successful stream must contain nonblank text, end in a `step_finish` with
 reason `stop`, have no error event, and exit 0. No text, incomplete finishes
 or an agent error leave an error result, resumable as before. Malformed
-JSONL or a spawn error is a harness failure, archived and retried once.
+JSONL without a timeout, or a spawn error, is a harness failure, archived
+and retried once (B5-31). A timeout takes precedence over a cut or unreadable
+stream line: retain complete events and apply the timeout rule (B5-32).
 The 20-minute timer sends SIGTERM; opencode gets SIGKILL after five more
 seconds if it has not closed. An agent timeout retries once, keeping the
 first attempt under `_attempts`; a second timeout is marked unscored,
 excluded from normal rates and counted as FAIL in the conflict sensitivity
-lines. Done and twice-timed-out unscored cells are skipped on resume.
+lines. Done, twice-timed-out and twice-breached unscored cells are skipped on resume.
 Isolation checks also run on timed-out/error sessions before cleanup.
 
 **Fixed reports.** All batch 5 blocks append after the complete saved report

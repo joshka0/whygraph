@@ -141,7 +141,7 @@ function createsSymlink(command) {
 export function isolationBreaches(repo, tools) {
   const root = realpathSync(repo);
   const hits = escapingSymlinks(repo).map(path => `external symlink: ${path}`);
-  const pathKey = /^(?:file_?path|path|paths|directory|dir|root|cwd|workdir|target_?file|old_?path|new_?path|include|pattern)$/i;
+  const pathKey = /^(?:file_?path|path|paths|directory|dir|root|cwd|workdir|target_?file|old_?path|new_?path)$/i;
   function paths(value, key = '') {
     if (typeof value === 'string') {
       if (pathKey.test(key) && isAbsolute(value) && !inside(root, value)) hits.push(`external file-tool path: ${value}`);

@@ -480,7 +480,7 @@ export async function runOne(task, condition, repeat, allIds) {
     const malformed = r.stdout.split('\n').filter(line => line.trim()).some(line => {
       try { JSON.parse(line); return false; } catch { return true; }
     });
-    if (malformed) return invalidRun(out, work, meta, [], 'harness failure: malformed JSONL');
+    if (malformed && !r.timedOut) return invalidRun(out, work, meta, [], 'harness failure: malformed JSONL');
     if (r.spawnError) {
       return invalidRun(out, work, meta, [], `harness failure: ${r.spawnError}`);
     }
@@ -560,9 +560,17 @@ async function main(argv) {
       let m = await runOne(p.task, p.condition, p.repeat, allIds);
       if (p.task.batch === 5) {
         if (m.status === 'invalid') {
+          const firstReason = m.reason;
           console.error(`invalid ${p.id}: ${m.reason}; archived ${m.archived}; retrying once`);
           m = await runOne(p.task, p.condition, p.repeat, allIds);
-          if (m.status === 'invalid') throw new Error(`repeated harness failure ${p.id}: ${m.reason}; archived ${m.archived}`);
+          if (m.status === 'invalid') {
+            if (firstReason !== 'isolation breach' || m.reason !== 'isolation breach') throw new Error(`repeated harness failure ${p.id}: ${m.reason}; archived ${m.archived}`);
+            // Both invalid attempts stay archived. This marker alone makes the cell
+            // resumable and visible in the existing unscored/sensitivity reports.
+            m = { ...m, status: 'error', unscored: true, timed_out: false };
+            mkdirSync(join(RESULTS, p.id), { recursive: true });
+            writeFileSync(join(RESULTS, p.id, 'meta.json'), JSON.stringify(m, null, 2));
+          }
         }
         if (m.timed_out) {
           console.error(`timeout ${p.id}; retrying once`);
