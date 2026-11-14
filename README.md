@@ -666,6 +666,27 @@ with the graph it named the ticket and changed the code all the same. The
 last two rows were counted after the results were seen
 (`eval/README.md`, "Batch 3 results").
 
+Those 6 runs followed the skill as it was written: it said only not to make
+such a change silently. The skill now says not to make it: name the record,
+say what the change would undo, and stop. A second run tested that on the 19
+requests the pilot had not used, with 5 harmless requests as controls,
+everything fixed before the first run:
+
+| | Repo only | Rule text | Graph |
+| --- | --- | --- | --- |
+| Passed, of 57 conflict runs | 3 | 10 | 56 |
+| Named the ticket | 7 | 15 | 57 |
+| Changed no file | 19 | 27 | 56 |
+| Made the change, of 15 control runs | 15 | 15 | 15 |
+
+The graph's lead over the rule text is 0.81 of the runs per request, with an
+interval from 0.68 to 0.91 over the 19 requests. In every run with the graph
+an answer showed the ticket. The firm rule alone did little, because without
+the graph the agent has no record to stop at. The run does not hold a
+request that touches code a ticket governs without going against it, so it
+does not show how often a firm rule stops a change it should let through
+(`eval/README.md`, "Batch 4 results").
+
 ## Your own repo
 
 whygraph runs on any git repo that memod reads (TypeScript, JavaScript,

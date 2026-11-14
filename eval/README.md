@@ -607,6 +607,10 @@ existing added-line rule expresses this; batch 4 controls do not additionally
 score objections in the reply. A skill that refuses every request fails
 these controls.
 
+The committed `tickets/controls.json` is that file byte for byte (SHA-256
+`cc15a2caf4c989fe5a13acebf25024e6bb83b2c29d4702cec1c2006fd7e4d79b`). The scratch copy was removed
+after the runs; the committed file is the record.
+
 **Runs.** (19 conflicts + 5 controls) x 3 conditions x 3 repeats = 216 runs.
 Generate tasks, inspect the plan, then run under the same resource scope as
 batch 3 (the final command starts agents; it was not run during preparation):
@@ -646,6 +650,59 @@ not the quality of the explanation or the time the conflict was noticed.
 [Batch 4 failure cases](tickets/batch4-failures.md) specify exact outcomes
 for an independent test author. No tests under `selftest/` or `test/` were
 written or changed for this implementation.
+
+## Batch 4 results
+
+From `score.txt`, all 216 runs scored; none timed out and none was invalid.
+The skill and rule text, the tasks, the pass rules and every count below
+were fixed and committed before the first run.
+
+| | none | graph | stub | graph - none | graph - stub |
+| --- | --- | --- | --- | --- | --- |
+| Nineteen ticket conflicts (primary: graph - stub) | 5% | 98% | 18% | 0.93 [0.84, 1.00] | **0.81 [0.68, 0.91]** |
+| Same words, 7 tasks | 14% | 100% | 29% | 0.86 [0.67, 1.00] | 0.71 [0.52, 0.90] |
+| One shared term, 6 tasks | 0% | 94% | 6% | 0.94 [0.83, 1.00] | 0.89 [0.78, 1.00] |
+| Other words, 6 tasks | 0% | 100% | 17% | 1.00 [1.00, 1.00] | 0.83 [0.61, 1.00] |
+| Five harmless controls | 100% | 100% | 100% | 0.00 | 0.00 |
+
+| Of 57 conflict runs per condition | none | graph | stub |
+| --- | --- | --- | --- |
+| Changed no file | 19 | 56 | 27 |
+| Named the ticket | 7 | 57 | 15 |
+| Named the ticket, and changed a file | 4 | 1 | 5 |
+| Changed no file, and did not name the ticket | 16 | 0 | 17 |
+
+- In all 57 `graph` runs a whygraph answer showed the needed ticket, and all
+  57 replies named it. `search` showed it in at least 51 runs and the commit
+  link in at least 41; the scorer cannot place it in the runs whose shell
+  call ran several commands.
+- With the firmer rule the agent that knew the ticket held the change: 56 of
+  57 `graph` runs changed no file (batch 3, with the old rule: 24 of 30).
+- The firmer rule text without the graph (`stub`) held the change in 27 of
+  57 runs, against 19 with the repo only. The rule tells the agent to stop
+  at a record; without the graph it has no record.
+- No control was refused: 45 of 45 control runs made the change. Counted
+  after the results were seen (`tickets/batch4-controls-posthoc.py`): all 15
+  `graph` runs on controls asked whygraph, an answer listed tickets in 14 of
+  them, and a `carry` or `why` answer listed a ticket linked to the code in
+  3 (all on one control); every one made the change.
+- Tokens: 11754525 over the 216 runs. On the conflicts a `graph` run used
+  less than a `none` run (2473479 against 4295368 over 57 runs each): the
+  agent that holds a change does not write it.
+
+What batch 4 cannot show:
+
+- The skill was changed after batch 3, for the fault batch 3 showed, to say
+  what the pass rule asks. Batch 4 shows that agents follow that rule when
+  the graph gives them the record, on requests that are new to it. It does
+  not show that holding the change is what a user wants each time.
+- Every conflict request was written to go against a ticket, and the five
+  controls are small edits that go against nothing. No request touches code
+  that a ticket governs without going against it. That is the case where a
+  firm rule could stop too often, and batch 4 has it only by chance, in the
+  three control runs where a linked ticket was listed.
+- One repo, one model, which may know ripgrep from its training, three
+  repeats, and a verdict on words and a diff.
 
 ## What the numbers can and cannot show
 
