@@ -739,3 +739,20 @@ change. A pass is a mechanical verdict on words and diffs, not a review.
   needs a passing `memod verify` run, which a diff cannot show.
 
 The fixture changed after the trial when unused graph parts were cut; whygraph commit `8ee90a9` holds the fixture the trial used.
+
+## Batch 5 launcher blocked before its first run
+
+The planned second-agent batch (opencode 1.18.29,
+`opencode-go/deepseek-v4.1-flash`) stopped during scratch-only isolation
+checks. An explicit external-directory denial blocked a direct read of
+`/etc/hostname`, but a repo-local symlink to the same file let the native
+file tool read it. The required repo-only file boundary is therefore not
+established. No trial started, and no batch 5 tasks, scorer changes or
+launcher are enabled. The runner, skill, rule and existing store stay as
+before preparation.
+
+[The blocker and scratch evidence](tickets/batch5-failures.md) record the
+exact command, environment, permission configuration, two model calls,
+condition-by-condition shell probes and the recommendation to require
+realpath enforcement before continuing. This is a blocked preparation,
+not a fixed-before-run batch specification.
