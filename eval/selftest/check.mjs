@@ -5,9 +5,10 @@
  *
  *   node eval/selftest/check.mjs
  */
-import { readTasks, scoreRun } from '../score.mjs';
+import { readTasks, scoreRun, recordIds } from '../score.mjs';
 import { sessionSummary } from '../run.mjs';
 import { cases } from './cases.mjs';
+import { ticketChecks } from './tickets.mjs';
 
 const tasks = readTasks();
 let wrong = 0;
@@ -23,5 +24,16 @@ for (const c of cases) {
   for (const [k, want, got = v[k]] of bad) console.log(`        ${k}: expected ${JSON.stringify(want)}, got ${JSON.stringify(got)}`);
   wrong += bad.length === 0 ? 0 : 1;
 }
-console.log(`${cases.length - wrong}/${cases.length} verdicts as expected`);
+const checks = await ticketChecks({ tasks, scoreRun, recordIds });
+for (const c of checks) {
+  try {
+    await c.run();
+    console.log(`ok    ${c.name}`);
+  } catch (error) {
+    wrong++;
+    console.log(`WRONG ${c.name}\n        ${error.message}`);
+  }
+}
+const total = cases.length + checks.length;
+console.log(`${total - wrong}/${total} cases as expected (${cases.length} original verdicts, ${checks.length} ticket checks)`);
 process.exitCode = wrong === 0 ? 0 : 1;
