@@ -3,39 +3,17 @@
     "eval/tickets/batch5-failures.md",
     "eval/README.md#batch-5-fixed-before-its-first-run"
   ],
-  "interfaces": "Production modules were copied as opaque bytes and exercised through exports/CLI. Mutants rename public exports and wrap their results; the pooling mutant alters fixture reads at node:fs. No implementation bodies supplied expected values.",
+  "interfaces": "Production modules are copied as opaque bytes and exercised through exports/CLI. Export-boundary mutants wrap results; the pooling mutant alters fixture reads at node:fs; the early-write generator mutant prepends a task write before invoking unchanged validation. No implementation bodies supplied expected values.",
   "safety": "No trial, model call, real opencode/claude process, install, push or delegation. Every runner CLI invocation includes --plan. Synthetic runOne tasks use an in-memory spawn boundary; only git really executes, against scratch baselines. No credential value was accessed. Existing committed cleanup inside checked tools was allowed by the brief.",
   "cases": {
     "existing": 315,
-    "new": 311,
-    "total": 626,
-    "passed": 621,
-    "red": 5
+    "batch5": 399,
+    "added_in_rulings_followup": 88,
+    "total": 714,
+    "passed": 714,
+    "red": 0
   },
-  "red_cases": [
-    {
-      "case": "B5 isolation grep regex is not a path-bearing field (B5-12)",
-      "contract": "Only path-bearing fields identify file access; regex text is not an access.",
-      "actual": "grep input {path: '.', pattern: '/etc/hostname'} produces external file-tool path: /etc/hostname.",
-      "classification": "Contract disagreement: native grep.pattern is a regex, not a path."
-    },
-    {
-      "cases": [
-        "B5 generator rejects four plain before writing",
-        "B5 generator rejects missing plain before writing",
-        "B5 generator rejects six plain before writing"
-      ],
-      "contract": "B5-39 says bad governed-control inputs stop generation before writing tasks and plain controls still require exactly five.",
-      "actual": "Plain-control validation fails nonzero, but all 19 batch 5 conflict files have already been written. Missing/seven/nine governed controls fail without writing tasks.",
-      "classification": "Contract gap: it does not separately state whether the before-writing requirement also applies to plain controls. Cases defend validating both required control sets before writing any task; parent must rule."
-    },
-    {
-      "case": "B5 runner timeout-cut sends TERM/KILL and retains usage as error",
-      "contract": "B5-32 requires timed_out true/status error for a timed-out session; the brief explicitly requests the cut-mid-line timeout case. B5-31 independently classifies malformed JSONL as harness invalid.",
-      "actual": "A timed-out stream with complete text/stop events followed by an incomplete JSON line retains usage and sends TERM/KILL, but becomes invalid with reason harness failure: malformed JSONL and is archived under _invalid.",
-      "classification": "Conflicting timeout/malformed rules need a precedence ruling. The case defends timeout/error for a final line cut by termination. The same complete-line timeout passes."
-    }
-  ],
+  "red_cases": [],
   "plants": [
     {
       "fault": "Drops all but last text part",
@@ -76,6 +54,11 @@
     {
       "fault": "Pools governed controls with plain controls",
       "caught_by": "B5 report plant pooled governed/plain counts caught by separated control report"
+    },
+    {
+      "fault": "Writes a batch 5 conflict task before rejecting a controls2 hash mismatch",
+      "caught_by": "B5 plant generator writes before validation caught by atomic rejection",
+      "evidence": "Good control rejects with no writes. Mutant still rejects specifically for the hash, but the unchanged no-write oracle detects its premature task; a syntax/subprocess error alone does not count."
     }
   ],
   "coverage": {
@@ -86,16 +69,16 @@
     "B5-05": "Preparation/store/none/stub/search/forwarding and shell policy spy; no real confined network/filesystem probes.",
     "B5-06": "Recursive hidden/.git external links plus synthetic preflight phase/status/reason/zero tokens/no agent spawn.",
     "B5-07": "Synthetic final link in .git/hidden before archival, including timed-out/cut stream.",
-    "B5-08": "ln -s/-sf/-snf/--symbolic, quoted ln, absolute ln, compound/internal/transient calls; plain ln and -- operands excluded.",
+    "B5-08": "All original ln forms and 30 quoted/comment/search-pattern creation fixtures across ln/cp and visible script APIs. Ordinary ln, -- operands and bare symlink word remain non-hits.",
     "B5-09": "cp -s/-as/--symbolic-link; plain cp and -- operands excluded.",
-    "B5-10": "All nine named visible script API forms; only fixture command text inspected.",
+    "B5-10": "All named visible script APIs, including quotes/comments/search patterns under the broad whole-command ruling.",
     "B5-11": "Logged creation invalidates with no surviving link. Documented computed/alias/script-file/race misses not exhaustively simulated.",
-    "B5-12": "Six native file-tool names, absolute fields/arrays/nesting, patch targets, denied call, content/regex distinctions; regex case red.",
+    "B5-12": "Six file-tool names, path aliases/arrays/nesting, patches, denied calls, regex/content distinctions; 42 text-field non-hits and 11 nested alias hits added. Original grep-pattern red now passes.",
     "B5-13": "Internal absolute/relative paths, sibling prefix, normalized parent escape, content-only absolute strings.",
     "B5-14": "Internal file/directory/root aliases, HomebrewFormula and relative local store links, external-ended chain.",
     "B5-15": "Dangling external/internal links, cycle, and simulated EACCES resolving an internal target all conservatively classified.",
     "B5-16": "Synthetic invalid reason/details/unique archives/renamed work/no root result; poisoned archived/root invalid tools ignored before parse.",
-    "B5-17": "Two manual runOne attempts preserve two archives; valid third fixture alone scores; plan retries invalid cells. Automatic bounded retry loop not run.",
+    "B5-17": "Manual exported runOne attempts preserve two invalid archives; valid later fixture alone scores. Second-breach marker report/resume semantics are covered by B5-56 fixtures. Automatic bounded retry loop is not exported and not run.",
     "B5-18": "Exact isolated config/disable flags/pure/provider allowlist. Live debug/provenance with machine plugins not run.",
     "B5-19": "Exact environment equality with injected sentinel host variables plus fallback identity/data values; no auth accessed.",
     "B5-20": "Exact host-data/tool-output deny in full config equality; absolute external tools have no exception.",
@@ -109,15 +92,15 @@
     "B5-28": "Independent token/cache/reasoning/total and cost sums, zero missing usage/cost, turns counted.",
     "B5-29": "Incomplete/missing finish, error, unknown event, successful stop/text, nonzero exit synthetic runner.",
     "B5-30": "No/blank text reader; blank synthetic session has error status, usage retained.",
-    "B5-31": "Malformed JSONL/spawn error archived synthetic sessions; numeric stdout/stderr fds and preserved raw/stderr. Automatic retry loop not run.",
-    "B5-32": "Accelerated 1200000/5000 timers, TERM/KILL signals, error complete-line timeout, post-timeout isolation precedence, sensitivity fixture. Cut-line red. Automatic second-timeout loop not run.",
-    "B5-33": "Plan done/twice-timeout skip and error/invalid retry; reextract final/tools/usage and invalid exclusion; reusing a saved result preserves every previous result byte under _attempts.",
+    "B5-31": "Malformed JSONL, non-timeout cut line and spawn error are archived harness failures; numeric stdout/stderr fds and raw/stderr preserved. Automatic retry loop not run.",
+    "B5-32": "Accelerated 1200000/5000 timers, TERM/KILL, complete-line and cut-line timeouts both error, post-timeout isolation precedence and scorer sensitivity. Automatic second-timeout loop not run.",
+    "B5-33": "Plan skips done/twice-timeout/twice-breach and retries ordinary error/invalid; reextract final/tools/usage/invalid exclusion; saved-result reuse preserves old bytes under _attempts.",
     "B5-34": "Missing-ready fails with zero child calls; invented ready store copied separately into both graph runs, internal links, none/stub absence. Existing ready host template never read/rebuilt.",
     "B5-35": "search no args/query/options exact stdout/status; all seven other named commands forwarded with argument bytes and status 37 via spy; stub all commands.",
     "B5-36": "Twice generation, unchanged whole task tree, reversed input selection, older generators without controls2, unsupported batch, no removal.",
     "B5-37": "Exact fixed 19+5+8 ids and task count/repo/batch; identical batch4 conflict requests.",
     "B5-38": "Verbatim ground truth/targets/control source, request and score structures equal to source/batch4; no amendment exception.",
-    "B5-39": "Committed SHA and count8; missing/seven/nine gov refused atomically; bad plain inputs refused but write conflicts (three red cases; atomicity gap).",
+    "B5-39": "Exact committed SHA and bytes for both success fixtures. Missing/seven/nine governed, missing/four/six plain, and one changed controls2 byte reject before any task write. Early-write plant is caught by the same atomic-rejection oracle. Field/id/regex/conflict-record validation is not separately fault-injected.",
     "B5-40": "Source/also ticket spellings and near misses; any changed-file header fails. Existing 315 cases remain green.",
     "B5-41": "All13 controls matching/casefold/objection+extra/empty/wrong file/removed/reply/mode-only cases and split-line rejection.",
     "B5-42": "All old fixture report bytes unchanged by invalid entries; batch5 appends after old; JSON finished only; external command compares committed score bytes separately.",
@@ -133,7 +116,8 @@
     "B5-52": "384 distinct plan cells with0/17/384 done; no writes/model; exact stderr model.",
     "B5-53": "Batch4 216 cells/three conditions/Claude sonnet and graph-nosearch rejection; mixed 3+4 per-task plan.",
     "B5-54": "README design/command/env/config/path/hash/limit/timeout/report clauses pinned by assertions.",
-    "B5-55": "No live agent or trial; only allowed files changed. Opaque generator import was initially probed and regenerated unchanged batch3 bytes; git confirms no task diff. All scratch retained under test-results. No model checks used."
+    "B5-55": "No live agent or trial; only allowed files changed. Opaque generator import was initially probed and regenerated unchanged batch3 bytes; git confirms no task diff. All scratch retained under test-results. No model checks used.",
+    "B5-56": "Hand-written conflict/control error-unscored markers plus two archived invalid attempts: excluded normal rates/JSON/tokens/costs, listed once, conflict FAIL sensitivity -1 against a passing stub, and --plan skips marker. Real archive preservation also exercised through repeated synthetic runOne calls; private retry-loop marker creation not run."
   },
   "uncovered_or_partial_and_why": [
     {
@@ -154,44 +138,45 @@
       "items": [
         "B5-17",
         "B5-31",
-        "B5-32"
+        "B5-32",
+        "B5-56"
       ],
-      "gap": "Automatic retry loop stopping after two invalid/timeout attempts and second-timeout marking.",
-      "why": "The loop is not exported; entering it requires invoking eval/run.mjs without --plan, explicitly forbidden. Manual exported runOne attempts, archive preservation, resume plans and scorer sensitivity are tested."
-    },
-    {
-      "items": [
-        "B5-08",
-        "B5-10"
-      ],
-      "gap": "Executable-looking ln -s/API creation syntax occurring solely in comments or search patterns.",
-      "why": "The contract expressly allows conservative scanning of quoted script text and does not separately define these lexical false-positive boundaries. Ordinary word symlink in a comment/search is tested as a non-hit."
+      "gap": "Automatic retry stopping/second-timeout and second-breach marker creation.",
+      "why": "The loop is not exported; entering it requires eval/run.mjs without --plan, forbidden by the brief. Manual runOne archives and explicit error-unscored marker/scorer/resume fixtures test the public components; no end-to-end retry-loop claim is made."
     }
   ],
   "checks": {
-    "node eval/selftest/check.mjs": "621/626, exit1: five intentional contract/gap reds; all315 original and all10 plants green",
+    "node eval/selftest/check.mjs": "714/714, exit0; 315 earlier cases plus399 batch5 cases, all11 plants caught. Run under systemd MemoryMax=6G/CPUQuota=400%.",
     "node eval/score.mjs | diff - eval/score.txt": "exit0, no output",
     "pnpm check": "exit0",
-    "node_modules/.bin/memod lint": "exit0 outside sandbox (sandbox attempt could not write .git event log)",
-    "node scripts/readme-check.mjs": "exit0 outside sandbox,14 commands0 drifted (sandbox attempt failed spawning bash EPERM)",
-    "full suite": "not run: no file under test/ changed",
-    "focused wrapper check": "6/6, exit0 after strengthening graph-vs-graph-nosearch forwarding equality and blocking real node queries with a spy"
+    "node_modules/.bin/memod lint": "exit0, escalated for normal .git event-log writes",
+    "node scripts/readme-check.mjs": "exit0,14 commands0 drifted, escalated for shell fixtures",
+    "focused rulings checks": "85/85, exit0 before adding cut-without-timeout and nested-alias cases to the full run",
+    "full application suite": "not run: no file under test/ changed"
   },
   "evidence": {
-    "full_selftest_log": "test-results/batch5-final-selftest.log",
+    "full_selftest_log": "test-results/batch5-rulings-selftest.log",
     "full_selftest_scratch": [
-      "test-results/ticket-selftest-bj97pn",
-      "test-results/batch4-selftest-ruiGvs",
-      "test-results/batch5-selftest-nmM8I7"
+      "test-results/ticket-selftest-POjZJ9",
+      "test-results/batch4-selftest-2CKZea",
+      "test-results/batch5-selftest-Oum2J0"
     ],
+    "focused_selftest_log": "test-results/batch5-rulings-focused.log",
     "all_retained_scratch_patterns": [
       "test-results/batch5-*",
       "test-results/ticket-selftest-*",
       "test-results/batch4-selftest-*"
     ],
-    "readme_log": "test-results/batch5-readme-check.log",
-    "typecheck_log": "test-results/batch5-pnpm-check.log",
-    "lint_log": "test-results/batch5-memod-lint.log",
-    "focused_wrapper_scratch": "test-results/batch5-selftest-HD3AI2"
+    "readme_log": "test-results/batch5-rulings-readme-check.log",
+    "typecheck_log": "test-results/batch5-rulings-pnpm-check.log",
+    "lint_log": "test-results/batch5-rulings-memod-lint.log"
+  },
+  "rulings": {
+    "implementation_commit": "2a3a3dc8b04e3218d067dd782c82b96c284b6528",
+    "B5-12": "Only file/folder arguments count. Pattern/query/glob/include/content/edit text never count as paths. The original red grep-pattern case and 42 text-field cases pass; eleven newly explicit nested path aliases remain external hits.",
+    "B5-31/B5-32": "Timeout wins over cut or unreadable JSONL. Timeout-cut is error; cut without timeout is harness invalid. Both synthetic runner cases pass.",
+    "B5-39": "All inputs are checked before writing tasks; controls2 exact byte hash is mandatory. Success fixtures now copy committed bytes. Missing/wrong controls counts and a one-byte, still-valid eight-entry controls2 mutation write no task.",
+    "B5-08/B5-10": "Creation syntax anywhere in shell text counts, including quotes/comments/search patterns. Thirty added broad-text cases pass.",
+    "B5-56": "Second isolation breach leaves an error/unscored marker; both attempts retained, normal rates/cost/tokens exclude it, listing and conflict FAIL sensitivity include it, resume skips it. Conflict/control marker fixtures test report/JSON/plan behavior. Automatic creation by the private retry loop is not exercised."
   }
 }

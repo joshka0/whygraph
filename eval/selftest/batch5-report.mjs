@@ -119,6 +119,21 @@ export async function batch5ReportChecks({root,scratch,tasks,node,copyHarness,ed
     for(const line of ['graph - stub: 0.10 [-0.80, 1.00] over 2 tasks','graph-nosearch - stub: -0.25 [-0.50, 0.00] over 2 tasks','graph - graph-nosearch: 0.35 [-0.30, 1.00] over 2 tasks','graph - none: 0.10 [0.00, 0.20] over 2 tasks'])assert.ok(s.includes(line),line);
     const rows=report(mixed,true);assert.equal(rows.length,32);assert.equal(rows.filter(r=>r.task.startsWith('ripgrep5-')).length,28);for(const id of [error,timeout,controlError])assert.ok(!rows.some(r=>r.id===id));
   });
+  for(const t of [task,gov])add(`second isolation breach ${t.kind} marker is unscored/listed and skipped on resume`,()=>{
+    const base=join(scratch,`report-twice-breached-${t.kind}`),at=copyHarness(base),results=join(at,'results');mkdirSync(results);
+    const id=save(results,t,'graph',1,{status:'error',tokens:999999,cost:99,extra:{unscored:true,reason:'isolation breach'}});
+    // Hand-written second-breach marker: the production retry loop is not
+    // exported and CLI calls without --plan remain forbidden by the brief.
+    for(const n of [1,2]){const dir=join(results,'_invalid',`${id}__attempt${n}`);mkdirSync(dir,{recursive:true});writeFileSync(join(dir,'meta.json'),JSON.stringify({id,task:t.id,condition:'graph',repeat:1,status:'invalid',reason:'isolation breach',tokens:{total:999999},cost_usd:99}));writeFileSync(join(dir,'tools.json'),'MALFORMED');}
+    const initial=report(results);assert.match(initial,/Batch 5: 0 finished runs/);assert.match(initial,/Batch 5 unscored runs: 1/);assert.ok(initial.includes(id));assert.match(initial,/Batch 5 total tokens: 0/);assert.ok(initial.includes('Batch 5 graph: 0 tokens; cost USD 0.000000'));assert.deepEqual(report(results,true),[]);
+    // A scored stub partner makes the conflict FAIL sensitivity observable.
+    save(results,t,'stub',1,{final:'ticket 3276',diff:t.kind==='control'?edit(govFile,'fn matches_all_candidate_shared_extensions() {}'):'',tokens:7,cost:0});
+    const paired=report(results);assert.match(paired,/Batch 5 unscored runs: 1/);assert.match(paired,/Batch 5 total tokens: 7/);assert.ok(paired.includes(id));
+    if(t.kind==='conflict'){assert.ok(paired.includes('graph - stub: no task has both'));assert.ok(paired.includes('Sensitivity, unscored conflicts counted as FAIL: graph - stub: -1.00 [-1.00, -1.00] over 1 tasks'));}
+    else assert.ok(!paired.includes('graph - stub: -1.00'));
+    const rows=report(results,true);assert.equal(rows.length,1);assert.ok(!rows.some(r=>r.id===id));
+    const plan=node(join(at,'run.mjs'),['--plan','--only',t.id,'--repeats','1']);assert.equal(plan.status,0,plan.stderr);assert.equal(plan.stdout.split('\n')[0],'4 runs planned, 2 already done, 2 to start');assert.ok(!plan.stdout.includes(id));
+  });
   for(const t of [task,gov])add(`error-only ${t.kind} has no normal rates/calls/cost/tokens`,()=>{
     const at=join(scratch,`report-errors-${t.kind}`);save(at,t,'graph',1,{status:'error',tokens:999,cost:123,tools:[b('whygraph search x','ticket-3276')]});const s=report(at);assert.match(s,/Batch 5: 0 finished runs/);assert.match(s,/Batch 5 total tokens: 0/);assert.match(s,/Batch 5 unscored runs: 1/);assert.deepEqual(report(at,true),[]);assert.ok(!s.includes('123.000000'));
   });

@@ -40,7 +40,7 @@ function fakeAgent(options) {
   if (mode === 'error') events.push({ type: 'error', error: { message: 'invented agent error' } });
   if (mode === 'externalfile') events.splice(1, 0, { type: 'tool_use', part: { tool: 'read', state: { status: 'error', input: { filePath: '/etc/hostname' }, error: 'denied' } } });
   if (mode === 'postlink'||mode==='timeout-link') { mkdirSync(join(options.cwd, '.git/hidden'), { recursive: true }); symlinkSync('/etc/hostname', join(options.cwd, '.git/hidden/escape')); }
-  const raw = events.map(e => JSON.stringify(e)).join('\n') + '\n' + (mode === 'malformed' ? 'not JSON\n' : ['timeout-cut','timeout-link'].includes(mode) ? '{"type":"text","part":' : '');
+  const raw = events.map(e => JSON.stringify(e)).join('\n') + '\n' + (mode === 'malformed' ? 'not JSON\n' : ['cut','timeout-cut','timeout-link'].includes(mode) ? '{"type":"text","part":' : '');
   if (!Array.isArray(options.stdio) || typeof options.stdio[1] !== 'number' || typeof options.stdio[2] !== 'number') throw new Error('stdout/stderr must be direct file descriptors');
   writeSync(options.stdio[1], raw); writeSync(options.stdio[2], 'invented stderr\n');
   if (!isTimeout) queueMicrotask(() => p.emit('close', mode === 'exit-nonzero' ? 9 : 0));

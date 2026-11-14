@@ -100,12 +100,23 @@ export async function batch5Checks({tasks,scoreRun}) {
   const shellForms=['ln -s a b','ln -sf a b','ln -snf a b','ln --symbolic a b',"'ln' -s a b",'"ln" -s a b','/bin/ln -s a b','true; ln -s a b; true','ln -s internal link; echo removed','cp -s a b','cp -as a b','cp --symbolic-link a b',
     `python -c 'os.symlink("a", "b")'`,`node -e 'fs.symlinkSync("a", "b")'`,`node -e 'fs.promises.symlink("a", "b")'`,`python -c 'Path("b").symlink_to("a")'`,`ruby -e 'File.symlink("a", "b")'`,`echo 'symlinkat(a,b,c)'`,`echo 'create_symlink(a,b)'`,`echo 'createSymbolicLink(a,b)'`];
   for(const command of shellForms)add(`isolation logged ${command}`,()=>assert.ok(isolationBreaches(clean,[bash(command)]).length>0));
+  const broadForms=['ln -s a b','cp --symbolic-link a b','os.symlink(a,b)','fs.symlinkSync(a,b)','fs.promises.symlink(a,b)','Path(a).symlink_to(b)','File.symlink(a,b)','symlinkat(a,b,c)','create_symlink(a,b)','createSymbolicLink(a,b)'];
+  for(const form of broadForms)for(const command of [`echo '${form}'`,`true # ${form}`,`rg '${form}' file`])add(`isolation broad shell text ${command}`,()=>assert.ok(isolationBreaches(clean,[bash(command)]).length>0));
+
   for(const command of ['ln a b','cp a b','ln -- -s b','cp -- -s b','rg symlink file','echo ordinary # symlink','rg "ordinary pattern" file'])add(`isolation near miss ${command}`,()=>assert.deepEqual(isolationBreaches(clean,[bash(command)]),[]));
   for(const name of ['read','edit','write','glob','grep','list'])for(const input of [{filePath:'/etc/hostname'},{path:'/etc/hostname'},{paths:['file','/etc/hostname']},{options:{directory:'/etc'}}])add(`isolation external ${name} ${JSON.stringify(input)}`,()=>assert.ok(isolationBreaches(clean,[{name,input,result:'denied',error:true}]).length>0));
   for(const input of [{filePath:`${clean}-other/file`},{filePath:`${clean}/../other/file`},{patchText:'*** Begin Patch\n*** Update File: /etc/hostname\n@@\n-a\n+b\n*** End Patch'},{patch:'--- /etc/hostname\n+++ /etc/hostname\n@@ -1 +1 @@\n-a\n+b'}])add(`isolation external normalized/patch ${JSON.stringify(input)}`,()=>assert.ok(isolationBreaches(clean,[{name:'apply_patch',input}]).length>0));
   for(const input of [{filePath:join(clean,'file')},{filePath:'file'},{filePath:'file',content:'/etc/hostname'},{patchText:'*** Begin Patch\n*** Add File: file\n+/etc/hostname\n*** End Patch'},{patch:'--- /dev/null\n+++ b/file\n@@ -0,0 +1 @@\n+/etc/hostname'}])add(`isolation allowed input ${JSON.stringify(input)}`,()=>assert.deepEqual(isolationBreaches(clean,[{name:'write',input}]),[]));
 
   add('isolation grep regex is not a path-bearing field (B5-12)',()=>assert.deepEqual(isolationBreaches(clean,[{name:'grep',input:{path:'.',pattern:'/etc/hostname'}}]),[]));
+
+  for(const name of ['read','edit','write','glob','grep','list'])for(const field of ['pattern','query','glob','include','content','oldText','newText'])add(`isolation ${name} ${field} text is never a file path`,()=>{
+    assert.deepEqual(isolationBreaches(clean,[{name,input:{path:'.',[field]:'/etc/hostname'}}]),[]);
+  });
+
+  for(const field of ['file_path','dir','root','cwd','workdir','target_file','targetFile','old_path','oldPath','new_path','newPath'])add(`isolation path alias ${field} remains external even when nested`,()=>{
+    assert.ok(isolationBreaches(clean,[{name:'read',input:{options:{[field]:'/etc/hostname'}}}]).length>0);
+  });
 
   function launchCheck(fn=opencodeLaunch) {
     const w=join(scratch,`launch-${launchIndex++}`);mkdirSync(w);
@@ -169,7 +180,10 @@ export async function batch5Checks({tasks,scoreRun}) {
   function generatorFixture(name,{gov=sourceGov,plain=sourceControls,reverse=false,omitBatch5=false}={}){
     const at=join(scratch,name);mkdirSync(join(at,'tickets'),{recursive:true});mkdirSync(join(at,'tasks'));for(const f of readdirSync(join(root,'eval/tasks')))if(!omitBatch5||!f.startsWith('ripgrep5-'))cpSync(join(root,'eval/tasks',f),join(at,'tasks',f));cpSync(join(root,'eval/tickets/make-tasks.mjs'),join(at,'tickets/make-tasks.mjs'));
     for(const file of ['requests','targets']){const value=json(join(root,`eval/tickets/${file}.json`));writeFileSync(join(at,`tickets/${file}.json`),JSON.stringify(reverse?value.reverse():value));}
-    for(const [name,value]of [['controls',plain],['controls2',gov]])if(value!==null)writeFileSync(join(at,`tickets/${name}.json`),JSON.stringify(value));
+    for(const [name,value]of [['controls',plain],['controls2',gov]])if(value!==null){
+      const bytes=name==='controls2'&&value===sourceGov?readFileSync(join(root,'eval/tickets/controls2.json')):JSON.stringify(value);
+      writeFileSync(join(at,`tickets/${name}.json`),bytes);
+    }
     return at;
   }
   for(const reverse of [false,true])add(`generator twice exact bytes, preserves old batches, reversed=${reverse}`,()=>{
@@ -178,6 +192,30 @@ export async function batch5Checks({tasks,scoreRun}) {
   });
   for(const [label,options]of [['missing governed',{gov:null}],['seven governed',{gov:sourceGov.slice(0,7)}],['nine governed',{gov:[...sourceGov,sourceGov[0]]}],['four plain',{plain:sourceControls.slice(0,4)}],['missing plain',{plain:null}],['six plain',{plain:[...sourceControls,sourceControls[0]]}]])add(`generator rejects ${label} before writing`,()=>{
     const at=generatorFixture(`generate-${label.replaceAll(' ','-')}`,{...options,omitBatch5:true});const before=snapshot(join(at,'tasks'));const r=node(join(at,'tickets/make-tasks.mjs'),['--batch','5']);assert.notEqual(r.status,0);assert.deepEqual(snapshot(join(at,'tasks')),before);
+  });
+  function rejectWithoutWrites(at){
+    const before=snapshot(join(at,'tasks')),r=node(join(at,'tickets/make-tasks.mjs'),['--batch','5']);
+    assert.notEqual(r.status,0,'bad generator input must fail');assert.deepEqual(snapshot(join(at,'tasks')),before,'invalid generator input must write no task');return r;
+  }
+  function changedByteFixture(name){
+    const at=generatorFixture(name,{omitBatch5:true}),path=join(at,'tickets/controls2.json'),bytes=readFileSync(path);
+    const index=bytes.indexOf(Buffer.from('matches_all_candidate_shared_extensions'));assert.ok(index>=0);bytes[index]='M'.charCodeAt(0);writeFileSync(path,bytes);
+    assert.equal(json(path).length,8);assert.notEqual(sha(path),'a358eb529f81821a24c21f00503ec552ac24426d2e604fba3f5120c959c04763');return at;
+  }
+  add('generator rejects one changed controls2 byte before writing any task',()=>{
+    const at=changedByteFixture('generate-changed-byte');assert.match(rejectWithoutWrites(at).stderr,/hash|sha|byte/i);
+  });
+  add('plant generator writes before validation caught by atomic rejection',()=>{
+    rejectWithoutWrites(changedByteFixture('plant-write-before-control'));
+    const at=changedByteFixture('plant-write-before-validation'),path=join(at,'tickets/make-tasks.mjs');
+    const prefix=`import {writeFileSync as plantWrite} from 'node:fs';plantWrite(new URL('../tasks/ripgrep5-conflict-rg-04.json',import.meta.url),'premature task write\\n');\n`;
+    writeFileSync(path,prefix+read(path).replace(/^#!.*\n/,''));
+    // An actual nonzero generator rejection must precede the oracle failure;
+    // a syntax error or subprocess failure alone cannot kill this plant.
+    const r=node(path,['--batch','5']);assert.notEqual(r.status,0);assert.match(r.stderr,/hash|sha|byte/i);assert.equal(read(join(at,'tasks/ripgrep5-conflict-rg-04.json')),'premature task write\n');
+    // Use a fresh faulty copy, so the baseline snapshot cannot contain the plant's write.
+    const fresh=changedByteFixture('plant-write-before-validation-fresh'),freshPath=join(fresh,'tickets/make-tasks.mjs');writeFileSync(freshPath,prefix+read(freshPath).replace(/^#!.*\n/,''));
+    assert.throws(()=>rejectWithoutWrites(fresh),{code:'ERR_ASSERTION',message:/invalid generator input must write no task/});
   });
   add('older generators do not require controls2; unsupported batch rejected',()=>{
     const at=generatorFixture('generate-old',{gov:null});const before=snapshot(join(at,'tasks'));
@@ -267,7 +305,7 @@ export async function batch5Checks({tasks,scoreRun}) {
     const {at,probe,meta}=runnerFixture(mode);const dir=join(at,'results',meta.id);assert.equal(meta.status,mode==='valid'?'done':'error');assert.equal(meta.agent,'opencode');assert.equal(meta.model,'opencode-go/deepseek-v4.1-flash');assert.equal(read(join(dir,'stderr.txt')),'invented stderr\n');assert.ok(probe.calls.some(c=>c.command.endsWith('/opencode')&&c.stdio?.[1]==='number'&&c.stdio?.[2]==='number'));
     assert.equal(read(join(dir,'final.txt')),mode==='blank'?' \n':'First\n\nLast');if(mode==='valid'){subset(meta,{replies:2,turns:1,cost_usd:.125,tokens:{input:2,output:3,reasoning:5,cache_read:7,cache_creation:11,total:13}});assert.deepEqual(json(join(dir,'tools.json')),[{name:'Bash',input:{command:'echo safe'},result:'safe\n',error:false}]);}
   });
-  for(const mode of ['malformed','spawn-error'])add(`runner ${mode} harness failure archived`,()=>{
+  for(const mode of ['malformed','cut','spawn-error'])add(`runner ${mode} harness failure archived`,()=>{
     const {at,meta}=runnerFixture(mode);assert.equal(meta.status,'invalid');assert.match(meta.reason,/malformed|JSONL|spawn/i);assert.ok(existsSync(meta.archived));assert.equal(existsSync(join(at,'results',meta.id)),false);
   });
   for(const mode of ['timeout','timeout-cut'])add(`runner ${mode} sends TERM/KILL and retains usage as error`,()=>{
