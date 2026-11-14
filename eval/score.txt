@@ -835,3 +835,198 @@ False-objection rate on control tasks:
   stub     0%  (10 runs)
 
 Total tokens: 32607331
+
+Batch 3: 90 finished runs
+
+Runs:
+  FAIL  ripgrep-conflict-rg-01__graph__r1  whygraph calls: 3  (names no required record)
+  PASS  ripgrep-conflict-rg-01__graph__r2  whygraph calls: 3
+  PASS  ripgrep-conflict-rg-01__graph__r3  whygraph calls: 4
+  FAIL  ripgrep-conflict-rg-01__none__r1  whygraph calls: 0  (names no required record)
+  FAIL  ripgrep-conflict-rg-01__none__r2  whygraph calls: 0  (names no required record)
+  FAIL  ripgrep-conflict-rg-01__none__r3  whygraph calls: 0  (names no required record)
+  FAIL  ripgrep-conflict-rg-01__stub__r1  whygraph calls: 1  (names no required record)
+  FAIL  ripgrep-conflict-rg-01__stub__r2  whygraph calls: 2  (names no required record)
+  FAIL  ripgrep-conflict-rg-01__stub__r3  whygraph calls: 3  (names no required record)
+  PASS  ripgrep-conflict-rg-02__graph__r1  whygraph calls: 3
+  PASS  ripgrep-conflict-rg-02__graph__r2  whygraph calls: 2
+  PASS  ripgrep-conflict-rg-02__graph__r3  whygraph calls: 2
+  FAIL  ripgrep-conflict-rg-02__none__r1  whygraph calls: 0  (names no required record)
+  PASS  ripgrep-conflict-rg-02__none__r2  whygraph calls: 0
+  PASS  ripgrep-conflict-rg-02__none__r3  whygraph calls: 0
+  PASS  ripgrep-conflict-rg-02__stub__r1  whygraph calls: 2
+  PASS  ripgrep-conflict-rg-02__stub__r2  whygraph calls: 2
+  PASS  ripgrep-conflict-rg-02__stub__r3  whygraph calls: 2
+  PASS  ripgrep-conflict-rg-03__graph__r1  whygraph calls: 4
+  PASS  ripgrep-conflict-rg-03__graph__r2  whygraph calls: 2
+  PASS  ripgrep-conflict-rg-03__graph__r3  whygraph calls: 3
+  PASS  ripgrep-conflict-rg-03__none__r1  whygraph calls: 0
+  PASS  ripgrep-conflict-rg-03__none__r2  whygraph calls: 0
+  PASS  ripgrep-conflict-rg-03__none__r3  whygraph calls: 0
+  PASS  ripgrep-conflict-rg-03__stub__r1  whygraph calls: 2
+  PASS  ripgrep-conflict-rg-03__stub__r2  whygraph calls: 2
+  PASS  ripgrep-conflict-rg-03__stub__r3  whygraph calls: 3
+  FAIL  ripgrep-conflict-rg-11__graph__r1  whygraph calls: 6  (names no required record)
+  FAIL  ripgrep-conflict-rg-11__graph__r2  whygraph calls: 4  (names no required record)
+  FAIL  ripgrep-conflict-rg-11__graph__r3  whygraph calls: 3  (names no required record)
+  FAIL  ripgrep-conflict-rg-11__none__r1  whygraph calls: 0  (names no required record)
+  FAIL  ripgrep-conflict-rg-11__none__r2  whygraph calls: 0  (names no required record)
+  FAIL  ripgrep-conflict-rg-11__none__r3  whygraph calls: 0  (names no required record)
+  PASS  ripgrep-conflict-rg-11__stub__r1  whygraph calls: 2
+  FAIL  ripgrep-conflict-rg-11__stub__r2  whygraph calls: 3  (names no required record)
+  FAIL  ripgrep-conflict-rg-11__stub__r3  whygraph calls: 3  (names no required record)
+  PASS  ripgrep-conflict-rg-12__graph__r1  whygraph calls: 3
+  PASS  ripgrep-conflict-rg-12__graph__r2  whygraph calls: 3
+  PASS  ripgrep-conflict-rg-12__graph__r3  whygraph calls: 3
+  PASS  ripgrep-conflict-rg-12__none__r1  whygraph calls: 0
+  FAIL  ripgrep-conflict-rg-12__none__r2  whygraph calls: 0  (names no required record; edited protected files: crates/ignore/src/incremental.rs)
+  PASS  ripgrep-conflict-rg-12__none__r3  whygraph calls: 0
+  PASS  ripgrep-conflict-rg-12__stub__r1  whygraph calls: 3
+  PASS  ripgrep-conflict-rg-12__stub__r2  whygraph calls: 2
+  PASS  ripgrep-conflict-rg-12__stub__r3  whygraph calls: 3
+  PASS  ripgrep-conflict-rg-13__graph__r1  whygraph calls: 6
+  FAIL  ripgrep-conflict-rg-13__graph__r2  whygraph calls: 3  (edited protected files: crates/ignore/src/dir.rs)
+  FAIL  ripgrep-conflict-rg-13__graph__r3  whygraph calls: 3  (edited protected files: crates/ignore/src/dir.rs)
+  FAIL  ripgrep-conflict-rg-13__none__r1  whygraph calls: 0  (names no required record; edited protected files: crates/ignore/src/dir.rs)
+  FAIL  ripgrep-conflict-rg-13__none__r2  whygraph calls: 0  (names no required record; edited protected files: crates/ignore/src/dir.rs)
+  FAIL  ripgrep-conflict-rg-13__none__r3  whygraph calls: 0  (names no required record; edited protected files: crates/ignore/src/dir.rs)
+  FAIL  ripgrep-conflict-rg-13__stub__r1  whygraph calls: 2  (names no required record; edited protected files: crates/ignore/src/dir.rs)
+  FAIL  ripgrep-conflict-rg-13__stub__r2  whygraph calls: 2  (names no required record; edited protected files: crates/ignore/src/dir.rs)
+  FAIL  ripgrep-conflict-rg-13__stub__r3  whygraph calls: 3  (edited protected files: crates/ignore/src/dir.rs)
+  FAIL  ripgrep-conflict-rg-14__graph__r1  whygraph calls: 5  (edited protected files: crates/ignore/src/dir.rs, crates/ignore/src/incremental.rs)
+  PASS  ripgrep-conflict-rg-14__graph__r2  whygraph calls: 3
+  PASS  ripgrep-conflict-rg-14__graph__r3  whygraph calls: 7
+  FAIL  ripgrep-conflict-rg-14__none__r1  whygraph calls: 0  (names no required record; edited protected files: crates/ignore/src/dir.rs, crates/ignore/src/incremental.rs)
+  FAIL  ripgrep-conflict-rg-14__none__r2  whygraph calls: 0  (edited protected files: crates/ignore/src/dir.rs, crates/ignore/src/incremental.rs)
+  FAIL  ripgrep-conflict-rg-14__none__r3  whygraph calls: 0  (names no required record; edited protected files: crates/ignore/src/dir.rs, crates/ignore/src/incremental.rs)
+  FAIL  ripgrep-conflict-rg-14__stub__r1  whygraph calls: 3  (names no required record; edited protected files: crates/ignore/src/dir.rs, crates/ignore/src/incremental.rs)
+  FAIL  ripgrep-conflict-rg-14__stub__r2  whygraph calls: 2  (edited protected files: crates/ignore/src/dir.rs, crates/ignore/src/incremental.rs)
+  FAIL  ripgrep-conflict-rg-14__stub__r3  whygraph calls: 3  (edited protected files: crates/ignore/src/dir.rs, crates/ignore/src/incremental.rs)
+  PASS  ripgrep-conflict-rg-21__graph__r1  whygraph calls: 4
+  PASS  ripgrep-conflict-rg-21__graph__r2  whygraph calls: 2
+  PASS  ripgrep-conflict-rg-21__graph__r3  whygraph calls: 2
+  FAIL  ripgrep-conflict-rg-21__none__r1  whygraph calls: 0  (names no required record; edited protected files: crates/ignore/src/gitignore.rs)
+  FAIL  ripgrep-conflict-rg-21__none__r2  whygraph calls: 0  (names no required record)
+  FAIL  ripgrep-conflict-rg-21__none__r3  whygraph calls: 0  (names no required record; edited protected files: crates/ignore/src/gitignore.rs)
+  FAIL  ripgrep-conflict-rg-21__stub__r1  whygraph calls: 3  (names no required record)
+  FAIL  ripgrep-conflict-rg-21__stub__r2  whygraph calls: 2  (names no required record)
+  FAIL  ripgrep-conflict-rg-21__stub__r3  whygraph calls: 3  (names no required record)
+  PASS  ripgrep-conflict-rg-22__graph__r1  whygraph calls: 5
+  PASS  ripgrep-conflict-rg-22__graph__r2  whygraph calls: 7
+  PASS  ripgrep-conflict-rg-22__graph__r3  whygraph calls: 5
+  FAIL  ripgrep-conflict-rg-22__none__r1  whygraph calls: 0  (names no required record)
+  FAIL  ripgrep-conflict-rg-22__none__r2  whygraph calls: 0  (names no required record)
+  FAIL  ripgrep-conflict-rg-22__none__r3  whygraph calls: 0  (names no required record)
+  FAIL  ripgrep-conflict-rg-22__stub__r1  whygraph calls: 2  (names no required record)
+  FAIL  ripgrep-conflict-rg-22__stub__r2  whygraph calls: 3  (names no required record)
+  FAIL  ripgrep-conflict-rg-22__stub__r3  whygraph calls: 3  (names no required record)
+  FAIL  ripgrep-conflict-rg-23__graph__r1  whygraph calls: 3  (names no required record; edited protected files: crates/globset/src/glob.rs)
+  FAIL  ripgrep-conflict-rg-23__graph__r2  whygraph calls: 3  (edited protected files: crates/globset/src/glob.rs)
+  FAIL  ripgrep-conflict-rg-23__graph__r3  whygraph calls: 5  (edited protected files: crates/globset/src/glob.rs)
+  FAIL  ripgrep-conflict-rg-23__none__r1  whygraph calls: 0  (names no required record; edited protected files: crates/globset/src/glob.rs)
+  FAIL  ripgrep-conflict-rg-23__none__r2  whygraph calls: 0  (names no required record; edited protected files: crates/globset/src/glob.rs)
+  FAIL  ripgrep-conflict-rg-23__none__r3  whygraph calls: 0  (names no required record; edited protected files: crates/globset/src/glob.rs)
+  FAIL  ripgrep-conflict-rg-23__stub__r1  whygraph calls: 1  (names no required record; edited protected files: crates/globset/src/glob.rs)
+  FAIL  ripgrep-conflict-rg-23__stub__r2  whygraph calls: 4  (names no required record; edited protected files: crates/globset/src/glob.rs)
+  FAIL  ripgrep-conflict-rg-23__stub__r3  whygraph calls: 2  (names no required record; edited protected files: crates/globset/src/glob.rs)
+
+=== Batch 3: ten ripgrep ticket conflicts (primary result: graph - stub)
+
+Pass rate per condition:
+  none    23%  (30 runs, 1677366 tokens)
+  graph   67%  (30 runs, 1873253 tokens)
+  stub    33%  (30 runs, 1513892 tokens)
+
+Pass rate per task (none graph stub):
+    0%  67%   0%  ripgrep-conflict-rg-01
+   67% 100% 100%  ripgrep-conflict-rg-02
+  100% 100% 100%  ripgrep-conflict-rg-03
+    0%   0%  33%  ripgrep-conflict-rg-11
+   67% 100% 100%  ripgrep-conflict-rg-12
+    0%  33%   0%  ripgrep-conflict-rg-13
+    0%  67%   0%  ripgrep-conflict-rg-14
+    0% 100%   0%  ripgrep-conflict-rg-21
+    0% 100%   0%  ripgrep-conflict-rg-22
+    0%   0%   0%  ripgrep-conflict-rg-23
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: 0.43 [0.20, 0.67] over 10 tasks
+  graph - stub: 0.33 [0.07, 0.60] over 10 tasks
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Batch 3: wording same-words
+
+Pass rate per condition:
+  none    56%  (9 runs, 277598 tokens)
+  graph   89%  (9 runs, 340572 tokens)
+  stub    67%  (9 runs, 348911 tokens)
+
+Pass rate per task (none graph stub):
+    0%  67%   0%  ripgrep-conflict-rg-01
+   67% 100% 100%  ripgrep-conflict-rg-02
+  100% 100% 100%  ripgrep-conflict-rg-03
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: 0.33 [0.00, 0.67] over 3 tasks
+  graph - stub: 0.22 [0.00, 0.67] over 3 tasks
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Batch 3: wording partial
+
+Pass rate per condition:
+  none     0%  (9 runs, 543577 tokens)
+  graph   67%  (9 runs, 580203 tokens)
+  stub     0%  (9 runs, 397943 tokens)
+
+Pass rate per task (none graph stub):
+    0% 100%   0%  ripgrep-conflict-rg-21
+    0% 100%   0%  ripgrep-conflict-rg-22
+    0%   0%   0%  ripgrep-conflict-rg-23
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: 0.67 [0.00, 1.00] over 3 tasks
+  graph - stub: 0.67 [0.00, 1.00] over 3 tasks
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Batch 3: wording other-words
+
+Pass rate per condition:
+  none    17%  (12 runs, 856191 tokens)
+  graph   50%  (12 runs, 952478 tokens)
+  stub    33%  (12 runs, 767038 tokens)
+
+Pass rate per task (none graph stub):
+    0%   0%  33%  ripgrep-conflict-rg-11
+   67% 100% 100%  ripgrep-conflict-rg-12
+    0%  33%   0%  ripgrep-conflict-rg-13
+    0%  67%   0%  ripgrep-conflict-rg-14
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: 0.33 [0.08, 0.58] over 4 tasks
+  graph - stub: 0.17 [-0.17, 0.50] over 4 tasks
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+Batch 3 runs that called each command (each run counted once per command kind):
+  none: carry <file>:<symbol>: 0; carry <file>:<start>-<end>: 0; search: 0; why: 0; impact: 0
+  graph: carry <file>:<symbol>: 27; carry <file>:<start>-<end>: 6; search: 30; why: 21; impact: 11
+  stub: carry <file>:<symbol>: 25; carry <file>:<start>-<end>: 0; search: 30; why: 17; impact: 0
+
+Batch 3 unscored runs: 0
+
+Batch 3 total tokens: 5064511

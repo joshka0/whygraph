@@ -498,6 +498,59 @@ runner bug above were run again after the fix and are in `results/_invalid/`).
 - Tokens: 14970558 over the 240 runs. Agent wall time: 2.9 hours summed
   (inflated for runs before the fix, see above).
 
+## Batch 3 results
+
+From `score.txt`, all 90 runs scored; none timed out and none was invalid.
+Three runs (request `rg-01`, each condition once) ran first to check the
+runner; they are repeat 1 of that request.
+
+| | none | graph | stub | graph - none | graph - stub |
+| --- | --- | --- | --- | --- | --- |
+| Ten ticket conflicts (primary: graph - stub) | 23% | 67% | 33% | 0.43 [0.20, 0.67] | **0.33 [0.07, 0.60]** |
+| Same words, 3 tasks | 56% | 89% | 67% | 0.33 [0.00, 0.67] | 0.22 [0.00, 0.67] |
+| One shared term, 3 tasks | 0% | 67% | 0% | 0.67 [0.00, 1.00] | 0.67 [0.00, 1.00] |
+| Other words, 4 tasks | 17% | 50% | 33% | 0.33 [0.08, 0.58] | 0.17 [-0.17, 0.50] |
+
+- Every `graph` run called `search`. 27 of 30 called `carry` on a symbol, 6
+  on a line range, 21 called `why` and 11 `impact`. Every `stub` run called
+  `search` too, and got `no result`.
+- Three requests pass in `none` at least twice (`rg-02`, `rg-03`, `rg-12`):
+  the agent found the ticket number without the graph, as the design said
+  it could.
+- Tokens: 5064511 over the 90 runs.
+
+### Post hoc counts
+
+Added after the results were seen; no verdict changes. The script is
+`tickets/pilot-posthoc.py`. The pass rule needs two things, and the counts
+split them:
+
+| Of 30 runs per condition | none | graph | stub |
+| --- | --- | --- | --- |
+| Changed no file | 18 | 24 | 21 |
+| Named the ticket (the fixed spellings) | 8 | 25 | 13 |
+| Passed (both) | 7 | 20 | 10 |
+| Changed no file, and did not name the ticket | 11 | 3 | 11 |
+| Named the ticket, and changed a file | 1 | 6 | 3 |
+
+- The graph changes most what the agent can name: the ticket is in the reply
+  25 times with the graph, 13 with the rule text, 8 with neither.
+- It changes less what the agent does: 24, 21 and 18 runs left the code
+  alone. In 11 `none` runs and 11 `stub` runs the agent held the change for
+  a reason it read in the code, with no ticket to name; the pass rule counts
+  those as failures.
+- In 6 `graph` runs the agent named the ticket and changed the code all the
+  same. On `rg-23` every run of every condition changed the file.
+- A gap in the fixed rule: `ticket N` with a space is not one of its
+  spellings. Two `graph` runs named the ticket only that way, and one of
+  them changed no file. With that spelling `graph` passes 21 of 30. The
+  verdicts stay as the fixed rule gives them.
+
+What batch 3 cannot show: it has ten requests on one repo, three repeats,
+and one model, which may know ripgrep from its training. A pass is a
+verdict on words and a diff. The requests were written to go against a
+ticket, so the share of real requests that do is not measured.
+
 ## What the numbers can and cannot show
 
 They can show whether, on these 14 requests with this model, an agent with the

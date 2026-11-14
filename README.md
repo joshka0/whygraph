@@ -645,6 +645,27 @@ The size of the store decides how much the link adds. On a store cut down to
 among few records there, and the link does not rank at all
 (`eval/tickets/README.md`, "The same requests on a small store").
 
+A small agent pilot then asked what an agent does with those lists. Claude
+Code (`sonnet`) got ten of the thirty requests, three times each, with the
+repo only, with the rule text and a tool that answers nothing, and with the
+graph. A run passes when the reply names the ticket and the diff changes no
+file.
+
+| | Repo only | Rule text | Graph |
+| --- | --- | --- | --- |
+| Passed, of 30 runs | 7 | 10 | 20 |
+| Named the ticket | 8 | 13 | 25 |
+| Changed no file | 18 | 21 | 24 |
+
+The graph's lead over the rule text is 0.33 of the runs per request, with an
+interval from 0.07 to 0.60 over the ten requests. It comes mostly from
+naming: the agent with the graph can say which ticket the change goes
+against. What the agent does changes less. In 11 runs without the graph the
+agent left the code alone for a reason it read in the code, and in 6 runs
+with the graph it named the ticket and changed the code all the same. The
+last two rows were counted after the results were seen
+(`eval/README.md`, "Batch 3 results").
+
 ## Your own repo
 
 whygraph runs on any git repo that memod reads (TypeScript, JavaScript,
