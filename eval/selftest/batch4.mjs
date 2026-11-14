@@ -142,10 +142,22 @@ export async function batch4Checks({ tasks, scoreRun }) {
       }
     }
   }
-  add('committed 19 ranged unused conflicts and five verbatim controls', () => {
+  // B4-25 records the blind author's exact bytes, independent of any scratch copy.
+  const controlsSha256 = 'cc15a2caf4c989fe5a13acebf25024e6bb83b2c29d4702cec1c2006fd7e4d79b';
+  function committedCheck(controlsPath = join(root, 'eval/tickets/controls.json')) {
     assert.equal(controls.length, 5);
-    assert.deepEqual(readFileSync(join(root, 'eval/tickets/controls.json')), readFileSync('/home/dev/scratch/rg-controls/controls.json'));
+    assert.equal(createHash('sha256').update(readFileSync(controlsPath)).digest('hex'), controlsSha256,
+      'controls bytes must match B4-25');
     metadata([...tasks.values()].filter(t => t.batch === 4));
+  }
+  add('committed 19 ranged unused conflicts and five verbatim controls', () => committedCheck());
+  add('plant one changed controls byte caught by committed metadata case', () => {
+    committedCheck();
+    const changed = readFileSync(join(root, 'eval/tickets/controls.json'));
+    changed[0] ^= 1;
+    const path = join(scratch, 'plant-controls.json');
+    writeFileSync(path, changed);
+    assert.throws(() => committedCheck(path), { code: 'ERR_ASSERTION', expected: controlsSha256 });
   });
   add('fixed README states batch 4 design, exact plan/run command and limits', () => {
     const section = read(join(root, 'eval/README.md')).split('## Batch 4, fixed before its first run\n')[1]?.split('\n## ')[0];
