@@ -1,6 +1,6 @@
 /**
  * module: [[whygraph-documentation-contracts]]
- * R1-R8 and S1-S7 come from docs/failures.md. Product copies, homes and
+ * R1-R8 and S1-S11 come from docs/failures.md. Product copies, homes and
  * installation targets stay in each test's retained scratch folder.
  */
 import test from 'node:test';
@@ -245,3 +245,50 @@ contract('S7', 'unset WHYGRAPH fails without installing, and repeat installation
     assert.ok(!existsSync(join(directory, 'whygraph'))); assert.deepEqual(readdirSync(directory), ['SKILL.md']);
   }
 });
+
+// These are instruction contracts, not a claim that an agent will obey them.
+// Scope the skill assertions to rule 1 so unrelated prose cannot satisfy them.
+function editRule(folder, file) {
+  const text = read(join(folder, file)).replace(/\s+/g, ' ');
+  if (file.endsWith('/SKILL.md')) {
+    const rule = text.match(/1\. Before you change a symbol,[\s\S]*?(?= 2\. Before a change)/)?.[0];
+    assert.ok(rule, 'missing skill rule 1'); return rule;
+  }
+  return text;
+}
+function skillContract(id, text) {
+  if (id === 'S8') {
+    assert.match(text, /A change goes against a record when it reverses, removes or weakens what the record decided or added\./);
+    assert.match(text, /Do not make that change,/);
+    assert.match(text, /name the record, say what the change would undo and what you would change if the user confirms, then stop\./);
+  } else if (id === 'S9') {
+    assert.match(text, /Do not make that change, even when the request asks plainly and nobody can answer:/);
+    assert.match(text, /then stop\. Make it only when the request itself names the record and says to reverse it;/);
+  } else if (id === 'S10') {
+    assert.match(text, /Make it only when the request itself names the record and says to reverse it; then change the record together with the code when the repo holds it\./);
+    assert.doesNotMatch(text, /(?:invent|create|copy|local copy|always update)/i, 'external tickets must not require a fabricated local record');
+  } else if (id === 'S11') {
+    assert.match(text, /A record the change does not go against is no reason to stop: make the change, naming the record only if it helps the reader\./);
+  } else assert.fail(`unknown contract ${id}`);
+}
+const editRuleFiles = ['skills/whygraph/SKILL.md', 'skills/whygraph-rule.md'];
+for (const [id, description] of [
+  ['S8', 'both texts define reversal/removal/weakening, forbid edits, require explanation and stop'],
+  ['S9', 'plain requests and unavailable users do not authorize an unnamed reversal'],
+  ['S10', 'a named reversal authorizes editing, with repo-held records updated together'],
+  ['S11', 'relevant unopposed records require proceeding with an optional citation'],
+]) contract(id, description, 'empty', () => {
+  for (const file of editRuleFiles) skillContract(id, editRule(h.subject, file));
+});
+
+for (const file of editRuleFiles) {
+  contract('S8', `plant missing prohibition in ${file} is caught by the rule contract`, 'empty', s => {
+    skillContract('S8', editRule(h.subject, file));
+    const folder = join(s.dir, 'faulty-subject');
+    const original = read(join(h.subject, file));
+    const faulty = original.replace(/Do not make\s+that change,/, 'Make that change,');
+    assert.notEqual(faulty, original, 'plant did not change the text');
+    s.write(join(folder, file), faulty);
+    assert.throws(() => skillContract('S8', editRule(folder, file)), { code: 'ERR_ASSERTION' });
+  });
+}

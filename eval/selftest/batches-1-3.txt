@@ -1,0 +1,325 @@
+2 finished runs
+
+Runs:
+  PASS  fixture-conflict-format-separators__graph__r1  whygraph calls: 0
+  PASS  memod2-conflict-merge-first-parent__graph__r1  whygraph calls: 0
+
+=== All tasks
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  graph  100%  (1 runs, 101 tokens)
+  stub      -  (0 runs, 0 tokens)
+
+Pass rate per task (none graph stub):
+     - 100%    -  fixture-conflict-format-separators
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: no task has both
+  graph - stub: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Without the tasks that shaped the tool (memod-conflict-report-build-gate)
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  graph  100%  (1 runs, 101 tokens)
+  stub      -  (0 runs, 0 tokens)
+
+Pass rate per task (none graph stub):
+     - 100%    -  fixture-conflict-format-separators
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: no task has both
+  graph - stub: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Batch 2: the sixteen tasks chosen blind (primary result: graph - stub)
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  graph  100%  (1 runs, 103 tokens)
+  stub      -  (0 runs, 0 tokens)
+
+Pass rate per task (none graph stub):
+     - 100%    -  memod2-conflict-merge-first-parent
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: no task has both
+  graph - stub: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Batch 2: memod only
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  graph  100%  (1 runs, 103 tokens)
+  stub      -  (0 runs, 0 tokens)
+
+Pass rate per task (none graph stub):
+     - 100%    -  memod2-conflict-merge-first-parent
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: no task has both
+  graph - stub: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Batch 2: memoryd only
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  graph     -  (0 runs, 0 tokens)
+  stub      -  (0 runs, 0 tokens)
+
+Pass rate per task (none graph stub):
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: no task has both
+  graph - stub: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Batch 2: findable by search, picker's rating easy
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  graph     -  (0 runs, 0 tokens)
+  stub      -  (0 runs, 0 tokens)
+
+Pass rate per task (none graph stub):
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: no task has both
+  graph - stub: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Batch 2: findable by search, picker's rating medium
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  graph  100%  (1 runs, 103 tokens)
+  stub      -  (0 runs, 0 tokens)
+
+Pass rate per task (none graph stub):
+     - 100%    -  memod2-conflict-merge-first-parent
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: no task has both
+  graph - stub: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Batch 2: findable by search, picker's rating hard
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  graph     -  (0 runs, 0 tokens)
+  stub      -  (0 runs, 0 tokens)
+
+Pass rate per task (none graph stub):
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: no task has both
+  graph - stub: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Both batches: all thirty tasks
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  graph  100%  (2 runs, 204 tokens)
+  stub      -  (0 runs, 0 tokens)
+
+Pass rate per task (none graph stub):
+     - 100%    -  fixture-conflict-format-separators
+     - 100%    -  memod2-conflict-merge-first-parent
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: no task has both
+  graph - stub: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Both batches: without the tasks that shaped the tool (memod-conflict-report-build-gate)
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  graph  100%  (2 runs, 204 tokens)
+  stub      -  (0 runs, 0 tokens)
+
+Pass rate per task (none graph stub):
+     - 100%    -  fixture-conflict-format-separators
+     - 100%    -  memod2-conflict-merge-first-parent
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: no task has both
+  graph - stub: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Unscored runs (an agent timed out twice; not in any rate above): 0
+
+=== Post hoc, added after the results were seen: without the fixture tasks whose records exist only outside the repo
+(fixture-conflict-format-separators, fixture-conflict-tax-per-line, fixture-impact-note-1-reversed: no agent without the graph can name their records, so they score 0/100/0 by design and carry much of the headline.)
+
+=== Post hoc: without the outside-only tasks
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  graph     -  (0 runs, 0 tokens)
+  stub      -  (0 runs, 0 tokens)
+
+Pass rate per task (none graph stub):
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: no task has both
+  graph - stub: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Post hoc: without the outside-only tasks and the tasks that shaped the tool (memod-conflict-report-build-gate)
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  graph     -  (0 runs, 0 tokens)
+  stub      -  (0 runs, 0 tokens)
+
+Pass rate per task (none graph stub):
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: no task has both
+  graph - stub: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+Total tokens: 204
+
+Batch 3: 1 finished runs
+
+Runs:
+  PASS  ripgrep-conflict-rg-01__graph__r1  whygraph calls: 0
+
+=== Batch 3: ten ripgrep ticket conflicts (primary result: graph - stub)
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  graph  100%  (1 runs, 107 tokens)
+  stub      -  (0 runs, 0 tokens)
+
+Pass rate per task (none graph stub):
+     - 100%    -  ripgrep-conflict-rg-01
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: no task has both
+  graph - stub: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Batch 3: wording same-words
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  graph  100%  (1 runs, 107 tokens)
+  stub      -  (0 runs, 0 tokens)
+
+Pass rate per task (none graph stub):
+     - 100%    -  ripgrep-conflict-rg-01
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: no task has both
+  graph - stub: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Batch 3: wording partial
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  graph     -  (0 runs, 0 tokens)
+  stub      -  (0 runs, 0 tokens)
+
+Pass rate per task (none graph stub):
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: no task has both
+  graph - stub: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+=== Batch 3: wording other-words
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  graph     -  (0 runs, 0 tokens)
+  stub      -  (0 runs, 0 tokens)
+
+Pass rate per task (none graph stub):
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - none: no task has both
+  graph - stub: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  graph     -  (0 runs)
+  stub      -  (0 runs)
+
+Batch 3 runs that called each command (each run counted once per command kind):
+  none: carry <file>:<symbol>: 0; carry <file>:<start>-<end>: 0; search: 0; why: 0; impact: 0
+  graph: carry <file>:<symbol>: 0; carry <file>:<start>-<end>: 0; search: 0; why: 0; impact: 0
+  stub: carry <file>:<symbol>: 0; carry <file>:<start>-<end>: 0; search: 0; why: 0; impact: 0
+
+Batch 3 unscored runs: 0
+
+Batch 3 total tokens: 107

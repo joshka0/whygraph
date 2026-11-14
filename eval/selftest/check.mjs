@@ -9,6 +9,7 @@ import { readTasks, scoreRun, recordIds } from '../score.mjs';
 import { sessionSummary } from '../run.mjs';
 import { cases } from './cases.mjs';
 import { ticketChecks } from './tickets.mjs';
+import { batch4Checks } from './batch4.mjs';
 
 const tasks = readTasks();
 let wrong = 0;
@@ -24,7 +25,10 @@ for (const c of cases) {
   for (const [k, want, got = v[k]] of bad) console.log(`        ${k}: expected ${JSON.stringify(want)}, got ${JSON.stringify(got)}`);
   wrong += bad.length === 0 ? 0 : 1;
 }
-const checks = await ticketChecks({ tasks, scoreRun, recordIds });
+const checks = [
+  ...await ticketChecks({ tasks, scoreRun, recordIds }),
+  ...await batch4Checks({ tasks, scoreRun }),
+];
 for (const c of checks) {
   try {
     await c.run();

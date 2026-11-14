@@ -1,0 +1,78 @@
+{
+  "implementationUnderTest": "5b43558",
+  "contract": [
+    "eval/tickets/batch4-failures.md (B4-01 through B4-24)",
+    "eval/README.md: Batch 4, fixed before its first run",
+    "git diff main..batch-4 -- docs/failures.md: S8 through S11"
+  ],
+  "scope": "Tests only. No implementation, task, skill, dependency or saved trial result is changed. No trial agent is started, no delegation, no install and no push.",
+  "entryPoints": ["node eval/selftest/check.mjs", "pnpm test"],
+  "expectations": "Ticket numbers, request selection, verdicts, rates, token sums, task-mean differences, bootstrap endpoints and diagnostic counts come from the contract and hand-constructed fixtures. Production score/run/make-tasks modules are opaque: calls use their exported interfaces or CLI. Faults wrap a public boundary or append to a copied generator; no private implementation is used as a verdict oracle.",
+  "savedReport": {
+    "file": "eval/selftest/batches-1-3.txt",
+    "provenance": "Saved by running the prior committed scorer at main f07c33b668512abc9975127973223bf1b68729b1 on this test's synthetic older-results fixture. Compared byte-for-byte to the current scorer before saving. No real eval/results files are used.",
+    "fixture": "One passing graph run each: fixture-conflict-format-separators (note-2, 101 tokens), memod2-conflict-merge-first-parent (ADR-0004, 103 tokens), ripgrep-conflict-rg-01 (#3145, 107 tokens); no tools, no edits, no errors.",
+    "oracle": "The older committed report is a formatting/regression oracle only. Its first two batches equal the existing batches-1-2.txt; the batch 3 addition has one 100% same-words graph run with 107 tokens, no pairs, no commands, zero errors, and dash rates for absent groups. The separate required score-vs-score.txt check covers all saved trial report bytes."
+  },
+  "coverage": [
+    {"id":"B4-01","cases":"S8 in test/docs.test.mjs: both texts, definition, prohibition, naming, undo explanation, conditional proposed edit, stop; prohibition-removal plants in each text."},
+    {"id":"B4-02","cases":"S9 in test/docs.test.mjs: plain request plus unavailable user still forbids editing and requires stop."},
+    {"id":"B4-03","cases":"S10 in test/docs.test.mjs: named reversal authorizes editing and conditional repo-held record update; rejects an invented-copy requirement."},
+    {"id":"B4-04","cases":"S11 in test/docs.test.mjs: unopposed relevance requires proceeding, citation optional."},
+    {"id":"B4-05","cases":"Default generator order/main-byte equality; batch 3 plain/uppercase/hashed ticket-space cases; existing self-tests retained; saved older report and older JSON verdict equality. Hashed space form is deliberately red; see findings."},
+    {"id":"B4-06","cases":"Committed metadata independently derives every ranged unused request; exact 19 ids; reverse request/target order yields identical selection/order/bytes."},
+    {"id":"B4-07","cases":"Metadata checks source, targets, request, kind, repo, batch, protected=all, absent exception; twice-generated exact bytes and preserved sentinel/older tasks."},
+    {"id":"B4-08","cases":"All old/new prefix spellings with casing and optional hash, for literal primary 3276 and also 3275; bare, shorter, longer, unrelated and empty near misses."},
+    {"id":"B4-09","cases":"Eight diff forms (target, unrelated, amendment, new, delete, rename, mode, binary), reasons and paths; unnamed/empty failure and unrelated ticket false mentions unscored."},
+    {"id":"B4-10","cases":"Five controls' complete source entries and requests; byte comparison against blind author's file; missing/four/six controls refuse generation without fabricated controls."},
+    {"id":"B4-11","cases":"Seven positive/negative variants for each of five controls, case-insensitive matches, multiline nonmatch, objections and extra-file allowance; older objection and only_files regressions each have a positive control."},
+    {"id":"B4-12","cases":"Saved batches-1-3 fixture report equality without batch 4; full old report remains prefix with batch 4; old JSON verdict equality and separated totals; required real saved report diff."},
+    {"id":"B4-13","cases":"Constructed conflict-only task means .125 and .25 with [-.75,1] and [.25,.25] bootstrap intervals; missing pairs omitted, control-pair differences deliberately differ; repeat report bytes."},
+    {"id":"B4-14","cases":"Three wording blocks use independently specified conflict rates/run counts/token sums; missing groups are dashes."},
+    {"id":"B4-15","cases":"Control graph 1/3, stub 1/1, none 0/1; tokens 97/41/43; unchanged 1/0/1; mode-only control is changed."},
+    {"id":"B4-16","cases":"Conflict denominators graph/stub/none=5/2/2, unchanged=3/2/2, named=3/1/1, named+changed=1/0/0, unchanged+unnamed=1/1/1. Repeated names and error/control exclusions pinned."},
+    {"id":"B4-17","cases":"Main fixture shown=3/5 and named=2/3; 25 answer-placement cases exercise primary/also, following punctuation/nondigit vs digit, non-Bash, unrelated command, input-only, repeated answers and reply-only naming."},
+    {"id":"B4-18","cases":"Search/link/terms/both/mixed-call and grouped multi-call source sets; carry, why and impact each tested before/after/no heading/both; every isolated group has two runs, named/not-named=1/1."},
+    {"id":"B4-19","cases":"Main command fixture includes controls and ignores errors, Read and path text; six separate carry cases cover symbol/range with no, single and double quotes, repeated within/across calls."},
+    {"id":"B4-20","cases":"Mixed errors listed separately, 281 finished batch-4 tokens; conflict-only sensitivity .10/[-.80,1] and .20/[.20,.20]; conflict-only and control-only error fixtures print blocks, dashes, zero commands/tokens, empty JSON."},
+    {"id":"B4-21","cases":"JSON parses without report text, 17 total/14 batch-4 finished verdicts, both errors excluded, three older verdicts deep-equal the older fixture JSON."},
+    {"id":"B4-22","cases":"216 exact distinct ids, all conditions/repeats; 0/17/216 selected done runs, unrelated old done result and selected error; byte-hashed tree snapshots unchanged, isolated work path absent, CLI traps for claude/whygraph/relate/memod."},
+    {"id":"B4-23","cases":"Git equality of runner, src, recipes and dependency files between main and preparation commit; README setup assertions; plan no-write/trap checks. Live ready-template/store reuse and runtime agent confinement are not exercised because starting a trial agent is prohibited."},
+    {"id":"B4-24","cases":"Fixed README assertions cover task/run counts, commands, skill-change motivation, ready reuse, pass rules/reports, new requests, one model/training limits; required README checker runs separately without --write."}
+  ],
+  "plants": [
+    {"fault":"batch 4 rejects ticket 3276","copy":"plant-ticket-space-rejected.mjs","caughtBy":"conflict accepts ticket 3276 (same verifier and expected pass=true)"},
+    {"fault":"batch 3 accepts ticket 3145","copy":"plant-ticket-space-accepted-batch3.mjs","caughtBy":"batch 3 rejects ticket-space (same verifier and missing-record expectation)"},
+    {"fault":"empty control diff passes","copy":"plant-empty-control-passes.mjs","caughtBy":"control empty diff (same verifier and expected pass=false)"},
+    {"fault":"generator changes batch 3 bytes","copy":"plant-b3-bytes/tickets/make-tasks.mjs","caughtBy":"generator twice matches committed bytes and preserves batch 3 and sentinel"},
+    {"fault":"named-and-changed count off by one","copy":"plant-off-by-one.mjs","caughtBy":"conflict finished-run quadrants count each run once and every diff header"},
+    {"fault":"skill rule 1 loses its prohibition","copy":"S8 plant scratch skills/whygraph/SKILL.md","caughtBy":"S8 text contract, asserted ERR_ASSERTION"},
+    {"fault":"startup rule loses its prohibition","copy":"S8 plant scratch skills/whygraph-rule.md","caughtBy":"S8 text contract, asserted ERR_ASSERTION"}
+  ],
+  "findings": [
+    {
+      "contractItems":"B4-05, B4-08; brief's batch-3-must-not-accept-ticket-N requirement",
+      "contract":"Additional ticket-space spelling, any case and optional #, belongs to batch 4 only; batch 3 accepts no new ticket spelling. Every older spelling/verdict must also stay unchanged.",
+      "observed":"Every one of the ten existing batch 3 tasks accepts ticket #N. Plain ticket N and TICKET N are correctly rejected.",
+      "ambiguity":"#N is independently an already-accepted batch 3 spelling, so accepting the #N substring in ticket #N also follows the old-spelling rule. A strict reading of batch-4-only optional-# syntax conflicts with preserving this old behavior.",
+      "decision":"Retain ten red cases under the strict batch-4-only reading and report both readings for the parent. No scorer/task correction, exemption or weakened assertion. No outside-scope spec-ledger file is changed."
+    }
+  ],
+  "itemsWithNoCase": [],
+  "limits": [
+    "S8-S11 verify both distributed instruction texts, not whether a model obeys them. The brief forbids a trial agent run.",
+    "B4-23 live ready-template/store reuse and agent runtime settings/confinement are not exercised; unchanged runner/source/dependency bytes and plan side-effect checks provide preparation evidence only.",
+    "The saved-tools 4000-character limit is documented, not independently exercised by an agent session; scorer answer fixtures represent already-saved results.",
+    "The blind-control byte oracle and main ref must remain available on this evaluation host."
+  ],
+  "validation": {
+    "selftest": {"command":"node eval/selftest/check.mjs (NODE_OPTIONS=--max-old-space-size=512)","cases":314,"pass":304,"fail":10,"exit":1,"newBatch4Cases":207,"unchangedOlderCases":107,"failureReason":"Only the ten strict batch-3 ticket #N cases described in findings.","log":"test-results/batch4-final-selftest.log"},
+    "fullSuite": {"command":"systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% pnpm test","tests":228,"pass":228,"fail":0,"skip":0,"exit":0,"newSkillTests":6,"log":"test-results/batch4-full-suite.log","tap":"test-results/2026-11-14T17-05-44-392Z-3291642.tap"},
+    "plants":{"attempted":7,"caught":7,"selftestPlants":5,"skillTextPlants":2,"rule":"A pristine case passes first. Each mutated copy then triggers the corresponding assertion; an import/subprocess failure does not count as a report-count plant."},
+    "typecheck":{"command":"pnpm check","exit":0,"log":"test-results/batch4-typecheck.log"},
+    "memod":{"command":"node_modules/.bin/memod lint","exit":0,"log":"test-results/batch4-memod.log"},
+    "savedReport":{"command":"node eval/score.mjs | diff - eval/score.txt","exit":0,"outputBytes":0,"log":"test-results/batch4-score-diff.log"},
+    "readme":{"command":"node scripts/readme-check.mjs","exit":0,"result":"14 commands, 0 drifted","log":"test-results/batch4-readme.log"}
+  },
+  "evidenceLocation":"test-results/batch4-*.log plus retained batch4-selftest-* fixtures and full-suite TAP/scratch. Scratch is never deleted."
+}
