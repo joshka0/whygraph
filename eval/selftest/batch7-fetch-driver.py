@@ -24,9 +24,13 @@ urllib.request.urlopen = local_open
 # Rate waits are observed as durations rather than wall-clock deadlines.
 import time
 
+virtual_clock = [time.time()]
+time.time = lambda: virtual_clock[0]
+
 def record_sleep(seconds):
     with open(log, 'a') as out:
         out.write(json.dumps({'sleep': seconds}) + '\n')
+    virtual_clock[0] += seconds
 
 time.sleep = record_sleep
 sys.argv = [script, *args]
