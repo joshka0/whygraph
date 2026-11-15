@@ -21,6 +21,7 @@ function collect(p,input=Buffer.alloc(0),onData){
 }
 async function wire(path,payload){return new Promise((ok,fail)=>{const chunks=[],s=createConnection(path);s.on('connect',()=>s.write(payload));s.on('data',b=>chunks.push(b));s.on('error',e=>{if(e.code!=='ECONNRESET')fail(e);});s.on('close',()=>ok(Buffer.concat(chunks)));});}
 function decode(bytes){let at=0,stdout=[],stderr=[],status;while(at+8<=bytes.length){const type=bytes.readUInt32BE(at),n=bytes.readUInt32BE(at+4),b=bytes.subarray(at+8,at+8+n);assert.equal(b.length,n);if(type===1)stdout.push(b);if(type===2)stderr.push(b);if(type===3)status=b.readUInt32BE();at+=8+n;}assert.equal(at,bytes.length);return {status,stdout:Buffer.concat(stdout),stderr:Buffer.concat(stderr)};}
+function procText(pid,file){try{return readFileSync(`/proc/${pid}/${file}`,'utf8');}catch(e){if(e.code==='ENOENT')return null;throw e;}}
 function live(pid){try{return readFileSync(`/proc/${pid}/stat`,'utf8').split(') ')[1][0]!=='Z';}catch(e){if(e.code==='ENOENT')return false;throw e;}}
 function ownedPids(token){return readdirSync('/proc').filter(n=>/^\d+$/.test(n)).filter(n=>{try{const args=readFileSync(`/proc/${n}/cmdline`).toString().split('\0');return args.includes('/repo/'+token+'.js')||args[0]==='/bin/bash'&&args.some(a=>a.includes(token));}catch{return false;}}).map(Number);}
 /** Host shell contracts through the generated script and live confinement.
@@ -75,7 +76,7 @@ export async function batch7HostChecks({scratch,shared}){
   const command=`/usr/bin/node /repo/${token}.js & /usr/bin/setsid /usr/bin/node /repo/${token}.js & exec 1>&- 2>&-; wait`;
   const c=f.start(command,{input:null});await ready(c,'CHILD_READY\nCHILD_READY\n');const pids=ownedPids(token);assert.ok(pids.length>=2,'both children started');
   try{if(mode==='disconnect'){c.p.kill('SIGKILL');await c.done;await f.launcher.stop();}else if(mode==='runner'){f.owner.kill('SIGKILL');await f.ownerDone.done;await c.done;}else{if(mode==='timeout')f.launcher.cancel();await f.launcher.stop();await c.done;}
-   h.write(join(f.r.at,'lifetime-'+mode+'.json'),pids.map(pid=>({pid,live:live(pid),cmdline:existsSync('/proc/'+pid+'/cmdline')?readFileSync('/proc/'+pid+'/cmdline').toString():null})));for(const pid of pids)assert.equal(live(pid),false,`child ${pid} must terminate before ${mode} returns`);
+   h.write(join(f.r.at,'lifetime-'+mode+'.json'),pids.map(pid=>({pid,live:live(pid),cmdline:procText(pid,'cmdline'),stat:procText(pid,'stat')})));for(const pid of pids)assert.equal(live(pid),false,`child ${pid} must terminate before ${mode} returns`);
    h.write(join(f.repo,'release-'+token),'release');assert.equal(existsSync(join(f.repo,'late-'+token)),false,'no later write');
   }finally{for(const pid of pids)if(live(pid))try{process.kill(pid,'SIGKILL');}catch(e){if(e.code!=='ESRCH')throw e;}if(c.p.exitCode===null&&c.p.signalCode===null)c.p.kill('SIGKILL');}
  }
