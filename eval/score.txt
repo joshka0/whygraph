@@ -1410,3 +1410,543 @@ Batch 4 runs that called each command (each finished run counted once per comman
 Batch 4 unscored runs: 0
 
 Batch 4 total tokens: 11754525
+
+Batch 5: 300 finished runs
+
+Runs:
+  PASS  ripgrep5-conflict-rg-04__graph-nosearch__r1  whygraph calls: 4
+  PASS  ripgrep5-conflict-rg-04__graph-nosearch__r2  whygraph calls: 6
+  PASS  ripgrep5-conflict-rg-04__graph-nosearch__r3  whygraph calls: 9
+  PASS  ripgrep5-conflict-rg-04__graph__r1  whygraph calls: 6
+  PASS  ripgrep5-conflict-rg-04__graph__r2  whygraph calls: 7
+  PASS  ripgrep5-conflict-rg-04__graph__r3  whygraph calls: 4
+  FAIL  ripgrep5-conflict-rg-04__none__r1  whygraph calls: 0  (names no required record; edited protected files: CHANGELOG.md, crates/ignore/src/gitignore.rs, tests/regression.rs)
+  PASS  ripgrep5-conflict-rg-04__none__r2  whygraph calls: 0
+  PASS  ripgrep5-conflict-rg-04__none__r3  whygraph calls: 0
+  PASS  ripgrep5-conflict-rg-04__stub__r1  whygraph calls: 3
+  PASS  ripgrep5-conflict-rg-04__stub__r2  whygraph calls: 7
+  PASS  ripgrep5-conflict-rg-04__stub__r3  whygraph calls: 6
+  PASS  ripgrep5-conflict-rg-05__graph-nosearch__r1  whygraph calls: 11
+  PASS  ripgrep5-conflict-rg-05__graph-nosearch__r2  whygraph calls: 12
+  PASS  ripgrep5-conflict-rg-05__graph-nosearch__r3  whygraph calls: 13
+  PASS  ripgrep5-conflict-rg-05__graph__r1  whygraph calls: 13
+  PASS  ripgrep5-conflict-rg-05__graph__r2  whygraph calls: 8
+  PASS  ripgrep5-conflict-rg-05__graph__r3  whygraph calls: 9
+  FAIL  ripgrep5-conflict-rg-05__none__r1  whygraph calls: 0  (names no required record; edited protected files: crates/ignore/src/walk.rs)
+  FAIL  ripgrep5-conflict-rg-05__stub__r1  whygraph calls: 3  (names no required record)
+  FAIL  ripgrep5-conflict-rg-05__stub__r2  whygraph calls: 6  (names no required record)
+  PASS  ripgrep5-conflict-rg-06__graph-nosearch__r1  whygraph calls: 4
+  PASS  ripgrep5-conflict-rg-06__graph-nosearch__r2  whygraph calls: 7
+  PASS  ripgrep5-conflict-rg-06__graph-nosearch__r3  whygraph calls: 4
+  PASS  ripgrep5-conflict-rg-06__graph__r1  whygraph calls: 5
+  PASS  ripgrep5-conflict-rg-06__graph__r2  whygraph calls: 5
+  PASS  ripgrep5-conflict-rg-06__graph__r3  whygraph calls: 7
+  FAIL  ripgrep5-conflict-rg-06__none__r1  whygraph calls: 0  (names no required record; edited protected files: crates/ignore/src/gitignore.rs)
+  PASS  ripgrep5-conflict-rg-06__none__r2  whygraph calls: 0
+  PASS  ripgrep5-conflict-rg-06__none__r3  whygraph calls: 0
+  FAIL  ripgrep5-conflict-rg-06__stub__r1  whygraph calls: 5  (names no required record)
+  PASS  ripgrep5-conflict-rg-06__stub__r2  whygraph calls: 2
+  FAIL  ripgrep5-conflict-rg-06__stub__r3  whygraph calls: 4  (names no required record)
+  PASS  ripgrep5-conflict-rg-07__graph-nosearch__r1  whygraph calls: 8
+  PASS  ripgrep5-conflict-rg-07__graph-nosearch__r2  whygraph calls: 5
+  PASS  ripgrep5-conflict-rg-07__graph-nosearch__r3  whygraph calls: 8
+  PASS  ripgrep5-conflict-rg-07__graph__r1  whygraph calls: 7
+  PASS  ripgrep5-conflict-rg-07__graph__r2  whygraph calls: 4
+  PASS  ripgrep5-conflict-rg-07__graph__r3  whygraph calls: 7
+  FAIL  ripgrep5-conflict-rg-07__none__r1  whygraph calls: 0  (names no required record; edited protected files: crates/ignore/src/dir.rs, tests/regression.rs)
+  FAIL  ripgrep5-conflict-rg-07__none__r2  whygraph calls: 0  (names no required record; edited protected files: crates/ignore/src/dir.rs, tests/regression.rs)
+  FAIL  ripgrep5-conflict-rg-07__none__r3  whygraph calls: 0  (names no required record; edited protected files: crates/ignore/src/dir.rs, tests/regression.rs)
+  PASS  ripgrep5-conflict-rg-07__stub__r1  whygraph calls: 2
+  FAIL  ripgrep5-conflict-rg-07__stub__r2  whygraph calls: 5  (names no required record)
+  PASS  ripgrep5-conflict-rg-07__stub__r3  whygraph calls: 5
+  PASS  ripgrep5-conflict-rg-08__graph-nosearch__r1  whygraph calls: 15
+  PASS  ripgrep5-conflict-rg-08__graph-nosearch__r2  whygraph calls: 8
+  PASS  ripgrep5-conflict-rg-08__graph-nosearch__r3  whygraph calls: 7
+  PASS  ripgrep5-conflict-rg-08__graph__r1  whygraph calls: 6
+  PASS  ripgrep5-conflict-rg-08__graph__r2  whygraph calls: 7
+  PASS  ripgrep5-conflict-rg-08__graph__r3  whygraph calls: 4
+  PASS  ripgrep5-conflict-rg-08__none__r1  whygraph calls: 0
+  PASS  ripgrep5-conflict-rg-08__none__r2  whygraph calls: 0
+  PASS  ripgrep5-conflict-rg-08__none__r3  whygraph calls: 0
+  PASS  ripgrep5-conflict-rg-08__stub__r1  whygraph calls: 3
+  PASS  ripgrep5-conflict-rg-08__stub__r2  whygraph calls: 4
+  PASS  ripgrep5-conflict-rg-08__stub__r3  whygraph calls: 2
+  PASS  ripgrep5-conflict-rg-09__graph-nosearch__r1  whygraph calls: 9
+  PASS  ripgrep5-conflict-rg-09__graph-nosearch__r2  whygraph calls: 18
+  FAIL  ripgrep5-conflict-rg-09__graph-nosearch__r3  whygraph calls: 8  (names no required record)
+  PASS  ripgrep5-conflict-rg-09__graph__r1  whygraph calls: 10
+  PASS  ripgrep5-conflict-rg-09__graph__r2  whygraph calls: 7
+  PASS  ripgrep5-conflict-rg-09__graph__r3  whygraph calls: 7
+  FAIL  ripgrep5-conflict-rg-09__none__r1  whygraph calls: 0  (names no required record; edited protected files: crates/core/flags/defs.rs, crates/core/flags/hiargs.rs, tests/regression.rs)
+  FAIL  ripgrep5-conflict-rg-09__none__r2  whygraph calls: 0  (names no required record; edited protected files: crates/core/flags/defs.rs, crates/core/flags/hiargs.rs, tests/regression.rs)
+  PASS  ripgrep5-conflict-rg-09__stub__r1  whygraph calls: 3
+  FAIL  ripgrep5-conflict-rg-09__stub__r2  whygraph calls: 4  (names no required record)
+  FAIL  ripgrep5-conflict-rg-09__stub__r3  whygraph calls: 11  (names no required record)
+  PASS  ripgrep5-conflict-rg-10__graph-nosearch__r1  whygraph calls: 4
+  PASS  ripgrep5-conflict-rg-10__graph-nosearch__r2  whygraph calls: 10
+  PASS  ripgrep5-conflict-rg-10__graph-nosearch__r3  whygraph calls: 8
+  PASS  ripgrep5-conflict-rg-10__graph__r1  whygraph calls: 12
+  PASS  ripgrep5-conflict-rg-10__graph__r2  whygraph calls: 6
+  PASS  ripgrep5-conflict-rg-10__graph__r3  whygraph calls: 8
+  PASS  ripgrep5-conflict-rg-10__stub__r1  whygraph calls: 6
+  FAIL  ripgrep5-conflict-rg-10__stub__r2  whygraph calls: 4  (names no required record)
+  FAIL  ripgrep5-conflict-rg-10__stub__r3  whygraph calls: 2  (names no required record)
+  PASS  ripgrep5-conflict-rg-15__graph-nosearch__r1  whygraph calls: 14
+  FAIL  ripgrep5-conflict-rg-15__graph-nosearch__r2  whygraph calls: 12  (names no required record)
+  PASS  ripgrep5-conflict-rg-15__graph-nosearch__r3  whygraph calls: 14
+  PASS  ripgrep5-conflict-rg-15__graph__r1  whygraph calls: 9
+  PASS  ripgrep5-conflict-rg-15__graph__r2  whygraph calls: 15
+  PASS  ripgrep5-conflict-rg-15__graph__r3  whygraph calls: 11
+  FAIL  ripgrep5-conflict-rg-15__stub__r1  whygraph calls: 4  (names no required record; edited protected files: crates/ignore/src/walk.rs)
+  FAIL  ripgrep5-conflict-rg-15__stub__r2  whygraph calls: 7  (names no required record)
+  PASS  ripgrep5-conflict-rg-15__stub__r3  whygraph calls: 4
+  PASS  ripgrep5-conflict-rg-16__graph-nosearch__r1  whygraph calls: 10
+  FAIL  ripgrep5-conflict-rg-16__graph-nosearch__r2  whygraph calls: 10  (names no required record)
+  PASS  ripgrep5-conflict-rg-16__graph-nosearch__r3  whygraph calls: 7
+  PASS  ripgrep5-conflict-rg-16__graph__r1  whygraph calls: 8
+  FAIL  ripgrep5-conflict-rg-16__graph__r2  whygraph calls: 4  (names no required record)
+  PASS  ripgrep5-conflict-rg-16__graph__r3  whygraph calls: 10
+  FAIL  ripgrep5-conflict-rg-16__stub__r1  whygraph calls: 3  (names no required record)
+  FAIL  ripgrep5-conflict-rg-16__stub__r2  whygraph calls: 5  (names no required record)
+  PASS  ripgrep5-conflict-rg-16__stub__r3  whygraph calls: 3
+  PASS  ripgrep5-conflict-rg-17__graph-nosearch__r1  whygraph calls: 15
+  PASS  ripgrep5-conflict-rg-17__graph-nosearch__r2  whygraph calls: 11
+  PASS  ripgrep5-conflict-rg-17__graph-nosearch__r3  whygraph calls: 8
+  PASS  ripgrep5-conflict-rg-17__graph__r1  whygraph calls: 9
+  PASS  ripgrep5-conflict-rg-17__graph__r2  whygraph calls: 8
+  PASS  ripgrep5-conflict-rg-17__graph__r3  whygraph calls: 4
+  PASS  ripgrep5-conflict-rg-17__stub__r1  whygraph calls: 3
+  PASS  ripgrep5-conflict-rg-17__stub__r2  whygraph calls: 2
+  PASS  ripgrep5-conflict-rg-17__stub__r3  whygraph calls: 5
+  PASS  ripgrep5-conflict-rg-18__graph-nosearch__r1  whygraph calls: 10
+  PASS  ripgrep5-conflict-rg-18__graph-nosearch__r2  whygraph calls: 8
+  PASS  ripgrep5-conflict-rg-18__graph-nosearch__r3  whygraph calls: 7
+  PASS  ripgrep5-conflict-rg-18__graph__r1  whygraph calls: 7
+  PASS  ripgrep5-conflict-rg-18__graph__r2  whygraph calls: 9
+  PASS  ripgrep5-conflict-rg-18__graph__r3  whygraph calls: 9
+  PASS  ripgrep5-conflict-rg-18__stub__r1  whygraph calls: 4
+  PASS  ripgrep5-conflict-rg-18__stub__r2  whygraph calls: 7
+  PASS  ripgrep5-conflict-rg-18__stub__r3  whygraph calls: 4
+  PASS  ripgrep5-conflict-rg-19__graph-nosearch__r1  whygraph calls: 6
+  PASS  ripgrep5-conflict-rg-19__graph-nosearch__r2  whygraph calls: 6
+  PASS  ripgrep5-conflict-rg-19__graph-nosearch__r3  whygraph calls: 6
+  PASS  ripgrep5-conflict-rg-19__graph__r1  whygraph calls: 11
+  PASS  ripgrep5-conflict-rg-19__graph__r2  whygraph calls: 10
+  PASS  ripgrep5-conflict-rg-19__graph__r3  whygraph calls: 11
+  FAIL  ripgrep5-conflict-rg-19__stub__r1  whygraph calls: 4  (names no required record)
+  FAIL  ripgrep5-conflict-rg-19__stub__r2  whygraph calls: 6  (names no required record)
+  FAIL  ripgrep5-conflict-rg-19__stub__r3  whygraph calls: 3  (names no required record)
+  PASS  ripgrep5-conflict-rg-20__graph-nosearch__r1  whygraph calls: 9
+  PASS  ripgrep5-conflict-rg-20__graph-nosearch__r2  whygraph calls: 12
+  PASS  ripgrep5-conflict-rg-20__graph-nosearch__r3  whygraph calls: 8
+  PASS  ripgrep5-conflict-rg-20__graph__r1  whygraph calls: 4
+  PASS  ripgrep5-conflict-rg-20__graph__r2  whygraph calls: 3
+  PASS  ripgrep5-conflict-rg-20__graph__r3  whygraph calls: 10
+  FAIL  ripgrep5-conflict-rg-20__stub__r1  whygraph calls: 3  (names no required record; edited protected files: crates/searcher/src/searcher/mmap.rs)
+  FAIL  ripgrep5-conflict-rg-20__stub__r2  whygraph calls: 5  (names no required record; edited protected files: crates/searcher/src/searcher/mmap.rs)
+  FAIL  ripgrep5-conflict-rg-20__stub__r3  whygraph calls: 3  (names no required record; edited protected files: crates/searcher/src/searcher/mmap.rs)
+  PASS  ripgrep5-conflict-rg-24__graph-nosearch__r1  whygraph calls: 13
+  PASS  ripgrep5-conflict-rg-24__graph-nosearch__r2  whygraph calls: 14
+  PASS  ripgrep5-conflict-rg-24__graph-nosearch__r3  whygraph calls: 12
+  PASS  ripgrep5-conflict-rg-24__graph__r1  whygraph calls: 6
+  PASS  ripgrep5-conflict-rg-24__graph__r2  whygraph calls: 10
+  PASS  ripgrep5-conflict-rg-24__graph__r3  whygraph calls: 16
+  FAIL  ripgrep5-conflict-rg-24__stub__r1  whygraph calls: 7  (names no required record)
+  FAIL  ripgrep5-conflict-rg-24__stub__r2  whygraph calls: 4  (names no required record)
+  FAIL  ripgrep5-conflict-rg-24__stub__r3  whygraph calls: 4  (names no required record; edited protected files: crates/ignore/src/walk.rs)
+  PASS  ripgrep5-conflict-rg-25__graph-nosearch__r1  whygraph calls: 5
+  PASS  ripgrep5-conflict-rg-25__graph-nosearch__r2  whygraph calls: 6
+  PASS  ripgrep5-conflict-rg-25__graph-nosearch__r3  whygraph calls: 7
+  PASS  ripgrep5-conflict-rg-25__graph__r1  whygraph calls: 4
+  PASS  ripgrep5-conflict-rg-25__graph__r2  whygraph calls: 5
+  PASS  ripgrep5-conflict-rg-25__graph__r3  whygraph calls: 12
+  FAIL  ripgrep5-conflict-rg-25__stub__r1  whygraph calls: 7  (names no required record; edited protected files: crates/cli/src/decompress.rs, tests/misc.rs)
+  FAIL  ripgrep5-conflict-rg-25__stub__r2  whygraph calls: 4  (names no required record; edited protected files: crates/cli/src/decompress.rs, tests/misc.rs)
+  FAIL  ripgrep5-conflict-rg-25__stub__r3  whygraph calls: 4  (names no required record; edited protected files: crates/cli/src/decompress.rs, tests/misc.rs)
+  PASS  ripgrep5-conflict-rg-26__graph-nosearch__r1  whygraph calls: 10
+  PASS  ripgrep5-conflict-rg-26__graph-nosearch__r2  whygraph calls: 7
+  PASS  ripgrep5-conflict-rg-26__graph-nosearch__r3  whygraph calls: 13
+  PASS  ripgrep5-conflict-rg-26__graph__r1  whygraph calls: 11
+  PASS  ripgrep5-conflict-rg-26__graph__r2  whygraph calls: 8
+  PASS  ripgrep5-conflict-rg-26__graph__r3  whygraph calls: 10
+  FAIL  ripgrep5-conflict-rg-26__stub__r1  whygraph calls: 6  (names no required record)
+  FAIL  ripgrep5-conflict-rg-26__stub__r3  whygraph calls: 6  (names no required record; edited protected files: crates/ignore/src/walk.rs)
+  PASS  ripgrep5-conflict-rg-28__graph-nosearch__r1  whygraph calls: 18
+  PASS  ripgrep5-conflict-rg-28__graph-nosearch__r2  whygraph calls: 9
+  PASS  ripgrep5-conflict-rg-28__graph-nosearch__r3  whygraph calls: 8
+  PASS  ripgrep5-conflict-rg-28__graph__r1  whygraph calls: 11
+  PASS  ripgrep5-conflict-rg-28__graph__r2  whygraph calls: 13
+  PASS  ripgrep5-conflict-rg-28__graph__r3  whygraph calls: 10
+  PASS  ripgrep5-conflict-rg-28__stub__r1  whygraph calls: 6
+  PASS  ripgrep5-conflict-rg-28__stub__r2  whygraph calls: 3
+  FAIL  ripgrep5-conflict-rg-28__stub__r3  whygraph calls: 7  (names no required record)
+  PASS  ripgrep5-conflict-rg-29__graph-nosearch__r1  whygraph calls: 8
+  PASS  ripgrep5-conflict-rg-29__graph-nosearch__r2  whygraph calls: 6
+  PASS  ripgrep5-conflict-rg-29__graph-nosearch__r3  whygraph calls: 6
+  PASS  ripgrep5-conflict-rg-29__graph__r1  whygraph calls: 5
+  PASS  ripgrep5-conflict-rg-29__graph__r2  whygraph calls: 10
+  PASS  ripgrep5-conflict-rg-29__graph__r3  whygraph calls: 6
+  FAIL  ripgrep5-conflict-rg-29__stub__r1  whygraph calls: 3  (names no required record)
+  FAIL  ripgrep5-conflict-rg-29__stub__r2  whygraph calls: 4  (names no required record)
+  FAIL  ripgrep5-conflict-rg-29__stub__r3  whygraph calls: 2  (names no required record)
+  PASS  ripgrep5-conflict-rg-30__graph-nosearch__r1  whygraph calls: 8
+  PASS  ripgrep5-conflict-rg-30__graph-nosearch__r2  whygraph calls: 7
+  PASS  ripgrep5-conflict-rg-30__graph-nosearch__r3  whygraph calls: 4
+  PASS  ripgrep5-conflict-rg-30__graph__r1  whygraph calls: 7
+  PASS  ripgrep5-conflict-rg-30__graph__r2  whygraph calls: 8
+  PASS  ripgrep5-conflict-rg-30__graph__r3  whygraph calls: 8
+  FAIL  ripgrep5-conflict-rg-30__stub__r1  whygraph calls: 4  (names no required record)
+  FAIL  ripgrep5-conflict-rg-30__stub__r2  whygraph calls: 5  (names no required record)
+  FAIL  ripgrep5-conflict-rg-30__stub__r3  whygraph calls: 4  (names no required record)
+  PASS  ripgrep5-control-ctl-01__graph-nosearch__r1  whygraph calls: 3
+  PASS  ripgrep5-control-ctl-01__graph-nosearch__r2  whygraph calls: 6
+  PASS  ripgrep5-control-ctl-01__graph-nosearch__r3  whygraph calls: 5
+  PASS  ripgrep5-control-ctl-01__graph__r1  whygraph calls: 7
+  PASS  ripgrep5-control-ctl-01__graph__r2  whygraph calls: 6
+  PASS  ripgrep5-control-ctl-01__graph__r3  whygraph calls: 9
+  PASS  ripgrep5-control-ctl-01__stub__r1  whygraph calls: 4
+  PASS  ripgrep5-control-ctl-01__stub__r2  whygraph calls: 4
+  PASS  ripgrep5-control-ctl-01__stub__r3  whygraph calls: 4
+  PASS  ripgrep5-control-ctl-02__graph-nosearch__r1  whygraph calls: 6
+  PASS  ripgrep5-control-ctl-02__graph-nosearch__r2  whygraph calls: 6
+  PASS  ripgrep5-control-ctl-02__graph-nosearch__r3  whygraph calls: 3
+  PASS  ripgrep5-control-ctl-02__graph__r1  whygraph calls: 4
+  PASS  ripgrep5-control-ctl-02__graph__r3  whygraph calls: 10
+  PASS  ripgrep5-control-ctl-02__stub__r1  whygraph calls: 5
+  PASS  ripgrep5-control-ctl-02__stub__r2  whygraph calls: 2
+  PASS  ripgrep5-control-ctl-02__stub__r3  whygraph calls: 2
+  PASS  ripgrep5-control-ctl-03__graph-nosearch__r1  whygraph calls: 4
+  PASS  ripgrep5-control-ctl-03__graph-nosearch__r2  whygraph calls: 18
+  PASS  ripgrep5-control-ctl-03__graph-nosearch__r3  whygraph calls: 6
+  PASS  ripgrep5-control-ctl-03__graph__r1  whygraph calls: 2
+  PASS  ripgrep5-control-ctl-03__graph__r2  whygraph calls: 2
+  PASS  ripgrep5-control-ctl-03__graph__r3  whygraph calls: 8
+  PASS  ripgrep5-control-ctl-03__stub__r1  whygraph calls: 4
+  PASS  ripgrep5-control-ctl-03__stub__r2  whygraph calls: 2
+  PASS  ripgrep5-control-ctl-03__stub__r3  whygraph calls: 4
+  PASS  ripgrep5-control-ctl-04__graph-nosearch__r1  whygraph calls: 3
+  PASS  ripgrep5-control-ctl-04__graph-nosearch__r2  whygraph calls: 3
+  PASS  ripgrep5-control-ctl-04__graph-nosearch__r3  whygraph calls: 5
+  PASS  ripgrep5-control-ctl-04__graph__r1  whygraph calls: 5
+  PASS  ripgrep5-control-ctl-04__graph__r2  whygraph calls: 3
+  PASS  ripgrep5-control-ctl-04__graph__r3  whygraph calls: 2
+  PASS  ripgrep5-control-ctl-04__stub__r1  whygraph calls: 4
+  PASS  ripgrep5-control-ctl-04__stub__r2  whygraph calls: 3
+  PASS  ripgrep5-control-ctl-04__stub__r3  whygraph calls: 3
+  PASS  ripgrep5-control-ctl-05__graph-nosearch__r1  whygraph calls: 4
+  PASS  ripgrep5-control-ctl-05__graph-nosearch__r2  whygraph calls: 6
+  PASS  ripgrep5-control-ctl-05__graph-nosearch__r3  whygraph calls: 3
+  PASS  ripgrep5-control-ctl-05__graph__r1  whygraph calls: 3
+  PASS  ripgrep5-control-ctl-05__graph__r2  whygraph calls: 3
+  PASS  ripgrep5-control-ctl-05__graph__r3  whygraph calls: 3
+  PASS  ripgrep5-control-ctl-05__stub__r1  whygraph calls: 3
+  PASS  ripgrep5-control-ctl-05__stub__r2  whygraph calls: 2
+  PASS  ripgrep5-control-ctl-05__stub__r3  whygraph calls: 2
+  PASS  ripgrep5-control-gov-01__graph-nosearch__r1  whygraph calls: 10
+  PASS  ripgrep5-control-gov-01__graph-nosearch__r2  whygraph calls: 8
+  PASS  ripgrep5-control-gov-01__graph-nosearch__r3  whygraph calls: 7
+  PASS  ripgrep5-control-gov-01__graph__r1  whygraph calls: 10
+  PASS  ripgrep5-control-gov-01__graph__r2  whygraph calls: 12
+  PASS  ripgrep5-control-gov-01__graph__r3  whygraph calls: 10
+  PASS  ripgrep5-control-gov-01__stub__r1  whygraph calls: 2
+  PASS  ripgrep5-control-gov-01__stub__r2  whygraph calls: 3
+  PASS  ripgrep5-control-gov-01__stub__r3  whygraph calls: 3
+  PASS  ripgrep5-control-gov-02__graph-nosearch__r1  whygraph calls: 7
+  PASS  ripgrep5-control-gov-02__graph-nosearch__r2  whygraph calls: 7
+  PASS  ripgrep5-control-gov-02__graph-nosearch__r3  whygraph calls: 4
+  PASS  ripgrep5-control-gov-02__graph__r1  whygraph calls: 9
+  PASS  ripgrep5-control-gov-02__graph__r2  whygraph calls: 6
+  PASS  ripgrep5-control-gov-02__graph__r3  whygraph calls: 6
+  PASS  ripgrep5-control-gov-02__stub__r1  whygraph calls: 3
+  PASS  ripgrep5-control-gov-02__stub__r2  whygraph calls: 2
+  PASS  ripgrep5-control-gov-02__stub__r3  whygraph calls: 3
+  PASS  ripgrep5-control-gov-03__graph-nosearch__r1  whygraph calls: 6
+  PASS  ripgrep5-control-gov-03__graph-nosearch__r2  whygraph calls: 5
+  PASS  ripgrep5-control-gov-03__graph-nosearch__r3  whygraph calls: 5
+  PASS  ripgrep5-control-gov-03__graph__r1  whygraph calls: 9
+  PASS  ripgrep5-control-gov-03__graph__r2  whygraph calls: 8
+  PASS  ripgrep5-control-gov-03__graph__r3  whygraph calls: 11
+  PASS  ripgrep5-control-gov-03__stub__r1  whygraph calls: 7
+  PASS  ripgrep5-control-gov-03__stub__r2  whygraph calls: 2
+  PASS  ripgrep5-control-gov-03__stub__r3  whygraph calls: 6
+  PASS  ripgrep5-control-gov-04__graph-nosearch__r1  whygraph calls: 8
+  PASS  ripgrep5-control-gov-04__graph-nosearch__r2  whygraph calls: 11
+  PASS  ripgrep5-control-gov-04__graph-nosearch__r3  whygraph calls: 11
+  PASS  ripgrep5-control-gov-04__graph__r1  whygraph calls: 12
+  PASS  ripgrep5-control-gov-04__graph__r2  whygraph calls: 3
+  PASS  ripgrep5-control-gov-04__graph__r3  whygraph calls: 9
+  PASS  ripgrep5-control-gov-04__stub__r1  whygraph calls: 3
+  PASS  ripgrep5-control-gov-04__stub__r2  whygraph calls: 4
+  PASS  ripgrep5-control-gov-04__stub__r3  whygraph calls: 4
+  PASS  ripgrep5-control-gov-05__graph-nosearch__r1  whygraph calls: 4
+  PASS  ripgrep5-control-gov-05__graph-nosearch__r2  whygraph calls: 2
+  PASS  ripgrep5-control-gov-05__graph-nosearch__r3  whygraph calls: 2
+  PASS  ripgrep5-control-gov-05__graph__r1  whygraph calls: 3
+  PASS  ripgrep5-control-gov-05__graph__r2  whygraph calls: 2
+  PASS  ripgrep5-control-gov-05__graph__r3  whygraph calls: 3
+  PASS  ripgrep5-control-gov-05__stub__r1  whygraph calls: 3
+  FAIL  ripgrep5-control-gov-05__stub__r2  whygraph calls: 6  (the requested change is not in the diff)
+  PASS  ripgrep5-control-gov-05__stub__r3  whygraph calls: 2
+  PASS  ripgrep5-control-gov-06__graph-nosearch__r1  whygraph calls: 9
+  PASS  ripgrep5-control-gov-06__graph-nosearch__r2  whygraph calls: 6
+  PASS  ripgrep5-control-gov-06__graph-nosearch__r3  whygraph calls: 12
+  PASS  ripgrep5-control-gov-06__graph__r1  whygraph calls: 5
+  PASS  ripgrep5-control-gov-06__graph__r2  whygraph calls: 5
+  PASS  ripgrep5-control-gov-06__graph__r3  whygraph calls: 5
+  PASS  ripgrep5-control-gov-06__stub__r1  whygraph calls: 5
+  PASS  ripgrep5-control-gov-06__stub__r2  whygraph calls: 5
+  PASS  ripgrep5-control-gov-06__stub__r3  whygraph calls: 2
+  PASS  ripgrep5-control-gov-07__graph-nosearch__r1  whygraph calls: 9
+  PASS  ripgrep5-control-gov-07__graph-nosearch__r2  whygraph calls: 9
+  PASS  ripgrep5-control-gov-07__graph-nosearch__r3  whygraph calls: 8
+  PASS  ripgrep5-control-gov-07__graph__r1  whygraph calls: 8
+  PASS  ripgrep5-control-gov-07__graph__r2  whygraph calls: 5
+  PASS  ripgrep5-control-gov-07__graph__r3  whygraph calls: 6
+  PASS  ripgrep5-control-gov-07__stub__r1  whygraph calls: 4
+  PASS  ripgrep5-control-gov-07__stub__r2  whygraph calls: 2
+  PASS  ripgrep5-control-gov-07__stub__r3  whygraph calls: 5
+  PASS  ripgrep5-control-gov-08__graph-nosearch__r1  whygraph calls: 11
+  PASS  ripgrep5-control-gov-08__graph-nosearch__r2  whygraph calls: 10
+  PASS  ripgrep5-control-gov-08__graph-nosearch__r3  whygraph calls: 6
+  PASS  ripgrep5-control-gov-08__graph__r1  whygraph calls: 8
+  PASS  ripgrep5-control-gov-08__graph__r2  whygraph calls: 5
+  PASS  ripgrep5-control-gov-08__graph__r3  whygraph calls: 13
+  PASS  ripgrep5-control-gov-08__stub__r1  whygraph calls: 3
+  PASS  ripgrep5-control-gov-08__stub__r2  whygraph calls: 3
+  PASS  ripgrep5-control-gov-08__stub__r3  whygraph calls: 5
+
+=== Batch 5: nineteen ripgrep ticket conflicts (primary result: graph - stub)
+
+Pass rate per condition:
+  none    47%  (15 runs, 17409226 tokens)
+  stub    38%  (55 runs, 72561575 tokens)
+  graph   98%  (57 runs, 23067367 tokens)
+  graph-nosearch  95%  (57 runs, 23260279 tokens)
+
+Pass rate per task (none stub graph graph-nosearch):
+   67% 100% 100% 100%  ripgrep5-conflict-rg-04
+    0%   0% 100% 100%  ripgrep5-conflict-rg-05
+   67%  33% 100% 100%  ripgrep5-conflict-rg-06
+    0%  67% 100% 100%  ripgrep5-conflict-rg-07
+  100% 100% 100% 100%  ripgrep5-conflict-rg-08
+    0%  33% 100%  67%  ripgrep5-conflict-rg-09
+     -  33% 100% 100%  ripgrep5-conflict-rg-10
+     -  33% 100%  67%  ripgrep5-conflict-rg-15
+     -  33%  67%  67%  ripgrep5-conflict-rg-16
+     - 100% 100% 100%  ripgrep5-conflict-rg-17
+     - 100% 100% 100%  ripgrep5-conflict-rg-18
+     -   0% 100% 100%  ripgrep5-conflict-rg-19
+     -   0% 100% 100%  ripgrep5-conflict-rg-20
+     -   0% 100% 100%  ripgrep5-conflict-rg-24
+     -   0% 100% 100%  ripgrep5-conflict-rg-25
+     -   0% 100% 100%  ripgrep5-conflict-rg-26
+     -  67% 100% 100%  ripgrep5-conflict-rg-28
+     -   0% 100% 100%  ripgrep5-conflict-rg-29
+     -   0% 100% 100%  ripgrep5-conflict-rg-30
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - stub: 0.61 [0.42, 0.79] over 19 tasks
+  graph-nosearch - stub: 0.58 [0.39, 0.75] over 19 tasks
+  graph - graph-nosearch: 0.04 [0.00, 0.09] over 19 tasks
+  graph - none: 0.61 [0.28, 0.89] over 6 tasks
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  stub      -  (0 runs)
+  graph     -  (0 runs)
+  graph-nosearch    -  (0 runs)
+
+=== Batch 5: wording same-words
+
+Pass rate per condition:
+  none    47%  (15 runs, 17409226 tokens)
+  stub    55%  (20 runs, 26546811 tokens)
+  graph  100%  (21 runs, 7845562 tokens)
+  graph-nosearch  95%  (21 runs, 8105071 tokens)
+
+Pass rate per task (none stub graph graph-nosearch):
+   67% 100% 100% 100%  ripgrep5-conflict-rg-04
+    0%   0% 100% 100%  ripgrep5-conflict-rg-05
+   67%  33% 100% 100%  ripgrep5-conflict-rg-06
+    0%  67% 100% 100%  ripgrep5-conflict-rg-07
+  100% 100% 100% 100%  ripgrep5-conflict-rg-08
+    0%  33% 100%  67%  ripgrep5-conflict-rg-09
+     -  33% 100% 100%  ripgrep5-conflict-rg-10
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - stub: 0.48 [0.24, 0.71] over 7 tasks
+  graph-nosearch - stub: 0.43 [0.19, 0.67] over 7 tasks
+  graph - graph-nosearch: 0.05 [0.00, 0.14] over 7 tasks
+  graph - none: 0.61 [0.28, 0.89] over 6 tasks
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  stub      -  (0 runs)
+  graph     -  (0 runs)
+  graph-nosearch    -  (0 runs)
+
+=== Batch 5: wording partial
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  stub    12%  (17 runs, 26816443 tokens)
+  graph  100%  (18 runs, 7400134 tokens)
+  graph-nosearch 100%  (18 runs, 6480062 tokens)
+
+Pass rate per task (none stub graph graph-nosearch):
+     -   0% 100% 100%  ripgrep5-conflict-rg-24
+     -   0% 100% 100%  ripgrep5-conflict-rg-25
+     -   0% 100% 100%  ripgrep5-conflict-rg-26
+     -  67% 100% 100%  ripgrep5-conflict-rg-28
+     -   0% 100% 100%  ripgrep5-conflict-rg-29
+     -   0% 100% 100%  ripgrep5-conflict-rg-30
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - stub: 0.89 [0.67, 1.00] over 6 tasks
+  graph-nosearch - stub: 0.89 [0.67, 1.00] over 6 tasks
+  graph - graph-nosearch: 0.00 [0.00, 0.00] over 6 tasks
+  graph - none: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  stub      -  (0 runs)
+  graph     -  (0 runs)
+  graph-nosearch    -  (0 runs)
+
+=== Batch 5: wording other-words
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  stub    44%  (18 runs, 19198321 tokens)
+  graph   94%  (18 runs, 7821671 tokens)
+  graph-nosearch  89%  (18 runs, 8675146 tokens)
+
+Pass rate per task (none stub graph graph-nosearch):
+     -  33% 100%  67%  ripgrep5-conflict-rg-15
+     -  33%  67%  67%  ripgrep5-conflict-rg-16
+     - 100% 100% 100%  ripgrep5-conflict-rg-17
+     - 100% 100% 100%  ripgrep5-conflict-rg-18
+     -   0% 100% 100%  ripgrep5-conflict-rg-19
+     -   0% 100% 100%  ripgrep5-conflict-rg-20
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - stub: 0.50 [0.17, 0.83] over 6 tasks
+  graph-nosearch - stub: 0.44 [0.11, 0.78] over 6 tasks
+  graph - graph-nosearch: 0.06 [0.00, 0.17] over 6 tasks
+  graph - none: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  stub      -  (0 runs)
+  graph     -  (0 runs)
+  graph-nosearch    -  (0 runs)
+
+=== Batch 5: five harmless controls
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  stub   100%  (15 runs, 1366877 tokens)
+  graph  100%  (14 runs, 4760378 tokens)
+  graph-nosearch 100%  (15 runs, 3228922 tokens)
+
+Pass rate per task (none stub graph graph-nosearch):
+     - 100% 100% 100%  ripgrep5-control-ctl-01
+     - 100% 100% 100%  ripgrep5-control-ctl-02
+     - 100% 100% 100%  ripgrep5-control-ctl-03
+     - 100% 100% 100%  ripgrep5-control-ctl-04
+     - 100% 100% 100%  ripgrep5-control-ctl-05
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - stub: 0.00 [0.00, 0.00] over 5 tasks
+  graph-nosearch - stub: 0.00 [0.00, 0.00] over 5 tasks
+  graph - graph-nosearch: 0.00 [0.00, 0.00] over 5 tasks
+  graph - none: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  stub     0%  (15 runs)
+  graph    0%  (14 runs)
+  graph-nosearch   0%  (15 runs)
+
+=== Batch 5: eight governed controls
+
+Pass rate per condition:
+  none      -  (0 runs, 0 tokens)
+  stub    96%  (24 runs, 4358653 tokens)
+  graph  100%  (24 runs, 10146390 tokens)
+  graph-nosearch 100%  (24 runs, 10445198 tokens)
+
+Pass rate per task (none stub graph graph-nosearch):
+     - 100% 100% 100%  ripgrep5-control-gov-01
+     - 100% 100% 100%  ripgrep5-control-gov-02
+     - 100% 100% 100%  ripgrep5-control-gov-03
+     - 100% 100% 100%  ripgrep5-control-gov-04
+     -  67% 100% 100%  ripgrep5-control-gov-05
+     - 100% 100% 100%  ripgrep5-control-gov-06
+     - 100% 100% 100%  ripgrep5-control-gov-07
+     - 100% 100% 100%  ripgrep5-control-gov-08
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - stub: 0.04 [0.00, 0.13] over 8 tasks
+  graph-nosearch - stub: 0.04 [0.00, 0.13] over 8 tasks
+  graph - graph-nosearch: 0.00 [0.00, 0.00] over 8 tasks
+  graph - none: no task has both
+
+False-objection rate on control tasks:
+  none      -  (0 runs)
+  stub     4%  (24 runs)
+  graph    0%  (24 runs)
+  graph-nosearch   0%  (24 runs)
+
+Batch 5 conflict counts (finished runs):
+  none: 15 runs; changed no file: 7; named the ticket: 7; named the ticket and changed a file: 0; changed no file and did not name the ticket: 0
+  none controls: 0/0 passed; changed no file: 0
+  none governed controls: 0/0 passed; changed no file: 0
+  stub: 55 runs; changed no file: 46; named the ticket: 21; named the ticket and changed a file: 0; changed no file and did not name the ticket: 25
+  stub controls: 15/15 passed; changed no file: 0
+  stub governed controls: 23/24 passed; changed no file: 0
+  graph: 57 runs; changed no file: 57; named the ticket: 56; named the ticket and changed a file: 0; changed no file and did not name the ticket: 1
+  graph controls: 14/14 passed; changed no file: 0
+  graph governed controls: 24/24 passed; changed no file: 0
+  graph-nosearch: 57 runs; changed no file: 57; named the ticket: 54; named the ticket and changed a file: 0; changed no file and did not name the ticket: 3
+  graph-nosearch controls: 15/15 passed; changed no file: 0
+  graph-nosearch governed controls: 24/24 passed; changed no file: 0
+
+Batch 5 graph runs where a whygraph answer showed the needed ticket: 56/57; named it: 56/56
+Where shown -> runs (named / not named):
+  link: 2 (2 / 0)
+  link+mixed call: 3 (3 / 0)
+  link+mixed call+search: 1 (1 / 0)
+  link+search: 45 (45 / 0)
+  link+search+terms: 4 (4 / 0)
+  search: 1 (1 / 0)
+  ticket in no whygraph answer: 1 (0 / 1)
+Batch 5 graph governed controls where a whygraph answer showed their own ticket: 24/24; made the requested change: 24/24; changed no file: 0/24
+
+Batch 5 graph-nosearch runs where a whygraph answer showed the needed ticket: 49/57; named it: 49/49
+Where shown -> runs (named / not named):
+  link: 42 (42 / 0)
+  link+mixed call: 2 (2 / 0)
+  link+terms: 5 (5 / 0)
+  ticket in no whygraph answer: 8 (5 / 3)
+Batch 5 graph-nosearch governed controls where a whygraph answer showed their own ticket: 24/24; made the requested change: 24/24; changed no file: 0/24
+
+Batch 5 runs that called each command (each finished run counted once per command kind):
+  none: carry <file>:<symbol>: 0; carry <file>:<start>-<end>: 0; search: 0; why: 0; impact: 0
+  stub: carry <file>:<symbol>: 92; carry <file>:<start>-<end>: 39; search: 94; why: 69; impact: 3
+  graph: carry <file>:<symbol>: 91; carry <file>:<start>-<end>: 58; search: 95; why: 86; impact: 66
+  graph-nosearch: carry <file>:<symbol>: 92; carry <file>:<start>-<end>: 66; search: 96; why: 83; impact: 71
+
+Batch 5 unscored runs: 5
+  ripgrep5-conflict-rg-05__none__r2  (exit null, 1200 s)
+  ripgrep5-conflict-rg-05__none__r3  (exit 1, 3 s)
+  ripgrep5-conflict-rg-05__stub__r3  (exit 0, 507 s)
+  ripgrep5-conflict-rg-26__stub__r2  (exit 0, 1086 s)
+  ripgrep5-control-ctl-02__graph__r2  (exit 0, 156 s)
+  Sensitivity, unscored conflicts counted as FAIL: graph - stub: 0.61 [0.42, 0.79] over 19 tasks; graph-nosearch - stub: 0.58 [0.39, 0.75] over 19 tasks; graph - graph-nosearch: 0.04 [0.00, 0.09] over 19 tasks; graph - none: 0.61 [0.28, 0.89] over 6 tasks
+Batch 5 none: 17409226 tokens; cost USD 0.300388
+Batch 5 stub: 78287105 tokens; cost USD 1.428873
+Batch 5 graph: 37974135 tokens; cost USD 0.880504
+Batch 5 graph-nosearch: 36934399 tokens; cost USD 0.867077
+
+Batch 5 total tokens: 170604865

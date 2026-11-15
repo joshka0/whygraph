@@ -989,3 +989,94 @@ outside a run folder; this does not certify future runs.
 [Batch 5 failure cases](tickets/batch5-failures.md) give exact outcomes for
 an independent test author. No tests under `eval/selftest/` or `test/`
 were authored or changed in this implementation.
+
+## Batch 5 results
+
+From `score.txt`. The agent is opencode 1.18.29 with
+`opencode-go/deepseek-v4.1-flash`; the runs are from 2026-11-14 and
+2026-11-15. The tasks, the conditions, the pass rules and every count below
+were fixed and committed before the first run. The run left the plan in two
+ways:
+
+- `none` is a partial cell. The run was paused after 65 runs to cut its
+  token use, and went on without `none`. That was decided before any batch 5
+  verdict was read. `none` holds 15 finished runs on six conflicts, all of
+  the same-words kind, and no control run. Do not read its column as a
+  result.
+- 5 runs are unscored and in no rate. Two `stub` conflict runs and one
+  `graph` control run broke isolation twice. One `none` run timed out twice,
+  and one `none` run ended on a server error of the provider and was not run
+  again, because `none` was dropped. One `graph` run ended on the same
+  server error and ran again on resume, as the fixed rule for an agent error
+  says.
+
+| | none | stub | graph | graph-nosearch | graph - stub | graph-nosearch - stub | graph - graph-nosearch |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Nineteen ticket conflicts (primary: graph - stub) | 47% (6 tasks) | 38% | 98% | 95% | **0.61 [0.42, 0.79]** | 0.58 [0.39, 0.75] | 0.04 [0.00, 0.09] |
+| Same words, 7 tasks | 47% (6 tasks) | 55% | 100% | 95% | 0.48 [0.24, 0.71] | 0.43 [0.19, 0.67] | 0.05 [0.00, 0.14] |
+| One shared term, 6 tasks | - | 12% | 100% | 100% | 0.89 [0.67, 1.00] | 0.89 [0.67, 1.00] | 0.00 |
+| Other words, 6 tasks | - | 44% | 94% | 89% | 0.50 [0.17, 0.83] | 0.44 [0.11, 0.78] | 0.06 [0.00, 0.17] |
+| Five harmless controls | - | 100% | 100% | 100% | 0.00 | 0.00 | 0.00 |
+| Eight governed controls | - | 96% | 100% | 100% | 0.04 [0.00, 0.13] | 0.04 [0.00, 0.13] | 0.00 |
+
+| Conflict runs | none | stub | graph | graph-nosearch |
+| --- | --- | --- | --- | --- |
+| Finished | 15 | 55 | 57 | 57 |
+| Changed no file | 7 | 46 | 57 | 57 |
+| Named the ticket | 7 | 21 | 56 | 54 |
+| Named the ticket, and changed a file | 0 | 0 | 0 | 0 |
+| Changed no file, and did not name the ticket | 0 | 25 | 1 | 3 |
+
+- **The commit link carries the result without `search`.** In
+  `graph-nosearch`, where `search` answers nothing, a whygraph answer showed
+  the needed ticket in 49 of 57 runs, each time in the linked part of
+  `carry` or `why`, and all 49 replies named it. In the other 8 runs no
+  answer showed it: 5 replies named it all the same and 3 did not.
+  `graph - graph-nosearch` is 0.04 [0.00, 0.09].
+- With `search` on, an answer showed the ticket in 56 of 57 `graph` runs,
+  and all 56 replies named it: the link showed it in 55 runs and `search` in
+  51. One run had it from `search` only.
+- **The firm rule stopped no harmless change.** The eight governed controls
+  ask for a change to code that a ticket governs, and the change goes
+  against nothing. In all 24 `graph` runs and all 24 `graph-nosearch` runs
+  a whygraph answer showed the control's own ticket, and all 48 made the
+  requested change. No control run of any condition changed no file. The
+  one failed control (`stub`) changed files, but the diff does not hold the
+  line that its pass rule asks for.
+- No run with the graph changed a file on a conflict: 57 of 57 in each
+  graph condition. Their 4 failures (1 `graph`, 3 `graph-nosearch`) changed
+  no file and named no required ticket; no whygraph answer had shown it.
+- `stub` changed no file in 46 of 55 conflict runs, and named the ticket in
+  21 of them. In 25 runs it held the change and named no record.
+- The lead over the rule text is smaller than in batch 4 (0.61 against
+  0.81), because `stub` passed more often here (38% against 18%); `graph`
+  passed 98% in both. The agent and the model both differ between the two
+  batches, so the batches do not say which of them moved `stub`.
+- Isolation: 20 attempts were archived as invalid and run again (13 `stub`,
+  4 `graph-nosearch`, 2 `graph`, 1 `none`). Ten `stub` attempts opened the
+  stand-in tool's own script in the run folder (`bin/whygraph`, `bin/memod`,
+  `bin/relate`) with the file tool, where the agent can read that the tool
+  answers nothing. Three `stub` attempts opened a file of the whygraph
+  checkout that holds this eval. Of the six graph attempts, five used
+  scratch files under `/tmp` and one made a symlink. The `none` attempt read
+  the run's baseline repository beside the repo copy.
+- Tokens: 170604865 over all runs, with a reported cost of USD 3.48 (the
+  runs drew on a subscription). On the conflicts a `stub` run used about
+  three times the tokens of a `graph` run (72561575 over 55 runs against
+  23067367 over 57).
+
+What batch 5 cannot show:
+
+- One agent and one model again, one repo that the model may know, three
+  repeats, and a verdict on words and a diff.
+- Whether the repo alone would do as well for this model: `none` is 15 runs
+  on six requests of one wording kind.
+- How the link does on a ticket that no commit cites. Every request comes
+  from a ticket with such a commit; about one ripgrep ticket in seven has
+  one.
+- That a firm rule never stops too often. There are eight governed
+  controls, each passes on one added line, and a harmless change that looks
+  like a reversal is not among them.
+- That the runs were isolated. The harness detects a breach in file-tool
+  paths and in shell text; it does not prevent one, and a read that neither
+  shows is not seen.

@@ -687,6 +687,32 @@ request that touches code a ticket governs without going against it, so it
 does not show how often a firm rule stops a change it should let through
 (`eval/README.md`, "Batch 4 results").
 
+A third run repeated that test with another agent and a smaller model
+(opencode with DeepSeek 4.1 Flash). It added what the second run lacked: a
+condition where `search` answers nothing, so that only the commit link can
+show the ticket, and 8 harmless requests on code that a ticket governs.
+Everything was fixed before the first run. The repo-only condition was
+dropped during the run to save tokens, before any verdict was read, so it
+has no column here.
+
+| | Rule text | Graph | Graph, `search` off |
+| --- | --- | --- | --- |
+| Passed, of the finished conflict runs | 21 of 55 | 56 of 57 | 54 of 57 |
+| Named the ticket | 21 | 56 | 54 |
+| Changed no file | 46 | 57 | 57 |
+| Made the change, of the plain control runs | 15 of 15 | 14 of 14 | 15 of 15 |
+| Made the change, of the governed control runs | 23 of 24 | 24 of 24 | 24 of 24 |
+
+The graph's lead over the rule text is 0.61 of the runs per request, with an
+interval from 0.42 to 0.79 over the 19 requests. With `search` off the lead
+is 0.58 (0.39 to 0.75): the commit link alone showed the ticket in 49 of 57
+runs. On the governed code an answer showed the governing ticket in all 48
+graph runs, and the agent made the change each time, so the firm rule
+stopped no change that goes against nothing. Three runs broke the run's
+isolation twice and are not scored. The run has one agent, one model and
+eight governed requests, and every request comes from a ticket that a
+commit cites (`eval/README.md`, "Batch 5 results").
+
 ## Your own repo
 
 whygraph runs on any git repo that memod reads (TypeScript, JavaScript,
