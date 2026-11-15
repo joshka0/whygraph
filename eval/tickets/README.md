@@ -73,6 +73,34 @@ in `report-small-store.json`.
   adds: `search` already finds almost every ticket there. Load all the
   tickets of the tracker, not only the ones that commits cite.
 
+## The same test on a second repo
+
+[hono](https://github.com/honojs/hono) is a TypeScript web framework. It was
+picked by a rule fixed before any result: of seven candidates, the
+TypeScript repo with the most ticket numbers cited by commits that change
+source files (1,828; the next had 320). The run used its history up to
+commit `f6fbaf0` (2,927 commits) and its 4,770 public issues and pull
+requests, fetched on 2026-11-15. A commit cites 2,199 of them, and 1,533
+reach a symbol that still exists. The steps are those of the ripgrep run,
+with new blind authors; the sample is 150 of the 1,082 such tickets with a
+body of 200 characters or more (`hono/sample-ids.json`, seed 20261115). The
+second model worked on a copy with no git history and found lines for 29
+requests. The files are in `hono/`.
+
+| Request wording | `search` | `carry` term section | `carry` link through a commit | Any |
+| --- | --- | --- | --- | --- |
+| Same words | 10 of 10 | 2 of 10 | 9 of 10 | 10 of 10 |
+| One shared term | 6 of 10 | 1 of 10 | 9 of 10 | 9 of 10 |
+| Other words | 2 of 10 | 1 of 10 | 7 of 10 | 7 of 10 |
+| All | 18 of 30 | 4 of 30 | 25 of 30 | 26 of 30 |
+
+Seven requests were found only through the commit link. All 25 link hits
+came through a commit that changed at most 20 symbols. A line range listed
+10 linked tickets at the median, against 3 on ripgrep: many hono tickets
+are pull requests whose commit cites its own number, so a ticket often
+describes the change it is linked to. The limits of the ripgrep run apply
+here too, except the last one.
+
 ## Run it on your repo
 
 You need the whygraph commands on `PATH` (root README, "Set up") and Python 3.
