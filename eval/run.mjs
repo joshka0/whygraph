@@ -17,6 +17,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readTasks } from './score.mjs';
 import { randomUUID } from 'node:crypto';
+import { evalBatch, ticketRepo, evalRegistry } from './registry.mjs';
 
 const EVAL = fileURLToPath(new URL('./', import.meta.url));
 const WHYGRAPH = join(EVAL, '..');
@@ -24,8 +25,6 @@ const RESULTS = join(EVAL, 'results');
 // On disk, not in /tmp: /tmp is an 8 GB tmpfs on this box, and three memoryd copies with their snapshots do not fit in it.
 const WORK = process.env.WHYGRAPH_EVAL_WORK ?? '/var/tmp/whygraph-eval';
 const MEMOD_REPO = '/home/dev/scratch/whygraph-eval/tasks2/memod';
-const RIPGREP_REPO = '/home/dev/scratch/whygraph-eval/tickets/ripgrep';
-const RIPGREP_DECISIONS = '/home/dev/scratch/whygraph-eval/tickets/ripgrep.decisions.json';
 const MEMORYD_REPO = '/home/dev/scratch/whygraph-eval/tasks2/memoryd';
 /**
  * ADR files left out of a repo's decisions file. memoryd numbers two test contracts like the ADRs they
@@ -138,21 +137,27 @@ export function memorydTemplate() {
 }
 
 /**
- * The ripgrep repo and ticket store, built once outside the repo so none and stub copies have no
+ * A registered ticket repo and its store, built once outside the repo so none and stub copies have no
  * store. No dependency install or cargo build. A graph run copies the resolved store directory.
  * owns: [[whygraph-eval-runner]]
  */
-export function ripgrepTemplate() {
-  const base = join(WORK, '_ripgrep');
+export function ticketTemplate(name, requireReady = false) {
+  const config = evalRegistry.repos[name];
+  if (!config) throw new Error(`unknown ticket repo ${name}`);
+  const base = join(WORK, `_${config.name}`);
   const repo = join(base, 'repo');
   const store = join(base, 'store');
-  if (existsSync(join(base, 'ready'))) return { repo, store };
+  if (existsSync(join(base, 'ready'))) {
+    if (!existsSync(repo) || !existsSync(store)) throw new Error(`ready ${config.name} template or store is missing`);
+    return { repo, store };
+  }
+  if (requireReady) throw new Error(`requires the ready ${config.name} template and store; do not rebuild`);
   mkdirSync(base, { recursive: true });
-  if (!existsSync(repo)) cpSync(RIPGREP_REPO, repo, { recursive: true, verbatimSymlinks: true });
-  if (sh('git', ['status', '--porcelain'], { cwd: repo }).trim() !== '') throw new Error(`the ripgrep copy in ${repo} is not clean`);
-  if (existsSync(join(repo, '.git/whygraph'))) throw new Error(`the ripgrep template repo must have no store: ${repo}`);
+  if (!existsSync(repo)) cpSync(config.source, repo, { recursive: true, verbatimSymlinks: true });
+  if (sh('git', ['status', '--porcelain'], { cwd: repo }).trim() !== '') throw new Error(`the ${config.name} copy in ${repo} is not clean`);
+  if (existsSync(join(repo, '.git/whygraph'))) throw new Error(`the ${config.name} template repo must have no store: ${repo}`);
   const started = Date.now();
-  sh(join(WHYGRAPH, 'bin/whygraph'), ['build', '--decisions', RIPGREP_DECISIONS, '--store', store], {
+  sh(join(WHYGRAPH, 'bin/whygraph'), ['build', '--decisions', config.decisions, '--store', store], {
     cwd: repo, env: { PATH: `${join(WHYGRAPH, 'node_modules/.bin')}:${process.env.PATH}` },
   });
   writeFileSync(join(base, 'build.json'), JSON.stringify({ build_ms: Date.now() - started }, null, 2));
@@ -165,7 +170,7 @@ function template(task) {
   if (task.repo === 'fixture') return fixtureTemplate().repo;
   if (task.repo === 'memod') return memodTemplate();
   if (task.repo === 'memoryd') return memorydTemplate();
-  if (task.repo === 'ripgrep') return ripgrepTemplate().repo;
+  if (ticketRepo(task)) return ticketTemplate(task.repo, evalBatch(task.batch).agent === 'opencode').repo;
   throw new Error(`task ${task.id}: unknown repo ${task.repo}`);
 }
 
@@ -225,8 +230,11 @@ export function confinement(condition, work, agent = 'claude') {
  * owns: [[whygraph-eval-runner]]
  */
 export function prepare(task, condition, work, source) {
-  const agent = task.batch === 5 ? 'opencode' : 'claude';
-  if (task.batch === 5 && !source && !existsSync(join(WORK, '_ripgrep/ready'))) throw new Error('batch 5 requires the ready ripgrep template and store; do not rebuild');
+  const batch = evalBatch(task.batch);
+  const agent = batch.agent;
+  const registered = ticketRepo(task);
+  if (!batch.conditions.includes(condition)) throw new Error(`batch ${task.batch ?? 1}: condition ${condition} is not run`);
+  if (agent === 'opencode' && !source) ticketTemplate(task.repo, true);
   rmSync(work, { recursive: true, force: true });
   mkdirSync(join(work, 'bin'), { recursive: true });
   mkdirSync(join(work, 'tmp'), { recursive: true });
@@ -248,10 +256,10 @@ export function prepare(task, condition, work, source) {
   }
   if (condition === 'graph' || condition === 'graph-nosearch') {
     const env = { PATH: `${bin}:${process.env.PATH}` };
-    if (task.repo === 'ripgrep' || source?.store) {
+    if (registered || source?.store) {
       const dir = join(repo, '.git/whygraph');
       mkdirSync(dir, { recursive: true });
-      cpSync(realpathSync(source?.store ?? ripgrepTemplate().store), join(dir, 'ticket-store'), { recursive: true, verbatimSymlinks: true });
+      cpSync(realpathSync(source?.store ?? ticketTemplate(task.repo, agent === 'opencode').store), join(dir, 'ticket-store'), { recursive: true, verbatimSymlinks: true });
       symlinkSync('ticket-store', join(dir, 'store'));
     } else if (fixture) {
       sh(join(bin, 'whygraph'), ['build', '--decisions', join(fixture.decisions, 'adrs.json'), '--decisions', join(fixture.decisions, 'notes.json')], { cwd: repo, env });
@@ -432,7 +440,7 @@ function invalidRun(out, work, meta, details, reason = 'isolation breach') {
 export async function runOne(task, condition, repeat, allIds) {
   const id = `${task.id}__${condition}__r${repeat}`;
   const out = join(RESULTS, id);
-  const opencode = task.batch === 5 ? await import('./opencode.mjs') : undefined;
+  const opencode = evalBatch(task.batch).agent === 'opencode' ? await import('./opencode.mjs') : undefined;
   if (opencode && existsSync(out)) archiveResult(out, '_attempts');
   else rmSync(out, { recursive: true, force: true });
   mkdirSync(out, { recursive: true });
@@ -444,7 +452,7 @@ export async function runOne(task, condition, repeat, allIds) {
       id, task: task.id, condition, repeat, agent: 'opencode', model: opencode.OPENCODE_MODEL,
       phase: 'preflight', wall_ms: 0, tokens: { total: 0 },
     }, escaped);
-    if (sh(which('opencode'), ['--version']).trim() !== '1.18.29') throw new Error('batch 5 requires opencode 1.18.29');
+    if (sh(which('opencode'), ['--version']).trim() !== '1.18.29') throw new Error(`batch ${task.batch} requires opencode 1.18.29`);
   }
   const launch = opencode ? opencode.opencodeLaunch(wrap(task.request), repo, bin, confine, work) : undefined;
   const env = launch?.env ?? agentEnv(bin, confine, join(work, 'tmp'));
@@ -509,8 +517,10 @@ async function main(argv) {
   const plan = [];
   for (const t of tasks.values()) {
     if (only && !only.includes(t.id)) continue;
-    const conditions = chosenConditions ?? (t.batch === 5 ? ['none', 'stub', 'graph', 'graph-nosearch'] : ['none', 'graph', 'stub']);
-    if (t.batch !== 5 && conditions.includes('graph-nosearch')) throw new Error('graph-nosearch is batch 5 only');
+    ticketRepo(t);
+    const batch = evalBatch(t.batch);
+    const conditions = chosenConditions ?? batch.conditions;
+    for (const condition of conditions) if (!batch.conditions.includes(condition)) throw new Error(`batch ${t.batch ?? 1}: condition ${condition} is not run`);
     for (let r = 1; r <= repeats; r++) for (const c of conditions) plan.push({ task: t, condition: c, repeat: r, id: `${t.id}__${c}__r${r}` });
   }
   if (argv.includes('--reextract')) {
@@ -540,14 +550,14 @@ async function main(argv) {
     const m = join(RESULTS, p.id, 'meta.json');
     if (!existsSync(m)) return false;
     const meta = JSON.parse(readFileSync(m, 'utf8'));
-    return meta.status === 'done' || (p.task.batch === 5 && meta.unscored === true);
+    return meta.status === 'done' || (evalBatch(p.task.batch).agent === 'opencode' && meta.unscored === true);
   };
   const todo = plan.filter((p) => !isDone(p));
   console.log(`${plan.length} runs planned, ${plan.length - todo.length} already done, ${todo.length} to start`);
   if (argv.includes('--plan')) {
     for (const p of todo) console.log(`  ${p.id}`);
-    if (plan.some(p => p.task.batch !== 5)) console.error('Agent: Claude Code (claude --model sonnet)');
-    if (plan.some(p => p.task.batch === 5)) console.error(`Agent: opencode --model ${(await import('./opencode.mjs')).OPENCODE_MODEL}`);
+    if (plan.some(p => evalBatch(p.task.batch).agent === 'claude')) console.error('Agent: Claude Code (claude --model sonnet)');
+    if (plan.some(p => evalBatch(p.task.batch).agent === 'opencode')) console.error(`Agent: opencode --model ${(await import('./opencode.mjs')).OPENCODE_MODEL}`);
     return 0;
   }
   const allIds = plan.map((p) => p.id);
@@ -558,7 +568,7 @@ async function main(argv) {
       const p = todo[next++];
       console.log(`start ${p.id}`);
       let m = await runOne(p.task, p.condition, p.repeat, allIds);
-      if (p.task.batch === 5) {
+      if (evalBatch(p.task.batch).agent === 'opencode') {
         if (m.status === 'invalid') {
           const firstReason = m.reason;
           console.error(`invalid ${p.id}: ${m.reason}; archived ${m.archived}; retrying once`);

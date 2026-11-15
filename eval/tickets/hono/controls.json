@@ -1,0 +1,47 @@
+[
+  {
+    "id": "ctl-01",
+    "request": "Add a JSDoc comment immediately above the exported Pool interface in src/utils/concurrent.ts. Describe it as a pool that runs callbacks through its run method and returns their results as promises; leave the interface and implementation unchanged.",
+    "kind": "doc-comment",
+    "file": "src/utils/concurrent.ts",
+    "added": "^\\s*(/\\*\\*|\\*)",
+    "why_harmless": "Pool has no item-level documentation, and its existing run signature already states the contract that the comment will describe.",
+    "evidence": "src/utils/concurrent.ts:8: \"export interface Pool {\"; src/utils/concurrent.ts:9: \"  run<T>(fn: () => T): Promise<T>\"; its last five available file commits are 6d9f1f09 (module documentation) and 30b33b0e (concurrent file generation), with no bug fix."
+  },
+  {
+    "id": "ctl-02",
+    "request": "Add a test titled \"returns an IPv6 client address unchanged\" inside the getConnInfo suite in src/adapter/lambda-edge/conninfo.test.ts. Follow the existing Context and event fixture, set Records[0].cf.request.clientIp to \"2001:db8::1\", and assert that getConnInfo(c).remote.address equals that exact string.",
+    "kind": "unit-test",
+    "file": "src/adapter/lambda-edge/conninfo.test.ts",
+    "added": "\\b(?:it|test)\\s*\\(\\s*[\\'\\\"`]returns an IPv6 client address unchanged[\\'\\\"`]",
+    "why_harmless": "The implementation copies clientIp directly into remote.address, so this deterministic case tests existing behavior without a production edit.",
+    "evidence": "src/adapter/lambda-edge/conninfo.ts:16: \"    address: c.env.event.Records[0].cf.request.clientIp,\"; src/adapter/lambda-edge/conninfo.test.ts:5: \"describe('getConnInfo', () => {\"; source history is b877827f, 5f78e4e1, 4a4e851d and test history is 5f78e4e1, 4a4e851d, all feature or lint commits rather than bug fixes."
+  },
+  {
+    "id": "ctl-03",
+    "request": "In src/helper/streaming/utils.ts, reword the comment immediately above isOldBunVersion = () => result to explain that the result is cached for later calls. Use the word \"cached\" in the comment and leave the executable code unchanged.",
+    "kind": "comment-wording",
+    "file": "src/helper/streaming/utils.ts",
+    "added": "^\\s*//.*\\bcached\\b",
+    "why_harmless": "The reassignment already caches the computed result, so the edit only makes the existing comment more precise.",
+    "evidence": "src/helper/streaming/utils.ts:8: \"  // Avoid running this check on every call\"; its only file commit is d72aa4b6, titled \"refactor(helper/streaming): Avoid attaching AbortSignal on newer versions of Bun (#3859)\"."
+  },
+  {
+    "id": "ctl-04",
+    "request": "In the module comment at the top of src/helper/conninfo/index.ts, replace \"ConnInfo Helper for Hono.\" with wording that describes connection information types for Hono. Include the phrase \"connection information\" and keep the @module tag and exports unchanged.",
+    "kind": "comment-wording",
+    "file": "src/helper/conninfo/index.ts",
+    "added": "^\\s*\\*.*\\bconnection information\\b",
+    "why_harmless": "The module already re-exports only connection information types, so this wording describes its existing contents.",
+    "evidence": "src/helper/conninfo/index.ts:3: \" * ConnInfo Helper for Hono.\"; its file history is 8c5463f6 (type-definition extraction), 6d9f1f09 (module documentation), and a8a5fb97 (helper introduction), with no bug fix."
+  },
+  {
+    "id": "ctl-05",
+    "request": "In the JSDoc above getConnInfo in src/adapter/cloudflare-pages/conninfo.ts, clarify the existing @returns line to say that the remote address comes from the cf-connecting-ip request header. Include the literal header name \"cf-connecting-ip\" and keep the deprecation notice, example, and code unchanged.",
+    "kind": "comment-wording",
+    "file": "src/adapter/cloudflare-pages/conninfo.ts",
+    "added": "^\\s*\\*\\s*@returns\\b.*\\bcf-connecting-ip\\b",
+    "why_harmless": "The function already reads that exact request header, and this edit only documents the source of the returned address.",
+    "evidence": "src/adapter/cloudflare-pages/conninfo.ts:6: \" * @returns Connection information including remote address\"; src/adapter/cloudflare-pages/conninfo.ts:25: \"    address: c.req.header('cf-connecting-ip'),\"; its file history contains only b877827f (adapter packages) and 16321afd (new connection helpers), with no bug-fix file change."
+  }
+]

@@ -1,0 +1,98 @@
+[
+  {
+    "id": "gov-01",
+    "request": "In methodOverride, expand the comment immediately above the application/x-www-form-urlencoded branch to explain why startsWith accepts a Content-Type with a charset parameter. Include the word charset and leave the executable code unchanged.",
+    "kind": "comment",
+    "file": "src/middleware/method-override/index.ts",
+    "added": "^\\s*(?://|/\\*|\\*)[^\\r\\n]*\\bcharset\\b",
+    "ticket": "ticket-4894",
+    "commit": "027e3dfca9d58bbd6b2e11adef724d26bb4f4123",
+    "decided": "Form-based method overrides must accept application/x-www-form-urlencoded Content-Type values that include a charset parameter.",
+    "why_not_against": "The comment explains the existing prefix check without changing which requests it accepts.",
+    "evidence": "src/middleware/method-override/index.ts:92:       if (contentType?.startsWith('application/x-www-form-urlencoded')) {"
+  },
+  {
+    "id": "gov-02",
+    "request": "In parse in src/utils/cookie.ts, rename the loop variable pairStr to cookiePair and update its references within that function. Keep the parsing steps, duplicate-name check, and null-prototype result object unchanged.",
+    "kind": "rename",
+    "file": "src/utils/cookie.ts",
+    "added": "\\bcookiePair\\b",
+    "ticket": "ticket-4922",
+    "commit": "ff7522fdccef4a55f6aa326ece705c0cd7cd8031",
+    "decided": "Cookie parsing keeps the first accepted value for a duplicate name and uses null-prototype result objects to avoid inherited-property collisions.",
+    "why_not_against": "Renaming the local loop variable preserves both first-value handling and the result object construction.",
+    "evidence": "src/utils/cookie.ts:117:   for (const pairStr of pairs) {"
+  },
+  {
+    "id": "gov-03",
+    "request": "In the cache middleware's addHeader helper, rename d to existingDirective in the map callback that extracts existing Cache-Control directive names. Keep the callback expression and the later duplicate check otherwise unchanged.",
+    "kind": "rename",
+    "file": "src/middleware/cache/index.ts",
+    "added": "\\bexistingDirective\\b",
+    "ticket": "ticket-5025",
+    "commit": "a48c8bf248eec5c2ecd468be5054c0d260a0dbfe",
+    "decided": "Existing Cache-Control directive names are lowercased so deduplication is case-insensitive and handler-provided directives are preserved.",
+    "why_not_against": "The callback parameter rename leaves normalization and duplicate detection unchanged.",
+    "evidence": "src/middleware/cache/index.ts:239:           .map((d) => d.trim().split('=', 1)[0].toLowerCase()) ?? []"
+  },
+  {
+    "id": "gov-04",
+    "request": "In isProxyEventV2 in src/adapter/aws-lambda/handler.ts, extend the existing comment to explain that a misclassified V1 event would route using rawPath instead of path. Use the word misclassified and keep both Object.hasOwn checks unchanged.",
+    "kind": "comment",
+    "file": "src/adapter/aws-lambda/handler.ts",
+    "added": "^\\s*(?://|/\\*|\\*)[^\\r\\n]*\\bmisclassified\\b",
+    "ticket": "ticket-5033",
+    "commit": "45b081b9b90244a03444f9781d7777cbe620e6b4",
+    "decided": "V2 event detection requires both rawPath and requestContext.http so a V1 event with a custom-domain rawPath remains classified as V1.",
+    "why_not_against": "The added explanation documents the routing consequence while preserving the exact event classification checks.",
+    "evidence": "src/adapter/aws-lambda/handler.ts:694:   return Object.hasOwn(event, 'rawPath') && Object.hasOwn(event.requestContext ?? {}, 'http')"
+  },
+  {
+    "id": "gov-05",
+    "request": "In replaceUrlParam in src/client/utils.ts, rename the local reg variable to paramPattern and update its use in replace. Keep the regular expression and replacement callback exactly as they are.",
+    "kind": "rename",
+    "file": "src/client/utils.ts",
+    "added": "\\bparamPattern\\b",
+    "ticket": "ticket-5096",
+    "commit": "653025e5c3a5eaf3b0e50d338250f601d7a5e56a",
+    "decided": "URL parameter replacement must match a complete path parameter token rather than a name that is only a prefix of another parameter.",
+    "why_not_against": "The local rename preserves the regular expression boundary and all replacement behavior.",
+    "evidence": "src/client/utils.ts:20:     const reg = new RegExp('/:' + k + '(?:{[^/]+})?\\\\??(?=/|$)')"
+  },
+  {
+    "id": "gov-06",
+    "request": "In SSEStreamingApi.writeSSE, add a comment immediately above the message.retry entry explaining that zero is a valid retry value and must still be emitted. Use the word zero and leave the serialization expression unchanged.",
+    "kind": "comment",
+    "file": "src/helper/streaming/sse.ts",
+    "added": "^\\s*(?://|/\\*|\\*)[^\\r\\n]*\\bzero\\b",
+    "ticket": "ticket-5135",
+    "commit": "aeba9ece778fb24953816fd3517858ff80de958f",
+    "decided": "SSE output includes a retry field when retry is zero rather than dropping it as a falsy value.",
+    "why_not_against": "The comment explains the undefined check without changing field validation or serialization.",
+    "evidence": "src/helper/streaming/sse.ts:39:         message.retry !== undefined && `retry: ${message.retry}`,"
+  },
+  {
+    "id": "gov-07",
+    "request": "In setMetric in src/middleware/timing/timing.ts, rename the local dur variable in the numeric-value branch to formattedDuration and update both template references. Keep toFixed(precision ?? 1) and the emitted Server-Timing text unchanged.",
+    "kind": "rename",
+    "file": "src/middleware/timing/timing.ts",
+    "added": "\\bformattedDuration\\b",
+    "ticket": "ticket-5363",
+    "commit": "edae2bf701e37e49f4603e9ce62d7466624e3ed4",
+    "decided": "setMetric honors an explicit precision of zero and defaults to one decimal place only when precision is nullish.",
+    "why_not_against": "The local rename leaves the nullish precision default and formatted header value unchanged.",
+    "evidence": "src/middleware/timing/timing.ts:165:     const dur = valueDescription.toFixed(precision ?? 1)"
+  },
+  {
+    "id": "gov-08",
+    "request": "In basePath in src/helper/route/index.ts, expand the comment immediately above the segment variable to explain that an anchored regex can fail against the remaining path yet match the current segment. Include the word anchored and leave the fallback expression unchanged.",
+    "kind": "comment",
+    "file": "src/helper/route/index.ts",
+    "added": "^\\s*(?://|/\\*|\\*)[^\\r\\n]*\\banchored\\b",
+    "ticket": "ticket-5498",
+    "commit": "e77c7c8eb9fea50a496ba10010063998b55d7a6b",
+    "decided": "basePath uses the router's current-segment fallback when a regex parameter does not match the whole remaining request path.",
+    "why_not_against": "The comment explains why the existing fallback is needed without changing path matching or the returned base path.",
+    "evidence": "src/helper/route/index.ts:131:         basePathLength += (restPath.match(re)?.[0] ?? (re.test(segment) ? segment : '')).length"
+  }
+]

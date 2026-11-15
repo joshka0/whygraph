@@ -12,6 +12,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { evalBatch, evalRegistry, ticketRepo } from './registry.mjs';
 
 const here = fileURLToPath(new URL('./', import.meta.url));
 
@@ -156,7 +157,7 @@ export function scoreRun(task, run) {
     }
     for (const k of s.kept ?? []) if (diff.get(k.file)?.removed.some((l) => l.includes(k.line))) reasons.push(`removed a kept line: ${k.line}`);
     if (task.kind === 'control') {
-      const claimed = [4, 5].includes(task.batch) ? [] : [...objectedIds(text)];
+      const claimed = Array.isArray(evalBatch(task.batch).repo) ? [...objectedIds(text)] : [];
       out.objection = !done || claimed.length > 0;
       if (claimed.length > 0) reasons.push(`claims a decision against it: ${claimed.join(', ')}`);
     }
@@ -213,7 +214,9 @@ function pct(x) {
 
 /** The lines `graph - none` and `graph - stub` from per-task pass rates. */
 function differences(perTask, batch = 4) {
-  const pairs = batch === 5 ? [['graph', 'stub'], ['graph-nosearch', 'stub'], ['graph', 'graph-nosearch'], ['graph', 'none']] : [['graph', 'none'], ['graph', 'stub']];
+  const pairs = evalBatch(batch).conditions.includes('graph-nosearch')
+    ? [['graph', 'stub'], ['graph-nosearch', 'stub'], ['graph', 'graph-nosearch'], ...(evalBatch(batch).conditions.includes('none') ? [['graph', 'none']] : [])]
+    : [['graph', 'none'], ['graph', 'stub']];
   return pairs.map(([left, other]) => {
     const diffs = [...perTask.values()].filter((r) => r[left] !== undefined && r[other] !== undefined).map((r) => r[left] - r[other]);
     const d = pairedDifference(diffs);
@@ -225,7 +228,7 @@ function differences(perTask, batch = 4) {
 function headline(rows, tasks, batch = 4) {
   const perTask = new Map();
   for (const t of tasks.values()) {
-    const r = Object.fromEntries((batch === 5 ? ['none', 'stub', 'graph', 'graph-nosearch'] : ['none', 'graph', 'stub']).map((c) => {
+    const r = Object.fromEntries(evalBatch(batch).conditions.map((c) => {
       const rs = rows.filter((x) => x.task.id === t.id && x.meta.condition === c);
       return [c, rs.length === 0 ? undefined : rs.filter((x) => x.verdict.pass).length / rs.length];
     }));
@@ -236,7 +239,7 @@ function headline(rows, tasks, batch = 4) {
 
 /** Prints the rates of `rows`: per condition, per task, paired differences, false objections. */
 function rates(rows, tasks, title, batch = 4) {
-  const conditions = batch === 5 ? ['none', 'stub', 'graph', 'graph-nosearch'] : ['none', 'graph', 'stub'];
+  const conditions = evalBatch(batch).conditions;
   const rate = (rs) => (rs.length === 0 ? undefined : rs.filter((r) => r.verdict.pass).length / rs.length);
   console.log(`\n=== ${title}`);
   console.log('\nPass rate per condition:');
@@ -263,19 +266,22 @@ function rates(rows, tasks, title, batch = 4) {
 }
 
 /** Fixed ticket-batch diagnostics, retaining byte-identical earlier report blocks. */
-function batchFour(rows, unscored, tasks, results, batch = 4) {
-  const conditions = batch === 5 ? ['none', 'stub', 'graph', 'graph-nosearch'] : ['none', 'graph', 'stub'];
+function ticketBatchReport(rows, unscored, tasks, results, batch = 4) {
+  const design = evalBatch(batch);
+  const repo = evalRegistry.repos[design.repo];
+  const countName = n => ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'][n] ?? String(n);
+  const conditions = evalBatch(batch).conditions;
   const conflicts = rows.filter((r) => r.task.kind === 'conflict');
   const controls = rows.filter((r) => r.task.kind === 'control');
   console.log(`\nBatch ${batch}: ${rows.length} finished runs\n\nRuns:`);
   for (const r of rows) console.log(`  ${r.verdict.pass ? 'PASS' : 'FAIL'}  ${r.id}  whygraph calls: ${r.verdict.whygraphCalls}${r.verdict.reasons.length ? `  (${r.verdict.reasons.join('; ')})` : ''}`);
-  rates(conflicts, tasks, `Batch ${batch}: nineteen ripgrep ticket conflicts (primary result: graph - stub)`, batch);
+  rates(conflicts, tasks, `Batch ${batch}: ${countName(design.counts.conflicts)} ${repo.display} ticket conflicts (primary result: graph - stub)`, batch);
   for (const wording of ['same-words', 'partial', 'other-words']) {
     rates(conflicts.filter((r) => r.task.ground_truth.source.wording === wording), tasks, `Batch ${batch}: wording ${wording}`, batch);
   }
-  const plainControls = batch === 5 ? controls.filter(r => !r.task.ground_truth.source.ticket) : controls;
-  rates(plainControls, tasks, `Batch ${batch}: five harmless controls`, batch);
-  if (batch === 5) rates(controls.filter(r => r.task.ground_truth.source.ticket), tasks, 'Batch 5: eight governed controls', batch);
+  const plainControls = design.counts.governed > 0 ? controls.filter(r => !r.task.ground_truth.source.ticket) : controls;
+  rates(plainControls, tasks, `Batch ${batch}: ${countName(design.counts.plain)} harmless controls`, batch);
+  if (design.counts.governed > 0) rates(controls.filter(r => r.task.ground_truth.source.ticket), tasks, `Batch ${batch}: ${countName(design.counts.governed)} governed controls`, batch);
   const runs = new Map(rows.map((r) => [r.id, readRun(join(results, r.id))]));
   const namedTicket = (r) => r.task.score.records.some((record) => named(record, runs.get(r.id).final));
   console.log(`\nBatch ${batch} conflict counts (finished runs):`);
@@ -286,7 +292,7 @@ function batchFour(rows, unscored, tasks, results, batch = 4) {
     console.log(`  ${condition}: ${rs.length} runs; changed no file: ${count(unchanged)}; named the ticket: ${count(namedTicket)}; named the ticket and changed a file: ${count((r) => namedTicket(r) && !unchanged(r))}; changed no file and did not name the ticket: ${count((r) => unchanged(r) && !namedTicket(r))}`);
     const cs = plainControls.filter((r) => r.meta.condition === condition);
     console.log(`  ${condition} controls: ${cs.filter((r) => r.verdict.pass).length}/${cs.length} passed; changed no file: ${cs.filter(unchanged).length}`);
-    if (batch === 5) {
+    if (design.counts.governed > 0) {
       const gs = controls.filter(r => r.meta.condition === condition && r.task.ground_truth.source.ticket);
       console.log(`  ${condition} governed controls: ${gs.filter(r => r.verdict.pass).length}/${gs.length} passed; changed no file: ${gs.filter(unchanged).length}`);
     }
@@ -314,7 +320,7 @@ function batchFour(rows, unscored, tasks, results, batch = 4) {
     }
     return seen;
   };
-  for (const condition of batch === 5 ? ['graph', 'graph-nosearch'] : ['graph']) {
+  for (const condition of conditions.filter(c => c === 'graph' || c === 'graph-nosearch')) {
     const rs = conflicts.filter(r => r.meta.condition === condition);
     const sources = new Map(rs.map(r => [r.id, shownSources(r)]));
     const shown = rs.filter(r => sources.get(r.id).size > 0);
@@ -329,10 +335,10 @@ function batchFour(rows, unscored, tasks, results, batch = 4) {
       groups.set(key, group);
     }
     for (const [key, group] of [...groups].sort(([a], [b]) => a.localeCompare(b))) console.log(`  ${key}: ${group.total} (${group.named} / ${group.total - group.named})`);
-    if (batch === 5) {
+    if (design.counts.governed > 0) {
       const governed = controls.filter(r => r.meta.condition === condition && r.task.ground_truth.source.ticket);
       const shown = governed.filter(r => shownSources(r).size > 0);
-      console.log(`Batch 5 ${condition} governed controls where a whygraph answer showed their own ticket: ${shown.length}/${governed.length}; made the requested change: ${shown.filter(r => r.verdict.pass).length}/${shown.length}; changed no file: ${shown.filter(r => r.verdict.changed.length === 0).length}/${shown.length}`);
+      console.log(`Batch ${batch} ${condition} governed controls where a whygraph answer showed their own ticket: ${shown.length}/${governed.length}; made the requested change: ${shown.filter(r => r.verdict.pass).length}/${shown.length}; changed no file: ${shown.filter(r => r.verdict.changed.length === 0).length}/${shown.length}`);
     }
   }
   console.log(`\nBatch ${batch} runs that called each command (each finished run counted once per command kind):`);
@@ -351,9 +357,9 @@ function batchFour(rows, unscored, tasks, results, batch = 4) {
   for (const r of unscored) console.log(`  ${r.id}  (exit ${r.meta.exit}, ${Math.round(r.meta.wall_ms / 1000)} s)`);
   const failedConflicts = unscored.filter((r) => r.task.kind === 'conflict');
   if (failedConflicts.length > 0) console.log(`  Sensitivity, unscored conflicts counted as FAIL: ${headline([...conflicts, ...failedConflicts], tasks, batch)}`);
-  if (batch === 5) for (const condition of conditions) {
+  if (design.agent === 'opencode') for (const condition of conditions) {
     const rs = rows.filter(r => r.meta.condition === condition);
-    console.log(`Batch 5 ${condition}: ${rs.reduce((sum, r) => sum + (r.meta.tokens?.total ?? 0), 0)} tokens; cost USD ${rs.reduce((sum, r) => sum + (r.meta.cost_usd ?? 0), 0).toFixed(6)}`);
+    console.log(`Batch ${batch} ${condition}: ${rs.reduce((sum, r) => sum + (r.meta.tokens?.total ?? 0), 0)} tokens; cost USD ${rs.reduce((sum, r) => sum + (r.meta.cost_usd ?? 0), 0).toFixed(6)}`);
   }
   console.log(`\nBatch ${batch} total tokens: ${rows.reduce((a, r) => a + (r.meta.tokens?.total ?? 0), 0)}`);
 }
@@ -369,9 +375,11 @@ function main(argv) {
     if (!existsSync(join(dir, 'meta.json'))) continue;
     const meta = JSON.parse(readFileSync(join(dir, 'meta.json'), 'utf8'));
     if (meta.status === 'invalid') continue;
+    const task = tasks.get(meta.task);
+    if (task === undefined) throw new Error(`${id}: no task ${meta.task}`);
+    ticketRepo(task);
+    if (!evalBatch(task.batch).conditions.includes(meta.condition)) throw new Error(`${id}: batch ${task.batch ?? 1} does not run condition ${meta.condition}`);
     const run = readRun(dir, meta);
-    const task = tasks.get(run.meta.task);
-    if (task === undefined) throw new Error(`${id}: no task ${run.meta.task}`);
     if (run.meta.status !== 'done') {
       unscored.push({ id, task, meta: run.meta, verdict: { pass: false, reasons: ['unscored'], whygraphCalls: 0 } });
       continue;
@@ -382,14 +390,11 @@ function main(argv) {
     console.log(JSON.stringify(rows.map((r) => ({ id: r.id, task: r.task.id, condition: r.meta.condition, ...r.verdict, tokens: r.meta.tokens })), null, 2));
     return 0;
   }
-  const fifth = rows.filter(r => r.task.batch === 5);
-  const fifthUnscored = unscored.filter(r => r.task.batch === 5);
-  rows.splice(0, rows.length, ...rows.filter(r => r.task.batch !== 5));
-  unscored.splice(0, unscored.length, ...unscored.filter(r => r.task.batch !== 5));
-  const fourth = rows.filter((r) => r.task.batch === 4);
-  const fourthUnscored = unscored.filter((r) => r.task.batch === 4);
-  rows.splice(0, rows.length, ...rows.filter((r) => r.task.batch !== 4));
-  unscored.splice(0, unscored.length, ...unscored.filter((r) => r.task.batch !== 4));
+  const later = Object.keys(evalRegistry.batches).map(Number).filter(n => n >= 4).sort((a, b) => a - b).map(number => ({
+    number, rows: rows.filter(r => r.task.batch === number), unscored: unscored.filter(r => r.task.batch === number),
+  }));
+  rows.splice(0, rows.length, ...rows.filter(r => (r.task.batch ?? 1) < 4));
+  unscored.splice(0, unscored.length, ...unscored.filter(r => (r.task.batch ?? 1) < 4));
   const third = rows.filter((r) => r.task.batch === 3);
   const thirdUnscored = unscored.filter((r) => r.task.batch === 3);
   rows.splice(0, rows.length, ...rows.filter((r) => r.task.batch !== 3));
@@ -436,7 +441,7 @@ function main(argv) {
   if (third.length > 0 || thirdUnscored.length > 0) {
     console.log(`\nBatch 3: ${third.length} finished runs\n\nRuns:`);
     for (const r of third) console.log(`  ${r.verdict.pass ? 'PASS' : 'FAIL'}  ${r.id}  whygraph calls: ${r.verdict.whygraphCalls}${r.verdict.reasons.length ? `  (${r.verdict.reasons.join('; ')})` : ''}`);
-    rates(third, tasks, 'Batch 3: ten ripgrep ticket conflicts (primary result: graph - stub)');
+    rates(third, tasks, `Batch 3: ten ${evalRegistry.repos[evalBatch(3).repo].display} ticket conflicts (primary result: graph - stub)`);
     for (const wording of ['same-words', 'partial', 'other-words']) {
       rates(third.filter((r) => r.task.ground_truth.source.wording === wording), tasks, `Batch 3: wording ${wording}`);
     }
@@ -461,8 +466,7 @@ function main(argv) {
     if (thirdUnscored.length > 0) console.log(`  Sensitivity, unscored counted as FAIL: ${headline([...third, ...thirdUnscored], tasks)}`);
     console.log(`\nBatch 3 total tokens: ${third.reduce((a, r) => a + (r.meta.tokens?.total ?? 0), 0)}`);
   }
-  if (fourth.length > 0 || fourthUnscored.length > 0) batchFour(fourth, fourthUnscored, tasks, results);
-  if (fifth.length > 0 || fifthUnscored.length > 0) batchFour(fifth, fifthUnscored, tasks, results, 5);
+  for (const group of later) if (group.rows.length || group.unscored.length) ticketBatchReport(group.rows, group.unscored, tasks, results, group.number);
   return 0;
 }
 

@@ -1080,3 +1080,128 @@ What batch 5 cannot show:
 - That the runs were isolated. The harness detects a breach in file-tool
   paths and in shell text; it does not prevent one, and a read that neither
   shows is not seen.
+
+## Batch 6, fixed before its first run
+
+Batch 6 repeats the ticket test on a second public repo, in a second
+language: hono (TypeScript), after ripgrep (Rust). One agent and one model:
+opencode 1.18.29 with `opencode-go/deepseek-v4.1-flash`. The batch 5 launcher
+in `opencode.mjs` is unchanged: command, environment, confinement, isolation
+checks, 20-minute timeout, retry and unscored rules all apply. The skill and
+rule text from main are unchanged. No trial or model call starts during
+preparation. No batch 6 number is compared with batch 5 run by run.
+
+**Preparation status.** The parent requested a partial preparation commit
+while another author fixes a store loader limit. The two supplied control
+files and their hashes are recorded. `requests.json`, `targets.json`,
+`sample-ids.json`, their hashes, the generated tasks and the 297-run plan
+check are pending the parent's follow-up. No trial can start before those
+inputs and the ready template are complete.
+
+**Repo selection.** Before any result, the parent selected the TypeScript
+repo with the most ticket numbers cited by commits that change source files,
+among seven candidates. `honojs/hono` had 1,828 numbers; got had 320, msw
+255, and zustand 258. The source is the clean clone at
+`/home/dev/scratch/whygraph-eval/tickets2/hono`, commit
+`f6fbaf0299c48eea9e656e03e2ffe7ac755e8823` (4.13.18). Its 4,770 public
+issues and pull requests were fetched on 2026-11-15. The decisions file is
+`/home/dev/scratch/whygraph-eval/tickets2/hono.decisions.json`.
+
+**Registry.** `eval/registry.json` is the shared data source for the runner,
+task generator and scorer; `registry.mjs` validates and reads it. `repos`
+is keyed by repo name. Each entry has `name`, `source` (clone path),
+`decisions` (file path), `blind` (folder relative to `eval/`), and `display`
+(the scorer's name). `batches` is keyed by batch number. Each entry fixes
+`repo`, `agent`, `conditions`, `counts`, `selection`, `prefix`, `sha256`,
+`verifyInputs`, and `hashChecks`. The first two batches list their fixture
+repos and task prefixes and use existing tasks. Ticket batches name one registered repo.
+`selection` takes the first eligible ids by wording, or excludes that set
+for batches 4 and 5. A third ticket repo and batch need data entries and
+blind inputs, with no repo-specific branch in code. Batches 1 to 5 keep
+their task bytes, report bytes, agents and condition order.
+
+**Template.** The parent builds `$WHYGRAPH_EVAL_WORK/_hono` once, under the
+same systemd scope as batch 5, with no dependency install or project build.
+`ticketTemplate('hono')` copies the clean clone into `_hono/repo`, runs
+`whygraph build --decisions <file> --store <_hono/store>`, records the build
+time, and writes `_hono/ready` after success. A batch 6 preparation refuses
+if the ready marker, repo or store is absent. It never builds the template.
+The ready ripgrep template is reused as it is. Every relate call sets
+`RELATE_TELEMETRY=0` and `DO_NOT_TRACK=1`.
+
+**Conditions.** Defaults are exactly `stub`, `graph`, `graph-nosearch`.
+`none` does not run in batch 6 and an explicit request for it is rejected.
+Stub has the unchanged rule, skill and tools but no store. Every whygraph
+command returns `no result` with exit 0. Graph gets real answers from a
+separate copy of the ready store, with a relative store link inside its
+repo. Graph-nosearch is the same, except `whygraph search` returns
+`no result` with exit 0. Its skill still tells the agent to search.
+
+**Blind inputs and tasks.** The parent supplies `requests.json`,
+`targets.json`, `controls.json`, `controls2.json` and `sample-ids.json`
+under `/home/dev/scratch/whygraph-eval/tickets2/final/`. Their exact bytes
+are copied into `eval/tickets/hono/`. The registry and
+[batch 6 failure list](tickets/batch6-failures.md) record all five SHA-256
+values. Before any task write, the generator checks all files, counts,
+required fields, unique ids, regular expressions, ticket numbers, sample
+ids and recorded hashes. A refusal writes no task, including conflicts.
+
+Of 30 requests, keep those with at least one valid positive line range,
+sort by id, and take the first seven `same-words`, seven `partial` and six
+`other-words`. An unranged request is ineligible. A wording shortage stops
+generation and names the wording and count. There is no retrieval or outcome
+filter. Each conflict keeps the unchanged request, complete source entry and
+target list. It passes with batch 5's accepted source or `also` ticket
+spellings and no changed file. There is no amendment exception.
+
+Five plain controls and eight governed controls keep their complete source
+entries. Each passes exactly when the diff adds a line matching `added`
+(case insensitive) in `file`. Governed controls have their own `ticket`;
+that ticket must be in the parent's built store before the trial starts.
+The scorer does not infer that a ticket was shown when no saved answer
+contains it. A passing control needs no ticket name in its final reply.
+
+**Fixed reports.** Batch 6 blocks append after the complete earlier report,
+only when a finished or unscored batch 6 result exists. Titles use the
+registered repo display name and fixed counts. Primary is `graph - stub`
+over the 20 conflicts, using the existing seeded task bootstrap 95%
+interval. Also print `graph-nosearch - stub`, `graph - graph-nosearch`,
+and rates by wording. Missing pairs are omitted. Controls do not enter
+conflict differences. A result in a condition that this batch does not run
+is an error, including an unscored result.
+
+For each condition, count conflicts that changed no file, named the ticket,
+named it and changed a file, or changed no file without naming it. For
+graph and graph-nosearch, count runs whose saved whygraph answer showed a
+needed ticket and how many named it. Classify the source as search, linked
+answer, distinctive terms, or mixed call, as in batch 5. Saved tool answers
+still stop at 4,000 characters. Report plain and governed controls apart,
+including their pass numerators, denominators and changed-no-file counts.
+For governed graph controls, count answers that showed their own ticket,
+then requested-change passes and unchanged runs among those answers.
+Count runs calling each command once per kind, controls included. List
+unscored runs separately, print the conflict FAIL sensitivity line, and
+sum tokens and reported cost per condition over finished runs only.
+JSON includes finished verdicts only. Invalid archives do not count.
+
+**Runs.** 33 tasks (20 conflicts, 5 plain controls, 8 governed controls)
+x 3 conditions x 3 repeats = 297 runs. These commands generate and plan
+batch 6 without a `--conditions` flag. The last command starts the trial;
+it is for the parent and was not run during preparation:
+
+```sh
+node eval/tickets/make-tasks.mjs --batch 6
+ids="$(node --input-type=module -e 'import {readTasks} from "./eval/score.mjs"; console.log([...readTasks().values()].filter(t => t.batch === 6).map(t => t.id).join(","))')"
+node eval/run.mjs --plan --only "$ids" --repeats 3
+systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/run.mjs --only "$ids" --repeats 3
+```
+
+**Limits fixed before the run.** The model may know hono. Many hono tickets
+are pull requests whose commit cites its own number, so a ticket often
+describes the very change it is linked to. Every request comes from a ticket
+that a commit cites. The blind locator used a copy with no git history.
+The repo copy has no installed dependencies, so the agent cannot run its
+tests. Isolation is by detection, with the same known misses as batch 5.
+This batch measures one agent, one model, a finite set of requests and
+word/diff pass rules. It does not establish the effect on other repos or
+longer sessions.

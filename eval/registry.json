@@ -1,0 +1,209 @@
+{
+  "repos": {
+    "ripgrep": {
+      "name": "ripgrep",
+      "source": "/home/dev/scratch/whygraph-eval/tickets/ripgrep",
+      "decisions": "/home/dev/scratch/whygraph-eval/tickets/ripgrep.decisions.json",
+      "blind": "tickets",
+      "display": "ripgrep"
+    },
+    "hono": {
+      "name": "hono",
+      "source": "/home/dev/scratch/whygraph-eval/tickets2/hono",
+      "decisions": "/home/dev/scratch/whygraph-eval/tickets2/hono.decisions.json",
+      "blind": "tickets/hono",
+      "display": "hono"
+    }
+  },
+  "batches": {
+    "1": {
+      "repo": [
+        "fixture",
+        "memod"
+      ],
+      "agent": "claude",
+      "conditions": [
+        "none",
+        "graph",
+        "stub"
+      ],
+      "counts": {
+        "conflicts": 8,
+        "plain": 2,
+        "governed": 0
+      },
+      "selection": {
+        "mode": "existing"
+      },
+      "prefix": [
+        "fixture",
+        "memod"
+      ],
+      "sha256": {},
+      "verifyInputs": false,
+      "hashChecks": []
+    },
+    "2": {
+      "repo": [
+        "memod",
+        "memoryd"
+      ],
+      "agent": "claude",
+      "conditions": [
+        "none",
+        "graph",
+        "stub"
+      ],
+      "counts": {
+        "conflicts": 10,
+        "plain": 2,
+        "governed": 0
+      },
+      "selection": {
+        "mode": "existing"
+      },
+      "prefix": [
+        "memod2",
+        "memoryd"
+      ],
+      "sha256": {},
+      "verifyInputs": false,
+      "hashChecks": []
+    },
+    "3": {
+      "repo": "ripgrep",
+      "agent": "claude",
+      "conditions": [
+        "none",
+        "graph",
+        "stub"
+      ],
+      "counts": {
+        "conflicts": 10,
+        "plain": 0,
+        "governed": 0,
+        "requests": 30
+      },
+      "selection": {
+        "mode": "take",
+        "wording": {
+          "same-words": 3,
+          "partial": 3,
+          "other-words": 4
+        }
+      },
+      "prefix": "ripgrep",
+      "sha256": {
+        "requests.json": "257e5a0c70b0a2fc5bbffb904c232eadad37894ff9d349da1f1c4643a6a2baa9",
+        "targets.json": "d71eb5aa49acff236b2fac081f0e24a8ede9be3eb0e5188ae9081a30b16f13d3",
+        "sample-ids.json": "b77aec4f179edd680d7badf1eb1f1bd457cd8ca69b623fd1a41916f8530aa982"
+      },
+      "verifyInputs": false,
+      "hashChecks": []
+    },
+    "4": {
+      "repo": "ripgrep",
+      "agent": "claude",
+      "conditions": [
+        "none",
+        "graph",
+        "stub"
+      ],
+      "counts": {
+        "conflicts": 19,
+        "plain": 5,
+        "governed": 0,
+        "requests": 30
+      },
+      "selection": {
+        "mode": "exclude",
+        "wording": {
+          "same-words": 3,
+          "partial": 3,
+          "other-words": 4
+        }
+      },
+      "prefix": "ripgrep4",
+      "sha256": {
+        "requests.json": "257e5a0c70b0a2fc5bbffb904c232eadad37894ff9d349da1f1c4643a6a2baa9",
+        "targets.json": "d71eb5aa49acff236b2fac081f0e24a8ede9be3eb0e5188ae9081a30b16f13d3",
+        "controls.json": "cc15a2caf4c989fe5a13acebf25024e6bb83b2c29d4702cec1c2006fd7e4d79b",
+        "sample-ids.json": "b77aec4f179edd680d7badf1eb1f1bd457cd8ca69b623fd1a41916f8530aa982"
+      },
+      "verifyInputs": false,
+      "hashChecks": []
+    },
+    "5": {
+      "repo": "ripgrep",
+      "agent": "opencode",
+      "conditions": [
+        "none",
+        "stub",
+        "graph",
+        "graph-nosearch"
+      ],
+      "counts": {
+        "conflicts": 19,
+        "plain": 5,
+        "governed": 8,
+        "requests": 30
+      },
+      "selection": {
+        "mode": "exclude",
+        "wording": {
+          "same-words": 3,
+          "partial": 3,
+          "other-words": 4
+        }
+      },
+      "prefix": "ripgrep5",
+      "sha256": {
+        "requests.json": "257e5a0c70b0a2fc5bbffb904c232eadad37894ff9d349da1f1c4643a6a2baa9",
+        "targets.json": "d71eb5aa49acff236b2fac081f0e24a8ede9be3eb0e5188ae9081a30b16f13d3",
+        "controls.json": "cc15a2caf4c989fe5a13acebf25024e6bb83b2c29d4702cec1c2006fd7e4d79b",
+        "controls2.json": "a358eb529f81821a24c21f00503ec552ac24426d2e604fba3f5120c959c04763",
+        "sample-ids.json": "b77aec4f179edd680d7badf1eb1f1bd457cd8ca69b623fd1a41916f8530aa982"
+      },
+      "verifyInputs": false,
+      "hashChecks": [
+        "controls2.json"
+      ]
+    },
+    "6": {
+      "repo": "hono",
+      "agent": "opencode",
+      "conditions": [
+        "stub",
+        "graph",
+        "graph-nosearch"
+      ],
+      "counts": {
+        "conflicts": 20,
+        "plain": 5,
+        "governed": 8,
+        "requests": 30
+      },
+      "selection": {
+        "mode": "take",
+        "wording": {
+          "same-words": 7,
+          "partial": 7,
+          "other-words": 6
+        }
+      },
+      "prefix": "hono6",
+      "sha256": {
+        "controls.json": "ce2df933115ac97bb19dd26fd4d946fb8912ad483595973b21a4b1f7649e889a",
+        "controls2.json": "a1c67e3278faa7b210436fb4b5aa4ca74923514cd875a39853a9eeb1a65dc9c0"
+      },
+      "verifyInputs": true,
+      "hashChecks": [
+        "requests.json",
+        "targets.json",
+        "controls.json",
+        "controls2.json",
+        "sample-ids.json"
+      ]
+    }
+  }
+}
