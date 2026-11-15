@@ -32,7 +32,9 @@ The service accepts exactly two arguments: one of `carry`, `why`, `impact`,
 `search`, then the target. It accepts no store path or query language.
 A lost service prints `whygraph service unavailable`, exits 70, and makes
 the attempt a harness failure. Complete service answers stay outside the
-agent filesystem in `service.jsonl`.
+agent filesystem in `service.jsonl`. Each reply keeps its raw direct-CLI
+reference, selected store and any decision-section replacements. The smoke
+checker compares reply bytes with those receipts and health calls.
 
 Graph and graph-norule call the real CLI with the run repo and full store.
 Stub returns `no result`. Graph-nosearch does that only for search.

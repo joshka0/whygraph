@@ -38,6 +38,17 @@ check('condition answers',()=>{
   const answers=readFileSync(join(dir,'service.jsonl'),'utf8').trim().split('\n').filter(Boolean).map(JSON.parse);
   require(health.condition===condition,'wrong health condition');
   require(health.answers.length===4&&new Set(health.answers.map(a=>a.args[0])).size===4,'incomplete health calls');
+  for(const a of answers) {
+   require(a.reference&&Array.isArray(a.sections),'missing direct-answer receipt');
+   let expected=a.reference.stdout;
+   for(const section of a.sections) {
+    require(condition==='graph-nolink'&&a.args[0]==='carry'&&typeof section.before==='string'&&typeof section.after==='string'&&expected.includes(section.before),'invalid decision-section receipt');
+    expected=expected.replace(section.before,section.after);
+   }
+   require(a.stdout===expected&&a.stderr===a.reference.stderr&&a.code===a.reference.code,'answer differs from direct reference');
+   if(a.code===0&&condition!=='stub'&&!(condition==='graph-nosearch'&&a.args[0]==='search'))require(a.referenceStore===(condition==='graph-nolink'&&['carry','impact'].includes(a.args[0])?health.stores.full:health.stores.current),'answer used the wrong store');
+  }
+  for(let i=0;i<4;i++)require(JSON.stringify(health.answers[i].args)===JSON.stringify(answers[i]?.args)&&health.answers[i].stdout===answers[i]?.stdout&&health.answers[i].stderr===answers[i]?.stderr&&health.answers[i].code===answers[i]?.code,'health reply differs from service log');
   for(const a of [...health.answers,...answers]) {
    require(a.code!==70,'service unavailable');
    if(condition==='stub'||(condition==='graph-nosearch'&&a.args[0]==='search')) require(a.stdout==='no result\n'&&a.code===0,'disabled command answered');

@@ -114,7 +114,7 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
       if (input.length > 65536) { connection.destroy(); failures++; return; }
       if (input.length < 4) return;
       const count = input.readUInt32BE();
-      if (count !== 2) { const result={ stdout:'',stderr:'usage: whygraph <carry|why|impact|search> <target>\n',code:2 };calls++;appendFileSync(log,JSON.stringify({args:[],...result})+'\n');respond(result); return; }
+      if (count !== 2) { const result={ stdout:'',stderr:'usage: whygraph <carry|why|impact|search> <target>\n',code:2 };calls++;appendFileSync(log,JSON.stringify({args:[],...result,reference:{...result},sections:[]})+'\n');respond(result); return; }
       let at=4; const args=[];
       for(let i=0;i<count;i++) {
         if(input.length < at+4) return;
@@ -136,8 +136,8 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
   async function answer(args) {
     calls++;
     const [command,target] = args;
-    if (!['carry','why','impact','search'].includes(command) || target.includes('\0')) { const result={stdout:'',stderr:'usage: whygraph <carry|why|impact|search> <target>\n',code:2};appendFileSync(log,JSON.stringify({args,...result})+'\n');return result; }
-    let result;
+    if (!['carry','why','impact','search'].includes(command) || target.includes('\0')) { const result={stdout:'',stderr:'usage: whygraph <carry|why|impact|search> <target>\n',code:2};appendFileSync(log,JSON.stringify({args,...result,reference:{...result},sections:[]})+'\n');return result; }
+    let result,reference,referenceStore;const sections=[];
     if(condition==='stub' || (condition==='graph-nosearch' && command==='search')) result={stdout:'no result\n',stderr:'',code:0};
     else {
       const mapped = command !== 'search' && target.startsWith('/repo/') ? join(repo,target.slice(6)) : target;
@@ -145,6 +145,7 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
         const selectedStore=condition==='graph-nolink'&&['carry','impact'].includes(command)?fullStore:store;
         const r = await execute(join(root,'bin/whygraph'), [command,mapped,'--repo',repo,'--store',selectedStore], { env:quiet, maxBuffer:1<<26, signal:abort.signal });
         result={stdout:r.stdout,stderr:r.stderr,code:0};
+        reference={...result};referenceStore=realpathSync(selectedStore);
         if(condition==='graph-nolink' && command==='carry') {
           const parsed=readSymbolTarget(mapped,repo);
           if('usage' in parsed) throw new Error('successful carry had an invalid target');
@@ -153,16 +154,18 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
             const before=whyAnswer(id,readQuery(fullStore,recipe('why'),{symbol:id})).split('\n').slice(2).join('\n');
             const after=whyAnswer(id,readQuery(store,recipe('why'),{symbol:id})).split('\n').slice(2).join('\n');
             if(!result.stdout.includes(before)) throw new Error('carry decision section changed; update the eval ablation');
+            sections.push({before,after});
             result.stdout=result.stdout.replace(before,after);
           }
         }
       } catch(error) {
         if (!Number.isInteger(error.code)) throw error;
         result={stdout:error.stdout??'',stderr:error.stderr??'',code:error.code};
+        reference={...result};
         if(error.code===1) failures++;
       }
     }
-    appendFileSync(log,JSON.stringify({args,...result})+'\n');
+    appendFileSync(log,JSON.stringify({args,...result,reference:reference??{...result},referenceStore,sections})+'\n');
     return result;
   }
   await new Promise((ok,fail) => {server.once('error',fail); server.listen(socket,ok);});

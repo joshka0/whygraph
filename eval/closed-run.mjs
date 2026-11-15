@@ -1,6 +1,6 @@
 /** module: [[whygraph-closed-runner]] */
 import { spawn, spawnSync } from 'node:child_process';
-import { closeSync, cpSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, writeFileSync, chmodSync, lstatSync, readlinkSync } from 'node:fs';
+import { closeSync, cpSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, writeFileSync, chmodSync, lstatSync, readlinkSync, realpathSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomUUID, createHash } from 'node:crypto';
 import { closedClient, closedConfinement, ablatedStores, startClosedStore, storeFingerprint } from './closed-store.mjs';
@@ -87,7 +87,7 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     const decisions=readQuery(stores.graph,'MATCH (d:Decision) RETURN d.id AS id, d.title AS title ORDER BY d.id LIMIT 1');
     if(!names.length||!decisions.length) throw new Error('health check needs a symbol and a decision');
     const symbol=String(names[0].id).replace(/#([^#]*)$/,':$1');
-    const health={condition,full:storeFingerprint(stores.graph),current:storeFingerprint(prepared.store),answers:[]};
+    const health={condition,stores:{full:realpathSync(stores.graph),current:realpathSync(prepared.store)},full:storeFingerprint(stores.graph),current:storeFingerprint(prepared.store),answers:[]};
     for(const args of [['carry',symbol],['why',symbol],['impact',String(decisions[0].id)],['search',String(decisions[0].title)]]) {
       const answer=await new Promise((resolve,reject)=>{
         const child=spawn(confinement[0],[...confinement.slice(1),'--','/tools/whygraph',...args],{env:quiet});const out=[],err=[];
