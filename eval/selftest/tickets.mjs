@@ -4,6 +4,7 @@
  * Expectations come from tickets/pilot-failures.md and README.md, not implementation.
  */
 import assert from 'node:assert/strict';
+import { copyRegistry } from './registry-fixture.mjs';
 import { cpSync, readFileSync, writeFileSync, mkdirSync, mkdtempSync, readdirSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
@@ -33,6 +34,7 @@ function generatedFixture(scratch, name, source = requests, ranges = targets, co
   const base = join(scratch, name);
   mkdirSync(join(base, 'tickets'), { recursive: true });
   mkdirSync(join(base, 'tasks'), { recursive: true });
+  copyRegistry(base);
   writeFileSync(join(base, 'tickets/requests.json'), JSON.stringify(source));
   writeFileSync(join(base, 'tickets/targets.json'), JSON.stringify(ranges));
   const script = join(base, 'tickets/make-tasks.mjs');
@@ -75,6 +77,7 @@ function metadata(tasks, source = requests, ranges = targets) {
 async function plantedScorer(scratch, name, body) {
   const signature = 'export function scoreRun(task, run)';
   assert.equal(scorer.split(signature).length, 2, 'scoreRun public signature moved');
+  copyRegistry(scratch);
   const path = join(scratch, `${name}.mjs`);
   writeFileSync(path, scorer.replace(signature, 'function originalScoreRun(task, run)') + `\nexport function scoreRun(task, run) { ${body} }\n`);
   return (await import(pathToFileURL(path).href)).scoreRun;
@@ -350,7 +353,7 @@ export async function ticketChecks({ tasks, scoreRun, recordIds }) {
     const at = join(base, 'eval');
     const results = join(at, 'results');
     mkdirSync(results, { recursive: true });
-    for (const file of ['run.mjs', 'score.mjs', 'tasks']) cpSync(join(root, 'eval', file), join(at, file), { recursive: true });
+    for (const file of ['run.mjs', 'opencode.mjs', 'score.mjs', 'registry.mjs', 'registry.json', 'tasks']) cpSync(join(root, 'eval', file), join(at, file), { recursive: true });
     let emptyPlan;
     const done = new Set();
     for (const count of [0, 17, 90]) {

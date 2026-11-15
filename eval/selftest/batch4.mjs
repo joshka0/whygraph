@@ -5,6 +5,7 @@
  * All constructed results and faulty copies are retained under test-results/.
  */
 import assert from 'node:assert/strict';
+import { copyRegistry } from './registry-fixture.mjs';
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -186,6 +187,7 @@ export async function batch4Checks({ tasks, scoreRun }) {
   function generatorFixture(name, { source = requests, target = ranges, control = controls, suffix = '' } = {}) {
     const base = join(scratch, name);
     mkdirSync(join(base, 'tickets'), { recursive: true }); mkdirSync(join(base, 'tasks'));
+    copyRegistry(base);
     for (const [f, value] of [['requests', source], ['targets', target], ['controls', control]]) {
       if (value !== null) writeFileSync(join(base, `tickets/${f}.json`), JSON.stringify(value));
     }
@@ -395,7 +397,7 @@ export async function batch4Checks({ tasks, scoreRun }) {
   const planned = allIds.flatMap(id => ['none', 'graph', 'stub'].flatMap(c => [1, 2, 3].map(r => `${id}__${c}__r${r}`)));
   add('plan has 216 distinct runs independent of existing results and writes nothing', () => {
     const base = join(scratch, 'plan'), at = join(base, 'eval'), results = join(at, 'results'); mkdirSync(results, { recursive: true });
-    for (const file of ['run.mjs', 'score.mjs', 'tasks']) cpSync(join(root, 'eval', file), join(at, file), { recursive: true });
+    for (const file of ['run.mjs', 'opencode.mjs', 'score.mjs', 'registry.mjs', 'registry.json', 'tasks']) cpSync(join(root, 'eval', file), join(at, file), { recursive: true });
     const bin = join(base, 'bin'); mkdirSync(bin);
     for (const name of ['claude', 'relate', 'memod', 'whygraph']) {
       writeFileSync(join(bin, name), `#!${process.execPath}\nimport {writeFileSync} from 'node:fs'; writeFileSync(${JSON.stringify(join(base, 'unexpected-tool-call'))}, ${JSON.stringify(name)}); process.exit(70);\n`, { mode: 0o755 });
@@ -425,6 +427,7 @@ export async function batch4Checks({ tasks, scoreRun }) {
   async function mutant(name, body) {
     const original = read(join(root, 'eval/score.mjs')), signature = 'export function scoreRun(task, run)';
     assert.equal(original.split(signature).length, 2);
+    copyRegistry(scratch);
     const path = join(scratch, `plant-${name}.mjs`);
     writeFileSync(path, original.replace(signature, 'function originalScoreRun(task, run)') + `\nexport function scoreRun(task, run) { ${body} }\n`);
     return (await import(pathToFileURL(path).href)).scoreRun;
@@ -445,6 +448,7 @@ export async function batch4Checks({ tasks, scoreRun }) {
   });
   add('plant named-and-changed off by one caught by conflict quadrants case', () => {
     diagnosticCheck(text());
+    copyRegistry(scratch);
     const path = join(scratch, 'plant-off-by-one.mjs');
     const prefix = `const writeB4 = process.stdout.write.bind(process.stdout); process.stdout.write = (chunk, ...args) => writeB4(typeof chunk === 'string' ? chunk.replace('named the ticket and changed a file: 1', 'named the ticket and changed a file: 2') : chunk, ...args);\n`;
     writeFileSync(path, prefix + read(join(root, 'eval/score.mjs')).replace(/^#!.*\n/, ''));

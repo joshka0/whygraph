@@ -1,0 +1,264 @@
+{
+  "contract": [
+    "eval/tickets/batch6-failures.md",
+    "eval/README.md: Batch 6, fixed before its first run",
+    "docs/adr/0008-eval-ticket-registry.md"
+  ],
+  "scope": "Independent tests only. No production file, trial, model call, dependency install or push.",
+  "existing_cases": {
+    "before_fixture_repair": "656/714, as stated in the brief",
+    "after_fixture_repair": "714/714, exit 0",
+    "change": "Copy registry.mjs and registry.json beside each copied generator, runner and scorer; copied runners also retain opencode.mjs. No earlier expectation changes."
+  },
+  "coverage": [
+    {
+      "item": "B6-01",
+      "cases": "unknown repo refused by runner, generator and scorer before writes"
+    },
+    {
+      "item": "B6-02",
+      "cases": "each missing repo field; key/name mismatch"
+    },
+    {
+      "item": "B6-03",
+      "cases": "missing/invalid registry fields; fixed batches 1 to 6; third repo/batch generator, plan and report"
+    },
+    {
+      "item": "B6-04",
+      "cases": "wrong repo and unknown batch rejected by runner and scorer; earlier fixture cases retained"
+    },
+    {
+      "item": "B6-05",
+      "cases": "missing ready marker, repo and store refuse without work mutation or child calls",
+      "not_exercised": "The parent-owned template build is not run."
+    },
+    {
+      "item": "B6-06",
+      "cases": "ready hono and ripgrep reused in all three graph-tool conditions; template bytes unchanged; no git source refresh; separate stores and internal relative links; wrong-store plant"
+    },
+    {
+      "item": "B6-07",
+      "cases": "each missing and malformed blind file refuses without task writes"
+    },
+    {
+      "item": "B6-08",
+      "cases": "each changed whitespace byte, missing recorded hash and malformed hash refuses; all five fixed hashes verified"
+    },
+    {
+      "item": "B6-09",
+      "cases": "29 requests, 31 requests and nonarray requests, with updated hashes"
+    },
+    {
+      "item": "B6-10",
+      "cases": "missing/extra plain and governed entries and nonarrays, with updated hashes"
+    },
+    {
+      "item": "B6-11",
+      "cases": "each missing/invalid request field; malformed ticket values; wording, shared terms and also arrays; valid empty shared terms and digit-only numeric tickets"
+    },
+    {
+      "item": "B6-12",
+      "cases": "each plain field missing, null, empty, whitespace-only or numeric"
+    },
+    {
+      "item": "B6-13",
+      "cases": "each governed field missing, null, empty, whitespace-only or numeric; invalid ticket form"
+    },
+    {
+      "item": "B6-14",
+      "cases": "duplicates within each set and across all pairs of request/plain/governed sets"
+    },
+    {
+      "item": "B6-15",
+      "cases": "invalid expressions in both control sets; exact expression bytes and case-insensitive diff matching"
+    },
+    {
+      "item": "B6-16",
+      "cases": "targets nonarray, missing, duplicate, unknown id, missing id, nonarray list, null entry and invalid file/symbol"
+    },
+    {
+      "item": "B6-17",
+      "cases": "empty/no range, fractional endpoints, zero start and reversed range are skipped; full mixed valid/invalid list retained"
+    },
+    {
+      "item": "B6-18",
+      "cases": "each wording shortage reports wording, required count and actual count before writes"
+    },
+    {
+      "item": "B6-19",
+      "cases": "known 7/7/6 selection from reversed synthetic inputs; verbatim sources and targets; exactly 20/5/8; two identical generations"
+    },
+    {
+      "item": "B6-20",
+      "cases": "missing file, empty, nonarray, duplicate, nonstring and invalid sample ids; unrelated valid sample does not filter selection"
+    },
+    {
+      "item": "B6-21",
+      "cases": "source and all also records; protected all; no exception; ticket spellings and near misses; text, mode, binary, add, delete, rename and amendment diffs"
+    },
+    {
+      "item": "B6-22",
+      "cases": "both generated control sets use only added-line/file matching; empty, wrong file, removed, reply-only, split lines, mode-only, objection and extra edits; separate report rates"
+    },
+    {
+      "item": "B6-23",
+      "cases": "all earlier task bytes compared with c92205d; earlier task and score plants/preservation checks; small report compared with historical scorer; required saved score byte comparison"
+    },
+    {
+      "item": "B6-24",
+      "cases": "297 distinct cells in fresh copied results, fixed conditions/model, no writes or template access; done and unscored markers reduce pending cells"
+    },
+    {
+      "item": "B6-25",
+      "cases": "none/unknown rejected in plan, prepare and saved done/error results, including JSON; earlier batch 4/5 plans retained"
+    },
+    {
+      "item": "B6-26",
+      "cases": "exact launcher, skill and rule bytes compared with c92205d; batch 6 missing/wrong version, malformed stream, isolation, timeout and success probes; inherited batch 5 launcher/environment/retry-marker cases",
+      "not_exercised": "No real agent is started. The nonexported CLI retry loop is not run; CLI invocations always include --plan."
+    },
+    {
+      "item": "B6-27",
+      "cases": "no block for invalid-only results; poisoned invalid logs ignored; append after every earlier byte; JSON finished only"
+    },
+    {
+      "item": "B6-28",
+      "cases": "fixed titles/counts, per-task paired means and intervals, three comparisons without none, missing pairs, conflict-only rates and wording dashes"
+    },
+    {
+      "item": "B6-29",
+      "cases": "finished quadrants; graph and graph-nosearch answer sources and naming groups; source/also tickets; following digit, input-only, other tool/command, unrelated and truncated-away misses; inherited 4000-character extraction case"
+    },
+    {
+      "item": "B6-30",
+      "cases": "own governed-ticket shown/pass/unchanged diagnostic; missing own ticket remains zero even when the diff passes",
+      "not_exercised": "The parent's live store inclusion gate has no callable contract in the named black-box APIs. It requires the parent-owned store and is not replaced with a test-side gate."
+    },
+    {
+      "item": "B6-31",
+      "cases": "once-per-kind calls including both controls; exact tokens/cost; missing cost zero; errors/unscored listed separately; conflict-only FAIL sensitivity; error-only reports and finished-only JSON"
+    },
+    {
+      "item": "B6-32",
+      "cases": "repaired dependency copies; missing registry module or JSON fails visibly without fallback"
+    }
+  ],
+  "plants": [
+    {
+      "fault": "Seven other-words and six same-words instead of 6/7",
+      "owner": "B6-19 reversed selection",
+      "receipt": "plant-1-quota-receipt.json"
+    },
+    {
+      "fault": "Unranged request selected",
+      "owner": "B6-17 eligibility",
+      "receipt": "plant-2-unranged-receipt.json"
+    },
+    {
+      "fault": "Changed blind byte accepted",
+      "owner": "B6-08 hash refusal",
+      "receipt": "plant-3-hash-receipt.json"
+    },
+    {
+      "fault": "Task written before validation",
+      "owner": "B6-10 atomic refusal",
+      "receipt": "plant-4-early-write-receipt.json"
+    },
+    {
+      "fault": "Batch 6 plans none",
+      "owner": "B6-24 plan",
+      "receipt": "plant-5-none-receipt.json"
+    },
+    {
+      "fault": "Batch 5 task byte changes",
+      "owner": "B6-23 preservation",
+      "receipt": "plant-6-old-task-receipt.json"
+    },
+    {
+      "fault": "Batch 6 report names ripgrep",
+      "owner": "B6-28 titles",
+      "receipt": "plant-7-display-receipt.json"
+    },
+    {
+      "fault": "Governed controls pooled with plain controls",
+      "owner": "B6-22 separate controls",
+      "receipt": "plant-8-pooled-receipt.json"
+    },
+    {
+      "fault": "Hono receives ripgrep store",
+      "owner": "B6-06 ready store",
+      "receipt": "plant-9-wrong-store-receipt.json"
+    }
+  ],
+  "contract_silence": [
+    "B6-11 fixes digit-only ticket numbers but does not fix their JSON type. Tests accept integral digit-only numbers in record/also and preserve the source entry. A parent ruling is needed if strings alone were intended.",
+    "The slash in B6-11 bad field/request does not explicitly say whether both names are mandatory. The 12 red cases use the stricter field-name reading and ignore incidental source lines in error stacks."
+  ],
+  "production_disagreements": [
+    {
+      "item": "B6-11",
+      "state": "Measured: 12 diagnostic cases fail. Each invalid input is refused before writes.",
+      "contract_reading": "Identifies the bad field/request requires the specific record or also field to be named.",
+      "observed": "The diagnostic is Error: case-01: invalid ticket number. It names the request, but not record or also.",
+      "parent_decision": "Decide whether naming the request alone meets B6-11. Tests retain the field-name reading until that ruling."
+    }
+  ],
+  "verification": {
+    "selftest": "node eval/selftest/check.mjs > test-results/batch6-final-check.txt 2>&1",
+    "saved_score": "node eval/score.mjs | diff - eval/score.txt",
+    "typecheck": "pnpm check",
+    "ownership": "node_modules/.bin/memod lint",
+    "readme": "node scripts/readme-check.mjs",
+    "full_suite": "Not required: no file under test/ changes."
+  },
+  "retained_evidence": "test-results/batch6-*.txt and test-results/batch6-selftest-*/. Each killed plant writes an assertion receipt beside its copied code and fixtures. Scratch is retained as the brief requires.",
+  "results": {
+    "command": "node eval/selftest/check.mjs",
+    "total": 1061,
+    "passed": 1049,
+    "failed": 12,
+    "exit": 1,
+    "existing_passed": 714,
+    "new_passed": 335,
+    "new_total": 347,
+    "plants_caught": 9
+  },
+  "verification_results": {
+    "pnpm check": {
+      "exit": 0
+    },
+    "memod lint": {
+      "exit": 0
+    },
+    "node scripts/readme-check.mjs": {
+      "exit": 0,
+      "commands": 14,
+      "drifted": 0
+    },
+    "node eval/score.mjs | diff - eval/score.txt": {
+      "exit": 0,
+      "output_bytes": 0
+    },
+    "template/version/timeout probes after ready-marker fixture cleanup": {
+      "command": "Retained in test-results/batch6-template-final-check.txt",
+      "passed": 17,
+      "total": 17,
+      "exit": 0
+    }
+  },
+  "failure_case_names": [
+    "B6 B6-11 requests.json record=undefined",
+    "B6 B6-11 requests.json record=null",
+    "B6 B6-11 requests.json record=\"\"",
+    "B6 B6-11 requests.json also=undefined",
+    "B6 B6-11 requests.json also=null",
+    "B6 B6-11 requests.json also=\"\"",
+    "B6 B6-11 requests.json also=\" \"",
+    "B6 B6-11 requests.json also=42",
+    "B6 B6-11 invalid record \"12x\"",
+    "B6 B6-11 invalid record 42.5",
+    "B6 B6-11 invalid record -1",
+    "B6 B6-11 invalid also [\"x\"]"
+  ],
+  "last_proof": "test-results/batch6-selftest-lHFA4z"
+}

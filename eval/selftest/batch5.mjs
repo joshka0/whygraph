@@ -4,6 +4,7 @@
  * fixtures, public calls and boundary mutants are retained under test-results/.
  */
 import assert from 'node:assert/strict';
+import { copyRegistry } from './registry-fixture.mjs';
 import fs from 'node:fs';
 import {syncBuiltinESMExports} from 'node:module';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, symlinkSync, writeFileSync } from 'node:fs';
@@ -40,6 +41,7 @@ function snapshot(dir) {
 }
 function copyHarness(base) {
   const at = join(base,'eval'); mkdirSync(at,{recursive:true});
+  copyRegistry(at);
   for (const f of ['run.mjs','opencode.mjs','score.mjs','tasks']) cpSync(join(root,'eval',f),join(at,f),{recursive:true});
   return at;
 }
@@ -178,7 +180,7 @@ export async function batch5Checks({tasks,scoreRun}) {
     for(const t of ts){assert.equal(t.repo,'ripgrep');if(t.kind==='conflict'){const old=tasks.get(t.id.replace('ripgrep5','ripgrep4'));assert.equal(t.request,old.request);assert.deepEqual(t.ground_truth,old.ground_truth);assert.deepEqual(t.score,old.score);}else{const s=[...sourceControls,...sourceGov].find(s=>t.id.endsWith(s.id));assert.equal(t.kind,'control');assert.equal(t.request,s.request);assert.deepEqual(t.ground_truth.source,s);assert.deepEqual(t.score.done,[{file:s.file,added:s.added}]);}}
   });
   function generatorFixture(name,{gov=sourceGov,plain=sourceControls,reverse=false,omitBatch5=false}={}){
-    const at=join(scratch,name);mkdirSync(join(at,'tickets'),{recursive:true});mkdirSync(join(at,'tasks'));for(const f of readdirSync(join(root,'eval/tasks')))if(!omitBatch5||!f.startsWith('ripgrep5-'))cpSync(join(root,'eval/tasks',f),join(at,'tasks',f));cpSync(join(root,'eval/tickets/make-tasks.mjs'),join(at,'tickets/make-tasks.mjs'));
+    const at=join(scratch,name);mkdirSync(join(at,'tickets'),{recursive:true});copyRegistry(at);mkdirSync(join(at,'tasks'));for(const f of readdirSync(join(root,'eval/tasks')))if(!omitBatch5||!f.startsWith('ripgrep5-'))cpSync(join(root,'eval/tasks',f),join(at,'tasks',f));cpSync(join(root,'eval/tickets/make-tasks.mjs'),join(at,'tickets/make-tasks.mjs'));
     for(const file of ['requests','targets']){const value=json(join(root,`eval/tickets/${file}.json`));writeFileSync(join(at,`tickets/${file}.json`),JSON.stringify(reverse?value.reverse():value));}
     for(const [name,value]of [['controls',plain],['controls2',gov]])if(value!==null){
       const bytes=name==='controls2'&&value===sourceGov?readFileSync(join(root,'eval/tickets/controls2.json')):JSON.stringify(value);
