@@ -292,7 +292,7 @@ const RANGE_TERM_HEADING = "Decision records that share the most distinctive ter
 const RANGE_TERM_EMPTY = "No decision record other than those above shares a distinctive term with these lines.";
 
 /**
- * The term-bridge lines over a set of lines, for `carry`'s range form and `search --at`: the heading and the candidates not already listed, or one line saying why none.
+ * The term-bridge lines over a set of lines, for `carry`'s range form: the heading and the candidates not already listed, or one line saying why none.
  * owns: [[whygraph-answers]]
  */
 export function rangeTermLines(section: TermSection, linked: ReadonlySet<string>): readonly string[] {
