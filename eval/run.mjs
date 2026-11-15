@@ -420,9 +420,9 @@ function runAgent(args, cwd, env, outFile, errFile, agent = 'claude') {
   });
 }
 
-function archiveResult(out, group) {
-  const dest = join(RESULTS, group, `${out.split('/').at(-1)}__${Date.now()}__${randomUUID()}`);
-  mkdirSync(join(RESULTS, group), { recursive: true });
+function archiveResult(out, group, results=RESULTS) {
+  const dest = join(results, group, `${out.split('/').at(-1)}__${Date.now()}__${randomUUID()}`);
+  mkdirSync(join(results, group), { recursive: true });
   renameSync(out, dest);
   return dest;
 }
@@ -517,29 +517,46 @@ export async function runOne(task, condition, repeat, allIds) {
 }
 
 
-async function settleClosedCell(p, allIds) {
-  const ledgerDir=join(RESULTS,'_ledger');mkdirSync(ledgerDir,{recursive:true});
-  const ledgerFile=join(ledgerDir,`${p.id}.json`);
-  const attempts=existsSync(ledgerFile)?JSON.parse(readFileSync(ledgerFile,'utf8')):[];
-  if(attempts.length>=2) throw new Error(`attempt budget exhausted for ${p.id}; inspect and archive the cell before restarting`);
-  while(attempts.length<2) {
-    if(attempts.some(a=>a.kind==='running')) throw new Error(`interrupted attempt ${p.id}; inspect its files before continuing`);
-    attempts.push({kind:'running'});writeFileSync(ledgerFile,JSON.stringify(attempts,null,2));
-    let meta=await runOne(p.task,p.condition,p.repeat,allIds);
-    attempts.pop();
-    if(meta.status==='done') {
-      attempts.push({kind:'done',meta});writeFileSync(ledgerFile,JSON.stringify(attempts,null,2));return meta;
-    }
-    const kind=meta.reason?.startsWith('harness failure:') ? 'harness' : meta.reason==='isolation breach' || meta.timed_out ? 'agent' : 'harness';
-    const archived=archiveResult(join(RESULTS,p.id),kind==='agent'?'_attempts':'_invalid');
-    attempts.push({kind,archived,meta});writeFileSync(ledgerFile,JSON.stringify(attempts,null,2));
-    if(attempts.length===2) {
-      const unscored=attempts.every(a=>a.kind==='agent');
-      meta={...meta,status:unscored?'error':'invalid',unscored,...(!unscored?{reason:'harness failure after one retry'}:{}),attempts:attempts.map(a=>a.archived)};
-      mkdirSync(join(RESULTS,p.id),{recursive:true});writeFileSync(join(RESULTS,p.id,'meta.json'),JSON.stringify(meta,null,2));
-      if(!meta.unscored) throw new Error(`harness failure after one retry ${p.id}; both attempts archived`);
+/** Apply the recorded retry rule with an injected attempt runner and result directory.
+ * owns: [[whygraph-eval-runner]]
+ */
+export async function settleCell(p, allIds=[], {runAttempt=runOne, results=RESULTS, rule}={}) {
+  const {attemptDecision}=await import('../scripts/attempts.pure.ts');
+  rule??=evalBatch(p.task.batch).storeAccess==='closed'?'closed':evalBatch(p.task.batch).agent==='opencode'?'opencode':'single';
+  const ledgerDir=join(results,'_ledger'), ledgerFile=join(ledgerDir,`${p.id}.json`);
+  const attempts=rule==='closed'&&existsSync(ledgerFile)?JSON.parse(readFileSync(ledgerFile,'utf8')):[];
+  const save=()=>{if(rule==='closed'){mkdirSync(ledgerDir,{recursive:true});writeFileSync(ledgerFile,JSON.stringify(attempts,null,2));}};
+  for(;;) {
+    const action=attemptDecision(rule,attempts);
+    let meta=attempts.at(-1)?.meta;
+    if(action.kind==='settled')return meta;
+    if(action.kind==='stop'&&action.reason==='interrupted')throw new Error(`interrupted attempt ${p.id}; inspect its files before continuing`);
+    if(action.kind==='stop'&&action.reason==='exhausted')throw new Error(`attempt budget exhausted for ${p.id}; inspect and archive the cell before restarting`);
+    if(action.kind==='unscored'||action.kind==='stop') {
+      if(rule==='closed')meta={...meta,status:action.kind==='unscored'?'error':'invalid',unscored:action.kind==='unscored',...(action.kind==='stop'?{reason:'harness failure after one retry'}:{}),attempts:attempts.map(a=>a.archived)};
+      else if(action.kind==='unscored')meta=meta.status==='invalid'?{...meta,status:'error',unscored:true,timed_out:false}:{...meta,unscored:true};
+      if(rule==='closed'||action.kind==='unscored'){
+        mkdirSync(join(results,p.id),{recursive:true});writeFileSync(join(results,p.id,'meta.json'),JSON.stringify(meta,null,2));
+      }
+      if(action.kind==='stop') {
+        if(rule==='opencode') {
+          if(attempts[0]?.meta.status==='invalid'&&attempts[1]?.meta.status==='invalid')throw new Error(`repeated harness failure ${p.id}: ${meta.reason}; archived ${meta.archived}`);
+          throw new Error(`harness failure on timeout retry ${p.id}: ${meta.reason}; archived ${meta.archived}`);
+        }
+        throw new Error(`harness failure after one retry ${p.id}; both attempts archived`);
+      }
       return meta;
     }
+    if(rule==='opencode'&&attempts.length) {
+      if(meta.status==='invalid')console.error(`invalid ${p.id}: ${meta.reason}; archived ${meta.archived}; retrying once`);
+      else console.error(`timeout ${p.id}; retrying once`);
+    }
+    attempts.push({kind:'running'});save();
+    meta=await runAttempt(p.task,p.condition,p.repeat,allIds);
+    attempts.pop();
+    const kind=meta.status==='done'?'done':meta.reason?.startsWith('harness failure:')?'harness':meta.reason==='isolation breach'||meta.timed_out?'agent':'harness';
+    const archived=rule==='closed'&&kind!=='done'?archiveResult(join(results,p.id),kind==='agent'?'_attempts':'_invalid',results):meta.archived;
+    attempts.push({kind,meta,...(archived?{archived}:{})});save();
   }
 }
 
@@ -601,34 +618,7 @@ async function main(argv) {
     while (next < todo.length) {
       const p = todo[next++];
       console.log(`start ${p.id}`);
-      let m;
-      if (evalBatch(p.task.batch).storeAccess === 'closed') {
-        m = await settleClosedCell(p, allIds);
-      } else m = await runOne(p.task, p.condition, p.repeat, allIds);
-      if (evalBatch(p.task.batch).storeAccess !== 'closed' && evalBatch(p.task.batch).agent === 'opencode') {
-        if (m.status === 'invalid') {
-          const firstReason = m.reason;
-          console.error(`invalid ${p.id}: ${m.reason}; archived ${m.archived}; retrying once`);
-          m = await runOne(p.task, p.condition, p.repeat, allIds);
-          if (m.status === 'invalid') {
-            if (firstReason !== 'isolation breach' || m.reason !== 'isolation breach') throw new Error(`repeated harness failure ${p.id}: ${m.reason}; archived ${m.archived}`);
-            // Both invalid attempts stay archived. This marker alone makes the cell
-            // resumable and visible in the existing unscored/sensitivity reports.
-            m = { ...m, status: 'error', unscored: true, timed_out: false };
-            mkdirSync(join(RESULTS, p.id), { recursive: true });
-            writeFileSync(join(RESULTS, p.id, 'meta.json'), JSON.stringify(m, null, 2));
-          }
-        }
-        if (m.timed_out) {
-          console.error(`timeout ${p.id}; retrying once`);
-          m = await runOne(p.task, p.condition, p.repeat, allIds);
-          if (m.status === 'invalid') throw new Error(`harness failure on timeout retry ${p.id}: ${m.reason}; archived ${m.archived}`);
-          if (m.timed_out) {
-            m.unscored = true;
-            writeFileSync(join(RESULTS, p.id, 'meta.json'), JSON.stringify(m, null, 2));
-          }
-        }
-      }
+      const m = await settleCell(p, allIds);
       if (m.status !== 'done') failed++;
       console.log(`${m.status.padEnd(5)} ${p.id}  ${Math.round(m.wall_ms / 1000)}s  ${m.tokens.total} tokens`);
     }
