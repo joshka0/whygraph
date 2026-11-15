@@ -185,11 +185,14 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
  */
 export async function startClosedShell({work,repo,client,socket,log}) {
   let failures=0, calls=0, stopped=false;
-  const connections=new Set(), children=new Set(), completions=new Set();
+  const connections=new Set(), children=new Map(), completions=new Set(), scopeErrors=[];
   const kill=child=>{
     child.stdout.resume();child.stderr.resume();
-    if(!child.pid)return;
-    try { process.kill(-child.pid,'SIGKILL'); } catch(error) { if(error.code!=='ESRCH')throw error; }
+    const scope=children.get(child);
+    if(!scope || scope.cancelled)return;
+    scope.cancelled=true;
+    scope.timer=setTimeout(()=>scope.fail(new Error('command scope did not terminate within 10000 ms')),10000);
+    if(scope.ready)scope.kill();
   };
   const server=createServer(connection=>{
     connections.add(connection);
@@ -215,15 +218,16 @@ export async function startClosedShell({work,repo,client,socket,log}) {
       if(ended)return;
       input=Buffer.concat([input,chunk]);
       if(!started) {
-        if(input.length>1<<20){fail('request too large');connection.destroy();return;}
         if(input.length<4)return;
         const count=input.readUInt32BE();
         if(count<1||count>1024){fail('invalid argument count');return;}
         let at=4;const args=[];
         for(let i=0;i<count;i++) {
+          if(at+4>1<<20){fail('request too large');return;}
           if(input.length<at+4)return;
           const size=input.readUInt32BE(at);at+=4;
           if(size>1<<20){fail('argument too large');return;}
+          if(at+size>1<<20){fail('request too large');return;}
           if(input.length<at+size)return;
           args.push(input.subarray(at,at+size).toString());at+=size;
         }
@@ -235,13 +239,33 @@ export async function startClosedShell({work,repo,client,socket,log}) {
         const confinement=closedConfinement({work,repo,client,socket});
         const atCwd=confinement.indexOf('--chdir');confinement[atCwd+1]=cwd;
         appendFileSync(log,JSON.stringify({event:'start',args,cwd})+'\n');
-        child=spawn(confinement[0],[...confinement.slice(1),'--','/bin/bash',...args],{
-          detached:true,env:{PATH:'/tools:/usr/bin:/bin',HOME:'/home/agent',LANG:'C.UTF-8',RELATE_TELEMETRY:'0',DO_NOT_TRACK:'1'},stdio:['pipe','pipe','pipe'],
+        child=spawn(confinement[0],[...confinement.slice(1),'--info-fd','3','--block-fd','4','--','/bin/bash',...args],{
+          detached:true,env:{PATH:'/tools:/usr/bin:/bin',HOME:'/home/agent',LANG:'C.UTF-8',RELATE_TELEMETRY:'0',DO_NOT_TRACK:'1'},stdio:['pipe','pipe','pipe','pipe','pipe'],
         });
-        children.add(child);
-        const completed=new Promise(resolve=>child.once('close',(code,signal)=>{
-          children.delete(child);completions.delete(completed);finish(code,signal);resolve();
-        }));completions.add(completed);
+        const scope={ready:false,cancelled:false,timer:undefined,kill:()=>{
+          witness?.kill('SIGTERM');
+          if(!child.pid || child.exitCode!==null || child.signalCode!==null)return;
+          try { process.kill(-child.pid,'SIGKILL'); } catch(error) { if(error.code!=='ESRCH')throw error; }
+        }};
+        children.set(child,scope);
+        const closed=new Promise(resolve=>child.once('close',(code,signal)=>resolve({code,signal})));
+        let witness;
+        const reaped=new Promise((resolve,reject)=>{
+          scope.fail=reject;
+          // The helper opens a pidfd before releasing bwrap's startup barrier.
+          // Its poll completes only after namespace PID 1 finishes kernel teardown.
+          witness=spawn(client,[],{argv0:'shell-scope',stdio:[child.stdio[3],'pipe','pipe',child.stdio[4]]});
+          child.stdio[3].destroy();child.stdio[4].destroy();
+          witness.stdout.once('data',()=>{scope.ready=true;if(scope.cancelled)scope.kill();});
+          witness.stderr.on('data',bytes=>appendFileSync(log,JSON.stringify({event:'scope-error',message:bytes.toString()})+'\n'));
+          witness.once('error',reject);
+          witness.once('close',(code,signal)=>code===0||!child.pid?resolve():reject(new Error(`command scope witness exited ${code??signal}`)));
+        });
+        const completed=Promise.all([closed,reaped]).then(([{code,signal}])=>finish(code,signal)).catch(error=>{
+          scopeErrors.push(error);fail(error.message);scope.kill();witness?.kill('SIGKILL');
+        }).finally(()=>{
+          clearTimeout(scope.timer);children.delete(child);completions.delete(completed);
+        });completions.add(completed);
         child.once('error',error=>fail(error.message));
         child.stdin.on('error',()=>{});
         for(const [stream,type] of [[child.stdout,1],[child.stderr,2]]) {
@@ -265,13 +289,14 @@ export async function startClosedShell({work,repo,client,socket,log}) {
   await new Promise((ok,fail)=>{server.once('error',fail);server.listen(join(work,'shell.sock'),ok);});
   const cancel=()=>{
     stopped=true;
-    for(const child of children)kill(child);
+    for(const child of children.keys())kill(child);
     for(const connection of connections)connection.destroy();
   };
   const stop=async()=>{
     cancel();
     const closed=server.listening?new Promise((ok,fail)=>server.close(error=>error?fail(error):ok())):Promise.resolve();
     await Promise.all([closed,...completions]);
+    if(scopeErrors.length)throw new AggregateError(scopeErrors,'shell command scope cleanup failed');
   };
   return {server,stats:()=>({calls,failures}),cancel,stop};
 }

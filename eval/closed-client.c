@@ -12,6 +12,8 @@
 #include <sys/prctl.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <poll.h>
+#include <sys/syscall.h>
 static const char *unavailable = "whygraph service unavailable\n";
 static void transfer(int fd, void *buf, size_t n, int sending) {
   char *p = buf;
@@ -67,9 +69,42 @@ static int shell_client(int argc, char **argv) {
     while(left) {size_t count=left<sizeof(buf)?left:sizeof(buf);transfer(fd,buf,count,0);transfer((int)type,buf,count,1);left-=(uint32_t)count;}
   }
 }
+/* Host-only scope witness. bwrap holds its first process at --block-fd
+ * until this process has bound a pidfd to it. PID reuse cannot satisfy it. */
+static int scope_fd=-1;
+static void cancel_scope(int signal_number) {
+  (void)signal_number;
+  int saved_errno=errno;
+  if(syscall(SYS_pidfd_send_signal,scope_fd,SIGKILL,NULL,0)<0 && errno!=ESRCH) {
+    static const char error[]="shell scope cancellation failed\n";
+    ssize_t written=write(2,error,sizeof(error)-1);(void)written;_exit(70);
+  }
+  errno=saved_errno;
+}
+static int shell_scope(void) {
+  char *line=NULL;size_t size=0;int pid=0;
+  while(getline(&line,&size,stdin)>=0) {
+    int value;
+    if(sscanf(line," \"child-pid\": %d",&value)==1)pid=value;
+  }
+  free(line);
+  if(ferror(stdin)) {perror("shell scope metadata");return 70;}
+  if(pid<=0) {fputs("shell scope missing namespace pid\n",stderr);return 70;}
+  int fd=(int)syscall(SYS_pidfd_open,pid,0);
+  if(fd<0) {perror("shell scope pidfd_open");return 70;}
+  scope_fd=fd;
+  if(signal(SIGTERM,cancel_scope)==SIG_ERR) {perror("shell scope signal");return 70;}
+  if(write(3,"1",1)!=1 || write(1,"R",1)!=1) {perror("shell scope readiness");close(fd);return 70;}
+  close(3);
+  struct pollfd scope={.fd=fd,.events=POLLIN};int result;
+  do {result=poll(&scope,1,-1);}while(result<0 && errno==EINTR);
+  if(result!=1 || !(scope.revents&POLLIN)) {fputs("shell scope wait failed\n",stderr);return 70;}
+  return 0;
+}
 int main(int argc, char **argv) {
   const char *name = strrchr(argv[0],'/'); name = name ? name+1 : argv[0];
   signal(SIGPIPE,SIG_IGN);
+  if (!strcmp(name,"shell-scope")) return shell_scope();
   if (!strcmp(name,"shell-client")) return shell_client(argc,argv);
   if (strcmp(name,"whygraph")) { fputs("tool unavailable in this evaluation\n",stderr); return 126; }
   int fd = socket(AF_UNIX,SOCK_STREAM,0);

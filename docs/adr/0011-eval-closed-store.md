@@ -41,11 +41,24 @@ An ordinary user cannot remove that enforced profile. No box policy changes.
 
 Each command owns a process group and a private PID namespace. Connection
 loss, timeout and attempt cleanup kill the command group. Namespace teardown
-also ends children that create their own session. Cleanup waits for process
-closure before closing the store. `--die-with-parent` ends commands if the
+also ends children that create their own session. A host scope witness opens
+a pidfd for the namespace's first process before it releases bwrap's startup
+barrier. Cancellation signals that process through the pidfd and kills the
+command group. Cleanup waits for both command pipe closure and pidfd readiness
+before closing the store. The kernel ends the other namespace processes
+before that pidfd becomes ready. Killing the bwrap monitor alone cannot
+prove this end condition. Cancellation has a 10-second bound. If the scope
+does not end within that bound, cleanup rejects and the attempt has a harness
+failure. `--die-with-parent` ends commands if the
 runner dies. A lost launcher prints `whygraph shell launcher unavailable`,
 exits 70, and makes the attempt a harness failure. The runner owns both
 services inside one `try`/`finally`, including a partial launcher start.
+
+The shell request permits at most 1,024 fields and 1 MiB, including its
+count and field lengths. Each declared field must fit within that request
+limit. Subsequent stdin frames do not count toward the request limit, even
+when the socket delivers them with the request. Stdin frames carry at most
+8,192 bytes. The end-of-input frame has an empty payload.
 
 Each attempt starts its service before health probes and agent launch.
 The runner closes it in `finally`. Its socket lives in a unique attempt
@@ -101,7 +114,8 @@ The fixture proof must cover both carry forms and unaffected sections.
 | --- | --- | --- | --- | --- |
 | Shell listener and connections | One host attempt | Attempt | Unique socket mount | Closed in finally |
 | Command and stdin/output pipes | One launcher connection | Connection or attempt, whichever ends first | Connection identity | Exit, spawn failure, or cancellation |
-| Pending command closures | Host launcher | Attempt cleanup | Child process identity | Await close after kill |
+| Pending command closures | Host launcher | Attempt cleanup | Child process identity | Await pipe closure and scope witness after kill; reject after 10 seconds |
+| Namespace scope witness | One launcher connection | Command scope | pidfd opened before startup barrier release | Namespace first process ends; witness closes |
 | Attempt reservation | Cell ledger | Across runner restarts | Cell id and reserved entry | Result recorded or inspection required |
 
 `scripts/attempts.pure.ts:attemptDecision` contains the existing retry rules.
