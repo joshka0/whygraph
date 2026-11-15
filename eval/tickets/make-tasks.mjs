@@ -50,7 +50,8 @@ if (design.verifyInputs) {
     for (const field of ['id', 'request', 'wording', 'settled', 'why']) if (typeof entry[field] !== 'string' || !entry[field].trim()) throw new Error(`${entry.id}: missing ${field}`);
     if (!['same-words', 'partial', 'other-words'].includes(entry.wording)) throw new Error(`${entry.id}: invalid wording`);
     if (!Array.isArray(entry.shared_terms) || entry.shared_terms.some(term => typeof term !== 'string' || !term.trim())) throw new Error(`${entry.id}: invalid shared_terms`);
-    if (!Array.isArray(entry.also) || [entry.record, ...entry.also].some(number => !/^\d+$/.test(String(number)))) throw new Error(`${entry.id}: invalid ticket number`);
+    if (!/^\d+$/.test(String(entry.record))) throw new Error(`${entry.id}: invalid record (a ticket number holds only digits)`);
+    if (!Array.isArray(entry.also) || entry.also.some(number => !/^\d+$/.test(String(number)))) throw new Error(`${entry.id}: invalid also (an array of ticket numbers that hold only digits)`);
   }
   const located = new Set();
   for (const entry of locations) {
