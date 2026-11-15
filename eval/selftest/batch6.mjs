@@ -193,8 +193,9 @@ export async function batch6Checks({tasks,scoreRun}) {
     verifyPlan(node(join(at,'run.mjs'),['--plan','--only',allIds.join(','),'--repeats','3']),done);
   });
   for(const condition of ['none','unknown'])add(`B6-25 rejects explicit ${condition} in plan`,()=>{const at=fixture('bad-condition');const r=node(join(at,'run.mjs'),['--plan','--only',t.id,'--conditions',condition]);assert.notEqual(r.status,0);assert.match(r.stderr,new RegExp(condition));});
-  add('B6-26 launcher, skill and rule bytes match batch 5 baseline',()=>{
-    for(const f of ['eval/opencode.mjs','skills/whygraph/SKILL.md','skills/whygraph-rule.md']){const r=spawnSync('git',['show',`c92205d:${f}`],{cwd:root});assert.equal(r.status,0);assert.deepEqual(readFileSync(join(root,f)),r.stdout,f);}
+  add('B6-26 launcher and recorded skill/rule bytes match batch 5 baseline (ADR 0010)',async()=>{
+    const {b7}=await import('./batch7-support.mjs');
+    await b7.recordedInputs(root,6);
   });
   function killed(plant,owner,run) {
     let receipt;
