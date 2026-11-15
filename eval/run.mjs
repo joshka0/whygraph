@@ -17,6 +17,8 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readTasks } from './score.mjs';
 import { randomUUID } from 'node:crypto';
+import { batchInstructions } from './registry.mjs';
+import { batchPlan } from './registry.mjs';
 import { evalBatch, ticketRepo, evalRegistry } from './registry.mjs';
 
 const EVAL = fileURLToPath(new URL('./', import.meta.url));
@@ -235,6 +237,7 @@ export function prepare(task, condition, work, source) {
   const registered = ticketRepo(task);
   if (!batch.conditions.includes(condition)) throw new Error(`batch ${task.batch ?? 1}: condition ${condition} is not run`);
   if (agent === 'opencode' && !source) ticketTemplate(task.repo, true);
+  const instructions = batchInstructions(task.batch ?? 1);
   rmSync(work, { recursive: true, force: true });
   mkdirSync(join(work, 'bin'), { recursive: true });
   mkdirSync(join(work, 'tmp'), { recursive: true });
@@ -251,8 +254,9 @@ export function prepare(task, condition, work, source) {
     else wrapper(join(bin, 'whygraph'), 'echo "no result"\nexit 0');
     const skillDir = agent === 'opencode' ? '.opencode/skills' : '.claude/skills';
     mkdirSync(join(repo, skillDir), { recursive: true });
-    cpSync(join(WHYGRAPH, 'skills/whygraph'), join(repo, skillDir, 'whygraph'), { recursive: true });
-    appendFileSync(join(repo, agent === 'opencode' ? 'AGENTS.md' : 'CLAUDE.md'), readFileSync(join(WHYGRAPH, 'skills/whygraph-rule.md'), 'utf8'));
+    mkdirSync(join(repo, skillDir, 'whygraph'), { recursive: true });
+    writeFileSync(join(repo, skillDir, 'whygraph/SKILL.md'), instructions.skill);
+    appendFileSync(join(repo, agent === 'opencode' ? 'AGENTS.md' : 'CLAUDE.md'), instructions.rule);
   }
   if (condition === 'graph' || condition === 'graph-nosearch') {
     const env = { PATH: `${bin}:${process.env.PATH}` };
@@ -444,6 +448,17 @@ export async function runOne(task, condition, repeat, allIds) {
   if (opencode && existsSync(out)) archiveResult(out, '_attempts');
   else rmSync(out, { recursive: true, force: true });
   mkdirSync(out, { recursive: true });
+  if (evalBatch(task.batch).storeAccess === 'closed') {
+    try {
+      const source=ticketTemplate(task.repo,true);
+      const {closedAttempt}=await import('./closed-run.mjs');
+      return await closedAttempt({task,condition,repeat,workRoot:WORK,out,prompt:wrap(task.request),source:source.repo,store:source.store});
+    } catch(error) {
+      const meta={id,task:task.id,condition,repeat,status:'invalid',reason:`harness failure: ${error.message}`,wall_ms:0,tokens:{total:0}};
+      writeFileSync(join(out,'meta.json'),JSON.stringify(meta,null,2));
+      return meta;
+    }
+  }
   const work = join(WORK, id);
   const { repo, bin, base, confine } = prepare(task, condition, work);
   if (opencode) {
@@ -501,6 +516,33 @@ export async function runOne(task, condition, repeat, allIds) {
   return meta;
 }
 
+
+async function settleClosedCell(p, allIds) {
+  const ledgerDir=join(RESULTS,'_ledger');mkdirSync(ledgerDir,{recursive:true});
+  const ledgerFile=join(ledgerDir,`${p.id}.json`);
+  const attempts=existsSync(ledgerFile)?JSON.parse(readFileSync(ledgerFile,'utf8')):[];
+  if(attempts.length>=2) throw new Error(`attempt budget exhausted for ${p.id}; inspect and archive the cell before restarting`);
+  while(attempts.length<2) {
+    if(attempts.some(a=>a.kind==='running')) throw new Error(`interrupted attempt ${p.id}; inspect its files before continuing`);
+    attempts.push({kind:'running'});writeFileSync(ledgerFile,JSON.stringify(attempts,null,2));
+    let meta=await runOne(p.task,p.condition,p.repeat,allIds);
+    attempts.pop();
+    if(meta.status==='done') {
+      attempts.push({kind:'done',meta});writeFileSync(ledgerFile,JSON.stringify(attempts,null,2));return meta;
+    }
+    const kind=meta.reason?.startsWith('harness failure:') ? 'harness' : meta.reason==='isolation breach' || meta.timed_out ? 'agent' : 'harness';
+    const archived=archiveResult(join(RESULTS,p.id),kind==='agent'?'_attempts':'_invalid');
+    attempts.push({kind,archived,meta});writeFileSync(ledgerFile,JSON.stringify(attempts,null,2));
+    if(attempts.length===2) {
+      const unscored=attempts.every(a=>a.kind==='agent');
+      meta={...meta,status:unscored?'error':'invalid',unscored,...(!unscored?{reason:'harness failure after one retry'}:{}),attempts:attempts.map(a=>a.archived)};
+      mkdirSync(join(RESULTS,p.id),{recursive:true});writeFileSync(join(RESULTS,p.id,'meta.json'),JSON.stringify(meta,null,2));
+      if(!meta.unscored) throw new Error(`harness failure after one retry ${p.id}; both attempts archived`);
+      return meta;
+    }
+  }
+}
+
 function option(argv, name, fallback) {
   const at = argv.indexOf(name);
   return at >= 0 ? argv[at + 1] : fallback;
@@ -510,19 +552,11 @@ async function main(argv) {
   const tasks = readTasks();
   const only = option(argv, '--only', undefined)?.split(',');
   const chosenConditions = option(argv, '--conditions', undefined)?.split(',');
-  const repeats = Number(option(argv, '--repeats', '5'));
+  const repeats = option(argv,'--repeats',undefined);
   const jobs = Math.min(3, Number(option(argv, '--jobs', '3')));
-  for (const c of chosenConditions ?? []) if (!['none', 'graph', 'stub', 'graph-nosearch'].includes(c)) throw new Error(`unknown condition ${c}`);
+  const batchNumber=option(argv,'--batch',undefined);
   for (const t of only ?? []) if (!tasks.has(t)) throw new Error(`unknown task ${t}`);
-  const plan = [];
-  for (const t of tasks.values()) {
-    if (only && !only.includes(t.id)) continue;
-    ticketRepo(t);
-    const batch = evalBatch(t.batch);
-    const conditions = chosenConditions ?? batch.conditions;
-    for (const condition of conditions) if (!batch.conditions.includes(condition)) throw new Error(`batch ${t.batch ?? 1}: condition ${condition} is not run`);
-    for (let r = 1; r <= repeats; r++) for (const c of conditions) plan.push({ task: t, condition: c, repeat: r, id: `${t.id}__${c}__r${r}` });
-  }
+  const plan=batchPlan(tasks,{batch:batchNumber===undefined?undefined:Number(batchNumber),stage:option(argv,'--stage','full'),only,conditions:chosenConditions,repeats:repeats===undefined?undefined:Number(repeats)});
   if (argv.includes('--reextract')) {
     // Rewrites final.txt and the session fields of meta.json of every saved run from its output.jsonl.
     let n = 0;
@@ -567,8 +601,11 @@ async function main(argv) {
     while (next < todo.length) {
       const p = todo[next++];
       console.log(`start ${p.id}`);
-      let m = await runOne(p.task, p.condition, p.repeat, allIds);
-      if (evalBatch(p.task.batch).agent === 'opencode') {
+      let m;
+      if (evalBatch(p.task.batch).storeAccess === 'closed') {
+        m = await settleClosedCell(p, allIds);
+      } else m = await runOne(p.task, p.condition, p.repeat, allIds);
+      if (evalBatch(p.task.batch).storeAccess !== 'closed' && evalBatch(p.task.batch).agent === 'opencode') {
         if (m.status === 'invalid') {
           const firstReason = m.reason;
           console.error(`invalid ${p.id}: ${m.reason}; archived ${m.archived}; retrying once`);

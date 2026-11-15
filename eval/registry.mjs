@@ -12,6 +12,7 @@ for (const [name, repo] of Object.entries(registry.repos)) {
   if (repo.name !== name) throw new Error(`repo ${name}: name mismatch`);
 }
 for (const [number, batch] of Object.entries(registry.batches)) {
+  if (!['direct','closed'].includes(batch.storeAccess) || !Array.isArray(batch.controlConditions) || !batch.controlConditions.length || batch.controlConditions.some(c=>!batch.conditions?.includes(c))) throw new Error(`batch ${number}: invalid store access or control conditions`);
   if (!['claude', 'opencode'].includes(batch.agent)) throw new Error(`batch ${number}: invalid agent`);
   if (!Array.isArray(batch.conditions) || !batch.conditions.length || new Set(batch.conditions).size !== batch.conditions.length || batch.conditions.some(c => !['none', 'stub', 'graph', 'graph-nosearch', 'graph-nolink', 'graph-noterms', 'graph-norule'].includes(c))) throw new Error(`batch ${number}: invalid conditions`);
   for (const field of ['conflicts', 'plain', 'governed']) if (!Number.isInteger(batch.counts?.[field]) || batch.counts[field] < 0) throw new Error(`batch ${number}: invalid ${field} count`);
@@ -71,12 +72,12 @@ export function batchInstructions(number, cwd = new URL('..', import.meta.url)) 
  */
 export function batchPlan(tasks, { batch, stage = 'full', only, conditions, repeats } = {}) {
   if (!['full','smoke'].includes(stage)) throw new Error(`unknown stage ${stage}`);
-  if (stage==='smoke' && (!batch || batch<7 || only || conditions || repeats!==undefined)) throw new Error('smoke requires --batch >=7 without --only, --conditions or --repeats');
+  if (stage==='smoke' && (!batch || evalBatch(batch).storeAccess!=='closed' || only || conditions || repeats!==undefined)) throw new Error('smoke requires --batch >=7 without --only, --conditions or --repeats');
   let selected=[...tasks.values()].filter(t=>(batch===undefined||t.batch===batch)&&(!only||only.includes(t.id)));
   if(batch!==undefined) {
     const design=evalBatch(batch);
     if(!selected.length) throw new Error(`batch ${batch}: no tasks; waiting for blind inputs and task generation`);
-    if(batch>=7 && !only && (selected.filter(t=>t.kind==='conflict').length!==design.counts.conflicts || selected.filter(t=>t.kind==='control'&&!t.ground_truth.source.ticket).length!==design.counts.plain || selected.filter(t=>t.kind==='control'&&t.ground_truth.source.ticket).length!==design.counts.governed)) throw new Error(`batch ${batch}: incomplete task set`);
+    if(design.storeAccess==='closed' && !only && (selected.filter(t=>t.kind==='conflict').length!==design.counts.conflicts || selected.filter(t=>t.kind==='control'&&!t.ground_truth.source.ticket).length!==design.counts.plain || selected.filter(t=>t.kind==='control'&&t.ground_truth.source.ticket).length!==design.counts.governed)) throw new Error(`batch ${batch}: incomplete task set`);
   }
   selected.sort((a,b)=>a.id.localeCompare(b.id,'en'));
   if(stage==='smoke') {
@@ -86,7 +87,7 @@ export function batchPlan(tasks, { batch, stage = 'full', only, conditions, repe
   const plan=[];
   for(const task of selected) {
     ticketRepo(task);const design=evalBatch(task.batch);
-    const allowed=(task.batch>=7&&task.kind==='control')?['stub','graph']:design.conditions;
+    const allowed=task.kind==='control'?design.controlConditions:design.conditions;
     const modes=conditions??allowed;
     for(const condition of modes) if(!allowed.includes(condition)) throw new Error(`batch ${task.batch??1}: condition ${condition} is not run for ${task.kind}`);
     for(let repeat=1;repeat<=(stage==='smoke'?1:repeats??design.repeats??5);repeat++) for(const condition of modes) plan.push({task,condition,repeat,id:`${task.id}__${condition}__r${repeat}`});

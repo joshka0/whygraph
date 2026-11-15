@@ -12,7 +12,7 @@ const design = evalBatch(Number(opt('--batch'))), repo = evalRegistry.repos[desi
 if (design.selection.mode !== 'strata' || !design.sampleSeed || !repo.sourceExtensions?.length) throw new Error('sampling requires strata, sampleSeed and sourceExtensions in the registry');
 const tickets = JSON.parse(readFileSync(opt('--tickets'), 'utf8'));
 if (!Array.isArray(tickets) || new Set(tickets.map(t => t.key)).size !== tickets.length || tickets.some(t => !/^\d+$/.test(t.key) || !['open', 'closed'].includes(t.state))) throw new Error('invalid or duplicate tickets/outcomes');
-const log = execFileSync('git', ['-C', repo.source, 'log', '--format=%x1e%H%x1f%B%x1d', '--name-only'], { encoding: 'utf8', maxBuffer: 1 << 28 });
+const log = execFileSync('git', ['-C', repo.source, 'log', '--format=%x1e%H%x1f%B%x1d', '--diff-merges=first-parent', '--name-only'], { encoding: 'utf8', maxBuffer: 1 << 28 });
 const cited = new Set(), sourceCited = new Set();
 for (const chunk of log.split('\x1e').slice(1)) {
   const at = chunk.indexOf('\x1d');

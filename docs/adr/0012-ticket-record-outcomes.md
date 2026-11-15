@@ -39,7 +39,8 @@ comment ends on a Unicode character boundary. Retained comments print in
 time order with their author, association, date and source.
 
 The seeded sampler selects 60 tickets in each stratum. Cited means a commit
-that changes a configured source extension cites the ticket. Uncited means
+that changes a configured source extension cites the ticket. Merge changes
+use the first parent. Uncited means
 no commit cites it and it is closed. Hash the seed, stratum and ticket id
 to order candidates. Shortages or invalid inputs write no sample.
 

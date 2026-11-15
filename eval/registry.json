@@ -57,7 +57,13 @@
       "sha256": {},
       "verifyInputs": false,
       "hashChecks": [],
-      "instructionsCommit": "c92205d"
+      "instructionsCommit": "c92205d",
+      "storeAccess": "direct",
+      "controlConditions": [
+        "none",
+        "graph",
+        "stub"
+      ]
     },
     "2": {
       "repo": [
@@ -85,7 +91,13 @@
       "sha256": {},
       "verifyInputs": false,
       "hashChecks": [],
-      "instructionsCommit": "c92205d"
+      "instructionsCommit": "c92205d",
+      "storeAccess": "direct",
+      "controlConditions": [
+        "none",
+        "graph",
+        "stub"
+      ]
     },
     "3": {
       "repo": "ripgrep",
@@ -117,7 +129,13 @@
       },
       "verifyInputs": false,
       "hashChecks": [],
-      "instructionsCommit": "c92205d"
+      "instructionsCommit": "c92205d",
+      "storeAccess": "direct",
+      "controlConditions": [
+        "none",
+        "graph",
+        "stub"
+      ]
     },
     "4": {
       "repo": "ripgrep",
@@ -150,7 +168,13 @@
       },
       "verifyInputs": false,
       "hashChecks": [],
-      "instructionsCommit": "c92205d"
+      "instructionsCommit": "c92205d",
+      "storeAccess": "direct",
+      "controlConditions": [
+        "none",
+        "graph",
+        "stub"
+      ]
     },
     "5": {
       "repo": "ripgrep",
@@ -187,7 +211,14 @@
       "hashChecks": [
         "controls2.json"
       ],
-      "instructionsCommit": "c92205d"
+      "instructionsCommit": "c92205d",
+      "storeAccess": "direct",
+      "controlConditions": [
+        "none",
+        "stub",
+        "graph",
+        "graph-nosearch"
+      ]
     },
     "6": {
       "repo": "hono",
@@ -227,7 +258,13 @@
         "controls2.json",
         "sample-ids.json"
       ],
-      "instructionsCommit": "c92205d"
+      "instructionsCommit": "c92205d",
+      "storeAccess": "direct",
+      "controlConditions": [
+        "stub",
+        "graph",
+        "graph-nosearch"
+      ]
     },
     "7": {
       "repo": "zustand",
@@ -265,7 +302,12 @@
       ],
       "instructionsCommit": null,
       "repeats": 3,
-      "sampleSeed": "whygraph-batch-7"
+      "sampleSeed": "whygraph-batch-7",
+      "storeAccess": "closed",
+      "controlConditions": [
+        "stub",
+        "graph"
+      ]
     }
   }
 }
