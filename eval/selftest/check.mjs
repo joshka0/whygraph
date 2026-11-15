@@ -12,6 +12,7 @@ import { ticketChecks } from './tickets.mjs';
 import { batch4Checks } from './batch4.mjs';
 import { batch5Checks } from './batch5.mjs';
 import { batch6Checks } from './batch6.mjs';
+import { batch7Checks } from './batch7.mjs';
 
 const tasks = readTasks();
 let wrong = 0;
@@ -32,6 +33,7 @@ const checks = [
   ...await batch4Checks({ tasks, scoreRun }),
   ...await batch5Checks({ tasks, scoreRun }),
   ...await batch6Checks({ tasks, scoreRun }),
+  ...await batch7Checks({ tasks, scoreRun }),
 ];
 for (const c of checks) {
   try {

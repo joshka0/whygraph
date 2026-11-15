@@ -1334,3 +1334,173 @@ What batch 6 cannot show:
 - What the runner should do when a timeout is followed by an isolation
   breach. The rule is not defined; the runner stops, and this batch gave
   that cell a third attempt.
+
+## Batch 7, fixed before its first run
+
+Batch 7 measures twelve conflicts on one small public TypeScript repo,
+`pmndrs/zustand`, at `9fed2eb2f3af672da9f7bf694b996df3831fc207`.
+The repo has 1,393 commits. Of its 1,934 tickets, a commit cites 954 and
+no commit cites 980. These are source inventory counts, not trial results.
+Two more repos can follow through registry data, without repo-specific code.
+The agent and model remain opencode 1.18.29 and
+`opencode-go/deepseek-v4.1-flash`. Preparation starts no trial or hosted model.
+
+**Historical inputs.** Each registry batch records `instructionsCommit`.
+Preparation reads the skill and rule from that commit with `git show`.
+Missing commits or files stop preparation before it changes a work folder.
+Batches 1 to 6 record `c92205d`. Batch 7 remains unrecorded until the parent
+cleans the skill and records its commit. This work does not edit `skills/`.
+The independent author moves B6-26's skill byte check to the recorded
+commit and keeps its launcher check. See [ADR 0010](../docs/adr/0010-eval-instruction-history.md).
+
+**Records and strata.** The unauthenticated fetcher saves raw issue and
+repository-comment pages by URL digest. A restart reuses complete pages.
+It waits out rate limits and sends only a generic client name.
+It makes no per-ticket comment or pull-request requests. The expected
+request count is ceil(tickets / 100) + ceil(comments / 100), at least two.
+Optional `--expected-tickets` and `--expected-comments` print a numeric
+estimate before fetching; without totals the output states the formula.
+Pull-request merge status comes from the issue-list `merged_at` field.
+
+The converter includes the outcome and only comments with OWNER, MEMBER or
+COLLABORATOR association. It prints comments in time order. The title and
+item texts together have an 8,000-byte UTF-8 budget. Keep the outcome, then
+newest maintainer comments, then the opening body. Cut the body first, then
+older comments; retain whole Unicode characters. Metadata and commit ids
+are outside that content budget. Earlier decisions files and stores stay
+unchanged. See [ADR 0012](../docs/adr/0012-ticket-record-outcomes.md).
+
+`sample.mjs --batch 7 --tickets <export> --out <sample>` draws 60 tickets
+per stratum with the registry's committed seed. Cited means a commit that
+changes a configured source extension cites the ticket. Uncited means no
+commit cites it and the ticket is closed. A shortage writes no sample.
+The blind author supplies requests, targets, two control files and sample
+ids in the same layout as `tickets/hono/`, with a stratum on each request
+and each sampled id. The parent records their exact SHA-256 values.
+
+`make-tasks.mjs --batch 7` refuses until those inputs and hashes exist.
+It validates all inputs before writing any task. For each stratum, sort
+requests with at least one valid positive line range by id and take the
+first six. A shortage names the stratum and writes nothing. Keep three
+plain controls and four governed controls. Pass rules remain batch 5's:
+a conflict must name a source or also ticket and change no file; a control
+must add a matching line in its specified file. Keep each source entry.
+
+**Six conditions.** Conflicts run in all conditions. Controls run in stub
+and graph only. Every condition receives the same client, repo and skill.
+The instruction file differs only by the omitted rule in graph-norule.
+
+| Condition | Rule | Store answers |
+| --- | --- | --- |
+| stub | Present | Every command returns `no result` |
+| graph | Present | Full tool |
+| graph-nolink | Present | Carry and why omit commit-linked records |
+| graph-nosearch | Present | Search returns `no result`; other commands stay full |
+| graph-noterms | Present | Carry has the no-shared-record term section |
+| graph-norule | Absent | Full tool and skill |
+
+**Closed store.** The complete agent process, including file tools, runs
+in a minimal bwrap filesystem. The run sees its repo, empty agent state,
+operating system tools, a compiled client and its own Unix socket.
+The store, product code, service code, templates and other run folders
+have no mounted path. A private PID namespace blocks host `/proc` paths.
+The agent's shell is a client of a host-owned launcher. The host starts
+each command in a separate minimal bwrap namespace with the same repo and
+tool client, no network, and no identity mount. Nested bwrap fails on this
+box under its enforced AppArmor profile. The host launcher avoids nested
+namespace creation without a policy change. Stdin, stdout, stderr and exit
+status pass through the client. Connection loss, timeout and run cleanup
+end the command and its children. The launcher closes before the store.
+The client is read-only and execute-only; capability drops prevent reads
+and permission changes. Its bytes are identical in every condition.
+
+The runner starts a separate service before health probes and agent launch.
+It closes that service in `finally`. A unique socket appears at the fixed
+path `/whygraph/service.sock` inside just that run. The protocol accepts
+only carry, why, impact and search, each with one target. It accepts no
+caller-selected store path or Cypher. Invalid invocations use the product
+parser and direct CLI diagnostics, including help. Valid unsupported commands,
+valid option-bearing invocations and embedded NUL receive exit 2 with empty
+stdout and `usage: whygraph <carry|why|impact|search> <target>\n` on stderr. A lost service prints `whygraph service unavailable`,
+exits 70, and makes the attempt a harness failure. A lost launcher prints
+`whygraph shell launcher unavailable` and has the same exit and classification.
+Full answers and file
+manifests remain outside the agent filesystem for the smoke audit.
+Batches 1 to 6 keep their earlier setup and limits.
+
+**Ablations.** Copy the resolved built store once per ablation. Graph-nolink
+removes CITES relationships. Graph-noterms removes Term nodes and MENTIONS
+relationships. Receipts record copy and mutation milliseconds. Graph
+fingerprints check every unchanged node, relationship, record text and
+search vector. No product flag, environment switch, source change or recipe
+change implements a condition.
+
+Carry omits term candidates already printed as linked decisions. A CITES
+removal alone would therefore change its term section. The eval service
+renders the full carry answer and replaces only its decision sections with
+the product's `whyAnswer` from the ablated store. Both carry forms retain
+all other bytes, including the original term de-duplication. Graph-nolink
+keeps search and impact full. Graph-noterms keeps why, impact and search
+full. See [ADR 0011](../docs/adr/0011-eval-closed-store.md).
+
+**Attempts.** Each cell has at most two attempts, across restarts too.
+The ledger reserves an attempt before launch. A failed attempt is archived
+before retry. Two agent-caused ends, whether timeout or isolation breach
+in either order, leave an unscored marker and both archives. The runner
+continues and resume skips that cell. A harness failure gets one retry;
+if the cell still fails, the runner stops with both archives. An interrupted
+reserved attempt stops visibly for inspection. The registry records each design's store access and control conditions.
+`scripts/attempts.pure.ts:attemptDecision` exposes the decision without I/O.
+`eval/run.mjs:settleCell(cell, allIds, {runAttempt, results, rule})` exposes
+the applying loop. Invented attempts can drive every order without an agent.
+`rule` is `closed`, `opencode`, or `single`; its default follows the registry.
+Closed ledgers live under `results/_ledger`. A runner rejection leaves its
+reservation for inspection. Earlier batches keep their existing rules,
+including the possible third attempt in the old invalid-then-timeout ladder.
+The 20-minute timeout and five-second kill grace remain.
+
+**Smoke and full plans.** The smoke plan uses repeat 1 of four tasks:
+the first cited conflict, first uncited conflict, first plain control and
+first governed control. It has 16 cells. The full plan has three repeats:
+12 conflicts x 6 conditions x 3, plus 7 controls x 2 x 3 = 258 cells.
+A plan reads no template, builds no store and starts no agent.
+
+```sh
+node eval/tickets/make-tasks.mjs --batch 7
+node eval/run.mjs --batch 7 --stage smoke --plan
+node eval/run.mjs --batch 7 --plan
+```
+
+The following commands are for the parent. Preparation does not run them:
+
+```sh
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/run.mjs --batch 7 --stage smoke
+node eval/smoke-check.mjs --batch 7
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/run.mjs --batch 7
+```
+
+The smoke checker prints PASS or FAIL for cell completion, ablation
+answers, file identity, denied store/code access with counts, service
+replies, scorer blocks, and tokens and wall time per run. It prints no task
+verdict or pass rate. Missing evidence fails the check. After PASS, those
+cells remain repeat 1 of the full plan. After FAIL, the parent archives the
+cells and their ledgers before another smoke run.
+
+**Reports.** Batch 7 blocks appear only when a finished or error result
+exists, after every unchanged earlier block. Conflicts print over all and
+per stratum, per condition. The primary paired difference is graph - stub.
+Also print graph minus each ablation. Use the existing seeded bootstrap
+over per-task differences, over all and per stratum. Report conflict
+quadrants, needed tickets shown in whygraph answers, plain controls and
+governed controls apart, unscored cells with FAIL sensitivity, and finished
+run tokens and reported cost per condition. Invalid attempts stay outside
+normal rates. JSON contains finished verdicts only.
+
+**Limits fixed before the run.** This batch has one agent, one model and
+twelve conflicts. An uncited ticket states a decision only as far as its
+outcome and maintainer comments state one. The model may know the repo.
+No project dependencies are installed, so the agent cannot run its tests.
+Three repeats and word/diff pass rules limit what the trial can establish.
+Saved agent tool answers still stop at 4,000 characters; service logs keep
+full answers for health checks. [Batch 7 failure cases](tickets/batch7-failures.md)
+are the contract for the independent test author.

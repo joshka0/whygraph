@@ -34,10 +34,32 @@ for (const entry of log.split("\x1e")) {
   for (const k of keys) if (byKey.has(k)) { (cites.get(k) ?? cites.set(k, []).get(k)).push(sha); hit = true; }
   if (hit) citing += 1;
 }
+// Content budget: 8,000 UTF-8 bytes across title and item texts. Keep the
+// outcome, then newest maintainer comments, then the opening body. Print kept
+// comments in chronological order. Metadata and commit ids are outside this budget.
+const clip = (text, budget) => {
+  let out = '', size = 0;
+  for (const char of String(text)) { const n = Buffer.byteLength(char); if (size + n > budget) break; out += char; size += n; }
+  return out;
+};
 const records = tickets.map((t) => {
-  const record = { id: `ticket-${t.key}`, date: t.date ?? null, title: String(t.title ?? "").slice(0, 300) };
-  const body = String(t.body ?? "").trim();
-  if (body) record.items = [{ label: "ticket", text: body.slice(0, 4000) }];
+  if (!['open', 'closed'].includes(t.state) || ![null, 'completed', 'not_planned', 'reopened'].includes(t.state_reason) || typeof t.is_pull_request !== 'boolean' || (t.is_pull_request && typeof t.merged !== 'boolean') || !Array.isArray(t.comments)) throw new Error(`ticket-${t.key}: missing or invalid outcome/comments`);
+  const outcome = `${t.is_pull_request ? 'Pull request' : 'Issue'}: ${t.state}; close reason: ${t.state_reason ?? 'not stated'}${t.is_pull_request ? `; ${t.merged ? 'merged' : 'not merged'}` : ''}.`;
+  const record = { id: `ticket-${t.key}`, date: t.date ?? null, title: clip(t.title ?? '', 300), items: [{ label: 'outcome', text: outcome }] };
+  let remaining = 8000 - Buffer.byteLength(record.title) - Buffer.byteLength(outcome);
+  const comments = t.comments.filter(c => ['OWNER', 'MEMBER', 'COLLABORATOR'].includes(c.association)).sort((a,b) => a.date.localeCompare(b.date) || a.source.localeCompare(b.source));
+  const kept = [];
+  for (const c of comments.toReversed()) {
+    if (typeof c.body !== 'string' || typeof c.author !== 'string' || typeof c.date !== 'string' || typeof c.source !== 'string') throw new Error(`ticket-${t.key}: invalid maintainer comment`);
+    const header = `${c.date} ${c.author} (${c.association}) ${c.source}\n`;
+    if (Buffer.byteLength(header) >= remaining) break;
+    const text = clip(header + c.body, remaining);
+    remaining -= Buffer.byteLength(text);
+    kept.unshift({ label: 'maintainer comment', text });
+  }
+  const body = clip(String(t.body ?? '').trim(), remaining);
+  if (body) record.items.push({ label: 'ticket', text: body });
+  record.items.push(...kept);
   if (t.source) record.source = String(t.source);
   if (t.author) record.author = String(t.author);
   const commits = cites.get(String(t.key));

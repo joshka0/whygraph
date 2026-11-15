@@ -149,7 +149,12 @@ export async function batch5Checks({tasks,scoreRun}) {
     const w=join(scratch,`prepared-${condition}`);mkdirSync(w);const p=prepare({batch:5,repo:'ripgrep'},condition,w,source);prepared.set(condition,{...p,w});
     const skill=join(p.repo,'.opencode/skills/whygraph/SKILL.md');const agents=read(join(p.repo,'AGENTS.md'));
     if(condition==='none'){assert.equal(agents,'Original instructions\n');assert.equal(existsSync(skill),false);assert.equal(existsSync(join(p.repo,'.git/whygraph/store')),false);}
-    else {assert.ok(agents.includes(read(join(root,'skills/whygraph-rule.md'))));assert.deepEqual(readFileSync(skill),readFileSync(join(root,'skills/whygraph/SKILL.md')));}
+    else {
+      const recordedRule=spawnSync('git',['show','c92205d:skills/whygraph-rule.md'],{cwd:root});
+      const recordedSkill=spawnSync('git',['show','c92205d:skills/whygraph/SKILL.md'],{cwd:root});
+      for(const r of [recordedRule,recordedSkill]){assert.ifError(r.error);assert.equal(r.status,0,r.stderr?.toString());}
+      assert.ok(agents.includes(recordedRule.stdout.toString()));assert.deepEqual(readFileSync(skill),recordedSkill.stdout);
+    }
     if(condition.startsWith('graph')){assert.equal(read(join(p.repo,'.git/whygraph/store/marker')),'copied store');assert.ok(realpathSync(join(p.repo,'.git/whygraph/store')).startsWith(realpathSync(p.repo)+'/'));assert.deepEqual(escapingSymlinks(p.repo),[]);}
     else assert.equal(existsSync(join(p.repo,'.git/whygraph/store')),false);
     const git=spawnSync('git',[...p.base,'diff','--exit-code','HEAD'],{encoding:'utf8'});assert.equal(git.status,0,git.stderr+git.stdout);
