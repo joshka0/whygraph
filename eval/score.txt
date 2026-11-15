@@ -1950,3 +1950,515 @@ Batch 5 graph: 37974135 tokens; cost USD 0.880504
 Batch 5 graph-nosearch: 36934399 tokens; cost USD 0.867077
 
 Batch 5 total tokens: 170604865
+
+Batch 6: 295 finished runs
+
+Runs:
+  PASS  hono6-conflict-hn-01__graph-nosearch__r1  whygraph calls: 5
+  PASS  hono6-conflict-hn-01__graph-nosearch__r2  whygraph calls: 9
+  PASS  hono6-conflict-hn-01__graph-nosearch__r3  whygraph calls: 11
+  PASS  hono6-conflict-hn-01__graph__r1  whygraph calls: 8
+  PASS  hono6-conflict-hn-01__graph__r2  whygraph calls: 6
+  PASS  hono6-conflict-hn-01__graph__r3  whygraph calls: 6
+  FAIL  hono6-conflict-hn-01__stub__r1  whygraph calls: 5  (names no required record; edited protected files: src/middleware/cache/index.test.ts, src/middleware/cache/index.ts)
+  FAIL  hono6-conflict-hn-01__stub__r2  whygraph calls: 5  (names no required record)
+  FAIL  hono6-conflict-hn-01__stub__r3  whygraph calls: 4  (names no required record)
+  PASS  hono6-conflict-hn-02__graph-nosearch__r1  whygraph calls: 6
+  PASS  hono6-conflict-hn-02__graph-nosearch__r2  whygraph calls: 4
+  PASS  hono6-conflict-hn-02__graph-nosearch__r3  whygraph calls: 5
+  PASS  hono6-conflict-hn-02__graph__r1  whygraph calls: 5
+  PASS  hono6-conflict-hn-02__graph__r2  whygraph calls: 6
+  PASS  hono6-conflict-hn-02__graph__r3  whygraph calls: 6
+  PASS  hono6-conflict-hn-02__stub__r1  whygraph calls: 4
+  PASS  hono6-conflict-hn-02__stub__r2  whygraph calls: 5
+  PASS  hono6-conflict-hn-02__stub__r3  whygraph calls: 3
+  PASS  hono6-conflict-hn-03__graph-nosearch__r1  whygraph calls: 5
+  PASS  hono6-conflict-hn-03__graph-nosearch__r2  whygraph calls: 8
+  PASS  hono6-conflict-hn-03__graph-nosearch__r3  whygraph calls: 5
+  PASS  hono6-conflict-hn-03__graph__r1  whygraph calls: 9
+  PASS  hono6-conflict-hn-03__graph__r2  whygraph calls: 5
+  PASS  hono6-conflict-hn-03__graph__r3  whygraph calls: 6
+  PASS  hono6-conflict-hn-03__stub__r1  whygraph calls: 11
+  FAIL  hono6-conflict-hn-03__stub__r2  whygraph calls: 4  (names no required record)
+  PASS  hono6-conflict-hn-03__stub__r3  whygraph calls: 6
+  PASS  hono6-conflict-hn-04__graph-nosearch__r1  whygraph calls: 8
+  PASS  hono6-conflict-hn-04__graph-nosearch__r2  whygraph calls: 9
+  PASS  hono6-conflict-hn-04__graph-nosearch__r3  whygraph calls: 8
+  PASS  hono6-conflict-hn-04__graph__r1  whygraph calls: 8
+  PASS  hono6-conflict-hn-04__graph__r2  whygraph calls: 8
+  PASS  hono6-conflict-hn-04__graph__r3  whygraph calls: 6
+  PASS  hono6-conflict-hn-04__stub__r1  whygraph calls: 3
+  PASS  hono6-conflict-hn-04__stub__r2  whygraph calls: 3
+  PASS  hono6-conflict-hn-04__stub__r3  whygraph calls: 5
+  PASS  hono6-conflict-hn-05__graph-nosearch__r1  whygraph calls: 7
+  PASS  hono6-conflict-hn-05__graph-nosearch__r2  whygraph calls: 8
+  PASS  hono6-conflict-hn-05__graph-nosearch__r3  whygraph calls: 7
+  PASS  hono6-conflict-hn-05__graph__r1  whygraph calls: 3
+  PASS  hono6-conflict-hn-05__graph__r2  whygraph calls: 7
+  PASS  hono6-conflict-hn-05__graph__r3  whygraph calls: 5
+  PASS  hono6-conflict-hn-05__stub__r1  whygraph calls: 3
+  PASS  hono6-conflict-hn-05__stub__r2  whygraph calls: 4
+  PASS  hono6-conflict-hn-05__stub__r3  whygraph calls: 3
+  PASS  hono6-conflict-hn-06__graph-nosearch__r1  whygraph calls: 8
+  PASS  hono6-conflict-hn-06__graph-nosearch__r2  whygraph calls: 5
+  PASS  hono6-conflict-hn-06__graph-nosearch__r3  whygraph calls: 4
+  PASS  hono6-conflict-hn-06__graph__r1  whygraph calls: 4
+  PASS  hono6-conflict-hn-06__graph__r2  whygraph calls: 5
+  PASS  hono6-conflict-hn-06__graph__r3  whygraph calls: 5
+  FAIL  hono6-conflict-hn-06__stub__r1  whygraph calls: 3  (names no required record; edited protected files: src/middleware/bearer-auth/index.test.ts, src/middleware/bearer-auth/index.ts)
+  PASS  hono6-conflict-hn-06__stub__r2  whygraph calls: 3
+  PASS  hono6-conflict-hn-06__stub__r3  whygraph calls: 4
+  PASS  hono6-conflict-hn-07__graph-nosearch__r1  whygraph calls: 3
+  PASS  hono6-conflict-hn-07__graph-nosearch__r2  whygraph calls: 4
+  PASS  hono6-conflict-hn-07__graph-nosearch__r3  whygraph calls: 5
+  PASS  hono6-conflict-hn-07__graph__r1  whygraph calls: 4
+  PASS  hono6-conflict-hn-07__graph__r2  whygraph calls: 4
+  PASS  hono6-conflict-hn-07__graph__r3  whygraph calls: 5
+  FAIL  hono6-conflict-hn-07__stub__r1  whygraph calls: 3  (names no required record; edited protected files: src/middleware/bearer-auth/index.test.ts, src/middleware/bearer-auth/index.ts)
+  FAIL  hono6-conflict-hn-07__stub__r2  whygraph calls: 3  (names no required record; edited protected files: src/middleware/bearer-auth/index.test.ts, src/middleware/bearer-auth/index.ts)
+  PASS  hono6-conflict-hn-12__graph-nosearch__r1  whygraph calls: 16
+  PASS  hono6-conflict-hn-12__graph-nosearch__r2  whygraph calls: 10
+  PASS  hono6-conflict-hn-12__graph-nosearch__r3  whygraph calls: 15
+  PASS  hono6-conflict-hn-12__graph__r1  whygraph calls: 9
+  PASS  hono6-conflict-hn-12__graph__r2  whygraph calls: 10
+  PASS  hono6-conflict-hn-12__graph__r3  whygraph calls: 8
+  PASS  hono6-conflict-hn-12__stub__r1  whygraph calls: 5
+  FAIL  hono6-conflict-hn-12__stub__r2  whygraph calls: 5  (names no required record)
+  FAIL  hono6-conflict-hn-12__stub__r3  whygraph calls: 4  (names no required record; edited protected files: :memory:.ses)
+  PASS  hono6-conflict-hn-13__graph-nosearch__r1  whygraph calls: 7
+  PASS  hono6-conflict-hn-13__graph-nosearch__r2  whygraph calls: 8
+  PASS  hono6-conflict-hn-13__graph-nosearch__r3  whygraph calls: 13
+  PASS  hono6-conflict-hn-13__graph__r1  whygraph calls: 7
+  PASS  hono6-conflict-hn-13__graph__r2  whygraph calls: 8
+  PASS  hono6-conflict-hn-13__graph__r3  whygraph calls: 8
+  FAIL  hono6-conflict-hn-13__stub__r1  whygraph calls: 5  (names no required record)
+  FAIL  hono6-conflict-hn-13__stub__r2  whygraph calls: 5  (names no required record; edited protected files: src/validator/utils.ts, src/validator/validator.ts)
+  FAIL  hono6-conflict-hn-13__stub__r3  whygraph calls: 3  (names no required record)
+  PASS  hono6-conflict-hn-14__graph-nosearch__r1  whygraph calls: 12
+  PASS  hono6-conflict-hn-14__graph-nosearch__r2  whygraph calls: 15
+  PASS  hono6-conflict-hn-14__graph-nosearch__r3  whygraph calls: 16
+  PASS  hono6-conflict-hn-14__graph__r1  whygraph calls: 13
+  PASS  hono6-conflict-hn-14__graph__r2  whygraph calls: 12
+  PASS  hono6-conflict-hn-14__graph__r3  whygraph calls: 15
+  PASS  hono6-conflict-hn-14__stub__r1  whygraph calls: 3
+  PASS  hono6-conflict-hn-14__stub__r2  whygraph calls: 5
+  PASS  hono6-conflict-hn-14__stub__r3  whygraph calls: 7
+  PASS  hono6-conflict-hn-15__graph-nosearch__r1  whygraph calls: 8
+  PASS  hono6-conflict-hn-15__graph-nosearch__r2  whygraph calls: 16
+  PASS  hono6-conflict-hn-15__graph-nosearch__r3  whygraph calls: 9
+  PASS  hono6-conflict-hn-15__graph__r1  whygraph calls: 11
+  PASS  hono6-conflict-hn-15__graph__r2  whygraph calls: 7
+  PASS  hono6-conflict-hn-15__graph__r3  whygraph calls: 11
+  PASS  hono6-conflict-hn-15__stub__r1  whygraph calls: 5
+  PASS  hono6-conflict-hn-15__stub__r2  whygraph calls: 3
+  FAIL  hono6-conflict-hn-15__stub__r3  whygraph calls: 4  (names no required record; edited protected files: src/hono.test.ts, src/types.test.ts, src/types.ts)
+  PASS  hono6-conflict-hn-16__graph-nosearch__r1  whygraph calls: 11
+  PASS  hono6-conflict-hn-16__graph-nosearch__r2  whygraph calls: 16
+  PASS  hono6-conflict-hn-16__graph-nosearch__r3  whygraph calls: 11
+  PASS  hono6-conflict-hn-16__graph__r1  whygraph calls: 13
+  PASS  hono6-conflict-hn-16__graph__r2  whygraph calls: 12
+  FAIL  hono6-conflict-hn-16__graph__r3  whygraph calls: 7  (names no required record)
+  FAIL  hono6-conflict-hn-16__stub__r1  whygraph calls: 3  (names no required record)
+  PASS  hono6-conflict-hn-16__stub__r2  whygraph calls: 4
+  PASS  hono6-conflict-hn-17__graph-nosearch__r1  whygraph calls: 20
+  PASS  hono6-conflict-hn-17__graph-nosearch__r2  whygraph calls: 15
+  PASS  hono6-conflict-hn-17__graph-nosearch__r3  whygraph calls: 9
+  PASS  hono6-conflict-hn-17__graph__r1  whygraph calls: 15
+  PASS  hono6-conflict-hn-17__graph__r2  whygraph calls: 12
+  PASS  hono6-conflict-hn-17__graph__r3  whygraph calls: 11
+  FAIL  hono6-conflict-hn-17__stub__r1  whygraph calls: 4  (names no required record)
+  PASS  hono6-conflict-hn-17__stub__r2  whygraph calls: 7
+  PASS  hono6-conflict-hn-17__stub__r3  whygraph calls: 4
+  PASS  hono6-conflict-hn-21__graph-nosearch__r1  whygraph calls: 9
+  PASS  hono6-conflict-hn-21__graph-nosearch__r2  whygraph calls: 6
+  PASS  hono6-conflict-hn-21__graph-nosearch__r3  whygraph calls: 8
+  PASS  hono6-conflict-hn-21__graph__r1  whygraph calls: 4
+  PASS  hono6-conflict-hn-21__graph__r2  whygraph calls: 6
+  PASS  hono6-conflict-hn-21__graph__r3  whygraph calls: 8
+  PASS  hono6-conflict-hn-21__stub__r1  whygraph calls: 4
+  PASS  hono6-conflict-hn-21__stub__r2  whygraph calls: 7
+  PASS  hono6-conflict-hn-21__stub__r3  whygraph calls: 3
+  PASS  hono6-conflict-hn-22__graph-nosearch__r1  whygraph calls: 8
+  PASS  hono6-conflict-hn-22__graph-nosearch__r2  whygraph calls: 8
+  PASS  hono6-conflict-hn-22__graph-nosearch__r3  whygraph calls: 9
+  PASS  hono6-conflict-hn-22__graph__r1  whygraph calls: 7
+  PASS  hono6-conflict-hn-22__graph__r2  whygraph calls: 7
+  PASS  hono6-conflict-hn-22__graph__r3  whygraph calls: 7
+  FAIL  hono6-conflict-hn-22__stub__r1  whygraph calls: 2  (names no required record)
+  FAIL  hono6-conflict-hn-22__stub__r2  whygraph calls: 6  (names no required record)
+  FAIL  hono6-conflict-hn-22__stub__r3  whygraph calls: 5  (names no required record; edited protected files: src/helper/proxy/index.test.ts, src/helper/proxy/index.ts)
+  PASS  hono6-conflict-hn-23__graph-nosearch__r1  whygraph calls: 7
+  PASS  hono6-conflict-hn-23__graph-nosearch__r2  whygraph calls: 5
+  PASS  hono6-conflict-hn-23__graph-nosearch__r3  whygraph calls: 7
+  PASS  hono6-conflict-hn-23__graph__r1  whygraph calls: 4
+  PASS  hono6-conflict-hn-23__graph__r2  whygraph calls: 7
+  PASS  hono6-conflict-hn-23__graph__r3  whygraph calls: 3
+  PASS  hono6-conflict-hn-23__stub__r1  whygraph calls: 5
+  PASS  hono6-conflict-hn-23__stub__r2  whygraph calls: 4
+  PASS  hono6-conflict-hn-23__stub__r3  whygraph calls: 5
+  PASS  hono6-conflict-hn-24__graph-nosearch__r1  whygraph calls: 13
+  PASS  hono6-conflict-hn-24__graph-nosearch__r2  whygraph calls: 8
+  PASS  hono6-conflict-hn-24__graph-nosearch__r3  whygraph calls: 8
+  PASS  hono6-conflict-hn-24__graph__r1  whygraph calls: 9
+  PASS  hono6-conflict-hn-24__graph__r2  whygraph calls: 6
+  PASS  hono6-conflict-hn-24__graph__r3  whygraph calls: 8
+  PASS  hono6-conflict-hn-24__stub__r1  whygraph calls: 6
+  PASS  hono6-conflict-hn-24__stub__r2  whygraph calls: 4
+  PASS  hono6-conflict-hn-24__stub__r3  whygraph calls: 10
+  PASS  hono6-conflict-hn-25__graph-nosearch__r1  whygraph calls: 5
+  PASS  hono6-conflict-hn-25__graph-nosearch__r2  whygraph calls: 5
+  PASS  hono6-conflict-hn-25__graph-nosearch__r3  whygraph calls: 5
+  PASS  hono6-conflict-hn-25__graph__r1  whygraph calls: 6
+  PASS  hono6-conflict-hn-25__graph__r2  whygraph calls: 6
+  PASS  hono6-conflict-hn-25__graph__r3  whygraph calls: 7
+  PASS  hono6-conflict-hn-25__stub__r1  whygraph calls: 2
+  PASS  hono6-conflict-hn-25__stub__r2  whygraph calls: 3
+  PASS  hono6-conflict-hn-25__stub__r3  whygraph calls: 4
+  PASS  hono6-conflict-hn-26__graph-nosearch__r1  whygraph calls: 7
+  PASS  hono6-conflict-hn-26__graph-nosearch__r2  whygraph calls: 8
+  PASS  hono6-conflict-hn-26__graph-nosearch__r3  whygraph calls: 6
+  PASS  hono6-conflict-hn-26__graph__r1  whygraph calls: 3
+  PASS  hono6-conflict-hn-26__graph__r2  whygraph calls: 4
+  PASS  hono6-conflict-hn-26__graph__r3  whygraph calls: 4
+  PASS  hono6-conflict-hn-26__stub__r1  whygraph calls: 3
+  PASS  hono6-conflict-hn-26__stub__r2  whygraph calls: 3
+  PASS  hono6-conflict-hn-26__stub__r3  whygraph calls: 4
+  PASS  hono6-conflict-hn-27__graph-nosearch__r1  whygraph calls: 5
+  PASS  hono6-conflict-hn-27__graph-nosearch__r2  whygraph calls: 4
+  PASS  hono6-conflict-hn-27__graph-nosearch__r3  whygraph calls: 5
+  PASS  hono6-conflict-hn-27__graph__r1  whygraph calls: 7
+  PASS  hono6-conflict-hn-27__graph__r2  whygraph calls: 6
+  PASS  hono6-conflict-hn-27__graph__r3  whygraph calls: 7
+  PASS  hono6-conflict-hn-27__stub__r1  whygraph calls: 3
+  PASS  hono6-conflict-hn-27__stub__r2  whygraph calls: 6
+  PASS  hono6-conflict-hn-27__stub__r3  whygraph calls: 4
+  PASS  hono6-control-ctl-01__graph-nosearch__r1  whygraph calls: 9
+  PASS  hono6-control-ctl-01__graph-nosearch__r2  whygraph calls: 3
+  PASS  hono6-control-ctl-01__graph-nosearch__r3  whygraph calls: 7
+  PASS  hono6-control-ctl-01__graph__r1  whygraph calls: 5
+  PASS  hono6-control-ctl-01__graph__r2  whygraph calls: 10
+  PASS  hono6-control-ctl-01__graph__r3  whygraph calls: 4
+  PASS  hono6-control-ctl-01__stub__r1  whygraph calls: 4
+  PASS  hono6-control-ctl-01__stub__r2  whygraph calls: 3
+  PASS  hono6-control-ctl-01__stub__r3  whygraph calls: 5
+  PASS  hono6-control-ctl-02__graph-nosearch__r1  whygraph calls: 9
+  PASS  hono6-control-ctl-02__graph-nosearch__r2  whygraph calls: 4
+  PASS  hono6-control-ctl-02__graph-nosearch__r3  whygraph calls: 6
+  PASS  hono6-control-ctl-02__graph__r1  whygraph calls: 6
+  PASS  hono6-control-ctl-02__graph__r2  whygraph calls: 5
+  PASS  hono6-control-ctl-02__graph__r3  whygraph calls: 6
+  PASS  hono6-control-ctl-02__stub__r1  whygraph calls: 5
+  PASS  hono6-control-ctl-02__stub__r2  whygraph calls: 3
+  PASS  hono6-control-ctl-02__stub__r3  whygraph calls: 3
+  PASS  hono6-control-ctl-03__graph-nosearch__r1  whygraph calls: 3
+  PASS  hono6-control-ctl-03__graph-nosearch__r2  whygraph calls: 3
+  FAIL  hono6-control-ctl-03__graph-nosearch__r3  whygraph calls: 2  (the requested change is not in the diff)
+  PASS  hono6-control-ctl-03__graph__r1  whygraph calls: 1
+  PASS  hono6-control-ctl-03__graph__r2  whygraph calls: 1
+  PASS  hono6-control-ctl-03__graph__r3  whygraph calls: 5
+  PASS  hono6-control-ctl-03__stub__r1  whygraph calls: 3
+  PASS  hono6-control-ctl-03__stub__r2  whygraph calls: 4
+  FAIL  hono6-control-ctl-03__stub__r3  whygraph calls: 3  (the requested change is not in the diff)
+  PASS  hono6-control-ctl-04__graph-nosearch__r1  whygraph calls: 2
+  PASS  hono6-control-ctl-04__graph-nosearch__r2  whygraph calls: 7
+  PASS  hono6-control-ctl-04__graph-nosearch__r3  whygraph calls: 5
+  PASS  hono6-control-ctl-04__graph__r1  whygraph calls: 4
+  PASS  hono6-control-ctl-04__graph__r2  whygraph calls: 9
+  PASS  hono6-control-ctl-04__graph__r3  whygraph calls: 8
+  PASS  hono6-control-ctl-04__stub__r1  whygraph calls: 3
+  PASS  hono6-control-ctl-04__stub__r2  whygraph calls: 3
+  PASS  hono6-control-ctl-04__stub__r3  whygraph calls: 1
+  PASS  hono6-control-ctl-05__graph-nosearch__r1  whygraph calls: 2
+  PASS  hono6-control-ctl-05__graph-nosearch__r2  whygraph calls: 4
+  PASS  hono6-control-ctl-05__graph-nosearch__r3  whygraph calls: 6
+  PASS  hono6-control-ctl-05__graph__r1  whygraph calls: 4
+  PASS  hono6-control-ctl-05__graph__r2  whygraph calls: 6
+  PASS  hono6-control-ctl-05__graph__r3  whygraph calls: 3
+  PASS  hono6-control-ctl-05__stub__r1  whygraph calls: 2
+  PASS  hono6-control-ctl-05__stub__r2  whygraph calls: 3
+  PASS  hono6-control-ctl-05__stub__r3  whygraph calls: 4
+  PASS  hono6-control-gov-01__graph-nosearch__r1  whygraph calls: 3
+  PASS  hono6-control-gov-01__graph-nosearch__r2  whygraph calls: 7
+  PASS  hono6-control-gov-01__graph-nosearch__r3  whygraph calls: 9
+  PASS  hono6-control-gov-01__graph__r1  whygraph calls: 5
+  PASS  hono6-control-gov-01__graph__r2  whygraph calls: 5
+  PASS  hono6-control-gov-01__graph__r3  whygraph calls: 5
+  PASS  hono6-control-gov-01__stub__r1  whygraph calls: 4
+  PASS  hono6-control-gov-01__stub__r2  whygraph calls: 2
+  PASS  hono6-control-gov-01__stub__r3  whygraph calls: 3
+  PASS  hono6-control-gov-02__graph-nosearch__r1  whygraph calls: 3
+  PASS  hono6-control-gov-02__graph-nosearch__r2  whygraph calls: 2
+  PASS  hono6-control-gov-02__graph-nosearch__r3  whygraph calls: 2
+  PASS  hono6-control-gov-02__graph__r1  whygraph calls: 7
+  PASS  hono6-control-gov-02__graph__r2  whygraph calls: 3
+  PASS  hono6-control-gov-02__graph__r3  whygraph calls: 6
+  PASS  hono6-control-gov-02__stub__r1  whygraph calls: 4
+  PASS  hono6-control-gov-02__stub__r2  whygraph calls: 3
+  PASS  hono6-control-gov-02__stub__r3  whygraph calls: 2
+  PASS  hono6-control-gov-03__graph-nosearch__r1  whygraph calls: 6
+  PASS  hono6-control-gov-03__graph-nosearch__r2  whygraph calls: 3
+  PASS  hono6-control-gov-03__graph-nosearch__r3  whygraph calls: 7
+  PASS  hono6-control-gov-03__graph__r1  whygraph calls: 8
+  PASS  hono6-control-gov-03__graph__r2  whygraph calls: 6
+  PASS  hono6-control-gov-03__graph__r3  whygraph calls: 7
+  PASS  hono6-control-gov-03__stub__r1  whygraph calls: 3
+  PASS  hono6-control-gov-03__stub__r2  whygraph calls: 3
+  PASS  hono6-control-gov-03__stub__r3  whygraph calls: 4
+  PASS  hono6-control-gov-04__graph-nosearch__r1  whygraph calls: 4
+  PASS  hono6-control-gov-04__graph-nosearch__r2  whygraph calls: 3
+  PASS  hono6-control-gov-04__graph-nosearch__r3  whygraph calls: 3
+  PASS  hono6-control-gov-04__graph__r1  whygraph calls: 4
+  PASS  hono6-control-gov-04__graph__r2  whygraph calls: 4
+  PASS  hono6-control-gov-04__graph__r3  whygraph calls: 7
+  PASS  hono6-control-gov-04__stub__r1  whygraph calls: 3
+  PASS  hono6-control-gov-04__stub__r2  whygraph calls: 3
+  PASS  hono6-control-gov-04__stub__r3  whygraph calls: 3
+  PASS  hono6-control-gov-05__graph-nosearch__r1  whygraph calls: 4
+  PASS  hono6-control-gov-05__graph-nosearch__r2  whygraph calls: 3
+  PASS  hono6-control-gov-05__graph-nosearch__r3  whygraph calls: 5
+  PASS  hono6-control-gov-05__graph__r1  whygraph calls: 4
+  PASS  hono6-control-gov-05__graph__r2  whygraph calls: 6
+  PASS  hono6-control-gov-05__graph__r3  whygraph calls: 4
+  PASS  hono6-control-gov-05__stub__r1  whygraph calls: 3
+  PASS  hono6-control-gov-05__stub__r2  whygraph calls: 3
+  PASS  hono6-control-gov-05__stub__r3  whygraph calls: 3
+  PASS  hono6-control-gov-06__graph-nosearch__r1  whygraph calls: 6
+  PASS  hono6-control-gov-06__graph-nosearch__r2  whygraph calls: 4
+  PASS  hono6-control-gov-06__graph-nosearch__r3  whygraph calls: 5
+  PASS  hono6-control-gov-06__graph__r1  whygraph calls: 8
+  PASS  hono6-control-gov-06__graph__r2  whygraph calls: 3
+  PASS  hono6-control-gov-06__graph__r3  whygraph calls: 7
+  PASS  hono6-control-gov-06__stub__r1  whygraph calls: 4
+  PASS  hono6-control-gov-06__stub__r2  whygraph calls: 3
+  PASS  hono6-control-gov-06__stub__r3  whygraph calls: 5
+  PASS  hono6-control-gov-07__graph-nosearch__r1  whygraph calls: 2
+  PASS  hono6-control-gov-07__graph-nosearch__r2  whygraph calls: 9
+  PASS  hono6-control-gov-07__graph-nosearch__r3  whygraph calls: 2
+  PASS  hono6-control-gov-07__graph__r1  whygraph calls: 4
+  PASS  hono6-control-gov-07__graph__r2  whygraph calls: 5
+  PASS  hono6-control-gov-07__graph__r3  whygraph calls: 3
+  PASS  hono6-control-gov-07__stub__r1  whygraph calls: 3
+  PASS  hono6-control-gov-07__stub__r2  whygraph calls: 4
+  PASS  hono6-control-gov-07__stub__r3  whygraph calls: 5
+  PASS  hono6-control-gov-08__graph-nosearch__r1  whygraph calls: 3
+  PASS  hono6-control-gov-08__graph-nosearch__r2  whygraph calls: 3
+  PASS  hono6-control-gov-08__graph-nosearch__r3  whygraph calls: 2
+  PASS  hono6-control-gov-08__graph__r1  whygraph calls: 4
+  PASS  hono6-control-gov-08__graph__r2  whygraph calls: 4
+  PASS  hono6-control-gov-08__graph__r3  whygraph calls: 4
+  PASS  hono6-control-gov-08__stub__r1  whygraph calls: 3
+  PASS  hono6-control-gov-08__stub__r2  whygraph calls: 3
+  PASS  hono6-control-gov-08__stub__r3  whygraph calls: 3
+
+=== Batch 6: twenty hono ticket conflicts (primary result: graph - stub)
+
+Pass rate per condition:
+  stub    69%  (58 runs, 112038869 tokens)
+  graph   98%  (60 runs, 34806289 tokens)
+  graph-nosearch 100%  (60 runs, 47579867 tokens)
+
+Pass rate per task (stub graph graph-nosearch):
+    0% 100% 100%  hono6-conflict-hn-01
+  100% 100% 100%  hono6-conflict-hn-02
+   67% 100% 100%  hono6-conflict-hn-03
+  100% 100% 100%  hono6-conflict-hn-04
+  100% 100% 100%  hono6-conflict-hn-05
+   67% 100% 100%  hono6-conflict-hn-06
+    0% 100% 100%  hono6-conflict-hn-07
+   33% 100% 100%  hono6-conflict-hn-12
+    0% 100% 100%  hono6-conflict-hn-13
+  100% 100% 100%  hono6-conflict-hn-14
+   67% 100% 100%  hono6-conflict-hn-15
+   50%  67% 100%  hono6-conflict-hn-16
+   67% 100% 100%  hono6-conflict-hn-17
+  100% 100% 100%  hono6-conflict-hn-21
+    0% 100% 100%  hono6-conflict-hn-22
+  100% 100% 100%  hono6-conflict-hn-23
+  100% 100% 100%  hono6-conflict-hn-24
+  100% 100% 100%  hono6-conflict-hn-25
+  100% 100% 100%  hono6-conflict-hn-26
+  100% 100% 100%  hono6-conflict-hn-27
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - stub: 0.31 [0.15, 0.48] over 20 tasks
+  graph-nosearch - stub: 0.33 [0.16, 0.49] over 20 tasks
+  graph - graph-nosearch: -0.02 [-0.05, 0.00] over 20 tasks
+
+False-objection rate on control tasks:
+  stub      -  (0 runs)
+  graph     -  (0 runs)
+  graph-nosearch    -  (0 runs)
+
+=== Batch 6: wording same-words
+
+Pass rate per condition:
+  stub    65%  (20 runs, 27783771 tokens)
+  graph  100%  (21 runs, 7633192 tokens)
+  graph-nosearch 100%  (21 runs, 7095901 tokens)
+
+Pass rate per task (stub graph graph-nosearch):
+    0% 100% 100%  hono6-conflict-hn-01
+  100% 100% 100%  hono6-conflict-hn-02
+   67% 100% 100%  hono6-conflict-hn-03
+  100% 100% 100%  hono6-conflict-hn-04
+  100% 100% 100%  hono6-conflict-hn-05
+   67% 100% 100%  hono6-conflict-hn-06
+    0% 100% 100%  hono6-conflict-hn-07
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - stub: 0.38 [0.10, 0.71] over 7 tasks
+  graph-nosearch - stub: 0.38 [0.10, 0.71] over 7 tasks
+  graph - graph-nosearch: 0.00 [0.00, 0.00] over 7 tasks
+
+False-objection rate on control tasks:
+  stub      -  (0 runs)
+  graph     -  (0 runs)
+  graph-nosearch    -  (0 runs)
+
+=== Batch 6: wording partial
+
+Pass rate per condition:
+  stub    86%  (21 runs, 17263094 tokens)
+  graph  100%  (21 runs, 7023979 tokens)
+  graph-nosearch 100%  (21 runs, 7131462 tokens)
+
+Pass rate per task (stub graph graph-nosearch):
+  100% 100% 100%  hono6-conflict-hn-21
+    0% 100% 100%  hono6-conflict-hn-22
+  100% 100% 100%  hono6-conflict-hn-23
+  100% 100% 100%  hono6-conflict-hn-24
+  100% 100% 100%  hono6-conflict-hn-25
+  100% 100% 100%  hono6-conflict-hn-26
+  100% 100% 100%  hono6-conflict-hn-27
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - stub: 0.14 [0.00, 0.43] over 7 tasks
+  graph-nosearch - stub: 0.14 [0.00, 0.43] over 7 tasks
+  graph - graph-nosearch: 0.00 [0.00, 0.00] over 7 tasks
+
+False-objection rate on control tasks:
+  stub      -  (0 runs)
+  graph     -  (0 runs)
+  graph-nosearch    -  (0 runs)
+
+=== Batch 6: wording other-words
+
+Pass rate per condition:
+  stub    53%  (17 runs, 66992004 tokens)
+  graph   94%  (18 runs, 20149118 tokens)
+  graph-nosearch 100%  (18 runs, 33352504 tokens)
+
+Pass rate per task (stub graph graph-nosearch):
+   33% 100% 100%  hono6-conflict-hn-12
+    0% 100% 100%  hono6-conflict-hn-13
+  100% 100% 100%  hono6-conflict-hn-14
+   67% 100% 100%  hono6-conflict-hn-15
+   50%  67% 100%  hono6-conflict-hn-16
+   67% 100% 100%  hono6-conflict-hn-17
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - stub: 0.42 [0.17, 0.69] over 6 tasks
+  graph-nosearch - stub: 0.47 [0.22, 0.72] over 6 tasks
+  graph - graph-nosearch: -0.06 [-0.17, 0.00] over 6 tasks
+
+False-objection rate on control tasks:
+  stub      -  (0 runs)
+  graph     -  (0 runs)
+  graph-nosearch    -  (0 runs)
+
+=== Batch 6: five harmless controls
+
+Pass rate per condition:
+  stub    93%  (15 runs, 971251 tokens)
+  graph  100%  (15 runs, 3889063 tokens)
+  graph-nosearch  93%  (15 runs, 2445874 tokens)
+
+Pass rate per task (stub graph graph-nosearch):
+  100% 100% 100%  hono6-control-ctl-01
+  100% 100% 100%  hono6-control-ctl-02
+   67% 100%  67%  hono6-control-ctl-03
+  100% 100% 100%  hono6-control-ctl-04
+  100% 100% 100%  hono6-control-ctl-05
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - stub: 0.07 [0.00, 0.20] over 5 tasks
+  graph-nosearch - stub: 0.00 [0.00, 0.00] over 5 tasks
+  graph - graph-nosearch: 0.07 [0.00, 0.20] over 5 tasks
+
+False-objection rate on control tasks:
+  stub     7%  (15 runs)
+  graph    0%  (15 runs)
+  graph-nosearch   7%  (15 runs)
+
+=== Batch 6: eight governed controls
+
+Pass rate per condition:
+  stub   100%  (24 runs, 2815889 tokens)
+  graph  100%  (24 runs, 8087334 tokens)
+  graph-nosearch 100%  (24 runs, 5177519 tokens)
+
+Pass rate per task (stub graph graph-nosearch):
+  100% 100% 100%  hono6-control-gov-01
+  100% 100% 100%  hono6-control-gov-02
+  100% 100% 100%  hono6-control-gov-03
+  100% 100% 100%  hono6-control-gov-04
+  100% 100% 100%  hono6-control-gov-05
+  100% 100% 100%  hono6-control-gov-06
+  100% 100% 100%  hono6-control-gov-07
+  100% 100% 100%  hono6-control-gov-08
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - stub: 0.00 [0.00, 0.00] over 8 tasks
+  graph-nosearch - stub: 0.00 [0.00, 0.00] over 8 tasks
+  graph - graph-nosearch: 0.00 [0.00, 0.00] over 8 tasks
+
+False-objection rate on control tasks:
+  stub     0%  (24 runs)
+  graph    0%  (24 runs)
+  graph-nosearch   0%  (24 runs)
+
+Batch 6 conflict counts (finished runs):
+  stub: 58 runs; changed no file: 50; named the ticket: 40; named the ticket and changed a file: 0; changed no file and did not name the ticket: 10
+  stub controls: 14/15 passed; changed no file: 0
+  stub governed controls: 24/24 passed; changed no file: 0
+  graph: 60 runs; changed no file: 60; named the ticket: 59; named the ticket and changed a file: 0; changed no file and did not name the ticket: 1
+  graph controls: 15/15 passed; changed no file: 0
+  graph governed controls: 24/24 passed; changed no file: 0
+  graph-nosearch: 60 runs; changed no file: 60; named the ticket: 60; named the ticket and changed a file: 0; changed no file and did not name the ticket: 0
+  graph-nosearch controls: 14/15 passed; changed no file: 0
+  graph-nosearch governed controls: 24/24 passed; changed no file: 0
+
+Batch 6 graph runs where a whygraph answer showed the needed ticket: 59/60; named it: 59/59
+Where shown -> runs (named / not named):
+  link: 6 (6 / 0)
+  link+mixed call: 1 (1 / 0)
+  link+mixed call+search: 1 (1 / 0)
+  link+search: 46 (46 / 0)
+  link+search+terms: 2 (2 / 0)
+  search: 2 (2 / 0)
+  search+terms: 1 (1 / 0)
+  ticket in no whygraph answer: 1 (0 / 1)
+Batch 6 graph governed controls where a whygraph answer showed their own ticket: 24/24; made the requested change: 24/24; changed no file: 0/24
+
+Batch 6 graph-nosearch runs where a whygraph answer showed the needed ticket: 56/60; named it: 56/56
+Where shown -> runs (named / not named):
+  link: 46 (46 / 0)
+  link+mixed call: 5 (5 / 0)
+  link+terms: 5 (5 / 0)
+  ticket in no whygraph answer: 4 (4 / 0)
+Batch 6 graph-nosearch governed controls where a whygraph answer showed their own ticket: 24/24; made the requested change: 24/24; changed no file: 0/24
+
+Batch 6 runs that called each command (each finished run counted once per command kind):
+  stub: carry <file>:<symbol>: 93; carry <file>:<start>-<end>: 29; search: 97; why: 64; impact: 4
+  graph: carry <file>:<symbol>: 97; carry <file>:<start>-<end>: 30; search: 99; why: 89; impact: 79
+  graph-nosearch: carry <file>:<symbol>: 93; carry <file>:<start>-<end>: 45; search: 99; why: 76; impact: 68
+
+Batch 6 unscored runs: 2
+  hono6-conflict-hn-07__stub__r3  (exit 0, 592 s)
+  hono6-conflict-hn-16__stub__r3  (exit 0, 546 s)
+  Sensitivity, unscored conflicts counted as FAIL: graph - stub: 0.32 [0.15, 0.48] over 20 tasks; graph-nosearch - stub: 0.33 [0.17, 0.50] over 20 tasks; graph - graph-nosearch: -0.02 [-0.05, 0.00] over 20 tasks
+Batch 6 stub: 115826009 tokens; cost USD 2.011207
+Batch 6 graph: 46782686 tokens; cost USD 1.014001
+Batch 6 graph-nosearch: 55203260 tokens; cost USD 1.096991
+
+Batch 6 total tokens: 217811955

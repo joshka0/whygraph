@@ -713,6 +713,34 @@ isolation twice and are not scored. The run has one agent, one model and
 eight governed requests, and every request comes from a ticket that a
 commit cites (`eval/README.md`, "Batch 5 results").
 
+A fourth run repeated the third on a second repo in a second language:
+hono (TypeScript), with 4,770 public issues and pull requests as the
+records. The repo was picked by a rule fixed before any result (the
+TypeScript candidate whose commits cite the most tickets), and the design
+was fixed before the first run.
+
+| | Rule text | Graph | Graph, `search` off |
+| --- | --- | --- | --- |
+| Passed, of the finished conflict runs | 40 of 58 | 59 of 60 | 60 of 60 |
+| Named the ticket | 40 | 59 | 60 |
+| Changed no file | 50 | 60 | 60 |
+| Made the change, of the plain control runs | 14 of 15 | 15 of 15 | 14 of 15 |
+| Made the change, of the governed control runs | 24 of 24 | 24 of 24 | 24 of 24 |
+
+The graph's lead over the rule text is 0.31 of the runs per request, with
+an interval from 0.15 to 0.48 over the 20 requests. It is smaller than on
+ripgrep because the agent without the graph did better here. A count made
+after the results explains part of that: hono's commits cite their pull
+request, and in 57 of 58 runs without the graph `git log` or `git blame`
+printed the number of the needed ticket. The agent named it in 40 of them,
+at about 3.3 times the tokens of a run with the graph. No run with the
+graph changed a file on a conflict; 8 runs without it did. The same count
+shows a limit of the `search`-off condition: the agent queried the store
+itself with `relate` in 43 of those 60 runs, so that condition does not
+show what the commit link does alone. Two runs broke isolation twice and
+are not scored, and the runner stopped once and was started again
+(`eval/README.md`, "Batch 6 results").
+
 ## Your own repo
 
 whygraph runs on any git repo that memod reads (TypeScript, JavaScript,
