@@ -1,0 +1,365 @@
+[
+  {
+    "id": "hn-01",
+    "request": "Let the cache middleware store responses with status 404 as well as successful ones, so repeated misses do not keep hitting the backend.",
+    "wording": "same-words",
+    "record": "1232",
+    "settled": "The cache middleware does not cache responses with status 400 or greater.",
+    "shared_terms": [
+      "cache middleware",
+      "404"
+    ],
+    "also": [],
+    "why": "Caching 404 responses would reverse the exclusion of error responses."
+  },
+  {
+    "id": "hn-02",
+    "request": "Use only LinearRouter for the hono/quick preset and remove SmartRouter and TrieRouter from it, so the bundle stays small.",
+    "wording": "same-words",
+    "record": "1250",
+    "settled": "The hono/quick preset uses SmartRouter with LinearRouter and TrieRouter to support route patterns LinearRouter cannot handle.",
+    "shared_terms": [
+      "LinearRouter",
+      "hono/quick",
+      "SmartRouter",
+      "TrieRouter"
+    ],
+    "also": [],
+    "why": "Removing the router combination would lose the route-pattern coverage the preset gained."
+  },
+  {
+    "id": "hn-03",
+    "request": "Make app.use() without an explicit path attach middleware to the current path rather than *, so a nearby route declaration controls its scope.",
+    "wording": "same-words",
+    "record": "1753",
+    "settled": "When app.use receives middleware as its first argument, its default path is *.",
+    "shared_terms": [
+      "app.use()",
+      "middleware",
+      "current path",
+      "*"
+    ],
+    "also": [],
+    "why": "Using the current path would reverse the all-path default for pathless middleware registration."
+  },
+  {
+    "id": "hn-04",
+    "request": "Have renderToString() stringify function-valued attributes automatically with toString(), so we can pass browser callbacks straight into data attributes.",
+    "wording": "same-words",
+    "record": "2161",
+    "settled": "Rendering ignores function-valued attributes whose keys start with on and rejects other function-valued attributes unless explicitly stringified.",
+    "shared_terms": [
+      "renderToString()",
+      "attributes",
+      "toString()"
+    ],
+    "also": [],
+    "why": "Automatic stringification would bypass the rejection that prevents accidental exposure of server-side function code."
+  },
+  {
+    "id": "hn-05",
+    "request": "When removeIndexString removes /index from a nested client URL, leave the trailing slash in place, so generated links use our directory-style convention.",
+    "wording": "same-words",
+    "record": "2344",
+    "settled": "The client removes the trailing slash along with the synthetic /index suffix on nested paths for exact route matching.",
+    "shared_terms": [
+      "removeIndexString",
+      "/index",
+      "trailing slash"
+    ],
+    "also": [],
+    "why": "Leaving the trailing slash would recreate the nested URL mismatch fixed by the ticket."
+  },
+  {
+    "id": "hn-06",
+    "request": "Remove verifyToken from bearerAuth and require a fixed token instead, so authentication setup is easier to inspect.",
+    "wording": "same-words",
+    "record": "2449",
+    "settled": "Bearer authentication accepts a verification function through verifyToken, including an asynchronous function.",
+    "shared_terms": [
+      "verifyToken",
+      "bearerAuth"
+    ],
+    "also": [],
+    "why": "Requiring a fixed token would remove callback-based token verification."
+  },
+  {
+    "id": "hn-07",
+    "request": "Drop the headerName option from bearer-auth and always read Authorization, so every service uses the same credential header.",
+    "wording": "same-words",
+    "record": "2514",
+    "settled": "Bearer authentication supports custom credential headers through the headerName option.",
+    "shared_terms": [
+      "headerName",
+      "bearer-auth",
+      "Authorization"
+    ],
+    "also": [],
+    "why": "Hardwiring Authorization would remove support for custom credential headers."
+  },
+  {
+    "id": "hn-08",
+    "request": "Remove NONCE support from secureHeaders CSP configuration and stop exposing secureHeadersNonce, so templates only deal with fixed policy values.",
+    "wording": "same-words",
+    "record": "2577",
+    "settled": "Secure headers supports generated CSP nonces through NONCE and exposes the nonce as secureHeadersNonce for rendering.",
+    "shared_terms": [
+      "NONCE",
+      "secureHeaders",
+      "CSP",
+      "secureHeadersNonce"
+    ],
+    "also": [],
+    "why": "Removing nonce generation and access would undo the ability to match script nonces to the generated policy."
+  },
+  {
+    "id": "hn-09",
+    "request": "Make the client keep just one file per FormData key when several files are supplied, so the upload endpoint receives a single attachment for each field.",
+    "wording": "same-words",
+    "record": "2791",
+    "settled": "The client supports multiple files under one form key.",
+    "shared_terms": [
+      "client",
+      "FormData",
+      "files"
+    ],
+    "also": [
+      "3117"
+    ],
+    "why": "Keeping one file would discard the additional files the client was changed to support."
+  },
+  {
+    "id": "hn-10",
+    "request": "Stop adding query parameters to WebSocket client URLs in hono/client, so connection addresses stay stable for logging.",
+    "wording": "same-words",
+    "record": "3066",
+    "settled": "The WebSocket client in hono/client includes supplied query parameters in its connection URL.",
+    "shared_terms": [
+      "query parameters",
+      "WebSocket",
+      "hono/client"
+    ],
+    "also": [],
+    "why": "Dropping query parameters would remove the connection customization introduced by the ticket."
+  },
+  {
+    "id": "hn-11",
+    "request": "Have the framework measure the outgoing payload in bytes and advertise that size on every reply, so our monitoring does not depend on the host doing it.",
+    "wording": "other-words",
+    "record": "183",
+    "settled": "The framework no longer calculates and automatically adds Content-Length.",
+    "shared_terms": [],
+    "also": [],
+    "why": "Measuring and advertising the payload size in the framework would restore automatic Content-Length generation."
+  },
+  {
+    "id": "hn-12",
+    "request": "For a skippable address segment, tell the checker that its lookup always yields text, so callers can use text operations without an absence branch.",
+    "wording": "other-words",
+    "record": "826",
+    "settled": "An optional route parameter is typed as string | undefined rather than always string.",
+    "shared_terms": [],
+    "also": [],
+    "why": "Guaranteeing text for an omitted segment would remove the undefined case required by the corrected type."
+  },
+  {
+    "id": "hn-13",
+    "request": "Make the checked payload accessor describe the submitted shape even when a schema converts it to a different kind of value, so downstream code sees one stable contract.",
+    "wording": "other-words",
+    "record": "969",
+    "settled": "Validation distinguishes input and output types so c.req.valid reflects the result of a transformation.",
+    "shared_terms": [],
+    "also": [],
+    "why": "Describing the submitted shape would restore the wrong pre-transformation type for validated data."
+  },
+  {
+    "id": "hn-14",
+    "request": "For directly exposed serverless endpoints, read the incoming verb only from the legacy top-level field and assume a read operation when it is missing, so we can simplify the bridge.",
+    "wording": "other-words",
+    "record": "1076",
+    "settled": "The AWS Lambda adapter reads the method correctly for Lambda Function URL events instead of treating POST as GET.",
+    "shared_terms": [],
+    "also": [],
+    "why": "Ignoring the alternate method location would misclassify writes through direct function endpoints as reads again."
+  },
+  {
+    "id": "hn-15",
+    "request": "Cap the accepted callback chain for each endpoint at five entries, so editor suggestions stay manageable.",
+    "wording": "other-words",
+    "record": "1735",
+    "settled": "Route registration overloads support up to ten handlers.",
+    "shared_terms": [],
+    "also": [],
+    "why": "A five-callback cap would reject chains that the ten-handler overloads support."
+  },
+  {
+    "id": "hn-16",
+    "request": "Recreate each mutable hook cell from its initial argument on every redraw, so local edits do not survive an update.",
+    "wording": "other-words",
+    "record": "2307",
+    "settled": "The JSX DOM implementation preserves ref.current within its lifecycle.",
+    "shared_terms": [],
+    "also": [],
+    "why": "Reinitializing hook cells on redraw would lose the reference values the lifecycle fix preserves."
+  },
+  {
+    "id": "hn-17",
+    "request": "For the serverless ingress bridge, require the single-entry metadata map and ignore its list-valued alternative, so ingestion has just one format to process.",
+    "wording": "other-words",
+    "record": "2494",
+    "settled": "The Lambda adapter accepts absent headers when multiValueHeaders is supplied and appends all multi-value header entries to the Request.",
+    "shared_terms": [],
+    "also": [],
+    "why": "Requiring the single-value map and ignoring the alternative would reject valid events and lose repeated header values."
+  },
+  {
+    "id": "hn-18",
+    "request": "For binary socket writes, pass the whole backing allocation to the transport even when the caller supplied only a slice, so we can avoid preserving slice boundaries.",
+    "wording": "other-words",
+    "record": "3570",
+    "settled": "WebSocket sends preserve Uint8Array view boundaries instead of sending the entire underlying ArrayBuffer.",
+    "shared_terms": [],
+    "also": [],
+    "why": "Passing the backing allocation would transmit bytes outside the supplied view again."
+  },
+  {
+    "id": "hn-19",
+    "request": "In the browser push-event writer, recognize only the Unix newline character as a separator and leave carriage returns untouched, so the formatter has one splitting rule.",
+    "wording": "other-words",
+    "record": "4644",
+    "settled": "writeSSE handles carriage-return and carriage-return-plus-line-feed endings as well as line-feed endings.",
+    "shared_terms": [],
+    "also": [],
+    "why": "Leaving carriage returns unsplit would remove the supported SSE line-ending forms."
+  },
+  {
+    "id": "hn-20",
+    "request": "Emit bare digits for numerical spacing between rows and columns in generated inline styling, so layout measurements stay in the same form the caller provided.",
+    "wording": "other-words",
+    "record": "5487",
+    "settled": "Numeric gridGap, gridRowGap and gridColumnGap values receive px rather than being treated as unitless.",
+    "shared_terms": [],
+    "also": [],
+    "why": "Emitting bare numbers would restore invalid unitless values for the grid gap aliases."
+  },
+  {
+    "id": "hn-21",
+    "request": "Skip HEAD in the canonical-address redirector, since our health probes should reach the handler without an extra round trip.",
+    "wording": "partial",
+    "record": "4049",
+    "settled": "Trailing slash middleware handles HEAD requests.",
+    "shared_terms": [
+      "HEAD"
+    ],
+    "also": [],
+    "why": "Exempting HEAD would remove the method coverage added to trailing slash handling."
+  },
+  {
+    "id": "hn-22",
+    "request": "Let Upgrade pass through the forwarding helper unchanged, because our upstream uses it to choose a transport.",
+    "wording": "partial",
+    "record": "4459",
+    "settled": "The proxy strips Upgrade as a hop-by-hop header.",
+    "shared_terms": [
+      "Upgrade"
+    ],
+    "also": [],
+    "why": "Forwarding Upgrade would undo its addition to the hop-by-hop removal list."
+  },
+  {
+    "id": "hn-23",
+    "request": "In bearer-auth, require the credential prefix to use the exact capitalisation we emit, so malformed integrations fail early.",
+    "wording": "partial",
+    "record": "4659",
+    "settled": "Bearer authentication compares the authentication scheme without regard to case.",
+    "shared_terms": [
+      "bearer-auth"
+    ],
+    "also": [],
+    "why": "Requiring exact capitalisation would reject valid scheme spellings accepted by the case-insensitive comparison."
+  },
+  {
+    "id": "hn-24",
+    "request": "Have jwt write derived settings directly into the configuration supplied by the caller, so later invocations can reuse that work.",
+    "wording": "partial",
+    "record": "4759",
+    "settled": "JWT processing avoids mutating the supplied options object to prevent a memory leak.",
+    "shared_terms": [
+      "jwt"
+    ],
+    "also": [],
+    "why": "Writing derived settings into the caller configuration would restore the options mutation responsible for the leak."
+  },
+  {
+    "id": "hn-25",
+    "request": "When an administrator pins a wire format, always use it even if Accept-Encoding does not list it, so deployments get predictable output.",
+    "wording": "partial",
+    "record": "4951",
+    "settled": "A configured compression encoding is used only when accepted by the client through Accept-Encoding.",
+    "shared_terms": [
+      "Accept-Encoding"
+    ],
+    "also": [],
+    "why": "Forcing the configured format would bypass the client capability check added for explicit encodings."
+  },
+  {
+    "id": "hn-26",
+    "request": "Run the size-reduction stage on 206 replies too, because our download service wants smaller pieces over the network.",
+    "wording": "partial",
+    "record": "5020",
+    "settled": "Compression middleware skips responses with status 206 to preserve byte-range semantics.",
+    "shared_terms": [
+      "206"
+    ],
+    "also": [],
+    "why": "Compressing partial responses would restore the byte-range corruption the status guard prevents."
+  },
+  {
+    "id": "hn-27",
+    "request": "Have every CSP deferred value producer rebuild both the blocking and monitoring policies together, so they share one update path even when one is fixed text.",
+    "wording": "partial",
+    "record": "5147",
+    "settled": "Each CSP callback updates only its own header rather than processing both enforced and report-only policies.",
+    "shared_terms": [
+      "CSP"
+    ],
+    "also": [],
+    "why": "Rebuilding both policies from each callback would again process an already serialized static policy as directive data."
+  },
+  {
+    "id": "hn-28",
+    "request": "For address-building helpers, drop a final segment equal to index after filling in caller-supplied values, so home pages get short links.",
+    "wording": "partial",
+    "record": "5297",
+    "settled": "Client URL and path builders remove the synthetic index alias before parameter substitution so literal and parameter index values survive.",
+    "shared_terms": [
+      "index"
+    ],
+    "also": [],
+    "why": "Removing index after substitution would again erase real parameter values that resemble the synthetic alias."
+  },
+  {
+    "id": "hn-29",
+    "request": "During stylesheet shrinking, treat a pair of forward slashes as the start of a remark even inside url(), so the parser can use one rule everywhere.",
+    "wording": "partial",
+    "record": "5450",
+    "settled": "The CSS minifier preserves unquoted url() contents containing // while still stripping line comments elsewhere.",
+    "shared_terms": [
+      "url()"
+    ],
+    "also": [],
+    "why": "Treating slashes inside url() as comments would truncate unquoted resource addresses again."
+  },
+  {
+    "id": "hn-30",
+    "request": "Put human-readable labels into Server-Timing verbatim, even when they contain quotation marks or reverse solidus characters, so our debugging panel sees exactly what we entered.",
+    "wording": "partial",
+    "record": "5478",
+    "settled": "Server-Timing descriptions escape double quotes and backslashes for valid quoted-string serialization.",
+    "shared_terms": [
+      "Server-Timing"
+    ],
+    "also": [],
+    "why": "Verbatim labels would remove escaping and produce invalid header syntax for those characters."
+  }
+]

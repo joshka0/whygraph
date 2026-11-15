@@ -1,0 +1,54 @@
+{
+  "id": "hono6-conflict-hn-01",
+  "kind": "conflict",
+  "repo": "hono",
+  "batch": 6,
+  "request": "Let the cache middleware store responses with status 404 as well as successful ones, so repeated misses do not keep hitting the backend.",
+  "ground_truth": {
+    "source": {
+      "id": "hn-01",
+      "request": "Let the cache middleware store responses with status 404 as well as successful ones, so repeated misses do not keep hitting the backend.",
+      "wording": "same-words",
+      "record": "1232",
+      "settled": "The cache middleware does not cache responses with status 400 or greater.",
+      "shared_terms": [
+        "cache middleware",
+        "404"
+      ],
+      "also": [],
+      "why": "Caching 404 responses would reverse the exclusion of error responses."
+    },
+    "targets": [
+      {
+        "file": "src/middleware/cache/index.ts",
+        "symbol": "defaultCacheableStatusCodes",
+        "start_line": 12,
+        "end_line": 15
+      },
+      {
+        "file": "src/middleware/cache/index.ts",
+        "symbol": "cache: cacheableStatusCodes initialization",
+        "start_line": 225,
+        "end_line": 228
+      },
+      {
+        "file": "src/middleware/cache/index.ts",
+        "symbol": "cache: response status eligibility",
+        "start_line": 306,
+        "end_line": 309
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-1232",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)1232(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}

@@ -1,0 +1,43 @@
+{
+  "id": "hono6-conflict-hn-05",
+  "kind": "conflict",
+  "repo": "hono",
+  "batch": 6,
+  "request": "When removeIndexString removes /index from a nested client URL, leave the trailing slash in place, so generated links use our directory-style convention.",
+  "ground_truth": {
+    "source": {
+      "id": "hn-05",
+      "request": "When removeIndexString removes /index from a nested client URL, leave the trailing slash in place, so generated links use our directory-style convention.",
+      "wording": "same-words",
+      "record": "2344",
+      "settled": "The client removes the trailing slash along with the synthetic /index suffix on nested paths for exact route matching.",
+      "shared_terms": [
+        "removeIndexString",
+        "/index",
+        "trailing slash"
+      ],
+      "also": [],
+      "why": "Leaving the trailing slash would recreate the nested URL mismatch fixed by the ticket."
+    },
+    "targets": [
+      {
+        "file": "src/client/utils.ts",
+        "symbol": "removeIndexString",
+        "start_line": 58,
+        "end_line": 63
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-2344",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)2344(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}

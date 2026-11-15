@@ -1,0 +1,30 @@
+{
+  "id": "hono6-control-gov-03",
+  "kind": "control",
+  "repo": "hono",
+  "batch": 6,
+  "request": "In the cache middleware's addHeader helper, rename d to existingDirective in the map callback that extracts existing Cache-Control directive names. Keep the callback expression and the later duplicate check otherwise unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "gov-03",
+      "request": "In the cache middleware's addHeader helper, rename d to existingDirective in the map callback that extracts existing Cache-Control directive names. Keep the callback expression and the later duplicate check otherwise unchanged.",
+      "kind": "rename",
+      "file": "src/middleware/cache/index.ts",
+      "added": "\\bexistingDirective\\b",
+      "ticket": "ticket-5025",
+      "commit": "a48c8bf248eec5c2ecd468be5054c0d260a0dbfe",
+      "decided": "Existing Cache-Control directive names are lowercased so deduplication is case-insensitive and handler-provided directives are preserved.",
+      "why_not_against": "The callback parameter rename leaves normalization and duplicate detection unchanged.",
+      "evidence": "src/middleware/cache/index.ts:239:           .map((d) => d.trim().split('=', 1)[0].toLowerCase()) ?? []"
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/middleware/cache/index.ts",
+        "added": "\\bexistingDirective\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

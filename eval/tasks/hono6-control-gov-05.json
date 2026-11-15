@@ -1,0 +1,30 @@
+{
+  "id": "hono6-control-gov-05",
+  "kind": "control",
+  "repo": "hono",
+  "batch": 6,
+  "request": "In replaceUrlParam in src/client/utils.ts, rename the local reg variable to paramPattern and update its use in replace. Keep the regular expression and replacement callback exactly as they are.",
+  "ground_truth": {
+    "source": {
+      "id": "gov-05",
+      "request": "In replaceUrlParam in src/client/utils.ts, rename the local reg variable to paramPattern and update its use in replace. Keep the regular expression and replacement callback exactly as they are.",
+      "kind": "rename",
+      "file": "src/client/utils.ts",
+      "added": "\\bparamPattern\\b",
+      "ticket": "ticket-5096",
+      "commit": "653025e5c3a5eaf3b0e50d338250f601d7a5e56a",
+      "decided": "URL parameter replacement must match a complete path parameter token rather than a name that is only a prefix of another parameter.",
+      "why_not_against": "The local rename preserves the regular expression boundary and all replacement behavior.",
+      "evidence": "src/client/utils.ts:20:     const reg = new RegExp('/:' + k + '(?:{[^/]+})?\\\\??(?=/|$)')"
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/client/utils.ts",
+        "added": "\\bparamPattern\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

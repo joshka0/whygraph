@@ -1,0 +1,27 @@
+{
+  "id": "hono6-control-ctl-02",
+  "kind": "control",
+  "repo": "hono",
+  "batch": 6,
+  "request": "Add a test titled \"returns an IPv6 client address unchanged\" inside the getConnInfo suite in src/adapter/lambda-edge/conninfo.test.ts. Follow the existing Context and event fixture, set Records[0].cf.request.clientIp to \"2001:db8::1\", and assert that getConnInfo(c).remote.address equals that exact string.",
+  "ground_truth": {
+    "source": {
+      "id": "ctl-02",
+      "request": "Add a test titled \"returns an IPv6 client address unchanged\" inside the getConnInfo suite in src/adapter/lambda-edge/conninfo.test.ts. Follow the existing Context and event fixture, set Records[0].cf.request.clientIp to \"2001:db8::1\", and assert that getConnInfo(c).remote.address equals that exact string.",
+      "kind": "unit-test",
+      "file": "src/adapter/lambda-edge/conninfo.test.ts",
+      "added": "\\b(?:it|test)\\s*\\(\\s*[\\'\\\"`]returns an IPv6 client address unchanged[\\'\\\"`]",
+      "why_harmless": "The implementation copies clientIp directly into remote.address, so this deterministic case tests existing behavior without a production edit.",
+      "evidence": "src/adapter/lambda-edge/conninfo.ts:16: \"    address: c.env.event.Records[0].cf.request.clientIp,\"; src/adapter/lambda-edge/conninfo.test.ts:5: \"describe('getConnInfo', () => {\"; source history is b877827f, 5f78e4e1, 4a4e851d and test history is 5f78e4e1, 4a4e851d, all feature or lint commits rather than bug fixes."
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/adapter/lambda-edge/conninfo.test.ts",
+        "added": "\\b(?:it|test)\\s*\\(\\s*[\\'\\\"`]returns an IPv6 client address unchanged[\\'\\\"`]"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

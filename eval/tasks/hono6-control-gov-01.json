@@ -1,0 +1,30 @@
+{
+  "id": "hono6-control-gov-01",
+  "kind": "control",
+  "repo": "hono",
+  "batch": 6,
+  "request": "In methodOverride, expand the comment immediately above the application/x-www-form-urlencoded branch to explain why startsWith accepts a Content-Type with a charset parameter. Include the word charset and leave the executable code unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "gov-01",
+      "request": "In methodOverride, expand the comment immediately above the application/x-www-form-urlencoded branch to explain why startsWith accepts a Content-Type with a charset parameter. Include the word charset and leave the executable code unchanged.",
+      "kind": "comment",
+      "file": "src/middleware/method-override/index.ts",
+      "added": "^\\s*(?://|/\\*|\\*)[^\\r\\n]*\\bcharset\\b",
+      "ticket": "ticket-4894",
+      "commit": "027e3dfca9d58bbd6b2e11adef724d26bb4f4123",
+      "decided": "Form-based method overrides must accept application/x-www-form-urlencoded Content-Type values that include a charset parameter.",
+      "why_not_against": "The comment explains the existing prefix check without changing which requests it accepts.",
+      "evidence": "src/middleware/method-override/index.ts:92:       if (contentType?.startsWith('application/x-www-form-urlencoded')) {"
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/middleware/method-override/index.ts",
+        "added": "^\\s*(?://|/\\*|\\*)[^\\r\\n]*\\bcharset\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

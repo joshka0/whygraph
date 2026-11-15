@@ -1,0 +1,47 @@
+{
+  "id": "hono6-conflict-hn-22",
+  "kind": "conflict",
+  "repo": "hono",
+  "batch": 6,
+  "request": "Let Upgrade pass through the forwarding helper unchanged, because our upstream uses it to choose a transport.",
+  "ground_truth": {
+    "source": {
+      "id": "hn-22",
+      "request": "Let Upgrade pass through the forwarding helper unchanged, because our upstream uses it to choose a transport.",
+      "wording": "partial",
+      "record": "4459",
+      "settled": "The proxy strips Upgrade as a hop-by-hop header.",
+      "shared_terms": [
+        "Upgrade"
+      ],
+      "also": [],
+      "why": "Forwarding Upgrade would undo its addition to the hop-by-hop removal list."
+    },
+    "targets": [
+      {
+        "file": "src/helper/proxy/index.ts",
+        "symbol": "hopByHopHeaders",
+        "start_line": 10,
+        "end_line": 19
+      },
+      {
+        "file": "src/helper/proxy/index.ts",
+        "symbol": "buildRequestInitFromRequest: Connection-listed header removal",
+        "start_line": 60,
+        "end_line": 82
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-4459",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)4459(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}

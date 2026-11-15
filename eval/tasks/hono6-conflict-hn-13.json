@@ -1,0 +1,51 @@
+{
+  "id": "hono6-conflict-hn-13",
+  "kind": "conflict",
+  "repo": "hono",
+  "batch": 6,
+  "request": "Make the checked payload accessor describe the submitted shape even when a schema converts it to a different kind of value, so downstream code sees one stable contract.",
+  "ground_truth": {
+    "source": {
+      "id": "hn-13",
+      "request": "Make the checked payload accessor describe the submitted shape even when a schema converts it to a different kind of value, so downstream code sees one stable contract.",
+      "wording": "other-words",
+      "record": "969",
+      "settled": "Validation distinguishes input and output types so c.req.valid reflects the result of a transformation.",
+      "shared_terms": [],
+      "also": [],
+      "why": "Describing the submitted shape would restore the wrong pre-transformation type for validated data."
+    },
+    "targets": [
+      {
+        "file": "src/context.ts",
+        "symbol": "Context.req",
+        "start_line": 366,
+        "end_line": 369
+      },
+      {
+        "file": "src/request.ts",
+        "symbol": "HonoRequest.valid",
+        "start_line": 356,
+        "end_line": 359
+      },
+      {
+        "file": "src/types.ts",
+        "symbol": "InputToDataByTarget",
+        "start_line": 2724,
+        "end_line": 2731
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-969",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)969(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}

@@ -1,0 +1,51 @@
+{
+  "id": "hono6-conflict-hn-15",
+  "kind": "conflict",
+  "repo": "hono",
+  "batch": 6,
+  "request": "Cap the accepted callback chain for each endpoint at five entries, so editor suggestions stay manageable.",
+  "ground_truth": {
+    "source": {
+      "id": "hn-15",
+      "request": "Cap the accepted callback chain for each endpoint at five entries, so editor suggestions stay manageable.",
+      "wording": "other-words",
+      "record": "1735",
+      "settled": "Route registration overloads support up to ten handlers.",
+      "shared_terms": [],
+      "also": [],
+      "why": "A five-callback cap would reject chains that the ten-handler overloads support."
+    },
+    "targets": [
+      {
+        "file": "src/types.ts",
+        "symbol": "HandlerInterface: six-handler path overload",
+        "start_line": 541,
+        "end_line": 591
+      },
+      {
+        "file": "src/types.ts",
+        "symbol": "HandlerInterface: variadic handler overloads",
+        "start_line": 1043,
+        "end_line": 1061
+      },
+      {
+        "file": "src/types.ts",
+        "symbol": "OnHandlerInterface: six-handler overload",
+        "start_line": 1628,
+        "end_line": 1679
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-1735",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)1735(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}

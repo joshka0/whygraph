@@ -1,0 +1,27 @@
+{
+  "id": "hono6-control-ctl-04",
+  "kind": "control",
+  "repo": "hono",
+  "batch": 6,
+  "request": "In the module comment at the top of src/helper/conninfo/index.ts, replace \"ConnInfo Helper for Hono.\" with wording that describes connection information types for Hono. Include the phrase \"connection information\" and keep the @module tag and exports unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "ctl-04",
+      "request": "In the module comment at the top of src/helper/conninfo/index.ts, replace \"ConnInfo Helper for Hono.\" with wording that describes connection information types for Hono. Include the phrase \"connection information\" and keep the @module tag and exports unchanged.",
+      "kind": "comment-wording",
+      "file": "src/helper/conninfo/index.ts",
+      "added": "^\\s*\\*.*\\bconnection information\\b",
+      "why_harmless": "The module already re-exports only connection information types, so this wording describes its existing contents.",
+      "evidence": "src/helper/conninfo/index.ts:3: \" * ConnInfo Helper for Hono.\"; its file history is 8c5463f6 (type-definition extraction), 6d9f1f09 (module documentation), and a8a5fb97 (helper introduction), with no bug fix."
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/helper/conninfo/index.ts",
+        "added": "^\\s*\\*.*\\bconnection information\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

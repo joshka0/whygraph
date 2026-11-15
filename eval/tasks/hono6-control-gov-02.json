@@ -1,0 +1,30 @@
+{
+  "id": "hono6-control-gov-02",
+  "kind": "control",
+  "repo": "hono",
+  "batch": 6,
+  "request": "In parse in src/utils/cookie.ts, rename the loop variable pairStr to cookiePair and update its references within that function. Keep the parsing steps, duplicate-name check, and null-prototype result object unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "gov-02",
+      "request": "In parse in src/utils/cookie.ts, rename the loop variable pairStr to cookiePair and update its references within that function. Keep the parsing steps, duplicate-name check, and null-prototype result object unchanged.",
+      "kind": "rename",
+      "file": "src/utils/cookie.ts",
+      "added": "\\bcookiePair\\b",
+      "ticket": "ticket-4922",
+      "commit": "ff7522fdccef4a55f6aa326ece705c0cd7cd8031",
+      "decided": "Cookie parsing keeps the first accepted value for a duplicate name and uses null-prototype result objects to avoid inherited-property collisions.",
+      "why_not_against": "Renaming the local loop variable preserves both first-value handling and the result object construction.",
+      "evidence": "src/utils/cookie.ts:117:   for (const pairStr of pairs) {"
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/utils/cookie.ts",
+        "added": "\\bcookiePair\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

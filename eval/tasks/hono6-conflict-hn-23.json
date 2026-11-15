@@ -1,0 +1,41 @@
+{
+  "id": "hono6-conflict-hn-23",
+  "kind": "conflict",
+  "repo": "hono",
+  "batch": 6,
+  "request": "In bearer-auth, require the credential prefix to use the exact capitalisation we emit, so malformed integrations fail early.",
+  "ground_truth": {
+    "source": {
+      "id": "hn-23",
+      "request": "In bearer-auth, require the credential prefix to use the exact capitalisation we emit, so malformed integrations fail early.",
+      "wording": "partial",
+      "record": "4659",
+      "settled": "Bearer authentication compares the authentication scheme without regard to case.",
+      "shared_terms": [
+        "bearer-auth"
+      ],
+      "also": [],
+      "why": "Requiring exact capitalisation would reject valid scheme spellings accepted by the case-insensitive comparison."
+    },
+    "targets": [
+      {
+        "file": "src/middleware/bearer-auth/index.ts",
+        "symbol": "bearerAuth: credential prefix parsing",
+        "start_line": 183,
+        "end_line": 193
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-4659",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)4659(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}

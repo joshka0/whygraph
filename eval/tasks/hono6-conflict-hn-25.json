@@ -1,0 +1,53 @@
+{
+  "id": "hono6-conflict-hn-25",
+  "kind": "conflict",
+  "repo": "hono",
+  "batch": 6,
+  "request": "When an administrator pins a wire format, always use it even if Accept-Encoding does not list it, so deployments get predictable output.",
+  "ground_truth": {
+    "source": {
+      "id": "hn-25",
+      "request": "When an administrator pins a wire format, always use it even if Accept-Encoding does not list it, so deployments get predictable output.",
+      "wording": "partial",
+      "record": "4951",
+      "settled": "A configured compression encoding is used only when accepted by the client through Accept-Encoding.",
+      "shared_terms": [
+        "Accept-Encoding"
+      ],
+      "also": [],
+      "why": "Forcing the configured format would bypass the client capability check added for explicit encodings."
+    },
+    "targets": [
+      {
+        "file": "src/middleware/compress/index.ts",
+        "symbol": "compress: encoding negotiation",
+        "start_line": 118,
+        "end_line": 122
+      },
+      {
+        "file": "src/middleware/compress/index.ts",
+        "symbol": "compress: encoding candidates",
+        "start_line": 72,
+        "end_line": 75
+      },
+      {
+        "file": "src/middleware/compress/index.ts",
+        "symbol": "selectEncoding",
+        "start_line": 24,
+        "end_line": 44
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-4951",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)4951(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}

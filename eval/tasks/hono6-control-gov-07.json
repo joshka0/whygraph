@@ -1,0 +1,30 @@
+{
+  "id": "hono6-control-gov-07",
+  "kind": "control",
+  "repo": "hono",
+  "batch": 6,
+  "request": "In setMetric in src/middleware/timing/timing.ts, rename the local dur variable in the numeric-value branch to formattedDuration and update both template references. Keep toFixed(precision ?? 1) and the emitted Server-Timing text unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "gov-07",
+      "request": "In setMetric in src/middleware/timing/timing.ts, rename the local dur variable in the numeric-value branch to formattedDuration and update both template references. Keep toFixed(precision ?? 1) and the emitted Server-Timing text unchanged.",
+      "kind": "rename",
+      "file": "src/middleware/timing/timing.ts",
+      "added": "\\bformattedDuration\\b",
+      "ticket": "ticket-5363",
+      "commit": "edae2bf701e37e49f4603e9ce62d7466624e3ed4",
+      "decided": "setMetric honors an explicit precision of zero and defaults to one decimal place only when precision is nullish.",
+      "why_not_against": "The local rename leaves the nullish precision default and formatted header value unchanged.",
+      "evidence": "src/middleware/timing/timing.ts:165:     const dur = valueDescription.toFixed(precision ?? 1)"
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/middleware/timing/timing.ts",
+        "added": "\\bformattedDuration\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

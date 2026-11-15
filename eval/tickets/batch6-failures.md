@@ -39,13 +39,10 @@ list and the README. The implementation author changes no file under
 
 ## Blind-file SHA-256
 
-The parent delayed the complete handoff while another author fixes a store
-loader limit. The partial preparation records the two supplied control files:
+The five files match the parent's final handoff byte for byte.
 
+- `requests.json`: `3d290aa080fc0fcc6fec4527e10d890b9d0f9b33c48d4038503e09d6871b5a51`.
+- `targets.json`: `1371c02ca60b1108a851a852260de873968037f13e3f6f446729f3364e359f26`.
 - `controls.json`: `ce2df933115ac97bb19dd26fd4d946fb8912ad483595973b21a4b1f7649e889a`.
 - `controls2.json`: `a1c67e3278faa7b210436fb4b5aa4ca74923514cd875a39853a9eeb1a65dc9c0`.
-
-Pending follow-up: copy `requests.json`, `targets.json` and `sample-ids.json`,
-record their exact hashes here and in the registry, then generate the 33
-`hono6-*` tasks and verify the 297-run plan. Do not start a trial before
-that follow-up and the parent's store preparation are complete.
+- `sample-ids.json`: `52ba0f3b813fd5a484d7b953d02dbe9683890f51446f8d0690d22541279dec8c`.

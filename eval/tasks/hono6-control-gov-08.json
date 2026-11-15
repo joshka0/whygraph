@@ -1,0 +1,30 @@
+{
+  "id": "hono6-control-gov-08",
+  "kind": "control",
+  "repo": "hono",
+  "batch": 6,
+  "request": "In basePath in src/helper/route/index.ts, expand the comment immediately above the segment variable to explain that an anchored regex can fail against the remaining path yet match the current segment. Include the word anchored and leave the fallback expression unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "gov-08",
+      "request": "In basePath in src/helper/route/index.ts, expand the comment immediately above the segment variable to explain that an anchored regex can fail against the remaining path yet match the current segment. Include the word anchored and leave the fallback expression unchanged.",
+      "kind": "comment",
+      "file": "src/helper/route/index.ts",
+      "added": "^\\s*(?://|/\\*|\\*)[^\\r\\n]*\\banchored\\b",
+      "ticket": "ticket-5498",
+      "commit": "e77c7c8eb9fea50a496ba10010063998b55d7a6b",
+      "decided": "basePath uses the router's current-segment fallback when a regex parameter does not match the whole remaining request path.",
+      "why_not_against": "The comment explains why the existing fallback is needed without changing path matching or the returned base path.",
+      "evidence": "src/helper/route/index.ts:131:         basePathLength += (restPath.match(re)?.[0] ?? (re.test(segment) ? segment : '')).length"
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/helper/route/index.ts",
+        "added": "^\\s*(?://|/\\*|\\*)[^\\r\\n]*\\banchored\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

@@ -1,0 +1,30 @@
+{
+  "id": "hono6-control-gov-04",
+  "kind": "control",
+  "repo": "hono",
+  "batch": 6,
+  "request": "In isProxyEventV2 in src/adapter/aws-lambda/handler.ts, extend the existing comment to explain that a misclassified V1 event would route using rawPath instead of path. Use the word misclassified and keep both Object.hasOwn checks unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "gov-04",
+      "request": "In isProxyEventV2 in src/adapter/aws-lambda/handler.ts, extend the existing comment to explain that a misclassified V1 event would route using rawPath instead of path. Use the word misclassified and keep both Object.hasOwn checks unchanged.",
+      "kind": "comment",
+      "file": "src/adapter/aws-lambda/handler.ts",
+      "added": "^\\s*(?://|/\\*|\\*)[^\\r\\n]*\\bmisclassified\\b",
+      "ticket": "ticket-5033",
+      "commit": "45b081b9b90244a03444f9781d7777cbe620e6b4",
+      "decided": "V2 event detection requires both rawPath and requestContext.http so a V1 event with a custom-domain rawPath remains classified as V1.",
+      "why_not_against": "The added explanation documents the routing consequence while preserving the exact event classification checks.",
+      "evidence": "src/adapter/aws-lambda/handler.ts:694:   return Object.hasOwn(event, 'rawPath') && Object.hasOwn(event.requestContext ?? {}, 'http')"
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/adapter/aws-lambda/handler.ts",
+        "added": "^\\s*(?://|/\\*|\\*)[^\\r\\n]*\\bmisclassified\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

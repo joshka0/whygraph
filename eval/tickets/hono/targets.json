@@ -1,0 +1,601 @@
+[
+  {
+    "id": "hn-01",
+    "targets": [
+      {
+        "file": "src/middleware/cache/index.ts",
+        "symbol": "defaultCacheableStatusCodes",
+        "start_line": 12,
+        "end_line": 15
+      },
+      {
+        "file": "src/middleware/cache/index.ts",
+        "symbol": "cache: cacheableStatusCodes initialization",
+        "start_line": 225,
+        "end_line": 228
+      },
+      {
+        "file": "src/middleware/cache/index.ts",
+        "symbol": "cache: response status eligibility",
+        "start_line": 306,
+        "end_line": 309
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Followed the cache default status list through its Set initialization to the response-status guard.",
+    "not_found": false
+  },
+  {
+    "id": "hn-02",
+    "targets": [
+      {
+        "file": "src/preset/quick.ts",
+        "symbol": "Hono.constructor",
+        "start_line": 18,
+        "end_line": 23
+      },
+      {
+        "file": "src/preset/quick.ts",
+        "symbol": "router imports",
+        "start_line": 6,
+        "end_line": 11
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Read the quick preset and found SmartRouter constructing LinearRouter and TrieRouter together.",
+    "not_found": false
+  },
+  {
+    "id": "hn-03",
+    "targets": [
+      {
+        "file": "src/hono-base.ts",
+        "symbol": "HonoBase.constructor: this.use",
+        "start_line": 177,
+        "end_line": 188
+      },
+      {
+        "file": "src/types.ts",
+        "symbol": "MiddlewareHandlerInterface: pathless middleware overload",
+        "start_line": 1085,
+        "end_line": 1093
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Found the pathless use branch resetting the current path to * and its matching middleware type overload.",
+    "not_found": false
+  },
+  {
+    "id": "hn-04",
+    "targets": [
+      {
+        "file": "src/jsx/base.ts",
+        "symbol": "attributeToBuffer: function-valued attribute branch",
+        "start_line": 178,
+        "end_line": 187
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Traced renderToString through JSX string rendering to the attribute serializer that rejects non-event function props.",
+    "not_found": false
+  },
+  {
+    "id": "hn-05",
+    "targets": [
+      {
+        "file": "src/client/utils.ts",
+        "symbol": "removeIndexString",
+        "start_line": 58,
+        "end_line": 63
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Searched for removeIndexString and found its nested-URL replacement removes the entire /index suffix.",
+    "not_found": false
+  },
+  {
+    "id": "hn-06",
+    "targets": [
+      {
+        "file": "src/middleware/bearer-auth/index.ts",
+        "symbol": "BearerAuthOptions",
+        "start_line": 23,
+        "end_line": 67
+      },
+      {
+        "file": "src/middleware/bearer-auth/index.ts",
+        "symbol": "bearerAuth: required credential options",
+        "start_line": 105,
+        "end_line": 110
+      },
+      {
+        "file": "src/middleware/bearer-auth/index.ts",
+        "symbol": "bearerAuth: token verification branches",
+        "start_line": 207,
+        "end_line": 219
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Found verifyToken in the options union, required-options check, and authentication branch.",
+    "not_found": false
+  },
+  {
+    "id": "hn-07",
+    "targets": [
+      {
+        "file": "src/middleware/bearer-auth/index.ts",
+        "symbol": "bearerAuth: credential header lookup",
+        "start_line": 169,
+        "end_line": 181
+      },
+      {
+        "file": "src/middleware/bearer-auth/index.ts",
+        "symbol": "BearerAuthOptions",
+        "start_line": 23,
+        "end_line": 67
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Searched bearer-auth for headerName and found both option variants and the runtime Authorization fallback.",
+    "not_found": false
+  },
+  {
+    "id": "hn-08",
+    "targets": [
+      {
+        "file": "src/middleware/secure-headers/secure-headers.ts",
+        "symbol": "NONCE and generateNonce",
+        "start_line": 131,
+        "end_line": 145
+      },
+      {
+        "file": "src/middleware/secure-headers/secure-headers.ts",
+        "symbol": "SecureHeadersVariables",
+        "start_line": 11,
+        "end_line": 13
+      },
+      {
+        "file": "src/middleware/secure-headers/index.ts",
+        "symbol": "NONCE exports and ContextVariableMap augmentation",
+        "start_line": 1,
+        "end_line": 8
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Found the NONCE producer storing secureHeadersNonce and followed its public export and context-variable type.",
+    "not_found": false
+  },
+  {
+    "id": "hn-09",
+    "targets": [
+      {
+        "file": "src/client/client.ts",
+        "symbol": "ClientRequestImpl.fetch: FormData serialization",
+        "start_line": 69,
+        "end_line": 87
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Read the client form serialization loop that appends every array value under the same FormData key.",
+    "not_found": false
+  },
+  {
+    "id": "hn-10",
+    "targets": [
+      {
+        "file": "src/client/client.ts",
+        "symbol": "hc.proxyCallback: WebSocket URL query branch",
+        "start_line": 206,
+        "end_line": 228
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Found the ws proxy branch appending query parameters before establishing the WebSocket.",
+    "not_found": false
+  },
+  {
+    "id": "hn-11",
+    "targets": [],
+    "confidence": "high",
+    "how_found": "Searched response construction and all source Content-Length uses; no framework-wide outgoing-payload byte measurement or automatic size-header feature exists.",
+    "not_found": true
+  },
+  {
+    "id": "hn-12",
+    "targets": [
+      {
+        "file": "src/request.ts",
+        "symbol": "HonoRequest.param overloads",
+        "start_line": 91,
+        "end_line": 101
+      },
+      {
+        "file": "src/types.ts",
+        "symbol": "ParamKeyToRecord",
+        "start_line": 2714,
+        "end_line": 2716
+      },
+      {
+        "file": "src/types.ts",
+        "symbol": "ValidationTargets",
+        "start_line": 2687,
+        "end_line": 2694
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Traced optional path parameter typing to the param overload, optional-key record mapping, and validation target type.",
+    "not_found": false
+  },
+  {
+    "id": "hn-13",
+    "targets": [
+      {
+        "file": "src/context.ts",
+        "symbol": "Context.req",
+        "start_line": 366,
+        "end_line": 369
+      },
+      {
+        "file": "src/request.ts",
+        "symbol": "HonoRequest.valid",
+        "start_line": 356,
+        "end_line": 359
+      },
+      {
+        "file": "src/types.ts",
+        "symbol": "InputToDataByTarget",
+        "start_line": 2724,
+        "end_line": 2731
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Traced the checked payload accessor from Context.req using validation output to valid and its return-type extraction.",
+    "not_found": false
+  },
+  {
+    "id": "hn-14",
+    "targets": [
+      {
+        "file": "src/adapter/aws-lambda/handler.ts",
+        "symbol": "EventV2Processor.getMethod",
+        "start_line": 436,
+        "end_line": 443
+      },
+      {
+        "file": "adapters/aws-lambda/src/handler.ts",
+        "symbol": "EventV2Processor.getMethod",
+        "start_line": 408,
+        "end_line": 415
+      },
+      {
+        "file": "src/adapter/aws-lambda/handler.ts",
+        "symbol": "APIGatewayProxyEventV2",
+        "start_line": 51,
+        "end_line": 71
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Located the Lambda function-URL event processor reading requestContext.http.method in both adapter copies and its event type.",
+    "not_found": false
+  },
+  {
+    "id": "hn-15",
+    "targets": [
+      {
+        "file": "src/types.ts",
+        "symbol": "HandlerInterface: six-handler path overload",
+        "start_line": 541,
+        "end_line": 591
+      },
+      {
+        "file": "src/types.ts",
+        "symbol": "HandlerInterface: variadic handler overloads",
+        "start_line": 1043,
+        "end_line": 1061
+      },
+      {
+        "file": "src/types.ts",
+        "symbol": "OnHandlerInterface: six-handler overload",
+        "start_line": 1628,
+        "end_line": 1679
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Read endpoint overloads and found explicit six-to-ten-handler signatures plus unbounded variadic signatures that permit more than five callbacks.",
+    "not_found": false
+  },
+  {
+    "id": "hn-16",
+    "targets": [
+      {
+        "file": "src/jsx/hooks/index.ts",
+        "symbol": "useRef",
+        "start_line": 320,
+        "end_line": 334
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Found useRef retaining its mutable current cell through the per-node refArray hook slot.",
+    "not_found": false
+  },
+  {
+    "id": "hn-17",
+    "targets": [
+      {
+        "file": "src/adapter/aws-lambda/handler.ts",
+        "symbol": "EventV1Processor.getHeaders",
+        "start_line": 509,
+        "end_line": 527
+      },
+      {
+        "file": "src/adapter/aws-lambda/handler.ts",
+        "symbol": "ALBProcessor.getHeaders",
+        "start_line": 542,
+        "end_line": 562
+      },
+      {
+        "file": "src/adapter/aws-lambda/handler.ts",
+        "symbol": "ALBProxyEvent",
+        "start_line": 101,
+        "end_line": 113
+      }
+    ],
+    "confidence": "medium",
+    "how_found": "Searched serverless header ingestion and found multiValueHeaders processing in gateway and load-balancer processors plus optional ALB headers.",
+    "not_found": false
+  },
+  {
+    "id": "hn-18",
+    "targets": [
+      {
+        "file": "src/helper/websocket/index.ts",
+        "symbol": "WSContext.send",
+        "start_line": 78,
+        "end_line": 80
+      },
+      {
+        "file": "src/adapter/deno/websocket.ts",
+        "symbol": "upgradeWebSocket: transport send callback",
+        "start_line": 23,
+        "end_line": 34
+      },
+      {
+        "file": "src/adapter/cloudflare-workers/websocket.ts",
+        "symbol": "upgradeWebSocket: transport send callback",
+        "start_line": 24,
+        "end_line": 35
+      }
+    ],
+    "confidence": "medium",
+    "how_found": "Traced binary socket writes from WSContext.send to adapter callbacks that currently forward the supplied Uint8Array view unchanged.",
+    "not_found": false
+  },
+  {
+    "id": "hn-19",
+    "targets": [
+      {
+        "file": "src/helper/streaming/sse.ts",
+        "symbol": "SSEStreamingApi.writeSSE",
+        "start_line": 18,
+        "end_line": 45
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Found the SSE data formatter splitting on CRLF, CR, and LF before adding data prefixes.",
+    "not_found": false
+  },
+  {
+    "id": "hn-20",
+    "targets": [
+      {
+        "file": "src/jsx/utils.ts",
+        "symbol": "styleObjectForEach",
+        "start_line": 169,
+        "end_line": 202
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Traced inline style serialization to the numeric-property rule that appends px unless the property matches its unitless expression.",
+    "not_found": false
+  },
+  {
+    "id": "hn-21",
+    "targets": [
+      {
+        "file": "src/middleware/trailing-slash/index.ts",
+        "symbol": "trimTrailingSlash",
+        "start_line": 44,
+        "end_line": 74
+      },
+      {
+        "file": "src/middleware/trailing-slash/index.ts",
+        "symbol": "appendTrailingSlash",
+        "start_line": 128,
+        "end_line": 158
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Found GET-or-HEAD guards in both canonical trailing-slash redirectors and both redirect modes.",
+    "not_found": false
+  },
+  {
+    "id": "hn-22",
+    "targets": [
+      {
+        "file": "src/helper/proxy/index.ts",
+        "symbol": "hopByHopHeaders",
+        "start_line": 10,
+        "end_line": 19
+      },
+      {
+        "file": "src/helper/proxy/index.ts",
+        "symbol": "buildRequestInitFromRequest: Connection-listed header removal",
+        "start_line": 60,
+        "end_line": 82
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Found upgrade in the forwarding helper hop-by-hop removal list and the optional Connection-token removal path.",
+    "not_found": false
+  },
+  {
+    "id": "hn-23",
+    "targets": [
+      {
+        "file": "src/middleware/bearer-auth/index.ts",
+        "symbol": "bearerAuth: credential prefix parsing",
+        "start_line": 183,
+        "end_line": 193
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Found bearer-auth lowercasing both the incoming header and configured prefix before matching.",
+    "not_found": false
+  },
+  {
+    "id": "hn-24",
+    "targets": [
+      {
+        "file": "src/middleware/jwt/jwt.ts",
+        "symbol": "jwt: derived verification options",
+        "start_line": 54,
+        "end_line": 72
+      },
+      {
+        "file": "src/middleware/jwt/jwt.ts",
+        "symbol": "jwt: derived credential header",
+        "start_line": 78,
+        "end_line": 81
+      },
+      {
+        "file": "src/middleware/jwt/jwt.ts",
+        "symbol": "jwt: verification options construction",
+        "start_line": 135,
+        "end_line": 141
+      }
+    ],
+    "confidence": "medium",
+    "how_found": "Read jwt configuration handling and found derived verification and header settings held in local values rather than written into caller options.",
+    "not_found": false
+  },
+  {
+    "id": "hn-25",
+    "targets": [
+      {
+        "file": "src/middleware/compress/index.ts",
+        "symbol": "compress: encoding negotiation",
+        "start_line": 118,
+        "end_line": 122
+      },
+      {
+        "file": "src/middleware/compress/index.ts",
+        "symbol": "compress: encoding candidates",
+        "start_line": 72,
+        "end_line": 75
+      },
+      {
+        "file": "src/middleware/compress/index.ts",
+        "symbol": "selectEncoding",
+        "start_line": 24,
+        "end_line": 44
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Traced the pinned encoding option into candidates and selectEncoding, which still requires acceptance by the request header.",
+    "not_found": false
+  },
+  {
+    "id": "hn-26",
+    "targets": [
+      {
+        "file": "src/middleware/compress/index.ts",
+        "symbol": "compress: response eligibility guard",
+        "start_line": 91,
+        "end_line": 104
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Found the explicit status-206 exclusion in the compression eligibility guard.",
+    "not_found": false
+  },
+  {
+    "id": "hn-27",
+    "targets": [
+      {
+        "file": "src/middleware/secure-headers/secure-headers.ts",
+        "symbol": "getCSPDirectives: deferred policy callback",
+        "start_line": 275,
+        "end_line": 291
+      },
+      {
+        "file": "src/middleware/secure-headers/secure-headers.ts",
+        "symbol": "secureHeaders: policy callback registration",
+        "start_line": 184,
+        "end_line": 204
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Found each deferred CSP callback restricted to its headerName and separately registered for blocking and report-only policies.",
+    "not_found": false
+  },
+  {
+    "id": "hn-28",
+    "targets": [
+      {
+        "file": "src/client/client.ts",
+        "symbol": "hc.proxyCallback: url and path helper branch",
+        "start_line": 189,
+        "end_line": 205
+      },
+      {
+        "file": "src/client/client.ts",
+        "symbol": "ClientRequestImpl.fetch: index removal and parameter substitution",
+        "start_line": 129,
+        "end_line": 136
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Found URL helpers removing the synthetic index segment before parameter substitution, with the same ordering in client fetch.",
+    "not_found": false
+  },
+  {
+    "id": "hn-29",
+    "targets": [
+      {
+        "file": "src/helper/css/common.ts",
+        "symbol": "cssStringReStr",
+        "start_line": 79,
+        "end_line": 85
+      },
+      {
+        "file": "src/helper/css/common.ts",
+        "symbol": "minifyCssRe",
+        "start_line": 86,
+        "end_line": 106
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Found unquoted url() protected as a string alternative ahead of the double-slash comment matcher in CSS minification.",
+    "not_found": false
+  },
+  {
+    "id": "hn-30",
+    "targets": [
+      {
+        "file": "src/middleware/timing/timing.ts",
+        "symbol": "quote",
+        "start_line": 134,
+        "end_line": 135
+      },
+      {
+        "file": "src/middleware/timing/timing.ts",
+        "symbol": "setMetric: description serialization",
+        "start_line": 164,
+        "end_line": 177
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Found the timing quoted-string helper escaping quotes and backslashes and both description paths calling it.",
+    "not_found": false
+  }
+]

@@ -1,0 +1,30 @@
+{
+  "id": "hono6-control-gov-06",
+  "kind": "control",
+  "repo": "hono",
+  "batch": 6,
+  "request": "In SSEStreamingApi.writeSSE, add a comment immediately above the message.retry entry explaining that zero is a valid retry value and must still be emitted. Use the word zero and leave the serialization expression unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "gov-06",
+      "request": "In SSEStreamingApi.writeSSE, add a comment immediately above the message.retry entry explaining that zero is a valid retry value and must still be emitted. Use the word zero and leave the serialization expression unchanged.",
+      "kind": "comment",
+      "file": "src/helper/streaming/sse.ts",
+      "added": "^\\s*(?://|/\\*|\\*)[^\\r\\n]*\\bzero\\b",
+      "ticket": "ticket-5135",
+      "commit": "aeba9ece778fb24953816fd3517858ff80de958f",
+      "decided": "SSE output includes a retry field when retry is zero rather than dropping it as a falsy value.",
+      "why_not_against": "The comment explains the undefined check without changing field validation or serialization.",
+      "evidence": "src/helper/streaming/sse.ts:39:         message.retry !== undefined && `retry: ${message.retry}`,"
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/helper/streaming/sse.ts",
+        "added": "^\\s*(?://|/\\*|\\*)[^\\r\\n]*\\bzero\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

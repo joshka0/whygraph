@@ -1,0 +1,27 @@
+{
+  "id": "hono6-control-ctl-01",
+  "kind": "control",
+  "repo": "hono",
+  "batch": 6,
+  "request": "Add a JSDoc comment immediately above the exported Pool interface in src/utils/concurrent.ts. Describe it as a pool that runs callbacks through its run method and returns their results as promises; leave the interface and implementation unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "ctl-01",
+      "request": "Add a JSDoc comment immediately above the exported Pool interface in src/utils/concurrent.ts. Describe it as a pool that runs callbacks through its run method and returns their results as promises; leave the interface and implementation unchanged.",
+      "kind": "doc-comment",
+      "file": "src/utils/concurrent.ts",
+      "added": "^\\s*(/\\*\\*|\\*)",
+      "why_harmless": "Pool has no item-level documentation, and its existing run signature already states the contract that the comment will describe.",
+      "evidence": "src/utils/concurrent.ts:8: \"export interface Pool {\"; src/utils/concurrent.ts:9: \"  run<T>(fn: () => T): Promise<T>\"; its last five available file commits are 6d9f1f09 (module documentation) and 30b33b0e (concurrent file generation), with no bug fix."
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/utils/concurrent.ts",
+        "added": "^\\s*(/\\*\\*|\\*)"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

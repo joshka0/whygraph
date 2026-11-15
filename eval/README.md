@@ -1091,12 +1091,11 @@ checks, 20-minute timeout, retry and unscored rules all apply. The skill and
 rule text from main are unchanged. No trial or model call starts during
 preparation. No batch 6 number is compared with batch 5 run by run.
 
-**Preparation status.** The parent requested a partial preparation commit
-while another author fixes a store loader limit. The two supplied control
-files and their hashes are recorded. `requests.json`, `targets.json`,
-`sample-ids.json`, their hashes, the generated tasks and the 297-run plan
-check are pending the parent's follow-up. No trial can start before those
-inputs and the ready template are complete.
+**Preparation status.** All five blind files are copied byte for byte,
+and their hashes are recorded in the registry and failure list. The generator
+produced 33 tasks. The plan prints `297 runs planned, 0 already done,
+297 to start`, in the three fixed conditions with opencode. The parent owns
+the ready template and store preparation. No trial starts here.
 
 **Repo selection.** Before any result, the parent selected the TypeScript
 repo with the most ticket numbers cited by commits that change source files,

@@ -1,0 +1,51 @@
+{
+  "id": "hono6-conflict-hn-14",
+  "kind": "conflict",
+  "repo": "hono",
+  "batch": 6,
+  "request": "For directly exposed serverless endpoints, read the incoming verb only from the legacy top-level field and assume a read operation when it is missing, so we can simplify the bridge.",
+  "ground_truth": {
+    "source": {
+      "id": "hn-14",
+      "request": "For directly exposed serverless endpoints, read the incoming verb only from the legacy top-level field and assume a read operation when it is missing, so we can simplify the bridge.",
+      "wording": "other-words",
+      "record": "1076",
+      "settled": "The AWS Lambda adapter reads the method correctly for Lambda Function URL events instead of treating POST as GET.",
+      "shared_terms": [],
+      "also": [],
+      "why": "Ignoring the alternate method location would misclassify writes through direct function endpoints as reads again."
+    },
+    "targets": [
+      {
+        "file": "src/adapter/aws-lambda/handler.ts",
+        "symbol": "EventV2Processor.getMethod",
+        "start_line": 436,
+        "end_line": 443
+      },
+      {
+        "file": "adapters/aws-lambda/src/handler.ts",
+        "symbol": "EventV2Processor.getMethod",
+        "start_line": 408,
+        "end_line": 415
+      },
+      {
+        "file": "src/adapter/aws-lambda/handler.ts",
+        "symbol": "APIGatewayProxyEventV2",
+        "start_line": 51,
+        "end_line": 71
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-1076",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)1076(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}
