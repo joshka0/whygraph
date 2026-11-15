@@ -1,0 +1,2362 @@
+{
+  "contract": [
+    "/home/dev/scratch/whygraph-eval/trial7-tests-brief.md",
+    "eval/tickets/batch7-failures.md",
+    "eval/README.md: Batch 7, fixed before its first run",
+    "docs/adr/0010-eval-instruction-history.md",
+    "docs/adr/0011-eval-closed-store.md",
+    "docs/adr/0012-ticket-record-outcomes.md"
+  ],
+  "status": "blocked: retry dispatcher is outside permitted callable surface; contract-red assertions need parent ruling",
+  "scope": {
+    "edited": "eval/selftest/ only",
+    "branch": "batch-7",
+    "branch_state": "local and unmerged",
+    "test_directory_changes": false,
+    "production_changes": false,
+    "installs": 0,
+    "hosted_model_calls": 0,
+    "trial_runs": 0,
+    "pushes": 0,
+    "delegation": false,
+    "worktrees_created": 0
+  },
+  "history_changes": {
+    "B6-26": "Compare skill/rule from batch 6 recorded commit with c92205d. Keep launcher working-byte pin.",
+    "batch5_prepare": "Compare prepared instruction bytes with c92205d instead of the working skill, per ADR 0010."
+  },
+  "results": {
+    "passed": 1338,
+    "total": 1347,
+    "exit": 1,
+    "earlier_passed": 1061,
+    "earlier_total": 1061,
+    "new_passed": 277,
+    "new_total": 286,
+    "red_cases": [
+      "B7 B7-12 graph carry missing-argument usage matches direct CLI bytes and status",
+      "B7 B7-12 graph why missing-argument usage matches direct CLI bytes and status",
+      "B7 B7-12 graph impact missing-argument usage matches direct CLI bytes and status",
+      "B7 B7-12 graph search missing-argument usage matches direct CLI bytes and status",
+      "B7 B7-12 graph-norule carry missing-argument usage matches direct CLI bytes and status",
+      "B7 B7-12 graph-norule why missing-argument usage matches direct CLI bytes and status",
+      "B7 B7-12 graph-norule impact missing-argument usage matches direct CLI bytes and status",
+      "B7 B7-12 graph-norule search missing-argument usage matches direct CLI bytes and status",
+      "B7 B7-11 B7-19 actual generated shell denies network and identity while source and commands work"
+    ],
+    "log": "test-results/batch7-final-proof.txt",
+    "supplement": "test-results/batch7-preserved-inputs.txt and batch7-verified-smoke-plants.txt: focused preservation and checker-plant proofs; all are included in the final run"
+  },
+  "checks": {
+    "selftest": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/check.mjs",
+    "pnpm check": {
+      "exit": 0,
+      "log": "test-results/batch7-verified-typecheck.txt"
+    },
+    "memod lint": {
+      "exit": 0,
+      "log": "test-results/batch7-verified-memod.txt"
+    },
+    "readme-check": {
+      "exit": 0,
+      "commands": 14,
+      "drifted": 0,
+      "log": "test-results/batch7-verified-readme.txt"
+    },
+    "saved score diff": {
+      "exit": 0,
+      "output_bytes": 0,
+      "log": "test-results/batch7-verified-score-diff.txt"
+    },
+    "pnpm test": "Not required: no file under test/ changed.",
+    "receipt refinement": "test-results/batch7-final-receipts.txt: finite-time/source assertions and an identical-graph foreign source pass; also included in the final run"
+  },
+  "coverage": [
+    {
+      "item": "B7-01",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-01 historical batch 5 ignores changed working skill and rule",
+        "B7 B7-01 historical batch 6 ignores changed working skill and rule",
+        "B7 plant past batch reads working skill caught by B7-01 instruction bytes"
+      ],
+      "coverage": "Batch 5 and 6 preparation reads c92205d despite changed working skill and rule."
+    },
+    {
+      "item": "B7-02",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-02 missing instruction commit null refuses before preparation",
+        "B7 B7-02 missing instruction commit undefined refuses before preparation",
+        "B7 B7-02 missing instruction commit ffffffffffffffffffffffffffffffffffffffff refuses before preparation",
+        "B7 B7-02 recorded commit missing a skill file refuses before work changes"
+      ],
+      "coverage": "Missing instructionsCommit, unavailable commit and missing recorded skill refuse before work creation."
+    },
+    {
+      "item": "B7-03",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-03 B6-26 owner ignores working instruction edits and catches recorded-byte changes"
+      ],
+      "coverage": "The B6-26 owner ignores working bytes and catches changed recorded bytes. Launcher remains pinned."
+    },
+    {
+      "item": "B7-04",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-04 B7-45 repeated generation preserves earlier tasks, blind inputs and stored bytes"
+      ],
+      "coverage": "Repeated generation preserves earlier tasks, copied blind files, decision sentinels and store sentinels. Earlier report prefix stays fixed.",
+      "limits": [
+        "Official external batch 5/6 stores and decisions were never read. Preservation uses repo-local fixture sentinels and copied blind files."
+      ]
+    },
+    {
+      "item": "B7-05",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-05 batch 5 and 6 plan stdout/stderr equal c243073 with identical tasks/results"
+      ],
+      "coverage": "Batch 5 and 6 single-id plan stdout, stderr and defaults equal c243073."
+    },
+    {
+      "item": "B7-06",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-06 registry missing repo refuses visibly",
+        "B7 B7-06 registry missing conditions refuses visibly",
+        "B7 B7-06 registry missing sourceExtensions refuses visibly",
+        "B7 B7-06 registry missing sampleSeed refuses visibly",
+        "B7 B7-06 another repo uses stratified generator and planner through registry data alone",
+        "B7 B7-06 B7-38 another repo and source extension require only registry data"
+      ],
+      "coverage": "Registry refusals; another repo uses stratified generation, planning and a configured source extension."
+    },
+    {
+      "item": "B7-07",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-07 relate against the actual store fails through shell, absolute path and script",
+        "B7 plant mounted-store caught inside B7-07/B7-08 confinement",
+        "B7 plant relate-path caught inside B7-07/B7-08 confinement"
+      ],
+      "coverage": "Real relate access fails through shell, absolute executable and script in the whole-agent namespace."
+    },
+    {
+      "item": "B7-08",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-08 B7-09 native file reads deny store, client, service and product source, including /proc/1/root",
+        "B7 B7-08 symlink cannot recover guessed host store path",
+        "B7 plant mounted-store caught inside B7-07/B7-08 confinement",
+        "B7 plant relate-path caught inside B7-07/B7-08 confinement"
+      ],
+      "coverage": "Native reads, symlinks, guessed host paths and /proc/1/root cannot read an actual store file."
+    },
+    {
+      "item": "B7-09",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-08 B7-09 native file reads deny store, client, service and product source, including /proc/1/root"
+      ],
+      "coverage": "Native reads cannot read client, service or product source. Read-only execute-only mount resists chmod."
+    },
+    {
+      "item": "B7-10",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-10 a second run socket has no reachable path in the first namespace"
+      ],
+      "coverage": "The first namespace cannot connect to a known second-run host socket; its own service still answers."
+    },
+    {
+      "item": "B7-11",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-11 native and shell reads and ordinary source edits work inside confinement",
+        "B7 B7-11 B7-19 actual generated shell denies network and identity while source and commands work"
+      ],
+      "coverage": "Native and direct shell source reads and edits pass. The actual generated shell cannot create its nested namespace; its normal source-read positive control remains red."
+    },
+    {
+      "item": "B7-12",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-12 graph client matches real CLI bytes/status including symbol, range and missing errors",
+        "B7 B7-12 graph carry missing-argument usage matches direct CLI bytes and status",
+        "B7 B7-12 graph why missing-argument usage matches direct CLI bytes and status",
+        "B7 B7-12 graph impact missing-argument usage matches direct CLI bytes and status",
+        "B7 B7-12 graph search missing-argument usage matches direct CLI bytes and status",
+        "B7 B7-12 graph-norule carry missing-argument usage matches direct CLI bytes and status",
+        "B7 B7-12 graph-norule why missing-argument usage matches direct CLI bytes and status",
+        "B7 B7-12 graph-norule impact missing-argument usage matches direct CLI bytes and status",
+        "B7 B7-12 graph-norule search missing-argument usage matches direct CLI bytes and status",
+        "B7 B7-12 graph-norule command bytes equal graph"
+      ],
+      "coverage": "Both carry forms and why/impact/search match direct CLI bytes. Eight missing-argument usage cases remain red."
+    },
+    {
+      "item": "B7-13",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-13 client wire has exactly command and target, no condition or store path",
+        "B7 B7-13 protocol rejects fifth command, store override, raw query, extra args, NUL and oversized frame",
+        "B7 plant raw query accepted caught by B7-13 server protocol owner"
+      ],
+      "coverage": "Observed binary framing; allowed raw request control; fifth command, query text, store override, extra args, NUL and oversized frame refused."
+    },
+    {
+      "item": "B7-14",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-14 service down after mount prints exact unavailable error and exits 70",
+        "B7 B7-14 B7-15 B7-53 health-failure is a harness failure and closes service",
+        "B7 B7-14 B7-15 B7-53 service-down is a harness failure and closes service",
+        "B7 B7-14 B7-15 B7-53 timeout-service-down is a harness failure and closes service"
+      ],
+      "coverage": "Service loss after mounting returns exact unavailable text and exit 70; exported runOne classifies it as a harness failure.",
+      "limits": [
+        "Client loss and harness classification are tested. Retry dispatch remains unexercised."
+      ]
+    },
+    {
+      "item": "B7-15",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-15 B7-16 closed success keeps evidence and closes listener",
+        "B7 B7-15 B7-16 closed timeout keeps evidence and closes listener",
+        "B7 B7-15 B7-16 closed breach keeps evidence and closes listener",
+        "B7 B7-15 B7-16 closed malformed keeps evidence and closes listener",
+        "B7 B7-15 B7-16 closed spawn-error keeps evidence and closes listener",
+        "B7 B7-15 exported runOne uses closed runtime without spawning an agent",
+        "B7 B7-15 failed preparation is a harness failure with evidence and no agent",
+        "B7 B7-14 B7-15 B7-53 health-failure is a harness failure and closes service",
+        "B7 B7-14 B7-15 B7-53 service-down is a harness failure and closes service",
+        "B7 B7-14 B7-15 B7-53 timeout-service-down is a harness failure and closes service"
+      ],
+      "coverage": "Success, timeout, escaping symlink, malformed stream, spawn error, failed preparation/health and service loss retain evidence and close service.",
+      "limits": [
+        "Preparation, health and service failure during timeout are replayed. Retry dispatch remains unexercised."
+      ]
+    },
+    {
+      "item": "B7-16",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-16 service closes after commands and full replies remain archived",
+        "B7 B7-15 B7-16 closed success keeps evidence and closes listener",
+        "B7 B7-15 B7-16 closed timeout keeps evidence and closes listener",
+        "B7 B7-15 B7-16 closed breach keeps evidence and closes listener",
+        "B7 B7-15 B7-16 closed malformed keeps evidence and closes listener",
+        "B7 B7-15 B7-16 closed spawn-error keeps evidence and closes listener"
+      ],
+      "coverage": "stdout/stderr and full replies remain; sockets disappear; timeout signals are recorded; no actual agent starts.",
+      "limits": [
+        "Agent spawn is simulated. Actual hosted-agent process lifetime is outside the brief."
+      ]
+    },
+    {
+      "item": "B7-17",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-17 B7-18 repo/tool bytes identical except exact omitted rule; skill stays present",
+        "B7 plant different client compiled for a condition caught by B7-17 byte owner"
+      ],
+      "coverage": "Prepared manifests and compiled bytes agree across conditions. A C-source client variant is caught."
+    },
+    {
+      "item": "B7-18",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-17 B7-18 repo/tool bytes identical except exact omitted rule; skill stays present",
+        "B7 plant norule rule text retained caught by B7-18 instruction owner"
+      ],
+      "coverage": "Norule keeps original instructions and recorded skill, omits exactly the rule. A preparation fault is caught."
+    },
+    {
+      "item": "B7-19",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-11 B7-19 actual generated shell denies network and identity while source and commands work"
+      ],
+      "coverage": "Outer network and identity positive controls pass. Generated shell status 1 cannot prove denial: even its normal source read fails because nested namespace creation is denied."
+    },
+    {
+      "item": "B7-20",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-20 B7-21 stub disables exactly its commands",
+        "B7 B7-20 B7-21 graph-nosearch disables exactly its commands"
+      ],
+      "coverage": "Stub answers every fixture command with exactly no result newline and status zero."
+    },
+    {
+      "item": "B7-21",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-20 B7-21 stub disables exactly its commands",
+        "B7 B7-20 B7-21 graph-nosearch disables exactly its commands"
+      ],
+      "coverage": "No-search changes search only; every other stdout/stderr/status matches graph."
+    },
+    {
+      "item": "B7-22",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-22 B7-24 nolink why removes only commit links, search and impact stay byte-identical"
+      ],
+      "coverage": "Nolink removes commit-linked why/carry records, retains tags and nodes; a retained-link plant is caught."
+    },
+    {
+      "item": "B7-23",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-23 B7-71 nolink symbol and overlapping range preserve every unrelated byte including term de-duplication"
+      ],
+      "coverage": "Symbol and overlapping range carry preserve all bytes outside decision sections, including term de-duplication."
+    },
+    {
+      "item": "B7-24",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-22 B7-24 nolink why removes only commit links, search and impact stay byte-identical"
+      ],
+      "coverage": "Nolink search, impact, neighbors, users, commits and unaffected carry sections match full answers."
+    },
+    {
+      "item": "B7-25",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-25 B7-26 noterms uses product no-shared-record note and preserves every linked/search/impact/why byte"
+      ],
+      "coverage": "Actual Term and MENTIONS counts are zero; carry has no term candidates. Smoke rejects retained disabled components."
+    },
+    {
+      "item": "B7-26",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-25 B7-26 noterms uses product no-shared-record note and preserves every linked/search/impact/why byte"
+      ],
+      "coverage": "Noterms preserves links, why, impact, search, record/vector fingerprints and unrelated answer bytes."
+    },
+    {
+      "item": "B7-27",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-27 fingerprints unchanged components; altered record and foreign marker refuse",
+        "B7 B7-27 unrelated node removed in an ablation refuses",
+        "B7 B7-27 search vector changed in an ablation refuses",
+        "B7 B7-27 completion marker from another source store refuses"
+      ],
+      "coverage": "Unrelated node deletion, changed record/vector and a foreign source completion marker refuse.",
+      "limits": [
+        "Receipts expose one combined ms field. Separate copy/mutation durations are not specified; finite nonnegative preparation time and source identity are checked."
+      ]
+    },
+    {
+      "item": "B7-28",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-28 changed product carry section format fails visibly instead of truncating"
+      ],
+      "coverage": "Changed direct-CLI carry heading gives an explicit service failure with empty stdout."
+    },
+    {
+      "item": "B7-29",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-29 product source/recipes have no condition switches and stay unchanged across conditions",
+        "B7 B7-29 every observed relate child overrides telemetry and tracking flags"
+      ],
+      "coverage": "src and recipes stay byte-identical during condition preparation/querying and hold no condition names. Observed relate children override both privacy flags."
+    },
+    {
+      "item": "B7-30",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-30 issue and pull-request outcomes retained without per-PR requests"
+      ],
+      "coverage": "Open/completed/not-planned issues and open/unmerged/merged PRs retain outcomes using two list requests."
+    },
+    {
+      "item": "B7-31",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-31 only OWNER MEMBER COLLABORATOR comments in time and URL order",
+        "B7 B7-31 converter refuses outside-author record text",
+        "B7 plant outside comment retained caught by B7-31 converter output"
+      ],
+      "coverage": "Only OWNER/MEMBER/COLLABORATOR survive; time and URL order hold; outside text stays out of records and searchText."
+    },
+    {
+      "item": "B7-32",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-32 cached complete pages restart with zero requests",
+        "B7 B7-32 restart after first complete page fetches only remaining pages, tickets once",
+        "B7 B7-32 incomplete pending page is ignored on restart",
+        "B7 B7-32 cached URL digest is verified, mismatching raw URL not reused"
+      ],
+      "coverage": "Complete-cache restart makes zero requests; a 100-item first page survives an interruption; URL keys and pending files checked."
+    },
+    {
+      "item": "B7-33",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-33 403 Retry-After waits then continues",
+        "B7 B7-33 429 Retry-After waits then continues",
+        "B7 B7-33 reset header permits a later request without authentication",
+        "B7 B7-33 unrelated HTTP error fails visibly"
+      ],
+      "coverage": "403 and 429 Retry-After, reset time and unrelated 500 exercised with virtual time and a local server."
+    },
+    {
+      "item": "B7-34",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-34 page formula, expected counts and generic headers",
+        "B7 B7-34 zero-total forecast 0/0 retains one page per list (ADR 0012)",
+        "B7 B7-34 zero-total forecast 300/0 retains one page per list (ADR 0012)",
+        "B7 B7-34 zero-total forecast 0/300 retains one page per list (ADR 0012)",
+        "B7 B7-34 pagination off API host refused before a request"
+      ],
+      "coverage": "Known and unknown forecasts, zero totals with one page per list, two-request fixture, and off-host pagination refusal.",
+      "limits": [
+        "The shorthand formula omits the per-list floor. Tests follow ADR 0012: max(1,ceil(T/100))+max(1,ceil(C/100))."
+      ]
+    },
+    {
+      "item": "B7-35",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-35 null close reason explicitly not stated with outcome retained",
+        "B7 B7-35 missing state refuses before write",
+        "B7 B7-35 missing state_reason refuses before write",
+        "B7 B7-35 missing is_pull_request refuses before write",
+        "B7 B7-35 missing comments refuses before write",
+        "B7 B7-35 PR missing merge status refuses before write"
+      ],
+      "coverage": "Each missing outcome field and PR merge status refuses before output. Null close reason stays not stated."
+    },
+    {
+      "item": "B7-36",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-36 Unicode title and item text stay within 8000 bytes at the boundary",
+        "B7 B7-36 body cut first, then oldest comments, newest preferred and retained order"
+      ],
+      "coverage": "UTF-8 content reaches the 8000-byte boundary safely; title cap, body-first cuts and newest-comment priority hold."
+    },
+    {
+      "item": "B7-37",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-37 searchText indexes outcome and retained maintainer comment, excluding outside text"
+      ],
+      "coverage": "A real built Decision.searchText contains outcome and maintainer text and excludes outside text."
+    },
+    {
+      "item": "B7-38",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-38 B7-39 seed repeats bytes, source-cited open eligible, uncited open and doc-cited excluded",
+        "B7 B7-38 commit order does not change seeded sample bytes",
+        "B7 B7-38 a different registry seed changes selection while preserving both strata",
+        "B7 B7-06 B7-38 another repo and source extension require only registry data"
+      ],
+      "coverage": "60/60 unique strata, repeat bytes, reversed tickets/commits, changed seed and configured extension are checked."
+    },
+    {
+      "item": "B7-39",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-38 B7-39 seed repeats bytes, source-cited open eligible, uncited open and doc-cited excluded",
+        "B7 B7-39 merge citation uses source changes against first parent"
+      ],
+      "coverage": "Source-cited open tickets qualify; uncited open and doc-only cited tickets do not; merge uses first-parent source diff."
+    },
+    {
+      "item": "B7-40",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-40 shortage cited names actual 59, writes no sample",
+        "B7 B7-40 shortage uncited names actual 59, writes no sample",
+        "B7 B7-40 sampler duplicate ticket refuses without writing",
+        "B7 B7-40 sampler malformed key refuses without writing",
+        "B7 B7-40 sampler missing state refuses without writing",
+        "B7 B7-40 sampler invalid state refuses without writing",
+        "B7 B7-40 sampler nonarray refuses without writing",
+        "B7 B7-40 missing sourceExtensions refuses before sample output",
+        "B7 B7-40 missing sampleSeed refuses before sample output"
+      ],
+      "coverage": "Both 59-candidate shortages and invalid keys/state/duplicates/registry inputs refuse without sample output."
+    },
+    {
+      "item": "B7-41",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-41 requests.json missing refuses before any task write",
+        "B7 B7-41 requests.json JSON refuses before any task write",
+        "B7 B7-41 requests.json hash refuses before any task write",
+        "B7 B7-41 requests.json byte refuses before any task write",
+        "B7 B7-41 targets.json missing refuses before any task write",
+        "B7 B7-41 targets.json JSON refuses before any task write",
+        "B7 B7-41 targets.json hash refuses before any task write",
+        "B7 B7-41 targets.json byte refuses before any task write",
+        "B7 B7-41 controls.json missing refuses before any task write",
+        "B7 B7-41 controls.json JSON refuses before any task write",
+        "B7 B7-41 controls.json hash refuses before any task write",
+        "B7 B7-41 controls.json byte refuses before any task write",
+        "B7 B7-41 controls2.json missing refuses before any task write",
+        "B7 B7-41 controls2.json JSON refuses before any task write",
+        "B7 B7-41 controls2.json hash refuses before any task write",
+        "B7 B7-41 controls2.json byte refuses before any task write",
+        "B7 B7-41 sample-ids.json missing refuses before any task write",
+        "B7 B7-41 sample-ids.json JSON refuses before any task write",
+        "B7 B7-41 sample-ids.json hash refuses before any task write",
+        "B7 B7-41 sample-ids.json byte refuses before any task write",
+        "B7 plant missing blind hash accepted caught by B7-41 refusal owner"
+      ],
+      "coverage": "All five files get missing/invalid-JSON/missing-hash/changed-byte cases; malformed JSON has its matching recorded hash."
+    },
+    {
+      "item": "B7-42",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-42 request count 119",
+        "B7 B7-42 request count 121",
+        "B7 B7-42 duplicate request id",
+        "B7 B7-42 inherited missing request id",
+        "B7 B7-42 inherited missing request request",
+        "B7 B7-42 inherited missing request record",
+        "B7 B7-42 inherited missing request settled",
+        "B7 B7-42 inherited missing request why",
+        "B7 B7-42 inherited missing request wording",
+        "B7 B7-42 inherited missing request shared_terms",
+        "B7 B7-42 inherited missing request also",
+        "B7 B7-42 path escaping id \"../escape\"",
+        "B7 B7-42 path escaping id \"a/b\"",
+        "B7 B7-42 path escaping id \"..\"",
+        "B7 B7-42 path escaping id \"\"",
+        "B7 B7-42 invalid stratum bad",
+        "B7 B7-42 invalid stratum ",
+        "B7 B7-42 invalid stratum null",
+        "B7 B7-42 request/sample ticket mismatch",
+        "B7 B7-42 request/sample stratum mismatch",
+        "B7 B7-42 sample duplicate",
+        "B7 B7-42 sample not ticket",
+        "B7 B7-42 sample missing",
+        "B7 B7-42 sample invalid stratum",
+        "B7 B7-42 sample wrong counts",
+        "B7 B7-42 request record invalid \"bad\"",
+        "B7 B7-42 request also invalid [\"bad\"]",
+        "B7 B7-42 request wording invalid \"unknown\"",
+        "B7 B7-42 request shared_terms invalid {}",
+        "B7 B7-42 request request invalid \"\"",
+        "B7 B7-42 request record invalid null",
+        "B7 B7-42 two requests use one sampled ticket",
+        "B7 plant uncited request from cited ticket caught by B7-42 source-stratum owner"
+      ],
+      "coverage": "Counts, duplicate/path ids, sample/request ticket and stratum mapping, required fields and invalid data refuse atomically."
+    },
+    {
+      "item": "B7-43",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-43 targets missing entry",
+        "B7 B7-43 targets duplicate",
+        "B7 B7-43 targets unknown",
+        "B7 B7-43 targets missing file",
+        "B7 B7-43 targets missing symbol",
+        "B7 B7-43 targets nonarray",
+        "B7 B7-43 invalid ranges ineligible, mixed list retained",
+        "B7 B7-43 range 0-2 is ineligible",
+        "B7 B7-43 range 2-1 is ineligible",
+        "B7 B7-43 range 1.5-3 is ineligible",
+        "B7 B7-43 range 1-2.5 is ineligible",
+        "B7 B7-43 range null-3 is ineligible"
+      ],
+      "coverage": "Targets require unique known ids and file/symbol fields. Invalid ranges are skipped; complete selected target lists remain."
+    },
+    {
+      "item": "B7-44",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-44 shortage names cited and actual count",
+        "B7 B7-44 shortage names uncited and actual count"
+      ],
+      "coverage": "Each stratum with five ranged candidates names the stratum, required six and actual five before writes."
+    },
+    {
+      "item": "B7-45",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-45 reversed inputs select 6 cited, 6 uncited, 3 plain and 4 governed, preserving entries",
+        "B7 B7-04 B7-45 repeated generation preserves earlier tasks, blind inputs and stored bytes"
+      ],
+      "coverage": "Reversed inputs select the first six ids per stratum, three plain and four governed controls; repeat bytes agree."
+    },
+    {
+      "item": "B7-46",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-46 controls.json too few",
+        "B7 B7-46 controls.json too many",
+        "B7 B7-46 controls.json missing request",
+        "B7 B7-46 controls.json invalid regex",
+        "B7 B7-46 controls.json duplicate id",
+        "B7 B7-46 controls.json reused id",
+        "B7 B7-46 controls2.json too few",
+        "B7 B7-46 controls2.json too many",
+        "B7 B7-46 controls2.json missing request",
+        "B7 B7-46 controls2.json invalid regex",
+        "B7 B7-46 controls2.json duplicate id",
+        "B7 B7-46 controls2.json reused id",
+        "B7 B7-46 governed missing ticket",
+        "B7 B7-46 governed missing commit",
+        "B7 B7-46 governed missing decided",
+        "B7 B7-46 governed missing why_not_against",
+        "B7 B7-46 governed missing evidence",
+        "B7 B7-46 malformed governed ticket",
+        "B7 B7-46 controls.json missing id",
+        "B7 B7-46 controls.json missing kind",
+        "B7 B7-46 controls.json missing file",
+        "B7 B7-46 controls.json missing added",
+        "B7 B7-46 controls.json missing why_harmless",
+        "B7 B7-46 controls.json missing evidence",
+        "B7 B7-46 controls2.json missing id",
+        "B7 B7-46 controls2.json missing kind",
+        "B7 B7-46 controls2.json missing file",
+        "B7 B7-46 controls2.json missing added",
+        "B7 plant task write before input validation caught by B7-46 atomic refusal owner"
+      ],
+      "coverage": "Control counts, fields, expressions, duplicate/reused ids, ticket form and missing commit refuse before any task writes."
+    },
+    {
+      "item": "B7-47",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-47 conflict and control verdicts retain batch 5 rules"
+      ],
+      "coverage": "Source/also spellings and no-file-change conflict rules; text/mode/binary/add/delete/rename diffs; diff-only controls."
+    },
+    {
+      "item": "B7-48",
+      "state": "retry dispatcher not exercised",
+      "cases": [],
+      "why": "Two-timeout retry dispatch cannot run through --plan; no exported dispatcher exists."
+    },
+    {
+      "item": "B7-49",
+      "state": "retry dispatcher not exercised",
+      "cases": [],
+      "why": "Two-breach retry dispatch cannot run through --plan. The single-attempt escaping-symlink case passes."
+    },
+    {
+      "item": "B7-50",
+      "state": "retry dispatcher not exercised",
+      "cases": [],
+      "why": "Timeout-then-breach dispatch cannot run through --plan; smoke admission covers only the resulting ledger shape."
+    },
+    {
+      "item": "B7-51",
+      "state": "retry dispatcher not exercised",
+      "cases": [],
+      "why": "Breach-then-timeout dispatch cannot run through --plan; smoke admission covers only the resulting ledger shape."
+    },
+    {
+      "item": "B7-52",
+      "state": "retry dispatcher not exercised",
+      "cases": [],
+      "why": "Successful retry dispatch cannot run through --plan; an invented two-attempt archive fixture passes smoke."
+    },
+    {
+      "item": "B7-53",
+      "state": "retry dispatcher not exercised",
+      "cases": [
+        "B7 B7-14 B7-15 B7-53 health-failure is a harness failure and closes service",
+        "B7 B7-14 B7-15 B7-53 service-down is a harness failure and closes service",
+        "B7 B7-14 B7-15 B7-53 timeout-service-down is a harness failure and closes service"
+      ],
+      "why": "Retry ordering needs the forbidden CLI path. Exported runOne separately proves service failure takes precedence over timeout."
+    },
+    {
+      "item": "B7-54",
+      "state": "retry dispatcher not exercised",
+      "cases": [],
+      "why": "Exhaustion across runner restarts and interrupted reservation handling need the forbidden CLI execution path.",
+      "limits": [
+        "The smoke checker rejects running/third-attempt ledgers. Runner restart enforcement is unexercised."
+      ]
+    },
+    {
+      "item": "B7-55",
+      "state": "retry dispatcher not exercised",
+      "cases": [],
+      "why": "Batch 5/6 retry-pair regression needs their non-plan CLI dispatch; inherited single-attempt/resume cases still pass."
+    },
+    {
+      "item": "B7-56",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-56 B7-57 258 full cells derive only from local tasks",
+        "B7 B7-56 B7-57 16 smoke cells derive only from local tasks"
+      ],
+      "coverage": "258 distinct cells, three repeats, six conflict conditions and two control conditions; plan writes nothing."
+    },
+    {
+      "item": "B7-57",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-56 B7-57 258 full cells derive only from local tasks",
+        "B7 B7-56 B7-57 16 smoke cells derive only from local tasks",
+        "B7 B7-57 B7-58 invalid plan --stage unknown",
+        "B7 B7-57 B7-58 invalid plan --conditions unknown",
+        "B7 B7-57 B7-58 invalid plan --conditions graph,graph",
+        "B7 B7-57 B7-58 invalid plan --repeats 0",
+        "B7 B7-57 B7-58 invalid plan --repeats -1",
+        "B7 B7-57 B7-58 invalid plan --repeats 1.5",
+        "B7 B7-57 B7-58 invalid plan --stage smoke --repeats 2",
+        "B7 B7-57 B7-58 invalid plan --stage smoke --only x"
+      ],
+      "coverage": "16 repeat-1 smoke cells; invalid stage/selection/repeats refuse."
+    },
+    {
+      "item": "B7-58",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-57 B7-58 invalid plan --stage unknown",
+        "B7 B7-57 B7-58 invalid plan --conditions unknown",
+        "B7 B7-57 B7-58 invalid plan --conditions graph,graph",
+        "B7 B7-57 B7-58 invalid plan --repeats 0",
+        "B7 B7-57 B7-58 invalid plan --repeats -1",
+        "B7 B7-57 B7-58 invalid plan --repeats 1.5",
+        "B7 B7-57 B7-58 invalid plan --stage smoke --repeats 2",
+        "B7 B7-57 B7-58 invalid plan --stage smoke --only x",
+        "B7 B7-58 ablation on control refuses",
+        "B7 report B7-58 saved done unknown refused by scorer",
+        "B7 report B7-58 saved done none refused by scorer",
+        "B7 report B7-58 saved error unknown refused by scorer",
+        "B7 report B7-58 saved error none refused by scorer",
+        "B7 report B7-58 saved control done graph-nolink refused by scorer",
+        "B7 report B7-58 saved control done graph-nosearch refused by scorer",
+        "B7 report B7-58 saved control done graph-noterms refused by scorer",
+        "B7 report B7-58 saved control done graph-norule refused by scorer",
+        "B7 report B7-58 saved control error graph-nolink refused by scorer",
+        "B7 report B7-58 saved control error graph-nosearch refused by scorer",
+        "B7 report B7-58 saved control error graph-noterms refused by scorer",
+        "B7 report B7-58 saved control error graph-norule refused by scorer"
+      ],
+      "coverage": "Unknown/duplicate conditions and invalid repeats refuse; control ablations refuse in planning and saved scoring."
+    },
+    {
+      "item": "B7-59",
+      "state": "cases written",
+      "cases": [
+        "B7 smoke B7-59 through B7-65 all seven checks PASS from actual service evidence, no task verdict",
+        "B7 smoke B7-59 unfinished cell fails planned cells alone",
+        "B7 smoke B7-59 running ledger entry fails planned cells alone",
+        "B7 smoke B7-59 third attempt after timeout and breach fails planned cells alone",
+        "B7 smoke B7-59 missing archive fails planned cells alone",
+        "B7 smoke plant third launch after timeout and breach caught by B7-59 attempt budget",
+        "B7 smoke B7-59 B7-60 B7-65 archived attempt retains receipts and contributes its own usage",
+        "B7 smoke plant smoke accepts missing cell caught by B7-59 planned-cell owner"
+      ],
+      "coverage": "Valid cells and archives; unfinished cell, running ledger, missing archive and third attempt fail planned cells alone.",
+      "limits": [
+        "Ledger admission is tested; the dispatcher that creates these ledgers is not run."
+      ]
+    },
+    {
+      "item": "B7-60",
+      "state": "cases written",
+      "cases": [
+        "B7 smoke B7-60 disabled command leaking an answer fails condition answers alone",
+        "B7 smoke B7-60 raw CLI receipt absent fails condition answers alone",
+        "B7 smoke B7-60 changed unrelated store node fails condition answers alone",
+        "B7 smoke B7-60 enabled health call returns no result fails condition answers alone",
+        "B7 smoke B7-60 health command fails fails condition answers alone",
+        "B7 smoke B7-59 B7-60 B7-65 archived attempt retains receipts and contributes its own usage",
+        "B7 smoke B7-60 archived receipt differs from its saved answer fails answer check alone",
+        "B7 smoke B7-60 graph-nolink retains linkCount fails answer proof alone",
+        "B7 smoke B7-60 graph-noterms retains termCount fails answer proof alone",
+        "B7 smoke B7-60 graph-noterms retains mentionCount fails answer proof alone",
+        "B7 smoke B7-60 saved reply 2 differs from reference fails answers alone",
+        "B7 smoke B7-60 saved reply 3 differs from reference fails answers alone",
+        "B7 smoke B7-60 saved reply 4 differs from reference fails answers alone"
+      ],
+      "coverage": "Disabled/enabled health, unchanged components, every saved reply position and archived receipt differences fail answers."
+    },
+    {
+      "item": "B7-61",
+      "state": "cases written",
+      "cases": [
+        "B7 smoke B7-61 different client bytes fails identical agent files alone",
+        "B7 smoke B7-61 norule rule text retained fails identical agent files alone",
+        "B7 smoke B7-61 original norule text differs beyond omitted suffix fails file identity alone"
+      ],
+      "coverage": "Client/manifest differences, retained rule and original norule-text changes fail file identity alone."
+    },
+    {
+      "item": "B7-62",
+      "state": "cases written",
+      "cases": [
+        "B7 smoke B7-62 successful probe fails closed store and tool code alone",
+        "B7 smoke B7-62 missing probe fails closed store and tool code alone",
+        "B7 smoke B7-62 probe did not run fails closed store and tool code alone",
+        "B7 smoke B7-62 logged successful direct store access fails closed store and tool code alone",
+        "B7 smoke B7-62 ordinary command discovery and native repo read do not count as store access"
+      ],
+      "coverage": "Successful/missing/not-run probes and logged successful store calls fail. Ordinary whygraph/relate discovery remains valid."
+    },
+    {
+      "item": "B7-63",
+      "state": "cases written",
+      "cases": [
+        "B7 smoke B7-63 mismatched service call totals fails service answered every call alone",
+        "B7 smoke B7-63 malformed service reply fails service and answer checks"
+      ],
+      "coverage": "Call totals and malformed saved replies fail; malformed JSON also fails answer validation."
+    },
+    {
+      "item": "B7-64",
+      "state": "cases written",
+      "cases": [
+        "B7 smoke B7-64 missing scorer block fails scorer batch blocks alone",
+        "B7 smoke B7-64 scorer lacks === Batch 7: stratum cited fails scorer blocks alone",
+        "B7 smoke B7-64 scorer lacks === Batch 7: stratum uncited fails scorer blocks alone",
+        "B7 smoke B7-64 scorer lacks graph - graph-nolink fails scorer blocks alone",
+        "B7 smoke B7-64 scorer lacks graph - graph-nosearch fails scorer blocks alone",
+        "B7 smoke B7-64 scorer lacks graph - graph-noterms fails scorer blocks alone",
+        "B7 smoke B7-64 scorer lacks graph - graph-norule fails scorer blocks alone"
+      ],
+      "coverage": "Missing batch block, each stratum and each paired ablation comparison fail scorer blocks without printing scores."
+    },
+    {
+      "item": "B7-65",
+      "state": "cases written",
+      "cases": [
+        "B7 smoke B7-59 through B7-65 all seven checks PASS from actual service evidence, no task verdict",
+        "B7 smoke B7-65 missing wall time fails tokens and wall time per run alone",
+        "B7 smoke B7-65 negative tokens fails usage check alone",
+        "B7 smoke B7-65 negative wall_ms fails usage check alone",
+        "B7 smoke B7-59 B7-60 B7-65 archived attempt retains receipts and contributes its own usage",
+        "B7 smoke B7-65 archived attempt missing tokens fails usage check alone"
+      ],
+      "coverage": "Missing/negative usage fails; every root and archived attempt has its own tokens/time line."
+    },
+    {
+      "item": "B7-66",
+      "state": "cases written",
+      "cases": [
+        "B7 smoke B7-66 empty evidence makes every relevant check fail"
+      ],
+      "coverage": "An empty smoke fixture fails every relevant check."
+    },
+    {
+      "item": "B7-67",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-67 smoke completion resumes exact repeat-1 cells in full plan"
+      ],
+      "coverage": "The exact 16 smoke cells count as completed repeat 1 in full planning.",
+      "limits": [
+        "Full-plan resume is tested. Archiving after a failed smoke remains the parent-owned manual step."
+      ]
+    },
+    {
+      "item": "B7-68",
+      "state": "cases written",
+      "cases": [
+        "B7 report B7-68 no batch 7 results preserves every earlier block byte; invalid archives ignored",
+        "B7 report B7-68 earlier report prefix unchanged; JSON finished only"
+      ],
+      "coverage": "Earlier bytes remain; invalid-only results add no batch 7 block; JSON has finished verdicts only."
+    },
+    {
+      "item": "B7-69",
+      "state": "cases written",
+      "cases": [
+        "B7 report B7-69 75% graph and 0% stub conflicts; all ablations 50%; finished denominators",
+        "B7 report B7-69 cited conflict rates independent",
+        "B7 report B7-69 uncited conflict rates independent",
+        "B7 report B7-69 task-paired seeded bootstrap values, all six conditions",
+        "B7 report B7-69 cited every paired mean and seeded interval",
+        "B7 report B7-69 uncited every paired mean and seeded interval",
+        "B7 report B7-69 missing pairs do not pair unlike tasks"
+      ],
+      "coverage": "All/cited/uncited rates and every paired mean/interval are known by construction; missing pairs remain unpaired."
+    },
+    {
+      "item": "B7-70",
+      "state": "cases written",
+      "cases": [
+        "B7 report B7-70 conflict quadrants counted once; errors/control/invalid excluded",
+        "B7 report B7-70 needed-ticket shown counts include absolute closed client path",
+        "B7 report B7-70 plain/governed controls separate, diff-only pass and own-ticket diagnostic",
+        "B7 report B7-70 three harmless controls exact rates, counts and tokens",
+        "B7 report B7-70 four governed controls exact rates, counts and tokens",
+        "B7 report B7-70 exact finished-only tokens and cost per condition",
+        "B7 report B7-70 unscored listed, conflict-only FAIL sensitivity mean and interval"
+      ],
+      "coverage": "Quadrants, needed-ticket visibility, absolute client paths, separate control rates, unscored sensitivity, tokens and cost are counted."
+    },
+    {
+      "item": "B7-71",
+      "state": "cases written",
+      "cases": [
+        "B7 B7-23 B7-71 nolink symbol and overlapping range preserve every unrelated byte including term de-duplication"
+      ],
+      "coverage": "The overlapping-range and symbol proof compares every byte outside decision sections, including de-duplicated terms."
+    }
+  ],
+  "plants": [
+    {
+      "fault": "past batch reads working-tree skill",
+      "case": "B7 plant past batch reads working skill caught by B7-01 instruction bytes",
+      "first_failing_assertion": "recorded skill bytes",
+      "receipt": "test-results/batch7-selftest-J6NyNF/plant-history.json"
+    },
+    {
+      "fault": "uncited request uses a cited ticket",
+      "case": "B7 plant uncited request from cited ticket caught by B7-42 source-stratum owner",
+      "first_failing_assertion": "complete source entry",
+      "receipt": "test-results/batch7-selftest-J6NyNF/plant-uncited-from-cited.json"
+    },
+    {
+      "fault": "changed blind byte passes without hash checks",
+      "case": "B7 plant missing blind hash accepted caught by B7-41 refusal owner",
+      "first_failing_assertion": "invalid inputs must refuse",
+      "receipt": "test-results/batch7-selftest-J6NyNF/plant-blind-hash.json"
+    },
+    {
+      "fault": "task is written before validation",
+      "case": "B7 plant task write before input validation caught by B7-46 atomic refusal owner",
+      "first_failing_assertion": "refusal writes no tasks",
+      "receipt": "test-results/batch7-selftest-J6NyNF/plant-early-write.json"
+    },
+    {
+      "fault": "outside-author comment enters a record",
+      "case": "B7 plant outside comment retained caught by B7-31 converter output",
+      "first_failing_assertion": "The input was expected to not match the regular expression /OUTSIDER_SECRET_TEXT/. Input:",
+      "receipt": "test-results/batch7-selftest-J6NyNF/plant-outside-comment.json"
+    },
+    {
+      "fault": "host store is mounted into the run",
+      "case": "B7 plant mounted-store caught inside B7-07/B7-08 confinement",
+      "first_failing_assertion": "mounted-store must not be accessible",
+      "receipt": "test-results/batch7-selftest-J6NyNF/plant-mounted-store.json"
+    },
+    {
+      "fault": "real relate program is mounted on the run path",
+      "case": "B7 plant relate-path caught inside B7-07/B7-08 confinement",
+      "first_failing_assertion": "relate-path must not be accessible",
+      "receipt": "test-results/batch7-selftest-J6NyNF/plant-relate-path.json"
+    },
+    {
+      "fault": "graph-nolink retains a linked record",
+      "case": "B7 plant nolink-keeps-link caught by independent answer owner",
+      "first_failing_assertion": "nolink cannot show linked note-2",
+      "receipt": "test-results/batch7-selftest-J6NyNF/plant-nolink-keeps-link.json"
+    },
+    {
+      "fault": "graph-noterms also removes a linked record",
+      "case": "B7 plant noterms-drops-link caught by independent answer owner",
+      "first_failing_assertion": "noterms retains linked note-2",
+      "receipt": "test-results/batch7-selftest-J6NyNF/plant-noterms-drops-link.json"
+    },
+    {
+      "fault": "server accepts query through its binary protocol",
+      "case": "B7 plant raw query accepted caught by B7-13 server protocol owner",
+      "first_failing_assertion": "raw query must return no graph records",
+      "receipt": "test-results/batch7-selftest-J6NyNF/plant-query-protocol.json"
+    },
+    {
+      "fault": "graph-norule preparation retains rule text",
+      "case": "B7 plant norule rule text retained caught by B7-18 instruction owner",
+      "first_failing_assertion": "norule must omit the recorded rule exactly",
+      "receipt": "test-results/batch7-selftest-J6NyNF/plant-norule-code.json"
+    },
+    {
+      "fault": "one condition receives different compiled client bytes",
+      "case": "B7 plant different client compiled for a condition caught by B7-17 byte owner",
+      "first_failing_assertion": "all conditions must receive identical client bytes",
+      "receipt": "test-results/batch7-selftest-J6NyNF/plant-client-bytes-code.json"
+    },
+    {
+      "fault": "smoke admits a third attempt after timeout and breach",
+      "case": "B7 smoke plant third launch after timeout and breach caught by B7-59 attempt budget",
+      "first_failing_assertion": "Expected /^FAIL planned cells/; observed PASS planned cells.",
+      "receipt": "test-results/batch7-selftest-J6NyNF/plant-third-attempt.json"
+    },
+    {
+      "fault": "smoke reports a missing/unfinished cell as passing",
+      "case": "B7 smoke plant smoke accepts missing cell caught by B7-59 planned-cell owner",
+      "first_failing_assertion": "Expected /^FAIL planned cells/; observed PASS planned cells.",
+      "receipt": "test-results/batch7-selftest-J6NyNF/plant-smoke-missing-cell.json"
+    }
+  ],
+  "code_plants_caught": 14,
+  "additional_fixture_faults": [],
+  "disagreements": [
+    {
+      "items": [
+        "B7-11",
+        "B7-19"
+      ],
+      "measured": "The captured whole-agent bwrap command and command.json environment execute native positive controls. The actual generated /tools/shell exits 1 on cat /repo/src/cart.ts: bwrap reports no permissions to create a new namespace. The agent executable is mounted but never started.",
+      "reading": "Normal source commands must work; shell restrictions must deny network/identity without disabling commands. Exit 1 from the broken wrapper is not evidence of those restrictions.",
+      "action": "Parent diagnoses the nested namespace policy. If it cannot work with the required caps and mounts, approve a host-owned shell launcher design before trial."
+    },
+    {
+      "items": [
+        "B7-12"
+      ],
+      "measured": "Eight red cases. Both graph conditions return short client usage instead of direct CLI diagnostics, for all four commands. Both return status 2 and empty stdout.",
+      "reading": "B7-12 explicitly includes usage-byte equality.",
+      "action": "Parent keeps contract and fixes client, or amends the usage requirement before trial."
+    }
+  ],
+  "contract_silence": [
+    "Retry dispatch is not exported; the brief forbids its CLI path without --plan. No structural or rail change was made.",
+    "Relative workRoot support and Unix socket path-length bounds are not stated. Short relative aliases are used for lifecycle fixtures; absolute repo paths are used for functional byte proofs.",
+    "Smoke ledger schema is not documented. Fixtures use the command-accepted array with number, kind and absolute archived path. Receipt timing granularity is a single combined ms value.",
+    "B7-34 shorthand formula is ambiguous for zero totals. ADR 0012 explicitly requires at least one request per list; all three zero-total cases pass.",
+    "Early breach fixture claimed success for a store query that real confinement rejects. It was replaced by an actual escaping symlink, which is invalidated correctly."
+  ],
+  "scratch": {
+    "primary": "test-results/batch7-selftest-J6NyNF",
+    "root_folders": [
+      "test-results/b7-probe-052862fa",
+      "test-results/b7-probe-5a6215e2",
+      "test-results/batch4-selftest-2OKdOl",
+      "test-results/batch4-selftest-G4P4zd",
+      "test-results/batch4-selftest-OlIuow",
+      "test-results/batch4-selftest-YYNQJH",
+      "test-results/batch4-selftest-ZfhRKO",
+      "test-results/batch4-selftest-hZiYBL",
+      "test-results/batch4-selftest-ljKPZ0",
+      "test-results/batch4-selftest-oDPYQI",
+      "test-results/batch4-selftest-wOlpIl",
+      "test-results/batch4-selftest-wzPw0A",
+      "test-results/batch4-selftest-x89sJH",
+      "test-results/batch5-selftest-1iBopo",
+      "test-results/batch5-selftest-6jFLU2",
+      "test-results/batch5-selftest-8kovkk",
+      "test-results/batch5-selftest-Aklyxb",
+      "test-results/batch5-selftest-NKwcFo",
+      "test-results/batch5-selftest-RBDTMd",
+      "test-results/batch5-selftest-aOnQBB",
+      "test-results/batch5-selftest-uJeUq9",
+      "test-results/batch5-selftest-uUAKry",
+      "test-results/batch5-selftest-vFO0Zt",
+      "test-results/batch5-selftest-zOU2WO",
+      "test-results/batch6-selftest-1p9fXn",
+      "test-results/batch6-selftest-20vePK",
+      "test-results/batch6-selftest-46fOoI",
+      "test-results/batch6-selftest-GeCVUQ",
+      "test-results/batch6-selftest-IAbruY",
+      "test-results/batch6-selftest-U47y2R",
+      "test-results/batch6-selftest-kS0zl1",
+      "test-results/batch6-selftest-oJAhmh",
+      "test-results/batch6-selftest-sK8uRr",
+      "test-results/batch6-selftest-ub5IqX",
+      "test-results/batch6-selftest-vjwMLK",
+      "test-results/batch7-api-OkqAsx",
+      "test-results/batch7-attempt-api-7jOYMG",
+      "test-results/batch7-attempt-api-FPTR9v",
+      "test-results/batch7-attempt-api-Icuara",
+      "test-results/batch7-diagnostics",
+      "test-results/batch7-prepare-api-C5t67c",
+      "test-results/batch7-prepare-api-eyG9Uk",
+      "test-results/batch7-prepare-api-s6N4vv",
+      "test-results/batch7-selftest-0nxOGp",
+      "test-results/batch7-selftest-1z6UjP",
+      "test-results/batch7-selftest-2VmLOs",
+      "test-results/batch7-selftest-4O02QA",
+      "test-results/batch7-selftest-5nBt6k",
+      "test-results/batch7-selftest-6fvJI0",
+      "test-results/batch7-selftest-7mhXuh",
+      "test-results/batch7-selftest-85crWL",
+      "test-results/batch7-selftest-99U5n2",
+      "test-results/batch7-selftest-9TIL3U",
+      "test-results/batch7-selftest-A5YNcC",
+      "test-results/batch7-selftest-BDbQcN",
+      "test-results/batch7-selftest-Bbduwk",
+      "test-results/batch7-selftest-DYuvRf",
+      "test-results/batch7-selftest-EMpXES",
+      "test-results/batch7-selftest-EdadBE",
+      "test-results/batch7-selftest-EmWxEN",
+      "test-results/batch7-selftest-FQ1bop",
+      "test-results/batch7-selftest-G8Y702",
+      "test-results/batch7-selftest-GVoZtk",
+      "test-results/batch7-selftest-GzWrcA",
+      "test-results/batch7-selftest-GzYYad",
+      "test-results/batch7-selftest-HrziEC",
+      "test-results/batch7-selftest-J6NyNF",
+      "test-results/batch7-selftest-JBmEkw",
+      "test-results/batch7-selftest-KiT7WQ",
+      "test-results/batch7-selftest-NiaxqK",
+      "test-results/batch7-selftest-NrSKkd",
+      "test-results/batch7-selftest-OdE7Hd",
+      "test-results/batch7-selftest-QsWxtS",
+      "test-results/batch7-selftest-S9F3Ab",
+      "test-results/batch7-selftest-SqcVe4",
+      "test-results/batch7-selftest-VExezf",
+      "test-results/batch7-selftest-VQiX6f",
+      "test-results/batch7-selftest-WOT0Mr",
+      "test-results/batch7-selftest-XpuX88",
+      "test-results/batch7-selftest-Z96gcX",
+      "test-results/batch7-selftest-ZySn4S",
+      "test-results/batch7-selftest-asXcKa",
+      "test-results/batch7-selftest-cMvWu6",
+      "test-results/batch7-selftest-ceRb3l",
+      "test-results/batch7-selftest-ceYvx4",
+      "test-results/batch7-selftest-dJPOEG",
+      "test-results/batch7-selftest-fAklZV",
+      "test-results/batch7-selftest-g5pDiH",
+      "test-results/batch7-selftest-gbQ4lF",
+      "test-results/batch7-selftest-hVDoLP",
+      "test-results/batch7-selftest-ikh8kz",
+      "test-results/batch7-selftest-irGglx",
+      "test-results/batch7-selftest-k789lz",
+      "test-results/batch7-selftest-lFa65X",
+      "test-results/batch7-selftest-n17Y2v",
+      "test-results/batch7-selftest-rVQBD7",
+      "test-results/batch7-selftest-zJGipG",
+      "test-results/batch7-store-api-0DuuP1",
+      "test-results/batch7-store-api-ajLGK6",
+      "test-results/ticket-selftest-2BoUmA",
+      "test-results/ticket-selftest-7VClKV",
+      "test-results/ticket-selftest-GIJ5ZM",
+      "test-results/ticket-selftest-OIzWdR",
+      "test-results/ticket-selftest-U0Mkcq",
+      "test-results/ticket-selftest-VumG8Y",
+      "test-results/ticket-selftest-XBYbFs",
+      "test-results/ticket-selftest-hhvDVj",
+      "test-results/ticket-selftest-kYhkBq",
+      "test-results/ticket-selftest-pPdO9J",
+      "test-results/ticket-selftest-pQeYIK"
+    ],
+    "short_work_aliases": [
+      {
+        "path": "test-results/w00175f",
+        "target": "test-results/batch7-selftest-asXcKa/1-attempt-0/work"
+      },
+      {
+        "path": "test-results/w009ac7",
+        "target": "test-results/batch7-selftest-1z6UjP/5-attempt-6/work"
+      },
+      {
+        "path": "test-results/w00edde",
+        "target": "test-results/batch7-selftest-GzWrcA/217-attempt-33/work"
+      },
+      {
+        "path": "test-results/w01cf42",
+        "target": "test-results/batch7-selftest-99U5n2/214-attempt-33/work"
+      },
+      {
+        "path": "test-results/w03503a",
+        "target": "test-results/batch7-selftest-GzYYad/161-attempt-3/work"
+      },
+      {
+        "path": "test-results/w0468a6",
+        "target": "test-results/batch7-selftest-J6NyNF/217-attempt-33/work"
+      },
+      {
+        "path": "test-results/w04a1d3",
+        "target": "test-results/batch7-selftest-lFa65X/215-attempt-24/work"
+      },
+      {
+        "path": "test-results/w0530b8",
+        "target": "test-results/batch7-selftest-ceYvx4/8-attempt-15/work"
+      },
+      {
+        "path": "test-results/w0601d2",
+        "target": "test-results/batch7-selftest-5nBt6k/7-attempt-12/work"
+      },
+      {
+        "path": "test-results/w068173",
+        "target": "test-results/batch7-selftest-Z96gcX/172-attempt-0/work"
+      },
+      {
+        "path": "test-results/w088088",
+        "target": "test-results/batch7-selftest-hVDoLP/173-attempt-3/work"
+      },
+      {
+        "path": "test-results/w09bd25",
+        "target": "test-results/batch7-selftest-zJGipG/215-attempt-30/work"
+      },
+      {
+        "path": "test-results/w09d247",
+        "target": "test-results/batch7-selftest-ikh8kz/175-attempt-15/work"
+      },
+      {
+        "path": "test-results/w0af1c3",
+        "target": "test-results/batch7-selftest-k789lz/212-attempt-24/work"
+      },
+      {
+        "path": "test-results/w0df4ba",
+        "target": "test-results/batch7-selftest-hVDoLP/177-attempt-15/work"
+      },
+      {
+        "path": "test-results/w0e2056",
+        "target": "test-results/batch7-selftest-ikh8kz/220-attempt-42/work"
+      },
+      {
+        "path": "test-results/w0f673a",
+        "target": "test-results/batch7-selftest-VQiX6f/5-attempt-12/work"
+      },
+      {
+        "path": "test-results/w124e79",
+        "target": "test-results/batch7-selftest-lFa65X/218-attempt-33/work"
+      },
+      {
+        "path": "test-results/w12cfa6",
+        "target": "test-results/batch7-selftest-GzYYad/189-attempt-30/work"
+      },
+      {
+        "path": "test-results/w12f0a4",
+        "target": "test-results/batch7-selftest-5nBt6k/5-attempt-6/work"
+      },
+      {
+        "path": "test-results/w1342c2",
+        "target": "test-results/batch7-selftest-SqcVe4/6-attempt-9/work"
+      },
+      {
+        "path": "test-results/w140fe5",
+        "target": "test-results/batch7-selftest-ikh8kz/170-attempt-0/work"
+      },
+      {
+        "path": "test-results/w147773",
+        "target": "test-results/batch7-selftest-GzYYad/164-attempt-12/work"
+      },
+      {
+        "path": "test-results/w158d48",
+        "target": "test-results/batch7-selftest-g5pDiH/6-attempt-9/work"
+      },
+      {
+        "path": "test-results/w1657bd",
+        "target": "test-results/batch7-selftest-WOT0Mr/6-attempt-14/work"
+      },
+      {
+        "path": "test-results/w171fe2",
+        "target": "test-results/batch7-selftest-k789lz/171-attempt-6/work"
+      },
+      {
+        "path": "test-results/w197f89",
+        "target": "test-results/batch7-selftest-k789lz/213-attempt-27/work"
+      },
+      {
+        "path": "test-results/w1ac549",
+        "target": "test-results/batch7-selftest-5nBt6k/4-attempt-3/work"
+      },
+      {
+        "path": "test-results/w1c94a6",
+        "target": "test-results/batch7-selftest-hVDoLP/174-attempt-6/work"
+      },
+      {
+        "path": "test-results/w1d4cd2",
+        "target": "test-results/batch7-selftest-lFa65X/213-attempt-18/work"
+      },
+      {
+        "path": "test-results/w1d566c",
+        "target": "test-results/batch7-selftest-GzWrcA/178-fault-service-down/work"
+      },
+      {
+        "path": "test-results/w1e54e3",
+        "target": "test-results/batch7-selftest-Z96gcX/214-attempt-21/work"
+      },
+      {
+        "path": "test-results/w20f65d",
+        "target": "test-results/batch7-selftest-J6NyNF/172-attempt-6/work"
+      },
+      {
+        "path": "test-results/w21750c",
+        "target": "test-results/batch7-selftest-zJGipG/211-attempt-18/work"
+      },
+      {
+        "path": "test-results/w217d9d",
+        "target": "test-results/batch7-selftest-NrSKkd/8-attempt-15/work"
+      },
+      {
+        "path": "test-results/w221bc0",
+        "target": "test-results/batch7-selftest-9TIL3U/161-attempt-3/work"
+      },
+      {
+        "path": "test-results/w233bfa",
+        "target": "test-results/batch7-selftest-VQiX6f/4-attempt-9/work"
+      },
+      {
+        "path": "test-results/w23873d",
+        "target": "test-results/batch7-selftest-J6NyNF/220-attempt-42/work"
+      },
+      {
+        "path": "test-results/w23feb3",
+        "target": "test-results/batch7-selftest-lFa65X/173-attempt-3/work"
+      },
+      {
+        "path": "test-results/w2647cb",
+        "target": "test-results/batch7-selftest-9TIL3U/186-attempt-21/work"
+      },
+      {
+        "path": "test-results/w26b874",
+        "target": "test-results/batch7-selftest-J6NyNF/178-fault-health-failure/work"
+      },
+      {
+        "path": "test-results/w285af9",
+        "target": "test-results/batch7-selftest-WOT0Mr/1-attempt-0/work"
+      },
+      {
+        "path": "test-results/w291eb3",
+        "target": "test-results/batch7-selftest-FQ1bop/18-attempt-6/work"
+      },
+      {
+        "path": "test-results/w29401c",
+        "target": "test-results/batch7-selftest-GzYYad/165-attempt-15/work"
+      },
+      {
+        "path": "test-results/w2ca0ce",
+        "target": "test-results/batch7-selftest-J6NyNF/179-fault-service-down/work"
+      },
+      {
+        "path": "test-results/w2e2672",
+        "target": "test-results/batch7-selftest-ikh8kz/176-attempt-18/work"
+      },
+      {
+        "path": "test-results/w2f7be5",
+        "target": "test-results/batch7-selftest-hVDoLP/213-attempt-18/work"
+      },
+      {
+        "path": "test-results/w30b57d",
+        "target": "test-results/batch7-selftest-ikh8kz/173-attempt-9/work"
+      },
+      {
+        "path": "test-results/w30f2fc",
+        "target": "test-results/batch7-selftest-k789lz/169-attempt-0/work"
+      },
+      {
+        "path": "test-results/w30f4c1",
+        "target": "test-results/batch7-selftest-lFa65X/174-attempt-6/work"
+      },
+      {
+        "path": "test-results/w324eb4",
+        "target": "test-results/batch7-selftest-GzWrcA/172-attempt-6/work"
+      },
+      {
+        "path": "test-results/w326ad8",
+        "target": "test-results/batch7-selftest-GzYYad/160-attempt-0/work"
+      },
+      {
+        "path": "test-results/w32afdb",
+        "target": "test-results/batch7-selftest-k789lz/170-attempt-3/work"
+      },
+      {
+        "path": "test-results/w330bc6",
+        "target": "test-results/batch7-selftest-FQ1bop/17-attempt-3/work"
+      },
+      {
+        "path": "test-results/w35195f",
+        "target": "test-results/batch7-selftest-BDbQcN/5-attempt-6/work"
+      },
+      {
+        "path": "test-results/w353412",
+        "target": "test-results/batch7-selftest-ikh8kz/171-attempt-3/work"
+      },
+      {
+        "path": "test-results/w35ffa5",
+        "target": "test-results/batch7-selftest-J6NyNF/219-attempt-39/work"
+      },
+      {
+        "path": "test-results/w3708a6",
+        "target": "test-results/batch7-selftest-Bbduwk/8-attempt-15/work"
+      },
+      {
+        "path": "test-results/w3924d8",
+        "target": "test-results/batch7-selftest-ikh8kz/217-attempt-33/work"
+      },
+      {
+        "path": "test-results/w399160",
+        "target": "test-results/batch7-selftest-Bbduwk/7-attempt-12/work"
+      },
+      {
+        "path": "test-results/w3b2e0c",
+        "target": "test-results/batch7-selftest-NrSKkd/3-attempt-0/work"
+      },
+      {
+        "path": "test-results/w3d5113",
+        "target": "test-results/batch7-selftest-NrSKkd/7-attempt-12/work"
+      },
+      {
+        "path": "test-results/w3e8eaf",
+        "target": "test-results/batch7-selftest-ikh8kz/174-attempt-12/work"
+      },
+      {
+        "path": "test-results/w412480",
+        "target": "test-results/batch7-selftest-g5pDiH/4-attempt-3/work"
+      },
+      {
+        "path": "test-results/w4198b6",
+        "target": "test-results/batch7-selftest-GzWrcA/177-fault-health-failure/work"
+      },
+      {
+        "path": "test-results/w42d0df",
+        "target": "test-results/batch7-selftest-5nBt6k/6-attempt-9/work"
+      },
+      {
+        "path": "test-results/w433bcd",
+        "target": "test-results/batch7-selftest-zJGipG/172-attempt-6/work"
+      },
+      {
+        "path": "test-results/w43728d",
+        "target": "test-results/batch7-selftest-hVDoLP/214-attempt-21/work"
+      },
+      {
+        "path": "test-results/w4389fb",
+        "target": "test-results/batch7-selftest-BDbQcN/6-attempt-9/work"
+      },
+      {
+        "path": "test-results/w440369",
+        "target": "test-results/batch7-selftest-Bbduwk/4-attempt-3/work"
+      },
+      {
+        "path": "test-results/w4504b1",
+        "target": "test-results/batch7-selftest-zJGipG/174-attempt-12/work"
+      },
+      {
+        "path": "test-results/w45efd7",
+        "target": "test-results/batch7-selftest-k789lz/210-attempt-18/work"
+      },
+      {
+        "path": "test-results/w46f1a9",
+        "target": "test-results/batch7-selftest-ikh8kz/172-attempt-6/work"
+      },
+      {
+        "path": "test-results/w46f1de",
+        "target": "test-results/batch7-selftest-FQ1bop/19-attempt-9/work"
+      },
+      {
+        "path": "test-results/w46fabc",
+        "target": "test-results/batch7-selftest-9TIL3U/187-attempt-24/work"
+      },
+      {
+        "path": "test-results/w476e48",
+        "target": "test-results/batch7-selftest-k789lz/173-attempt-12/work"
+      },
+      {
+        "path": "test-results/w491f32",
+        "target": "test-results/batch7-selftest-1z6UjP/8-attempt-15/work"
+      },
+      {
+        "path": "test-results/w499648",
+        "target": "test-results/batch7-selftest-Z96gcX/177-attempt-15/work"
+      },
+      {
+        "path": "test-results/w49e2f2",
+        "target": "test-results/batch7-selftest-1z6UjP/7-attempt-12/work"
+      },
+      {
+        "path": "test-results/w4ddf57",
+        "target": "test-results/batch7-selftest-GzWrcA/175-attempt-15/work"
+      },
+      {
+        "path": "test-results/w4de812",
+        "target": "test-results/batch7-selftest-5nBt6k/3-attempt-0/work"
+      },
+      {
+        "path": "test-results/w4e5d7d",
+        "target": "test-results/batch7-selftest-BDbQcN/8-attempt-15/work"
+      },
+      {
+        "path": "test-results/w4e9407",
+        "target": "test-results/batch7-selftest-gbQ4lF/1-attempt-0/work"
+      },
+      {
+        "path": "test-results/w51d235",
+        "target": "test-results/batch7-selftest-BDbQcN/3-attempt-0/work"
+      },
+      {
+        "path": "test-results/w522c21",
+        "target": "test-results/batch7-selftest-Bbduwk/3-attempt-0/work"
+      },
+      {
+        "path": "test-results/w54c37e",
+        "target": "test-results/batch7-selftest-9TIL3U/165-attempt-15/work"
+      },
+      {
+        "path": "test-results/w56303b",
+        "target": "test-results/batch7-selftest-hVDoLP/175-attempt-9/work"
+      },
+      {
+        "path": "test-results/w573cbd",
+        "target": "test-results/batch7-selftest-g5pDiH/5-attempt-6/work"
+      },
+      {
+        "path": "test-results/w578a50",
+        "target": "test-results/batch7-selftest-SqcVe4/4-attempt-3/work"
+      },
+      {
+        "path": "test-results/w5842f6",
+        "target": "test-results/batch7-selftest-SqcVe4/3-attempt-0/work"
+      },
+      {
+        "path": "test-results/w587a36",
+        "target": "test-results/batch7-selftest-99U5n2/210-attempt-21/work"
+      },
+      {
+        "path": "test-results/w5a167b",
+        "target": "test-results/batch7-selftest-rVQBD7/4-fault-timeout-service-down/work"
+      },
+      {
+        "path": "test-results/w5a6c73",
+        "target": "test-results/batch7-selftest-WOT0Mr/2-attempt-3/work"
+      },
+      {
+        "path": "test-results/w5ce4c7",
+        "target": "test-results/batch7-selftest-J6NyNF/221-attempt-45/work"
+      },
+      {
+        "path": "test-results/w5ec64b",
+        "target": "test-results/batch7-selftest-S9F3Ab/1-attempt-0/work"
+      },
+      {
+        "path": "test-results/w5f34d0",
+        "target": "test-results/batch7-selftest-ceYvx4/7-attempt-12/work"
+      },
+      {
+        "path": "test-results/w619ccc",
+        "target": "test-results/batch7-selftest-Z96gcX/217-attempt-30/work"
+      },
+      {
+        "path": "test-results/w64462f",
+        "target": "test-results/batch7-selftest-GzYYad/162-attempt-6/work"
+      },
+      {
+        "path": "test-results/w65022e",
+        "target": "test-results/batch7-selftest-k789lz/172-attempt-9/work"
+      },
+      {
+        "path": "test-results/w653986",
+        "target": "test-results/batch7-selftest-J6NyNF/171-attempt-3/work"
+      },
+      {
+        "path": "test-results/w66bcc2",
+        "target": "test-results/batch7-selftest-9TIL3U/160-attempt-0/work"
+      },
+      {
+        "path": "test-results/w67628c",
+        "target": "test-results/batch7-selftest-Bbduwk/6-attempt-9/work"
+      },
+      {
+        "path": "test-results/w68effc",
+        "target": "test-results/batch7-selftest-J6NyNF/173-attempt-9/work"
+      },
+      {
+        "path": "test-results/w6982cd",
+        "target": "test-results/batch7-selftest-NrSKkd/4-attempt-3/work"
+      },
+      {
+        "path": "test-results/w6a484c",
+        "target": "test-results/batch7-selftest-k789lz/215-attempt-33/work"
+      },
+      {
+        "path": "test-results/w6d5430",
+        "target": "test-results/batch7-selftest-Z96gcX/175-attempt-9/work"
+      },
+      {
+        "path": "test-results/w6d6321",
+        "target": "test-results/batch7-selftest-hVDoLP/217-attempt-30/work"
+      },
+      {
+        "path": "test-results/w6fb43c",
+        "target": "test-results/batch7-selftest-99U5n2/212-attempt-27/work"
+      },
+      {
+        "path": "test-results/w71b6e4",
+        "target": "test-results/batch7-selftest-ikh8kz/218-attempt-36/work"
+      },
+      {
+        "path": "test-results/w728d3d",
+        "target": "test-results/batch7-selftest-VQiX6f/1-attempt-0/work"
+      },
+      {
+        "path": "test-results/w72e02e",
+        "target": "test-results/batch7-selftest-GzWrcA/215-attempt-27/work"
+      },
+      {
+        "path": "test-results/w73357f",
+        "target": "test-results/batch7-selftest-99U5n2/172-attempt-12/work"
+      },
+      {
+        "path": "test-results/w7437f5",
+        "target": "test-results/batch7-selftest-k789lz/211-attempt-21/work"
+      },
+      {
+        "path": "test-results/w7645cf",
+        "target": "test-results/batch7-selftest-GzWrcA/176-attempt-18/work"
+      },
+      {
+        "path": "test-results/w7675fb",
+        "target": "test-results/batch7-selftest-J6NyNF/174-attempt-12/work"
+      },
+      {
+        "path": "test-results/w76f014",
+        "target": "test-results/batch7-selftest-SqcVe4/8-attempt-15/work"
+      },
+      {
+        "path": "test-results/w77e612",
+        "target": "test-results/batch7-selftest-GzWrcA/173-attempt-9/work"
+      },
+      {
+        "path": "test-results/w79155b",
+        "target": "test-results/batch7-selftest-lFa65X/214-attempt-21/work"
+      },
+      {
+        "path": "test-results/w79dc2d",
+        "target": "test-results/batch7-selftest-GzWrcA/219-attempt-39/work"
+      },
+      {
+        "path": "test-results/w7a1a67",
+        "target": "test-results/batch7-selftest-Bbduwk/5-attempt-6/work"
+      },
+      {
+        "path": "test-results/w7a49aa",
+        "target": "test-results/batch7-selftest-hVDoLP/218-attempt-33/work"
+      },
+      {
+        "path": "test-results/w7b0dc2",
+        "target": "test-results/batch7-selftest-9TIL3U/163-attempt-9/work"
+      },
+      {
+        "path": "test-results/w7e4e8a",
+        "target": "test-results/batch7-selftest-GzYYad/190-attempt-33/work"
+      },
+      {
+        "path": "test-results/w7f9af3",
+        "target": "test-results/batch7-selftest-Z96gcX/215-attempt-24/work"
+      },
+      {
+        "path": "test-results/w7fd1e9",
+        "target": "test-results/batch7-selftest-hVDoLP/172-attempt-0/work"
+      },
+      {
+        "path": "test-results/w7ff4f6",
+        "target": "test-results/batch7-selftest-ikh8kz/216-attempt-30/work"
+      },
+      {
+        "path": "test-results/w80956f",
+        "target": "test-results/batch7-selftest-FQ1bop/16-attempt-0/work"
+      },
+      {
+        "path": "test-results/w80e35b",
+        "target": "test-results/batch7-selftest-GzWrcA/171-attempt-3/work"
+      },
+      {
+        "path": "test-results/w811853",
+        "target": "test-results/batch7-selftest-GzYYad/187-attempt-24/work"
+      },
+      {
+        "path": "test-results/w815981",
+        "target": "test-results/batch7-selftest-zJGipG/214-attempt-27/work"
+      },
+      {
+        "path": "test-results/w82b5f9",
+        "target": "test-results/batch7-selftest-fAklZV/1-attempt-0/work"
+      },
+      {
+        "path": "test-results/w84810a",
+        "target": "test-results/batch7-selftest-k789lz/214-attempt-30/work"
+      },
+      {
+        "path": "test-results/w8665e8",
+        "target": "test-results/batch7-selftest-hVDoLP/216-attempt-27/work"
+      },
+      {
+        "path": "test-results/w8738f6",
+        "target": "test-results/batch7-selftest-rVQBD7/2-fault-health-failure/work"
+      },
+      {
+        "path": "test-results/w8ad3d0",
+        "target": "test-results/batch7-selftest-g5pDiH/3-attempt-0/work"
+      },
+      {
+        "path": "test-results/w8b5454",
+        "target": "test-results/batch7-selftest-lFa65X/175-attempt-9/work"
+      },
+      {
+        "path": "test-results/w8ca2af",
+        "target": "test-results/batch7-selftest-WOT0Mr/5-attempt-12/work"
+      },
+      {
+        "path": "test-results/w8d365f",
+        "target": "test-results/batch7-selftest-9TIL3U/190-attempt-33/work"
+      },
+      {
+        "path": "test-results/w8de322",
+        "target": "test-results/batch7-selftest-GzYYad/163-attempt-9/work"
+      },
+      {
+        "path": "test-results/w8e63c1",
+        "target": "test-results/batch7-selftest-GzWrcA/218-attempt-36/work"
+      },
+      {
+        "path": "test-results/w8f6af2",
+        "target": "test-results/batch7-selftest-zJGipG/212-attempt-21/work"
+      },
+      {
+        "path": "test-results/w8f7133",
+        "target": "test-results/batch7-selftest-1z6UjP/6-attempt-9/work"
+      },
+      {
+        "path": "test-results/w8fe786",
+        "target": "test-results/batch7-selftest-5nBt6k/8-attempt-15/work"
+      },
+      {
+        "path": "test-results/w906d74",
+        "target": "test-results/batch7-selftest-99U5n2/213-attempt-30/work"
+      },
+      {
+        "path": "test-results/w912ca9",
+        "target": "test-results/batch7-selftest-Z96gcX/174-attempt-6/work"
+      },
+      {
+        "path": "test-results/w91d572",
+        "target": "test-results/batch7-selftest-9TIL3U/185-attempt-18/work"
+      },
+      {
+        "path": "test-results/w93ae75",
+        "target": "test-results/batch7-selftest-FQ1bop/21-attempt-15/work"
+      },
+      {
+        "path": "test-results/w951fc9",
+        "target": "test-results/batch7-selftest-rVQBD7/1-attempt-0/work"
+      },
+      {
+        "path": "test-results/w965ca1",
+        "target": "test-results/batch7-selftest-zJGipG/216-attempt-33/work"
+      },
+      {
+        "path": "test-results/w96ba23",
+        "target": "test-results/batch7-selftest-99U5n2/173-attempt-15/work"
+      },
+      {
+        "path": "test-results/w974440",
+        "target": "test-results/batch7-selftest-9TIL3U/188-attempt-27/work"
+      },
+      {
+        "path": "test-results/w9886e6",
+        "target": "test-results/batch7-selftest-ceYvx4/5-attempt-6/work"
+      },
+      {
+        "path": "test-results/w990c0c",
+        "target": "test-results/batch7-selftest-9TIL3U/162-attempt-6/work"
+      },
+      {
+        "path": "test-results/w9d2310",
+        "target": "test-results/batch7-selftest-J6NyNF/175-attempt-15/work"
+      },
+      {
+        "path": "test-results/w9d3781",
+        "target": "test-results/batch7-selftest-99U5n2/211-attempt-24/work"
+      },
+      {
+        "path": "test-results/wa01a62",
+        "target": "test-results/batch7-selftest-GzWrcA/170-attempt-0/work"
+      },
+      {
+        "path": "test-results/wa29dcd",
+        "target": "test-results/batch7-selftest-ikh8kz/178-fault-service-down/work"
+      },
+      {
+        "path": "test-results/wa3f66a",
+        "target": "test-results/batch7-selftest-zJGipG/213-attempt-24/work"
+      },
+      {
+        "path": "test-results/wa45156",
+        "target": "test-results/batch7-selftest-asXcKa/3-fault-service-down/work"
+      },
+      {
+        "path": "test-results/wa69f01",
+        "target": "test-results/batch7-selftest-99U5n2/170-attempt-6/work"
+      },
+      {
+        "path": "test-results/wa95d64",
+        "target": "test-results/batch7-selftest-BDbQcN/4-attempt-3/work"
+      },
+      {
+        "path": "test-results/wab4150",
+        "target": "test-results/batch7-selftest-lFa65X/172-attempt-0/work"
+      },
+      {
+        "path": "test-results/waf1cf4",
+        "target": "test-results/batch7-selftest-FQ1bop/20-attempt-12/work"
+      },
+      {
+        "path": "test-results/wb0b461",
+        "target": "test-results/batch7-selftest-asXcKa/4-fault-timeout-service-down/work"
+      },
+      {
+        "path": "test-results/wb12050",
+        "target": "test-results/batch7-selftest-GzYYad/185-attempt-18/work"
+      },
+      {
+        "path": "test-results/wb1a632",
+        "target": "test-results/batch7-selftest-ikh8kz/219-attempt-39/work"
+      },
+      {
+        "path": "test-results/wb2b962",
+        "target": "test-results/batch7-selftest-Z96gcX/173-attempt-3/work"
+      },
+      {
+        "path": "test-results/wb429a4",
+        "target": "test-results/batch7-selftest-k789lz/174-attempt-15/work"
+      },
+      {
+        "path": "test-results/wb44ba8",
+        "target": "test-results/batch7-selftest-1z6UjP/4-attempt-3/work"
+      },
+      {
+        "path": "test-results/wb4d6a0",
+        "target": "test-results/batch7-selftest-VQiX6f/2-attempt-3/work"
+      },
+      {
+        "path": "test-results/wb4f7ab",
+        "target": "test-results/batch7-selftest-ceYvx4/4-attempt-3/work"
+      },
+      {
+        "path": "test-results/wb5659e",
+        "target": "test-results/batch7-selftest-g5pDiH/8-attempt-15/work"
+      },
+      {
+        "path": "test-results/wb661a6",
+        "target": "test-results/batch7-selftest-ikh8kz/215-attempt-27/work"
+      },
+      {
+        "path": "test-results/wb82ec3",
+        "target": "test-results/batch7-selftest-J6NyNF/218-attempt-36/work"
+      },
+      {
+        "path": "test-results/wb8c8a1",
+        "target": "test-results/batch7-selftest-GzYYad/186-attempt-21/work"
+      },
+      {
+        "path": "test-results/wb9f14c",
+        "target": "test-results/batch7-selftest-GzWrcA/220-attempt-42/work"
+      },
+      {
+        "path": "test-results/wba8bf9",
+        "target": "test-results/batch7-selftest-GzWrcA/216-attempt-30/work"
+      },
+      {
+        "path": "test-results/wbba60f",
+        "target": "test-results/batch7-selftest-lFa65X/216-attempt-27/work"
+      },
+      {
+        "path": "test-results/wbccc49",
+        "target": "test-results/batch7-selftest-WOT0Mr/3-attempt-6/work"
+      },
+      {
+        "path": "test-results/wbdb09d",
+        "target": "test-results/batch7-selftest-1z6UjP/3-attempt-0/work"
+      },
+      {
+        "path": "test-results/wbe4589",
+        "target": "test-results/batch7-selftest-zJGipG/175-attempt-15/work"
+      },
+      {
+        "path": "test-results/wbe98d1",
+        "target": "test-results/batch7-selftest-NrSKkd/6-attempt-9/work"
+      },
+      {
+        "path": "test-results/wbfeb74",
+        "target": "test-results/batch7-selftest-g5pDiH/7-attempt-12/work"
+      },
+      {
+        "path": "test-results/wc0fd2f",
+        "target": "test-results/batch7-selftest-BDbQcN/7-attempt-12/work"
+      },
+      {
+        "path": "test-results/wc1243d",
+        "target": "test-results/batch7-selftest-zJGipG/173-attempt-9/work"
+      },
+      {
+        "path": "test-results/wc2652a",
+        "target": "test-results/batch7-selftest-WOT0Mr/4-attempt-9/work"
+      },
+      {
+        "path": "test-results/wc4b7a7",
+        "target": "test-results/batch7-selftest-9TIL3U/189-attempt-30/work"
+      },
+      {
+        "path": "test-results/wc590f5",
+        "target": "test-results/batch7-selftest-GzWrcA/179-fault-timeout-service-down/work"
+      },
+      {
+        "path": "test-results/wc91129",
+        "target": "test-results/batch7-selftest-zJGipG/171-attempt-3/work"
+      },
+      {
+        "path": "test-results/wcab7d0",
+        "target": "test-results/batch7-selftest-99U5n2/169-attempt-3/work"
+      },
+      {
+        "path": "test-results/wcada2a",
+        "target": "test-results/batch7-selftest-Z96gcX/176-attempt-12/work"
+      },
+      {
+        "path": "test-results/wcb7030",
+        "target": "test-results/batch7-selftest-J6NyNF/180-fault-timeout-service-down/work"
+      },
+      {
+        "path": "test-results/wccb934",
+        "target": "test-results/batch7-selftest-zJGipG/170-attempt-0/work"
+      },
+      {
+        "path": "test-results/wcf2df9",
+        "target": "test-results/batch7-selftest-Z96gcX/213-attempt-18/work"
+      },
+      {
+        "path": "test-results/wd38ad7",
+        "target": "test-results/batch7-selftest-lFa65X/217-attempt-30/work"
+      },
+      {
+        "path": "test-results/wd4c6da",
+        "target": "test-results/batch7-selftest-asXcKa/2-fault-health-failure/work"
+      },
+      {
+        "path": "test-results/wd6dcf5",
+        "target": "test-results/batch7-selftest-hVDoLP/215-attempt-24/work"
+      },
+      {
+        "path": "test-results/wd73a01",
+        "target": "test-results/batch7-selftest-Z96gcX/218-attempt-33/work"
+      },
+      {
+        "path": "test-results/wd8a3d5",
+        "target": "test-results/batch7-selftest-99U5n2/209-attempt-18/work"
+      },
+      {
+        "path": "test-results/wd96807",
+        "target": "test-results/batch7-selftest-VQiX6f/3-attempt-6/work"
+      },
+      {
+        "path": "test-results/wda1f8a",
+        "target": "test-results/batch7-selftest-99U5n2/171-attempt-9/work"
+      },
+      {
+        "path": "test-results/wda7a73",
+        "target": "test-results/batch7-selftest-ceYvx4/6-attempt-9/work"
+      },
+      {
+        "path": "test-results/wdba601",
+        "target": "test-results/batch7-selftest-lFa65X/176-attempt-12/work"
+      },
+      {
+        "path": "test-results/wdd658b",
+        "target": "test-results/batch7-selftest-ikh8kz/179-fault-timeout-service-down/work"
+      },
+      {
+        "path": "test-results/wddb48a",
+        "target": "test-results/batch7-selftest-hVDoLP/176-attempt-12/work"
+      },
+      {
+        "path": "test-results/wdf4c40",
+        "target": "test-results/batch7-selftest-SqcVe4/5-attempt-6/work"
+      },
+      {
+        "path": "test-results/we2790a",
+        "target": "test-results/batch7-selftest-99U5n2/168-attempt-0/work"
+      },
+      {
+        "path": "test-results/we32fcb",
+        "target": "test-results/batch7-selftest-GzWrcA/174-attempt-12/work"
+      },
+      {
+        "path": "test-results/we3486f",
+        "target": "test-results/batch7-selftest-Z96gcX/216-attempt-27/work"
+      },
+      {
+        "path": "test-results/we46191",
+        "target": "test-results/batch7-selftest-SqcVe4/7-attempt-12/work"
+      },
+      {
+        "path": "test-results/we5bbf2",
+        "target": "test-results/batch7-selftest-NrSKkd/5-attempt-6/work"
+      },
+      {
+        "path": "test-results/we66997",
+        "target": "test-results/batch7-selftest-ikh8kz/177-fault-health-failure/work"
+      },
+      {
+        "path": "test-results/we9ff21",
+        "target": "test-results/batch7-selftest-9TIL3U/164-attempt-12/work"
+      },
+      {
+        "path": "test-results/weddbbc",
+        "target": "test-results/batch7-selftest-lFa65X/177-attempt-15/work"
+      },
+      {
+        "path": "test-results/wef9e55",
+        "target": "test-results/batch7-selftest-GzYYad/188-attempt-27/work"
+      },
+      {
+        "path": "test-results/wf3251a",
+        "target": "test-results/batch7-selftest-VQiX6f/6-attempt-15/work"
+      },
+      {
+        "path": "test-results/wf52fcb",
+        "target": "test-results/batch7-selftest-ceYvx4/3-attempt-0/work"
+      },
+      {
+        "path": "test-results/wf724b7",
+        "target": "test-results/batch7-selftest-J6NyNF/163-attempt-0/work"
+      },
+      {
+        "path": "test-results/wfc0831",
+        "target": "test-results/batch7-selftest-J6NyNF/216-attempt-30/work"
+      },
+      {
+        "path": "test-results/wfc7f84",
+        "target": "test-results/batch7-selftest-rVQBD7/3-fault-service-down/work"
+      },
+      {
+        "path": "test-results/wfd3e02",
+        "target": "test-results/batch7-selftest-J6NyNF/176-attempt-18/work"
+      },
+      {
+        "path": "test-results/wfe5070",
+        "target": "test-results/batch7-selftest-J6NyNF/177-attempt-21/work"
+      }
+    ],
+    "logs": "test-results/batch7-*.txt",
+    "diagnostics": "test-results/batch7-diagnostics/",
+    "policy": "All scratch retained as requested; no deletion, push or worktree cleanup needed."
+  },
+  "duplicate_removals": [
+    {
+      "cases": [
+        "B7-46 controls.json missing request",
+        "B7-46 controls2.json missing request"
+      ],
+      "why": "Same request deletion and refusal oracle appeared in two tables. The first table remains the primary owner.",
+      "non_test_callers": "make-tasks.mjs CLI",
+      "history": "Added twice during common-field table expansion in this task.",
+      "unlocks": "Avoids duplicate cloned generator invocations.",
+      "risk": "No unique input or assertion removed; final suite executes the remaining owners."
+    },
+    {
+      "cases": [
+        "fixture-only client-difference plant",
+        "fixture-only norule plant"
+      ],
+      "why": "Duplicated existing single-fault smoke fixtures and wrote hand-authored receipts. Actual copied-code client/norule plants remain.",
+      "non_test_callers": "smoke-check.mjs CLI",
+      "history": "Added in this task while constructing the smoke table.",
+      "unlocks": "Removes two fake plant receipts from case counts.",
+      "risk": "Existing B7-61 owners and actual code plants retain the contracts."
+    }
+  ],
+  "test_author_corrections": [
+    "Replaced impossible successful-store fake with actual escaping symlink; verified invalid status.",
+    "Binary request format was observed from client traffic before the query plant was accepted.",
+    "Missing-cell plant now removes the cell by rename and returns exit 0; third-attempt plant must return exit 0.",
+    "Removed two duplicate missing-request entries and two duplicate fixture-only plant entries.",
+    "Early export discovery imported the default generator; historical-byte gates and Git status verify unchanged task bytes.",
+    "Async fake children own duplicated output descriptors until delayed writes finish. Default fake events contain only text and completion, never invented successful shell operations."
+  ],
+  "independence": "New fixture registry source/decision paths point inside test-results. Real batch 5/6 external stores stay unread. Expectations use contract data, invented results and immutable historical bytes, not live trial results or score.txt. The required saved-score check is separate.",
+  "case_names": [
+    "B7 B7-45 reversed inputs select 6 cited, 6 uncited, 3 plain and 4 governed, preserving entries",
+    "B7 B7-04 B7-45 repeated generation preserves earlier tasks, blind inputs and stored bytes",
+    "B7 B7-41 requests.json missing refuses before any task write",
+    "B7 B7-41 requests.json JSON refuses before any task write",
+    "B7 B7-41 requests.json hash refuses before any task write",
+    "B7 B7-41 requests.json byte refuses before any task write",
+    "B7 B7-41 targets.json missing refuses before any task write",
+    "B7 B7-41 targets.json JSON refuses before any task write",
+    "B7 B7-41 targets.json hash refuses before any task write",
+    "B7 B7-41 targets.json byte refuses before any task write",
+    "B7 B7-41 controls.json missing refuses before any task write",
+    "B7 B7-41 controls.json JSON refuses before any task write",
+    "B7 B7-41 controls.json hash refuses before any task write",
+    "B7 B7-41 controls.json byte refuses before any task write",
+    "B7 B7-41 controls2.json missing refuses before any task write",
+    "B7 B7-41 controls2.json JSON refuses before any task write",
+    "B7 B7-41 controls2.json hash refuses before any task write",
+    "B7 B7-41 controls2.json byte refuses before any task write",
+    "B7 B7-41 sample-ids.json missing refuses before any task write",
+    "B7 B7-41 sample-ids.json JSON refuses before any task write",
+    "B7 B7-41 sample-ids.json hash refuses before any task write",
+    "B7 B7-41 sample-ids.json byte refuses before any task write",
+    "B7 B7-42 request count 119",
+    "B7 B7-42 request count 121",
+    "B7 B7-42 duplicate request id",
+    "B7 B7-42 inherited missing request id",
+    "B7 B7-42 inherited missing request request",
+    "B7 B7-42 inherited missing request record",
+    "B7 B7-42 inherited missing request settled",
+    "B7 B7-42 inherited missing request why",
+    "B7 B7-42 inherited missing request wording",
+    "B7 B7-42 inherited missing request shared_terms",
+    "B7 B7-42 inherited missing request also",
+    "B7 B7-42 path escaping id \"../escape\"",
+    "B7 B7-42 path escaping id \"a/b\"",
+    "B7 B7-42 path escaping id \"..\"",
+    "B7 B7-42 path escaping id \"\"",
+    "B7 B7-42 invalid stratum bad",
+    "B7 B7-42 invalid stratum ",
+    "B7 B7-42 invalid stratum null",
+    "B7 B7-42 request/sample ticket mismatch",
+    "B7 B7-42 request/sample stratum mismatch",
+    "B7 B7-42 sample duplicate",
+    "B7 B7-42 sample not ticket",
+    "B7 B7-42 sample missing",
+    "B7 B7-42 sample invalid stratum",
+    "B7 B7-42 sample wrong counts",
+    "B7 B7-43 targets missing entry",
+    "B7 B7-43 targets duplicate",
+    "B7 B7-43 targets unknown",
+    "B7 B7-43 targets missing file",
+    "B7 B7-43 targets missing symbol",
+    "B7 B7-43 targets nonarray",
+    "B7 B7-44 shortage names cited and actual count",
+    "B7 B7-44 shortage names uncited and actual count",
+    "B7 B7-43 invalid ranges ineligible, mixed list retained",
+    "B7 B7-46 controls.json too few",
+    "B7 B7-46 controls.json too many",
+    "B7 B7-46 controls.json missing request",
+    "B7 B7-46 controls.json invalid regex",
+    "B7 B7-46 controls.json duplicate id",
+    "B7 B7-46 controls.json reused id",
+    "B7 B7-46 controls2.json too few",
+    "B7 B7-46 controls2.json too many",
+    "B7 B7-46 controls2.json missing request",
+    "B7 B7-46 controls2.json invalid regex",
+    "B7 B7-46 controls2.json duplicate id",
+    "B7 B7-46 controls2.json reused id",
+    "B7 B7-46 governed missing ticket",
+    "B7 B7-46 governed missing commit",
+    "B7 B7-46 governed missing decided",
+    "B7 B7-46 governed missing why_not_against",
+    "B7 B7-46 governed missing evidence",
+    "B7 B7-46 malformed governed ticket",
+    "B7 B7-46 controls.json missing id",
+    "B7 B7-46 controls.json missing kind",
+    "B7 B7-46 controls.json missing file",
+    "B7 B7-46 controls.json missing added",
+    "B7 B7-46 controls.json missing why_harmless",
+    "B7 B7-46 controls.json missing evidence",
+    "B7 B7-46 controls2.json missing id",
+    "B7 B7-46 controls2.json missing kind",
+    "B7 B7-46 controls2.json missing file",
+    "B7 B7-46 controls2.json missing added",
+    "B7 B7-42 request record invalid \"bad\"",
+    "B7 B7-42 request also invalid [\"bad\"]",
+    "B7 B7-42 request wording invalid \"unknown\"",
+    "B7 B7-42 request shared_terms invalid {}",
+    "B7 B7-42 request request invalid \"\"",
+    "B7 B7-42 request record invalid null",
+    "B7 B7-42 two requests use one sampled ticket",
+    "B7 B7-43 range 0-2 is ineligible",
+    "B7 B7-43 range 2-1 is ineligible",
+    "B7 B7-43 range 1.5-3 is ineligible",
+    "B7 B7-43 range 1-2.5 is ineligible",
+    "B7 B7-43 range null-3 is ineligible",
+    "B7 B7-47 conflict and control verdicts retain batch 5 rules",
+    "B7 B7-56 B7-57 258 full cells derive only from local tasks",
+    "B7 B7-56 B7-57 16 smoke cells derive only from local tasks",
+    "B7 B7-67 smoke completion resumes exact repeat-1 cells in full plan",
+    "B7 B7-57 B7-58 invalid plan --stage unknown",
+    "B7 B7-57 B7-58 invalid plan --conditions unknown",
+    "B7 B7-57 B7-58 invalid plan --conditions graph,graph",
+    "B7 B7-57 B7-58 invalid plan --repeats 0",
+    "B7 B7-57 B7-58 invalid plan --repeats -1",
+    "B7 B7-57 B7-58 invalid plan --repeats 1.5",
+    "B7 B7-57 B7-58 invalid plan --stage smoke --repeats 2",
+    "B7 B7-57 B7-58 invalid plan --stage smoke --only x",
+    "B7 B7-58 ablation on control refuses",
+    "B7 B7-01 historical batch 5 ignores changed working skill and rule",
+    "B7 B7-01 historical batch 6 ignores changed working skill and rule",
+    "B7 B7-02 missing instruction commit null refuses before preparation",
+    "B7 B7-02 missing instruction commit undefined refuses before preparation",
+    "B7 B7-02 missing instruction commit ffffffffffffffffffffffffffffffffffffffff refuses before preparation",
+    "B7 B7-06 registry missing repo refuses visibly",
+    "B7 B7-06 registry missing conditions refuses visibly",
+    "B7 B7-06 registry missing sourceExtensions refuses visibly",
+    "B7 B7-06 registry missing sampleSeed refuses visibly",
+    "B7 B7-06 another repo uses stratified generator and planner through registry data alone",
+    "B7 B7-05 batch 5 and 6 plan stdout/stderr equal c243073 with identical tasks/results",
+    "B7 B7-03 B6-26 owner ignores working instruction edits and catches recorded-byte changes",
+    "B7 B7-02 recorded commit missing a skill file refuses before work changes",
+    "B7 plant past batch reads working skill caught by B7-01 instruction bytes",
+    "B7 plant uncited request from cited ticket caught by B7-42 source-stratum owner",
+    "B7 plant missing blind hash accepted caught by B7-41 refusal owner",
+    "B7 plant task write before input validation caught by B7-46 atomic refusal owner",
+    "B7 B7-30 issue and pull-request outcomes retained without per-PR requests",
+    "B7 B7-31 only OWNER MEMBER COLLABORATOR comments in time and URL order",
+    "B7 B7-32 cached complete pages restart with zero requests",
+    "B7 B7-32 restart after first complete page fetches only remaining pages, tickets once",
+    "B7 B7-32 incomplete pending page is ignored on restart",
+    "B7 B7-32 cached URL digest is verified, mismatching raw URL not reused",
+    "B7 B7-34 page formula, expected counts and generic headers",
+    "B7 B7-34 zero-total forecast 0/0 retains one page per list (ADR 0012)",
+    "B7 B7-34 zero-total forecast 300/0 retains one page per list (ADR 0012)",
+    "B7 B7-34 zero-total forecast 0/300 retains one page per list (ADR 0012)",
+    "B7 B7-34 pagination off API host refused before a request",
+    "B7 B7-33 403 Retry-After waits then continues",
+    "B7 B7-33 429 Retry-After waits then continues",
+    "B7 B7-33 reset header permits a later request without authentication",
+    "B7 B7-33 unrelated HTTP error fails visibly",
+    "B7 B7-35 null close reason explicitly not stated with outcome retained",
+    "B7 B7-35 missing state refuses before write",
+    "B7 B7-35 missing state_reason refuses before write",
+    "B7 B7-35 missing is_pull_request refuses before write",
+    "B7 B7-35 missing comments refuses before write",
+    "B7 B7-35 PR missing merge status refuses before write",
+    "B7 B7-36 Unicode title and item text stay within 8000 bytes at the boundary",
+    "B7 B7-36 body cut first, then oldest comments, newest preferred and retained order",
+    "B7 B7-31 converter refuses outside-author record text",
+    "B7 B7-37 searchText indexes outcome and retained maintainer comment, excluding outside text",
+    "B7 plant outside comment retained caught by B7-31 converter output",
+    "B7 B7-38 B7-39 seed repeats bytes, source-cited open eligible, uncited open and doc-cited excluded",
+    "B7 B7-38 commit order does not change seeded sample bytes",
+    "B7 B7-39 merge citation uses source changes against first parent",
+    "B7 B7-38 a different registry seed changes selection while preserving both strata",
+    "B7 B7-06 B7-38 another repo and source extension require only registry data",
+    "B7 B7-40 shortage cited names actual 59, writes no sample",
+    "B7 B7-40 shortage uncited names actual 59, writes no sample",
+    "B7 B7-40 sampler duplicate ticket refuses without writing",
+    "B7 B7-40 sampler malformed key refuses without writing",
+    "B7 B7-40 sampler missing state refuses without writing",
+    "B7 B7-40 sampler invalid state refuses without writing",
+    "B7 B7-40 sampler nonarray refuses without writing",
+    "B7 B7-40 missing sourceExtensions refuses before sample output",
+    "B7 B7-40 missing sampleSeed refuses before sample output",
+    "B7 B7-12 graph client matches real CLI bytes/status including symbol, range and missing errors",
+    "B7 B7-12 graph carry missing-argument usage matches direct CLI bytes and status",
+    "B7 B7-12 graph why missing-argument usage matches direct CLI bytes and status",
+    "B7 B7-12 graph impact missing-argument usage matches direct CLI bytes and status",
+    "B7 B7-12 graph search missing-argument usage matches direct CLI bytes and status",
+    "B7 B7-12 graph-norule carry missing-argument usage matches direct CLI bytes and status",
+    "B7 B7-12 graph-norule why missing-argument usage matches direct CLI bytes and status",
+    "B7 B7-12 graph-norule impact missing-argument usage matches direct CLI bytes and status",
+    "B7 B7-12 graph-norule search missing-argument usage matches direct CLI bytes and status",
+    "B7 B7-12 graph-norule command bytes equal graph",
+    "B7 B7-20 B7-21 stub disables exactly its commands",
+    "B7 B7-20 B7-21 graph-nosearch disables exactly its commands",
+    "B7 B7-07 relate against the actual store fails through shell, absolute path and script",
+    "B7 B7-08 B7-09 native file reads deny store, client, service and product source, including /proc/1/root",
+    "B7 B7-08 symlink cannot recover guessed host store path",
+    "B7 B7-10 a second run socket has no reachable path in the first namespace",
+    "B7 B7-11 native and shell reads and ordinary source edits work inside confinement",
+    "B7 B7-11 B7-19 actual generated shell denies network and identity while source and commands work",
+    "B7 B7-13 client wire has exactly command and target, no condition or store path",
+    "B7 B7-13 protocol rejects fifth command, store override, raw query, extra args, NUL and oversized frame",
+    "B7 B7-14 service down after mount prints exact unavailable error and exits 70",
+    "B7 B7-16 service closes after commands and full replies remain archived",
+    "B7 B7-17 B7-18 repo/tool bytes identical except exact omitted rule; skill stays present",
+    "B7 B7-22 B7-24 nolink why removes only commit links, search and impact stay byte-identical",
+    "B7 B7-23 B7-71 nolink symbol and overlapping range preserve every unrelated byte including term de-duplication",
+    "B7 B7-25 B7-26 noterms uses product no-shared-record note and preserves every linked/search/impact/why byte",
+    "B7 B7-27 fingerprints unchanged components; altered record and foreign marker refuse",
+    "B7 B7-27 unrelated node removed in an ablation refuses",
+    "B7 B7-27 search vector changed in an ablation refuses",
+    "B7 B7-27 completion marker from another source store refuses",
+    "B7 B7-28 changed product carry section format fails visibly instead of truncating",
+    "B7 B7-29 product source/recipes have no condition switches and stay unchanged across conditions",
+    "B7 B7-29 every observed relate child overrides telemetry and tracking flags",
+    "B7 plant mounted-store caught inside B7-07/B7-08 confinement",
+    "B7 plant relate-path caught inside B7-07/B7-08 confinement",
+    "B7 plant nolink-keeps-link caught by independent answer owner",
+    "B7 plant noterms-drops-link caught by independent answer owner",
+    "B7 plant raw query accepted caught by B7-13 server protocol owner",
+    "B7 plant norule rule text retained caught by B7-18 instruction owner",
+    "B7 plant different client compiled for a condition caught by B7-17 byte owner",
+    "B7 B7-15 B7-16 closed success keeps evidence and closes listener",
+    "B7 B7-15 B7-16 closed timeout keeps evidence and closes listener",
+    "B7 B7-15 B7-16 closed breach keeps evidence and closes listener",
+    "B7 B7-15 B7-16 closed malformed keeps evidence and closes listener",
+    "B7 B7-15 B7-16 closed spawn-error keeps evidence and closes listener",
+    "B7 B7-15 exported runOne uses closed runtime without spawning an agent",
+    "B7 B7-15 failed preparation is a harness failure with evidence and no agent",
+    "B7 B7-14 B7-15 B7-53 health-failure is a harness failure and closes service",
+    "B7 B7-14 B7-15 B7-53 service-down is a harness failure and closes service",
+    "B7 B7-14 B7-15 B7-53 timeout-service-down is a harness failure and closes service",
+    "B7 report B7-68 no batch 7 results preserves every earlier block byte; invalid archives ignored",
+    "B7 report B7-68 earlier report prefix unchanged; JSON finished only",
+    "B7 report B7-69 75% graph and 0% stub conflicts; all ablations 50%; finished denominators",
+    "B7 report B7-69 cited conflict rates independent",
+    "B7 report B7-69 uncited conflict rates independent",
+    "B7 report B7-69 task-paired seeded bootstrap values, all six conditions",
+    "B7 report B7-69 cited every paired mean and seeded interval",
+    "B7 report B7-69 uncited every paired mean and seeded interval",
+    "B7 report B7-69 missing pairs do not pair unlike tasks",
+    "B7 report B7-70 conflict quadrants counted once; errors/control/invalid excluded",
+    "B7 report B7-70 needed-ticket shown counts include absolute closed client path",
+    "B7 report B7-70 plain/governed controls separate, diff-only pass and own-ticket diagnostic",
+    "B7 report B7-70 three harmless controls exact rates, counts and tokens",
+    "B7 report B7-70 four governed controls exact rates, counts and tokens",
+    "B7 report B7-70 exact finished-only tokens and cost per condition",
+    "B7 report B7-70 unscored listed, conflict-only FAIL sensitivity mean and interval",
+    "B7 report B7-58 saved done unknown refused by scorer",
+    "B7 report B7-58 saved done none refused by scorer",
+    "B7 report B7-58 saved error unknown refused by scorer",
+    "B7 report B7-58 saved error none refused by scorer",
+    "B7 report B7-58 saved control done graph-nolink refused by scorer",
+    "B7 report B7-58 saved control done graph-nosearch refused by scorer",
+    "B7 report B7-58 saved control done graph-noterms refused by scorer",
+    "B7 report B7-58 saved control done graph-norule refused by scorer",
+    "B7 report B7-58 saved control error graph-nolink refused by scorer",
+    "B7 report B7-58 saved control error graph-nosearch refused by scorer",
+    "B7 report B7-58 saved control error graph-noterms refused by scorer",
+    "B7 report B7-58 saved control error graph-norule refused by scorer",
+    "B7 smoke B7-59 through B7-65 all seven checks PASS from actual service evidence, no task verdict",
+    "B7 smoke B7-59 unfinished cell fails planned cells alone",
+    "B7 smoke B7-60 disabled command leaking an answer fails condition answers alone",
+    "B7 smoke B7-60 raw CLI receipt absent fails condition answers alone",
+    "B7 smoke B7-61 different client bytes fails identical agent files alone",
+    "B7 smoke B7-61 norule rule text retained fails identical agent files alone",
+    "B7 smoke B7-62 successful probe fails closed store and tool code alone",
+    "B7 smoke B7-63 mismatched service call totals fails service answered every call alone",
+    "B7 smoke B7-64 missing scorer block fails scorer batch blocks alone",
+    "B7 smoke B7-65 missing wall time fails tokens and wall time per run alone",
+    "B7 smoke B7-59 running ledger entry fails planned cells alone",
+    "B7 smoke B7-59 third attempt after timeout and breach fails planned cells alone",
+    "B7 smoke B7-59 missing archive fails planned cells alone",
+    "B7 smoke B7-60 changed unrelated store node fails condition answers alone",
+    "B7 smoke B7-60 enabled health call returns no result fails condition answers alone",
+    "B7 smoke B7-60 health command fails fails condition answers alone",
+    "B7 smoke B7-62 missing probe fails closed store and tool code alone",
+    "B7 smoke B7-62 probe did not run fails closed store and tool code alone",
+    "B7 smoke B7-62 logged successful direct store access fails closed store and tool code alone",
+    "B7 smoke B7-63 malformed service reply fails service and answer checks",
+    "B7 smoke B7-65 negative tokens fails usage check alone",
+    "B7 smoke B7-65 negative wall_ms fails usage check alone",
+    "B7 smoke plant third launch after timeout and breach caught by B7-59 attempt budget",
+    "B7 smoke B7-59 B7-60 B7-65 archived attempt retains receipts and contributes its own usage",
+    "B7 smoke B7-60 archived receipt differs from its saved answer fails answer check alone",
+    "B7 smoke B7-65 archived attempt missing tokens fails usage check alone",
+    "B7 smoke B7-61 original norule text differs beyond omitted suffix fails file identity alone",
+    "B7 smoke B7-60 graph-nolink retains linkCount fails answer proof alone",
+    "B7 smoke B7-60 graph-noterms retains termCount fails answer proof alone",
+    "B7 smoke B7-60 graph-noterms retains mentionCount fails answer proof alone",
+    "B7 smoke B7-60 saved reply 2 differs from reference fails answers alone",
+    "B7 smoke B7-60 saved reply 3 differs from reference fails answers alone",
+    "B7 smoke B7-60 saved reply 4 differs from reference fails answers alone",
+    "B7 smoke B7-64 scorer lacks === Batch 7: stratum cited fails scorer blocks alone",
+    "B7 smoke B7-64 scorer lacks === Batch 7: stratum uncited fails scorer blocks alone",
+    "B7 smoke B7-64 scorer lacks graph - graph-nolink fails scorer blocks alone",
+    "B7 smoke B7-64 scorer lacks graph - graph-nosearch fails scorer blocks alone",
+    "B7 smoke B7-64 scorer lacks graph - graph-noterms fails scorer blocks alone",
+    "B7 smoke B7-64 scorer lacks graph - graph-norule fails scorer blocks alone",
+    "B7 smoke B7-62 ordinary command discovery and native repo read do not count as store access",
+    "B7 smoke B7-66 empty evidence makes every relevant check fail",
+    "B7 smoke plant smoke accepts missing cell caught by B7-59 planned-cell owner"
+  ],
+  "needs_parent": [
+    "Diagnose generated-shell nested namespace creation without weakening confinement. If the required namespace cannot run, approve a host-owned per-attempt shell launcher redesign.",
+    "Authorize a deterministic copied-CLI replay with agent spawn intercepted, as a waiver of the --plan-only rail, or leave B7-48 through B7-55 unverified.",
+    "Keep B7-12 byte equality and fix the client, or amend the contract before trial."
+  ]
+}
