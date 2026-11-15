@@ -15,7 +15,7 @@ console.log(`TAP report: ${report}\nRetained scratch: ${scratch}`);
 const child = spawn(process.execPath, [
   '--test', '--test-reporter=spec', '--test-reporter-destination=stdout',
   '--test-reporter=tap', `--test-reporter-destination=${report}`,
-  ...process.argv.slice(2), resolve(root, 'test/contracts.test.mjs'), resolve(root, 'test/docs.test.mjs'), resolve(root, 'test/carry.test.mjs'), resolve(root, 'test/search.test.mjs'), resolve(root, 'test/embed.test.mjs'), resolve(root, 'test/terms.test.mjs'), resolve(root, 'test/wider.test.mjs'), resolve(root, 'test/rerank.test.mjs'), resolve(root, 'test/order-author.test.mjs'), resolve(root, 'test/unused.test.mjs'), resolve(root, 'test/load-size.test.mjs'),
+  ...process.argv.slice(2), resolve(root, 'test/contracts.test.mjs'), resolve(root, 'test/docs.test.mjs'), resolve(root, 'test/carry.test.mjs'), resolve(root, 'test/search.test.mjs'), resolve(root, 'test/embed.test.mjs'), resolve(root, 'test/terms.test.mjs'), resolve(root, 'test/wider.test.mjs'), resolve(root, 'test/search-author.test.mjs'), resolve(root, 'test/order-author.test.mjs'), resolve(root, 'test/unused.test.mjs'), resolve(root, 'test/load-size.test.mjs'),
 ], {
   cwd: root, stdio: 'inherit',
   env: {

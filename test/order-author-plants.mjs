@@ -28,18 +28,14 @@ const plants = [
   { name: 'impact-author-lost', group: 'W28 ', file: 'src/answers.pure.ts',
     before: 'if (str(head.author) !== "") out.push(`  author: ${str(head.author)}`);',
     after: 'if (false) out.push(`  author: ${str(head.author)}`);' },
-  { name: 'search-adds-author-line', group: 'Q27 ', test: 'rerank.test.mjs', file: 'src/search.pure.ts',
+  { name: 'search-adds-author-line', group: 'Q27 ', test: 'search-author.test.mjs', file: 'src/search.pure.ts',
     before: 'out.push(`      matched: ${c.match}; source: ${c.source || "(not stated)"}`);',
     after: 'out.push(`      matched: ${c.match}; source: ${c.source || "(not stated)"}`); out.push("      author: R. Chen");' },
-  { name: 'record-author-sent-to-reranker', group: 'Q27 ', test: 'rerank.test.mjs', file: 'src/ask.ts',
-    before: 'rerankDocuments(candidates));',
-    after: 'rerankDocuments(candidates).map((doc, i) => doc + " | " + String([...wordRows, ...meaningRows].find(row => row.id === candidates[i]!.id)?.author ?? "")));' },
 ];
 const env = {
   ...process.env, RELATE_TELEMETRY: '0', DO_NOT_TRACK: '1',
   NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ''} --import=${join(root, 'test/search-offline.mjs')}`.trim(),
 };
-for (const name of ['WHYGRAPH_RERANK', 'WHYGRAPH_RERANK_URL', 'OPENROUTER_API_KEY']) delete env[name];
 function suite(subject, name, pattern, files) {
   const dir = join(scratch, name); mkdirSync(dir, { recursive: true });
   const run = join(dir, 'run'); mkdirSync(run);
@@ -69,7 +65,7 @@ for (const plant of plants) {
   outcomes.push(outcome); console.log(JSON.stringify(outcome));
 }
 // Each planted group then returns to green against the untouched subject.
-const real = suite(root, 'real-code', '^(W21 |W24 |B30 |B33 |B34 |W28 |Q27 )', ['order-author.test.mjs', 'rerank.test.mjs']);
+const real = suite(root, 'real-code', '^(W21 |W24 |B30 |B33 |B34 |W28 |Q27 )', ['order-author.test.mjs', 'search-author.test.mjs']);
 const summary = { scratch, outcomes, real };
 writeFileSync(join(scratch, 'summary.json'), JSON.stringify(summary, null, 2) + '\n');
 console.log(JSON.stringify({ real })); console.log(`Plant evidence: ${scratch}`);

@@ -7,9 +7,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { carryAnswer, carryRangeAnswer, impactAnswer, shown, whyAnswer, type RangeSymbol, type Row, type TermCandidate, type TermSection } from "./answers.pure.ts";
 import { fail, type Exit } from "./build.ts";
-import { fuse, firstLine, searchAnswer, searchWords } from "./search.pure.ts";
-import { applyRerank, rerankAnswer, rerankDocuments, rerankFailure, rerankQuery, RERANK_MIN, searchAtAnswer, searchRecords, type RerankCode } from "./rerank.pure.ts";
-import { callRerank, endpointHost, rerankSettings } from "./rerank.ts";
+import { fuse, searchAnswer, searchWords } from "./search.pure.ts";
 import { closest, missingSymbol, readSymbolTarget } from "./target.pure.ts";
 import { symbolSource, termsOf } from "./terms.pure.ts";
 import { readQuery } from "./tools.ts";
@@ -157,44 +155,14 @@ function termSection(store: string, root: string, carry: Row): TermSection {
 }
 
 /**
- * The first statement of each decision record named by `$ids`, for the documents a rerank call sends.
- * Not a recipe: it answers no question an MCP host asks, it only fills in the first statement that `recipes/terms.cypher` does not return.
- */
-const FIRST_STATEMENTS = `UNWIND $ids AS id
-MATCH (d:Decision {id: id})
-OPTIONAL MATCH (d)-[:STATES]->(i:Item)
-WITH d, i ORDER BY i.ord
-WITH d, collect(i)[0] AS first
-RETURN d.id AS id, first.text AS statement`;
-
-/**
  * Answers `whygraph search`.
  * owns: [[whygraph-questions]]
- * post: exit 0 with the decision records that best match the request: the word search and the meaning search each rank at most ten (`LIST_SIZE`), fused by reciprocal rank into one list of at most twenty, each candidate saying how it matched; exit 2 when the request holds no word, and for `--at`, when it is not `<file>:<start>-<end>`, when the range starts after its end or below 1, or when it is past the end of the file; exit 1 when there is no store, when the embedding model is unavailable, or when the `--at` file cannot be read.
- * post: with `--at`, the candidates are the fused list plus the term list of those lines, each record once; without a reranker the fused list prints as now and the term candidates not already listed follow under the range form's term heading.
- * post: when `WHYGRAPH_RERANK` names a model and at least six candidates exist, one `fetch` to the endpoint ranks them and the five it keeps print in its order, with the line that says what was sent and where; any failure of that call prints the wide answer and one line naming the failure, exit 0.
+ * post: exit 0 with the decision records that best match the request: the word search and the meaning search each rank at most ten (`LIST_SIZE`), fused by reciprocal rank into one list of at most twenty, each candidate saying how it matched; exit 2 when the request holds no word; exit 1 when there is no store or when the embedding model is unavailable.
  */
-export async function search(text: string, store: string, root: string, at: string | undefined): Promise<Exit> {
+export async function search(text: string, store: string): Promise<Exit> {
   if (!existsSync(store)) return noStore(store);
   const words = searchWords(text);
   if (words === "") return fail("search needs a request with at least one word", 2);
-  let code: RerankCode | undefined;
-  let term: TermSection | undefined;
-  if (at !== undefined) {
-    const t = readSymbolTarget(at, root);
-    if ("usage" in t) return fail(t.usage, 2);
-    if (t.kind === "symbol") return fail(`--at takes <file>:<start>-<end>, not a symbol`, 2);
-    let source: string;
-    try {
-      source = readFileSync(join(root, t.path), "utf8");
-    } catch (e) {
-      return fail(`cannot read ${t.path}: ${(e as Error).message}`, 1);
-    }
-    const lines = source.split("\n");
-    if (t.end > lines.length) return fail(`${t.path} has ${lines.length} line${lines.length === 1 ? "" : "s"}, so ${t.start}-${t.end} is past its end`, 2);
-    code = { path: t.path, start: t.start, end: t.end, lines };
-    term = termSectionForLines(store, lines, t.start, t.end);
-  }
   let vector: readonly number[];
   try {
     vector = (await embedTexts([text]))[0]!;
@@ -205,33 +173,7 @@ export async function search(text: string, store: string, root: string, at: stri
   const wordRows = readQuery(store, recipe("search"), { text: words });
   const meaningRows = readQuery(store, recipe("meaning"), { vector });
   const fused = fuse(wordRows, meaningRows);
-  const wide = code === undefined || term === undefined ? searchAnswer(text, words, true, fused) : searchAtAnswer(text, words, fused, term);
-  const settings = rerankSettings();
-  if (settings === undefined) {
-    console.log(wide);
-    return 0;
-  }
-  const termRows = term?.kind === "records" ? term.rows : [];
-  if (searchRecords(fused, termRows).length < RERANK_MIN) {
-    console.log(wide);
-    return 0;
-  }
-  const fusedIds = new Set(fused.map((c) => c.id));
-  const missing = termRows.filter((t) => !fusedIds.has(t.id)).map((t) => t.id);
-  const statements = new Map<string, string>();
-  if (missing.length > 0) for (const row of readQuery(store, FIRST_STATEMENTS, { ids: missing })) statements.set(String(row.id), firstLine(String(row.statement ?? "")));
-  const candidates = searchRecords(fused, termRows, statements);
-  const call = await callRerank(settings, rerankQuery(text, code), rerankDocuments(candidates));
-  if (!call.ok) {
-    console.log(`${wide}\n${rerankFailure(call.reason)}`);
-    return 0;
-  }
-  const picked = applyRerank(candidates, call.value);
-  if (!picked.ok) {
-    console.log(`${wide}\n${rerankFailure(picked.reason)}`);
-    return 0;
-  }
-  console.log(rerankAnswer(settings.model, endpointHost(settings.endpoint), candidates.length, picked.records, code));
+  console.log(searchAnswer(text, words, true, fused));
   return 0;
 }
 

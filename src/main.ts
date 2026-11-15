@@ -17,7 +17,7 @@ const USAGE = `whygraph: why the code is the way it is, as a relate graph
   whygraph why <file>:<symbol> [--repo <path>] [--store <path>]
   whygraph impact <decision id> [--repo <path>] [--store <path>]
   whygraph carry <file>:<symbol>|<file>:<start>-<end> [--repo <path>] [--store <path>]
-  whygraph search "<text>" [--at <file>:<start>-<end>] [--repo <path>] [--store <path>]
+  whygraph search "<text>" [--repo <path>] [--store <path>]
   whygraph mcp [--repo <path>] [--store <path>]
 
 Exit: 0 answer, 1 failure, 2 usage, 3 target not in the graph.`;
@@ -40,7 +40,7 @@ async function main(argv: readonly string[]): Promise<Exit> {
   const store = storePath(root, args.store);
   if (args.command === "build") return build(root, store, args.decisions);
   if (args.command === "mcp") return mcp(store);
-  if (args.command === "search") return search(args.target, store, root, args.at);
+  if (args.command === "search") return search(args.target, store);
   return ask(args.command, args.target, root, store);
 }
 
