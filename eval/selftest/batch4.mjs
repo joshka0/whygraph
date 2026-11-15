@@ -178,8 +178,9 @@ export async function batch4Checks({ tasks, scoreRun }) {
       'answer showing the needed ticket', 'first 4,000 characters', 'errors',
       'JSON includes finished verdicts']) assert.ok(prose.toLowerCase().includes(phrase.toLowerCase()), phrase);
   });
+  // Compares the commit with its parent: `main` moves on with later batches.
   add('preparation commit changes no runner, src, recipes or dependency files', () => {
-    const r = spawnSync('git', ['diff', '--exit-code', 'main..5b43558', '--', 'eval/run.mjs', 'src', 'recipes', 'package.json', 'pnpm-lock.yaml'], { cwd: root, encoding: 'utf8' });
+    const r = spawnSync('git', ['diff', '--exit-code', '5b43558^..5b43558', '--', 'eval/run.mjs', 'src', 'recipes', 'package.json', 'pnpm-lock.yaml'], { cwd: root, encoding: 'utf8' });
     assert.ifError(r.error); assert.equal(r.status, 0, r.stdout + r.stderr);
   });
   function generatorFixture(name, { source = requests, target = ranges, control = controls, suffix = '' } = {}) {
