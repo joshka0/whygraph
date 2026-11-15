@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { readTasks } from './score.mjs';
 import { batchPlan } from './registry.mjs';
 import { batchInstructions } from './registry.mjs';
+import { readArgs } from '../src/args.pure.ts';
 const here=fileURLToPath(new URL('.',import.meta.url));
 const args=process.argv.slice(2),batch=Number(args[args.indexOf('--batch')+1]);
 if(!args.includes('--batch')||batch<7) throw new Error('usage: smoke-check.mjs --batch N (N >= 7)');
@@ -51,7 +52,9 @@ check('condition answers',()=>{
   for(let i=0;i<4;i++)require(JSON.stringify(health.answers[i].args)===JSON.stringify(answers[i]?.args)&&health.answers[i].stdout===answers[i]?.stdout&&health.answers[i].stderr===answers[i]?.stderr&&health.answers[i].code===answers[i]?.code,'health reply differs from service log');
   for(const a of [...health.answers,...answers]) {
    require(a.code!==70,'service unavailable');
-   if(condition==='stub'||(condition==='graph-nosearch'&&a.args[0]==='search')) require(a.stdout==='no result\n'&&a.code===0,'disabled command answered');
+   const parsed=readArgs(a.args);
+   const query=!('usage' in parsed)&&['carry','why','impact','search'].includes(parsed.command)&&a.args.length===2;
+   if(query&&(condition==='stub'||(condition==='graph-nosearch'&&a.args[0]==='search'))) require(a.stdout==='no result\n'&&a.code===0,'disabled command answered');
    else if(a.code===0) {
     require(a.stdout.trim()&&a.stdout!=='no result\n','enabled command did not answer');
     if(condition==='graph-nolink'&&['carry','why'].includes(a.args[0])) require(!a.stdout.includes('Decision records linked only through a commit that cites them'),'commit link remained on');

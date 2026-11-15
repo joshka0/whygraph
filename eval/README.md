@@ -1404,7 +1404,13 @@ in a minimal bwrap filesystem. The run sees its repo, empty agent state,
 operating system tools, a compiled client and its own Unix socket.
 The store, product code, service code, templates and other run folders
 have no mounted path. A private PID namespace blocks host `/proc` paths.
-The shell also removes network access and the CLI identity mount.
+The agent's shell is a client of a host-owned launcher. The host starts
+each command in a separate minimal bwrap namespace with the same repo and
+tool client, no network, and no identity mount. Nested bwrap fails on this
+box under its enforced AppArmor profile. The host launcher avoids nested
+namespace creation without a policy change. Stdin, stdout, stderr and exit
+status pass through the client. Connection loss, timeout and run cleanup
+end the command and its children. The launcher closes before the store.
 The client is read-only and execute-only; capability drops prevent reads
 and permission changes. Its bytes are identical in every condition.
 
@@ -1412,8 +1418,13 @@ The runner starts a separate service before health probes and agent launch.
 It closes that service in `finally`. A unique socket appears at the fixed
 path `/whygraph/service.sock` inside just that run. The protocol accepts
 only carry, why, impact and search, each with one target. It accepts no
-store path or Cypher. A lost service prints `whygraph service unavailable`,
-exits 70, and makes the attempt a harness failure. Full answers and file
+caller-selected store path or Cypher. Invalid invocations use the product
+parser and direct CLI diagnostics, including help. Valid unsupported commands,
+valid option-bearing invocations and embedded NUL receive exit 2 with empty
+stdout and `usage: whygraph <carry|why|impact|search> <target>\n` on stderr. A lost service prints `whygraph service unavailable`,
+exits 70, and makes the attempt a harness failure. A lost launcher prints
+`whygraph shell launcher unavailable` and has the same exit and classification.
+Full answers and file
 manifests remain outside the agent filesystem for the smoke audit.
 Batches 1 to 6 keep their earlier setup and limits.
 
@@ -1439,7 +1450,14 @@ in either order, leave an unscored marker and both archives. The runner
 continues and resume skips that cell. A harness failure gets one retry;
 if the cell still fails, the runner stops with both archives. An interrupted
 reserved attempt stops visibly for inspection. The registry records each design's store access and control conditions.
-Earlier batches keep their existing rules. The 20-minute timeout and five-second kill grace remain.
+`scripts/attempts.pure.ts:attemptDecision` exposes the decision without I/O.
+`eval/run.mjs:settleCell(cell, allIds, {runAttempt, results, rule})` exposes
+the applying loop. Invented attempts can drive every order without an agent.
+`rule` is `closed`, `opencode`, or `single`; its default follows the registry.
+Closed ledgers live under `results/_ledger`. A runner rejection leaves its
+reservation for inspection. Earlier batches keep their existing rules,
+including the possible third attempt in the old invalid-then-timeout ladder.
+The 20-minute timeout and five-second kill grace remain.
 
 **Smoke and full plans.** The smoke plan uses repeat 1 of four tasks:
 the first cited conflict, first uncited conflict, first plain control and
