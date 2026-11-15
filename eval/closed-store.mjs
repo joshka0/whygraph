@@ -3,16 +3,18 @@
  * Batch 7 owns the store outside both the agent process and its shell.
  */
 import { createServer } from 'node:net';
-import { execFile, execFileSync } from 'node:child_process';
+import { spawn, execFile, execFileSync } from 'node:child_process';
 import { promisify } from 'node:util';
 import { appendFileSync, chmodSync, cpSync, existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
+import { constants } from 'node:os';
 import { readQuery } from '../src/tools.ts';
 import { recipe } from '../src/ask.ts';
 import { whyAnswer } from '../src/answers.pure.ts';
 import { readSymbolTarget } from '../src/target.pure.ts';
+import { readArgs } from '../src/args.pure.ts';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const execute = promisify(execFile);
 const quiet = { ...process.env, RELATE_TELEMETRY: '0', DO_NOT_TRACK: '1' };
@@ -89,7 +91,7 @@ export function closedConfinement({ work, repo, client, socket, network = false,
     '--bind',join(work,'cache'),'/cache','--bind',join(work,'state'),'/state',
     '--ro-bind',client,'/tools/whygraph','--ro-bind',client,'/tools/relate','--ro-bind',client,'/tools/memod',
     '--ro-bind',socket,'/whygraph/service.sock','--chdir','/repo');
-  // The CLI alone needs its host identity store. The nested shell omits it.
+  // Host-launched shell commands use the same filesystem without identity or network.
   if (network && opencode) {
     args.push('--ro-bind',opencode,'/tools/opencode');
     const data = process.env.XDG_DATA_HOME ?? join(process.env.HOME,'.local/share');
@@ -102,6 +104,7 @@ export function closedConfinement({ work, repo, client, socket, network = false,
  * owns: [[whygraph-closed-store]]
  */
 export async function startClosedStore({ condition, repo, store, fullStore = store, socket, log }) {
+  repo=realpathSync(repo);
   let failures = 0, calls = 0;
   const abort=new AbortController(), connections=new Set();
   const server = createServer(connection => {
@@ -114,7 +117,7 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
       if (input.length > 65536) { connection.destroy(); failures++; return; }
       if (input.length < 4) return;
       const count = input.readUInt32BE();
-      if (count !== 2) { const result={ stdout:'',stderr:'usage: whygraph <carry|why|impact|search> <target>\n',code:2 };calls++;appendFileSync(log,JSON.stringify({args:[],...result,reference:{...result},sections:[]})+'\n');respond(result); return; }
+      if (count > 64) { connection.destroy(); failures++; return; }
       let at=4; const args=[];
       for(let i=0;i<count;i++) {
         if(input.length < at+4) return;
@@ -136,14 +139,19 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
   async function answer(args) {
     calls++;
     const [command,target] = args;
-    if (!['carry','why','impact','search'].includes(command) || target.includes('\0')) { const result={stdout:'',stderr:'usage: whygraph <carry|why|impact|search> <target>\n',code:2};appendFileSync(log,JSON.stringify({args,...result,reference:{...result},sections:[]})+'\n');return result; }
+    const parsed=readArgs(args);
+    const diagnostic='usage' in parsed || parsed.command==='help';
+    if (args.some(a=>a.includes('\0')) || (!diagnostic && (!['carry','why','impact','search'].includes(command) || args.length!==2))) {
+      const result={stdout:'',stderr:'usage: whygraph <carry|why|impact|search> <target>\n',code:2};
+      appendFileSync(log,JSON.stringify({args,...result,reference:{...result},sections:[]})+'\n');return result;
+    }
     let result,reference,referenceStore;const sections=[];
-    if(condition==='stub' || (condition==='graph-nosearch' && command==='search')) result={stdout:'no result\n',stderr:'',code:0};
+    if(!diagnostic && (condition==='stub' || (condition==='graph-nosearch' && command==='search'))) result={stdout:'no result\n',stderr:'',code:0};
     else {
-      const mapped = command !== 'search' && target.startsWith('/repo/') ? join(repo,target.slice(6)) : target;
+      const mapped = !diagnostic && command !== 'search' && target.startsWith('/repo/') ? join(repo,target.slice(6)) : target;
       try {
         const selectedStore=condition==='graph-nolink'&&['carry','impact'].includes(command)?fullStore:store;
-        const r = await execute(join(root,'bin/whygraph'), [command,mapped,'--repo',repo,'--store',selectedStore], { env:quiet, maxBuffer:1<<26, signal:abort.signal });
+        const r = await execute(join(root,'bin/whygraph'), diagnostic ? args : [command,mapped,'--repo',repo,'--store',selectedStore], { env:quiet, maxBuffer:1<<26, signal:abort.signal });
         result={stdout:r.stdout,stderr:r.stderr,code:0};
         reference={...result};referenceStore=realpathSync(selectedStore);
         if(condition==='graph-nolink' && command==='carry') {
@@ -170,4 +178,100 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
   }
   await new Promise((ok,fail) => {server.once('error',fail); server.listen(socket,ok);});
   return { server, stats:()=>({calls,failures}), stop:()=>new Promise((ok,fail)=>{abort.abort();for(const connection of connections)connection.destroy();server.close(error=>error?fail(error):ok());}) };
+}
+
+/** Launch shell commands from the host, outside the agent's user namespace.
+ * owns: [[whygraph-closed-store]]
+ */
+export async function startClosedShell({work,repo,client,socket,log}) {
+  let failures=0, calls=0, stopped=false;
+  const connections=new Set(), children=new Set(), completions=new Set();
+  const kill=child=>{
+    child.stdout.resume();child.stderr.resume();
+    if(!child.pid)return;
+    try { process.kill(-child.pid,'SIGKILL'); } catch(error) { if(error.code!=='ESRCH')throw error; }
+  };
+  const server=createServer(connection=>{
+    connections.add(connection);
+    let input=Buffer.alloc(0), child, started=false, ended=false;
+    const frame=(type,bytes)=>{
+      if(connection.destroyed)return true;
+      const header=Buffer.alloc(8);header.writeUInt32BE(type);header.writeUInt32BE(bytes.length,4);
+      return connection.write(Buffer.concat([header,bytes]));
+    };
+    const finish=(code,signal)=>{
+      if(ended)return;ended=true;
+      const status=Buffer.alloc(4);status.writeUInt32BE(code??128+(constants.signals[signal]??0));
+      frame(3,status);connection.end();
+      appendFileSync(log,JSON.stringify({event:'end',code:code??null,signal:signal??null})+'\n');
+    };
+    const fail=message=>{
+      failures++;
+      frame(2,Buffer.from(`whygraph shell launcher unavailable: ${message}\n`));finish(70);
+    };
+    connection.on('error',()=>{});
+    connection.on('close',()=>{connections.delete(connection);if(child&&children.has(child))kill(child);});
+    connection.on('data',chunk=>{
+      if(ended)return;
+      input=Buffer.concat([input,chunk]);
+      if(!started) {
+        if(input.length>1<<20){fail('request too large');connection.destroy();return;}
+        if(input.length<4)return;
+        const count=input.readUInt32BE();
+        if(count<1||count>1024){fail('invalid argument count');return;}
+        let at=4;const args=[];
+        for(let i=0;i<count;i++) {
+          if(input.length<at+4)return;
+          const size=input.readUInt32BE(at);at+=4;
+          if(size>1<<20){fail('argument too large');return;}
+          if(input.length<at+size)return;
+          args.push(input.subarray(at,at+size).toString());at+=size;
+        }
+        input=input.subarray(at);started=true;
+        const cwd=args.shift();
+        if(args.some(a=>a.includes('\0')) || cwd.includes('\0') || !(cwd==='/repo'||cwd.startsWith('/repo/')) || cwd.split('/').includes('..')){fail('invalid working directory or argument');return;}
+        if(stopped){fail('run ended');return;}
+        calls++;
+        const confinement=closedConfinement({work,repo,client,socket});
+        const atCwd=confinement.indexOf('--chdir');confinement[atCwd+1]=cwd;
+        appendFileSync(log,JSON.stringify({event:'start',args,cwd})+'\n');
+        child=spawn(confinement[0],[...confinement.slice(1),'--','/bin/bash',...args],{
+          detached:true,env:{PATH:'/tools:/usr/bin:/bin',HOME:'/home/agent',LANG:'C.UTF-8',RELATE_TELEMETRY:'0',DO_NOT_TRACK:'1'},stdio:['pipe','pipe','pipe'],
+        });
+        children.add(child);
+        const completed=new Promise(resolve=>child.once('close',(code,signal)=>{
+          children.delete(child);completions.delete(completed);finish(code,signal);resolve();
+        }));completions.add(completed);
+        child.once('error',error=>fail(error.message));
+        child.stdin.on('error',()=>{});
+        for(const [stream,type] of [[child.stdout,1],[child.stderr,2]]) {
+          stream.on('data',bytes=>{if(!frame(type,bytes))stream.pause();});
+          connection.on('drain',()=>stream.resume());
+        }
+        child.stdin.on('drain',()=>connection.resume());
+      }
+      while(child && input.length>=8) {
+        const type=input.readUInt32BE(),size=input.readUInt32BE(4);
+        if(size>8192 || type>1 || (type===1&&size!==0)){fail('invalid input frame');kill(child);return;}
+        if(input.length<8+size)return;
+        const bytes=input.subarray(8,8+size);input=input.subarray(8+size);
+        if(type===1)child.stdin.end();
+        else if(!child.stdin.write(bytes))connection.pause();
+      }
+    });
+  });
+  server.on('close',()=>{if(!stopped)failures++;});
+  server.on('error',()=>{failures++;});
+  await new Promise((ok,fail)=>{server.once('error',fail);server.listen(join(work,'shell.sock'),ok);});
+  const cancel=()=>{
+    stopped=true;
+    for(const child of children)kill(child);
+    for(const connection of connections)connection.destroy();
+  };
+  const stop=async()=>{
+    cancel();
+    const closed=server.listening?new Promise((ok,fail)=>server.close(error=>error?fail(error):ok())):Promise.resolve();
+    await Promise.all([closed,...completions]);
+  };
+  return {server,stats:()=>({calls,failures}),cancel,stop};
 }

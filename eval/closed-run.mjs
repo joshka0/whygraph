@@ -3,7 +3,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { closeSync, cpSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, writeFileSync, chmodSync, lstatSync, readlinkSync, realpathSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomUUID, createHash } from 'node:crypto';
-import { closedClient, closedConfinement, ablatedStores, startClosedStore, storeFingerprint } from './closed-store.mjs';
+import { closedClient, closedConfinement, ablatedStores, startClosedStore, startClosedShell, storeFingerprint } from './closed-store.mjs';
 import { batchInstructions } from './registry.mjs';
 import { readQuery } from '../src/tools.ts';
 import { opencodeLaunch, opencodeSession, escapingSymlinks, isolationBreaches, OPENCODE_MODEL } from './opencode.mjs';
@@ -65,21 +65,23 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
   const {repo,base,socket,files}=prepared;
   const log=join(out,'service.jsonl');
   const service=await startClosedStore({condition,repo,store:prepared.store,fullStore:stores.graph,socket,log});
+  let launcher;
   try {
+    launcher=await startClosedShell({work,repo,client,socket,log:join(out,'shell.jsonl')});
     // The shell wrapper is identical in every condition and contains no service configuration.
     const shell=join(work,'shell');
-    writeFileSync(shell,'#!/bin/sh\nexec /usr/bin/bwrap --die-with-parent --unshare-net --ro-bind / / --tmpfs /identity -- /bin/bash "$@"\n'); chmodSync(shell,0o555);
+    writeFileSync(shell,'#!/bin/sh\nexec /tools/shell-client "$@"\n'); chmodSync(shell,0o555);
     const command=sh('bash',['-c','command -v opencode']).trim();
     if(sh(command,['--version']).trim()!=='1.18.29') throw new Error('requires opencode 1.18.29');
     const confinement=closedConfinement({work,repo,client,socket,network:true,opencode:command});
-    confinement.push('--ro-bind',shell,'/tools/shell');
+    confinement.push('--ro-bind',shell,'/tools/shell','--ro-bind',client,'/tools/shell-client','--ro-bind',join(work,'shell.sock'),'/whygraph/shell.sock');
     const launch=opencodeLaunch(prompt,repo,'/tools','/tools/shell',work);
     Object.assign(launch.env,{HOME:'/home/agent',PATH:'/tools:/usr/bin:/bin',XDG_CONFIG_HOME:'/config',XDG_CACHE_HOME:'/cache',XDG_STATE_HOME:'/state',XDG_DATA_HOME:'/identity',OPENCODE_CONFIG_DIR:'/config/opencode'});
     // The old exact external-directory exclusion remains, with the mounted identity path too.
     const config=JSON.parse(launch.env.OPENCODE_CONFIG_CONTENT);
     config.permission.external_directory['/identity/opencode/tool-output/*']='deny';
     launch.env.OPENCODE_CONFIG_CONTENT=JSON.stringify(config);
-    for(const name of ['whygraph','relate','memod']) files[`/tools/${name}`]=readFileSync(`${client}.sha256`,'utf8');
+    for(const name of ['whygraph','relate','memod','shell-client']) files[`/tools/${name}`]=readFileSync(`${client}.sha256`,'utf8');
     files['/tools/shell']=createHash('sha256').update(readFileSync(shell)).digest('hex');
     writeFileSync(join(out,'files.json'),JSON.stringify(files,null,2));
     writeFileSync(join(out,'instructions.txt'),readFileSync(join(repo,'AGENTS.md')));
@@ -117,7 +119,7 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
       const child=spawn(confinement[0],[...confinement.slice(1),'--','/tools/opencode',...launch.args],{env:launch.env,stdio:['ignore',stdout,stderr]});
       closeSync(stdout);closeSync(stderr);
       let timedOut=false,spawnError,killTimer;
-      const timer=setTimeout(()=>{timedOut=true;child.kill('SIGTERM');killTimer=setTimeout(()=>child.kill('SIGKILL'),5000);},20*60*1000);
+      const timer=setTimeout(()=>{timedOut=true;launcher.cancel();child.kill('SIGTERM');killTimer=setTimeout(()=>child.kill('SIGKILL'),5000);},20*60*1000);
       child.on('error',e=>{spawnError=e.message;});
       child.on('close',(code,signal)=>{clearTimeout(timer);clearTimeout(killTimer);resolve({code,signal,timedOut,spawnError});});
     });
@@ -128,9 +130,10 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     const tools=session.tools.map(t=>({...t,input:t.input}));
     const normalized=JSON.parse(JSON.stringify(tools).replaceAll('/repo/',`${repo}/`).replaceAll('"/repo"',JSON.stringify(repo)));
     const breaches=isolationBreaches(repo,normalized);
+    await launcher.stop();
     const stats=service.stats();
-    const serviceDown=tools.some(t=>String(t.result).includes('whygraph service unavailable'));
-    const harness=r.spawnError || (!r.timedOut&&malformed?'malformed JSONL':undefined) || (stats.failures||serviceDown?'service unavailable':undefined);
+    const serviceDown=tools.some(t=>/whygraph (?:service|shell launcher) unavailable/.test(String(t.result)));
+    const harness=r.spawnError || (!r.timedOut&&malformed?'malformed JSONL':undefined) || (stats.failures||serviceDown||launcher.stats().failures?'service or shell launcher unavailable':undefined);
     const meta={id:`${task.id}__${condition}__r${repeat}`,task:task.id,condition,repeat,agent:'opencode',model:OPENCODE_MODEL,
       status:harness||breaches.length?'invalid':r.code===0&&session.success&&!r.timedOut?'done':'error',
       ...(harness?{reason:`harness failure: ${harness}`} : breaches.length?{reason:'isolation breach',isolation:breaches}:{}),
@@ -145,5 +148,5 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     const meta={id:`${task.id}__${condition}__r${repeat}`,task:task.id,condition,repeat,agent:'opencode',model:OPENCODE_MODEL,status:'invalid',reason:`harness failure: ${error.message}`,wall_ms:0,tokens:{total:0},work,service:service.stats()};
     writeFileSync(join(out,'meta.json'),JSON.stringify(meta,null,2));
     return meta;
-  } finally { await service.stop(); }
+  } finally { try { await launcher?.stop(); } finally { await service.stop(); } }
 }
