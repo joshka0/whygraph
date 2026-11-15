@@ -45,7 +45,7 @@ function isLink(p: string): boolean {
  * owns: [[whygraph-store]]
  * post: on success `store` links to the new build, and the build it linked to before is removed; a reader that opened the old build keeps its snapshot.
  * post: on failure the new directory is removed, `store` is unchanged, and the result holds relate's exit status and message, which names the statement that failed.
- * post: each step's rows go to relate through their own `--fetch-params` file, so no file reaches relate's 64 MiB parameter cap.
+ * post: each step's rows go to relate through their own `--fetch-params` file; loadPlan bounds each JSON array to 1 MiB unless a single row exceeds that budget. A single row can still exceed relate's 64 MiB parameter or WAL cap, in which case the build fails and the store is unchanged.
  */
 export function buildStore(store: string, steps: readonly LoadStep[]): { readonly ok: true } | { readonly status: number; readonly message: string } {
   const builds = buildsDir(store);

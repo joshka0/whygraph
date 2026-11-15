@@ -35,8 +35,18 @@ const NODE_KEYS = {
 
 type Label = keyof typeof NODE_KEYS;
 
-/** Rows per statement: far below relate's 100,000 evaluation passes and 64 MiB WAL record per statement. */
+/** Row limit below relate's 100,000 evaluation passes per statement. */
 const CHUNK = 5000;
+
+/**
+ * UTF-8 bytes of each statement's JSON row array, including brackets and commas.
+ * Relate 1.0.1 logs typed values rather than parameter JSON. The 4770-record
+ * Hono build measured at most 1,891,207 WAL payload bytes per statement with
+ * this budget: 35.48 times below its 64 MiB cap. The original Decision rows
+ * hit that cap in one statement. A row over this budget must stand alone.
+ */
+const CHUNK_BYTES = 1024 * 1024;
+const UTF8 = new TextEncoder();
 
 const LABEL_OF: Readonly<Record<string, Label>> = {
   file: "File",
@@ -69,7 +79,18 @@ function edgeStep(type: string, from: Label, to: Label, props: readonly string[]
 
 function chunks<T>(rows: readonly T[]): (readonly T[])[] {
   const out: (readonly T[])[] = [];
-  for (let i = 0; i < rows.length; i += CHUNK) out.push(rows.slice(i, i + CHUNK));
+  let start = 0;
+  let bytes = 2;
+  for (let i = 0; i < rows.length; i++) {
+    const rowBytes = UTF8.encode(JSON.stringify(rows[i])).byteLength;
+    if (i > start && (i - start === CHUNK || bytes + 1 + rowBytes > CHUNK_BYTES)) {
+      out.push(rows.slice(start, i));
+      start = i;
+      bytes = 2;
+    }
+    bytes += (i > start ? 1 : 0) + rowBytes;
+  }
+  if (start < rows.length) out.push(rows.slice(start));
   return out;
 }
 
@@ -107,7 +128,8 @@ function grouped(rows: readonly { readonly from: string; readonly to: string; re
  * post: a Decision's `source` is its own source or else the decisions file it came from; a Decision's `author` is the record's author, or null when the record has none; a Decision's `searchText` is its title and the text of each of its statements, one per line, which the full-text index holds, and its `vector` is `vectors`' 384-float embedding of that text, which the vector index holds.
  * post: `vectors` holds one embedding per record id, from `recordText` of that record; the caller embeds, so this plan stays pure.
  * post: `terms` holds the term counts of `recordText` of every record; the caller tokenizes, so this plan stays pure, and a term the common-term rule drops gets no node and no edge.
- * post: no statement holds more than 5000 rows; statement i that reads rows reads them as `$p<i>`, and a statement without rows has no parameter.
+ * post: each row statement holds at most 5000 rows and at most 1 MiB of UTF-8 JSON for its row array, including brackets and commas; a row whose array alone exceeds 1 MiB stands alone. Empty row lists emit no row statement, and splitting preserves row order and content.
+ * post: statement i that reads rows reads them as `$p<i>`, after all splits; a statement without rows has no parameter.
  * decided: the store is built with CREATE into an empty directory, not MERGE into an old one, because a rebuild must never keep a node that the repo no longer has
  */
 export function loadPlan(graph: CodeGraph, checked: CheckedRecords, names: readonly TagLink[], recordFiles: ReadonlyMap<string, string>, vectors: ReadonlyMap<string, readonly number[]>, terms: TermCounts): readonly LoadStep[] {
