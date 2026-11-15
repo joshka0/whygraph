@@ -12,7 +12,7 @@ for (const [name, repo] of Object.entries(registry.repos)) {
   if (repo.name !== name) throw new Error(`repo ${name}: name mismatch`);
 }
 for (const [number, batch] of Object.entries(registry.batches)) {
-  if (!['direct','closed'].includes(batch.storeAccess) || !Array.isArray(batch.controlConditions) || !batch.controlConditions.length || batch.controlConditions.some(c=>!batch.conditions?.includes(c))) throw new Error(`batch ${number}: invalid store access or control conditions`);
+  if (!['direct','closed'].includes(batch.storeAccess) || !Array.isArray(batch.controlConditions) || !batch.controlConditions.length || new Set(batch.controlConditions).size!==batch.controlConditions.length || batch.controlConditions.some(c=>!batch.conditions?.includes(c))) throw new Error(`batch ${number}: invalid store access or control conditions`);
   if (!['claude', 'opencode'].includes(batch.agent)) throw new Error(`batch ${number}: invalid agent`);
   if (!Array.isArray(batch.conditions) || !batch.conditions.length || new Set(batch.conditions).size !== batch.conditions.length || batch.conditions.some(c => !['none', 'stub', 'graph', 'graph-nosearch', 'graph-nolink', 'graph-noterms', 'graph-norule'].includes(c))) throw new Error(`batch ${number}: invalid conditions`);
   for (const field of ['conflicts', 'plain', 'governed']) if (!Number.isInteger(batch.counts?.[field]) || batch.counts[field] < 0) throw new Error(`batch ${number}: invalid ${field} count`);
@@ -71,6 +71,8 @@ export function batchInstructions(number, cwd = new URL('..', import.meta.url)) 
  * owns: [[whygraph-trial-design]]
  */
 export function batchPlan(tasks, { batch, stage = 'full', only, conditions, repeats } = {}) {
+  if (repeats!==undefined&&(!Number.isInteger(repeats)||repeats<1)) throw new Error('repeats must be a positive integer');
+  if (conditions&&new Set(conditions).size!==conditions.length) throw new Error('duplicate conditions');
   if (!['full','smoke'].includes(stage)) throw new Error(`unknown stage ${stage}`);
   if (stage==='smoke' && (!batch || evalBatch(batch).storeAccess!=='closed' || only || conditions || repeats!==undefined)) throw new Error('smoke requires --batch >=7 without --only, --conditions or --repeats');
   let selected=[...tasks.values()].filter(t=>(batch===undefined||t.batch===batch)&&(!only||only.includes(t.id)));

@@ -85,7 +85,7 @@ check('closed store and tool code',()=>{
   require(proof.length===5&&proof.every(p=>Number.isInteger(p.status)&&p.status!==0),'a confinement probe succeeded or did not run');probes+=proof.length;
   for(const tool of read(dir,'tools.json')) {
    const input=JSON.stringify(tool.input??{});
-   const attempt=tool.name==='Bash' ? /\brelate\s|\b(?:cat|head|tail|less|strings|xxd|od|cp|dd)\b[^\n]*(?:whygraph\/store|\/tools\/whygraph|closed-store\.mjs)/.test(String(tool.input?.command??'')) : /whygraph\/store|\/tools\/whygraph|closed-store\.mjs/.test(input);
+   const attempt=tool.name==='Bash' ? /(?:^|[;&|(\n])\s*(?:(?:env|exec|command)\s+)?(?:\/[^\s]+\/)?relate(?:\s|$)|\b(?:cat|head|tail|less|strings|xxd|od|cp|dd)\b[^\n]*(?:whygraph\/store|\/tools\/whygraph|closed-store\.mjs)/.test(String(tool.input?.command??'')) : /whygraph\/store|\/tools\/whygraph|closed-store\.mjs/.test(input);
    if(!attempt)continue;
    agentAttempts++;
    require(tool.error===true||/Permission denied|No such file|not found|unavailable|denied|cannot access/i.test(String(tool.result)),`successful store/code attempt: ${input}`);

@@ -1,0 +1,100 @@
+# Batch 7 failure cases
+
+Fixed before the first run. An independent author writes cases from this
+list. This implementation edits no file under `eval/selftest/`, `test/` or
+`skills/`. ADRs 0010, 0011 and 0012 record the changed decisions.
+
+## History and preserved inputs
+
+- B7-01: Change the working skill or rule after recording a batch commit. Expected: preparation reads the recorded bytes with `git show`; batches 5 and 6 still use c92205d.
+- B7-02: Remove a recorded commit, a recorded file, or instructionsCommit. Expected: preparation refuses before changing any work folder or starting any process for the agent. Plans remain read-only and available when tasks exist.
+- B7-03: B6-26 compares working skill bytes with c92205d. Expected: the independent author moves skill/rule comparisons to the batch's recorded commit, while keeping the launcher byte check. No implementation edit to this test is allowed.
+- B7-04: Generate or score any batch. Expected: no batch 1 through 6 task byte, blind-input byte or stored decision/store byte changes. With no batch 7 results, score output equals eval/score.txt byte for byte.
+- B7-05: Plan a batch 5 id and a batch 6 id using the same saved metadata as the base. Expected: stdout, stderr, cells, defaults and resume counts match c243073 exactly.
+- B7-06: Registry repo or batch is absent, unknown, malformed or mismatched to a task. Expected: visible refusal, no model call; another repo needs only valid registry data and blind files.
+
+## Closed store and transport
+
+- B7-07: From the full agent namespace, run relate against its actual store path, through a script, through an absolute path, or with a direct protocol client. Expected: relate/store access fails; only the four command protocol can return store content.
+- B7-08: Read any store file through a native file tool, shell, symlink, guessed host path, or /proc/1/root. Expected: the store is absent from that namespace; no bytes are returned. Detection after success is a failure.
+- B7-09: Read the client executable or service/product source. Expected: execute-only client read fails, source paths are absent, and chmod cannot make the mounted client readable. Check native file reads as well as shell reads.
+- B7-10: Address a second run's service from the first run, including its known host socket path. Expected: that path is absent; only the first run's socket is mounted. The first run never receives the second run's answer.
+- B7-11: Read repo files and edit an ordinary source file with native tools or the shell. Expected: normal operations work inside the whole-agent namespace. A sandbox that denies all useful work fails this case.
+- B7-12: Invoke carry, carry range, why, impact and search on the fixture's real store through the client. Expected: graph and graph-norule stdout, stderr and exit status equal the direct CLI byte for byte, including usage and missing-target errors.
+- B7-13: Send an unknown command, extra arguments, a store override, raw Cypher, an oversized frame or embedded NUL. Expected: no alternate route to the store; usage rejection or closed connection, never a query execution. Other clients keep working.
+- B7-14: Stop the service before a call. Expected: client prints `whygraph service unavailable`, exits 70; the attempt is a harness failure, never an agent verdict or a successful no-result answer.
+- B7-15: Fail preparation, health probe, agent spawn, malformed non-timeout JSONL or a service call. Expected: service closes in finally, attempt evidence remains, runner follows the harness retry rule. No orphan listener remains.
+- B7-16: Complete or time out a run. Expected: service closes, stdout/stderr and full service answers stay archived, no process survives to answer another run.
+- B7-17: Inspect files across conditions for one task. Expected: every repo and tool byte is identical, except AGENTS.md in graph-norule differs by exactly the omitted rule. No condition, store path or stand-in branch is readable from a tool.
+- B7-18: Prepare graph-norule. Expected: the skill is present and unchanged; AGENTS.md has the original repo text and no appended whygraph rule. Other conditions have the exact recorded suffix.
+- B7-19: Run a shell command that tries network access or reads the CLI identity mount. Expected: both fail; normal source and whygraph commands still work. No credential probe may read actual credential bytes.
+
+## Ablations
+
+- B7-20: Stub calls any of the four commands with a valid target. Expected: exactly `no result\n`, status 0, no graph content.
+- B7-21: Graph-nosearch calls search. Expected: exactly `no result\n`, status 0. All four other fixture answers (including both carry forms) equal graph bytes.
+- B7-22: Graph-nolink retains a CITES edge or a carry/why commit-linked record. Expected: proof and smoke checks fail. Direct tag links remain; no decision node is removed.
+- B7-23: Remove CITES from a fixture whose linked ticket also shares source terms. Expected: the service removes only carry's decision section; its original term section remains byte-identical, with original de-duplication. Cover symbol and range forms, multiple overlapping symbols, tags, neighbors, users and commit lists.
+- B7-24: Compare graph-nolink search and impact with graph. Expected: stdout, stderr and status match byte for byte. Compare carry's unrelated sections and term candidates the same way.
+- B7-25: Graph-noterms retains a Term node, MENTIONS edge or printed term candidate. Expected: proof and smoke checks fail. Carry uses the product's no-shared-record term note, or its existing no-term/long-span note when appropriate.
+- B7-26: Graph-noterms changes a linked answer, search result, record text/vector, why or impact. Expected: fingerprints or fixture byte comparison fail. Every component outside Term/MENTIONS is unchanged.
+- B7-27: A copied ablation removes an unrelated node/edge, changes any search vector or keeps its disabled component. Expected: ablatedStores refuses; no agent starts. A completion marker from another source store also refuses.
+- B7-28: A product carry format change prevents the exact decision-section replacement. Expected: explicit service failure; never silent truncation, a guessed section or an ordinary agent result.
+- B7-29: Build or query from any condition. Expected: no condition branch, flag, environment switch, source change or recipe change in the product. Every relate child has RELATE_TELEMETRY=0 and DO_NOT_TRACK=1.
+
+## Fetch and record content
+
+- B7-30: Fetch an issue, closed completed issue, closed not_planned issue, open PR, unmerged closed PR and merged PR. Expected: state, close reason, PR flag and merge status are retained accurately; merged_at from the issue list supplies merge status, without a per-PR request.
+- B7-31: Ticket comments include OWNER, MEMBER, COLLABORATOR, CONTRIBUTOR and NONE authors. Expected: only the first three associations survive, in creation-time order with URL tie-break. Outside comments never enter record text or search.
+- B7-32: Stop after a complete API page, then restart. Expected: matching raw cached pages make no request; incomplete pending pages are not used; all final tickets appear once. Cache keys include the exact URL and verify it.
+- B7-33: Receive 403/429 with reset or Retry-After. Expected: wait until the limit permits another request, then continue. An unrelated HTTP error fails visibly; no authentication or identity-specific header is added.
+- B7-34: A repo has T tickets and C comments. Expected: before fetching, print ceil(T/100)+ceil(C/100), at least two, when expected counts are supplied; otherwise print the formula and unknown totals. Request count is per page only, not per ticket. Pagination remains on api.github.com.
+- B7-35: Ticket export lacks state, close reason field, PR flag, merge status for a PR, or comments. Expected: conversion refuses before output write; no record silently lacks an outcome. A null close reason prints `not stated`, without inferring completed.
+- B7-36: A record has a large Unicode body and many maintainer comments. Expected: title plus item texts total at most 8,000 UTF-8 bytes, outcome retained, newest comments preferred, body cut first, then older comments. No split Unicode character; metadata and labels do not consume this stated content budget.
+- B7-37: Search the new record's outcome and a retained maintainer comment. Expected: existing searchText includes those item texts. Do not rebuild or change batch 5/6 decisions or stores to test this.
+
+## Sampler and generator
+
+- B7-38: Reverse tickets and commit order, then sample twice. Expected: exactly 60 cited and 60 uncited unique ids with strata, identical bytes for the committed seed. Source extension rules live in registry data.
+- B7-39: A ticket is cited only by a non-source commit. Expected: it enters neither stratum. A closed ticket cited by no commit is eligible uncited; an open uncited ticket is not. A source-cited ticket is eligible cited regardless of state.
+- B7-40: Either stratum has fewer than 60 candidates. Expected: sampler names stratum and actual count and writes no sample. Invalid repo, missing source extensions/seed, duplicate ticket keys, malformed ticket/state or missing input also refuse before writing.
+- B7-41: A blind file is absent, invalid JSON, has a missing hash or differs by one byte. Expected: generation refuses before every task write, including conflict files. Test all five files.
+- B7-42: Requests are not exactly 120, sample ids are not unique ticket ids, sample strata are invalid or not 60 each, request ticket/stratum differs from its sample, a sample has no unique request, or an id can escape the task folder. Expected: refusal and no task write. Missing request fields retain B6-11's validation.
+- B7-43: Targets lack a unique entry per request, have unknown ids, or miss file/symbol fields. Expected: refusal before writing. An empty target list or invalid range makes that request ineligible; one valid range keeps the complete target list.
+- B7-44: Either stratum has fewer than six eligible ranged requests. Expected: error names the stratum, required six and actual count; no task file is written.
+- B7-45: Input requests arrive in reverse order. Expected: first six eligible ids per stratum, twelve conflicts, three plain and four governed controls, with preserved source entries and explicit conflict strata. Repeated generation is byte-identical.
+- B7-46: Controls have wrong counts, missing fields, invalid added regex, duplicate/reused id or malformed governed ticket. Expected: refusal before all writes. In batch 7, a missing control commit is still invalid under the inherited source contract.
+- B7-47: Conflict names a valid source/also ticket and changes no file. Expected: batch 5 verdict; any file change fails, including mode/binary/new/delete/rename. Controls retain the diff-only verdict and stay separate from conflicts.
+
+## Attempt budget
+
+- B7-48: Two timeouts. Expected: exactly two archived attempts, unscored marker, continue, resume skips; FAIL sensitivity includes a conflict.
+- B7-49: Two isolation breaches. Expected: same as B7-48, both invalid attempts preserved.
+- B7-50: Timeout then isolation breach. Expected: same as B7-48; no third attempt, no harness-stop misclassification.
+- B7-51: Isolation breach then timeout. Expected: same as B7-48; no third attempt, no separate timeout retry ladder.
+- B7-52: An agent-caused end then a successful retry. Expected: exactly two attempts; score only the successful one; retain the first archive.
+- B7-53: Harness failure then successful retry. Expected: one retry, success scored, first failure retained. Two harness failures, harness then timeout/breach, or timeout/breach then harness failure stop after two attempts with both archives and an invalid root marker excluded from every scorer block. Test each order. A service failure during a timed-out attempt remains a harness failure.
+- B7-54: Restart after an unscored marker or after the two-attempt ledger is exhausted. Expected: no third launch. A reserved interrupted attempt fails visibly for inspection and is not silently forgotten.
+- B7-55: Run the same timeout/breach pairs in batches 5 and 6. Expected: their pre-batch-7 behavior remains unchanged; no new retry rule changes saved results.
+
+## Plans and smoke checks
+
+- B7-56: Plan all batch 7 tasks. Expected: 258 distinct cells, three repeats, six conditions on conflicts and only stub/graph on controls. No template access, build, dependency install, result write or model starts.
+- B7-57: Plan smoke. Expected: 16 distinct repeat-1 cells; first cited conflict, first uncited conflict, first plain control, first governed control. Missing tasks, missing strata or incompatible stage/selection flags refuse.
+- B7-58: Request an unknown stage/condition, duplicate condition, nonpositive/noninteger repeat count, or an ablation on a control. Expected: visible refusal. No unsupported condition enters scoring either.
+- B7-59: Smoke has a missing/unfinished cell, mismatched meta, invalid unscored rule, third attempt, running ledger entry or missing archive. Expected: `FAIL planned cells`, nonzero exit; never a task pass rate or verdict.
+- B7-60: Any saved disabled command answers or any enabled health command fails/answers no result; an unrelated store component changes. Expected: `FAIL condition answers`, nonzero exit. Check every recorded answer, including archived attempts.
+- B7-61: A repo/tool file differs across conditions, an instruction suffix differs, graph-norule still has the rule, or its original AGENTS.md differs beyond the omitted rule. Expected: `FAIL identical agent files`, nonzero exit.
+- B7-62: Any store/code/relate probe or logged direct agent access succeeds; a probe is missing or fails to run. Expected: `FAIL closed store and tool code`, nonzero exit. Successful checks print denied probe and observed agent-attempt counts. Ordinary command discovery is not a store access.
+- B7-63: Service reply is missing, malformed, unavailable, has a failure count or differs from recorded call totals. Expected: `FAIL service answered every call`, nonzero exit. No missing-evidence PASS.
+- B7-64: Scorer fails or omits a batch 7 block, stratum or any paired ablation difference. Expected: `FAIL scorer batch blocks`, nonzero exit; scorer output itself is not printed by smoke-check.
+- B7-65: Any attempt lacks finite nonnegative tokens or wall time. Expected: `FAIL tokens and wall time per run`, nonzero exit. The successful check lists every attempt's usage/time, including archived attempts.
+- B7-66: No smoke task/result exists. Expected: every relevant check fails for missing evidence, exit nonzero. No empty loop yields a passing health claim.
+- B7-67: Smoke passes and full planning resumes. Expected: those exact 16 cells count as completed repeat 1. After a failed smoke, parent archives results and their ledgers before restarting.
+
+## Scorer
+
+- B7-68: No batch 7 result or only invalid archives exists. Expected: all earlier report bytes unchanged, no batch 7 heading. Finished/error batch 7 results append after batch 6; JSON contains finished verdicts only.
+- B7-69: Mixed stratum/condition results. Expected: conflicts over all/cited/uncited per condition; graph - stub primary and graph minus every ablation; seeded per-task bootstrap, only paired tasks. No control/error/invalid attempt enters normal conflict rates.
+- B7-70: Conflicts and controls have shown/unshown required tickets, missing pairs and errors. Expected: condition quadrants and saved-answer needed-ticket counts use batch 5 rules; controls remain plain/governed apart; unscored conflicts enter FAIL sensitivity; finished-only tokens/cost per condition. Absolute client paths count as whygraph calls in the closed runtime; older report bytes stay unchanged.
+- B7-71: A graph-nolink carry attempt would change an unrelated section due to linked-record de-duplication. Expected: the fixture byte proof fails unless only the decision section changes. Do not weaken the comparison to an edge count alone.

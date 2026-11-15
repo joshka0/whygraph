@@ -14,7 +14,9 @@ working skill against `c92205d`. That check prevents later skill changes.
 
 ## Choice
 
-The registry records `instructionsCommit`. Preparation reads both
+The registry records `instructionsCommit`, `storeAccess` and
+`controlConditions`. The recorded design selects the runtime and control
+conditions; a batch number does not override that design. Preparation reads both
 `skills/whygraph/SKILL.md` and `skills/whygraph-rule.md` with `git show`.
 A missing commit or file stops preparation before work files change.
 Batches 1 through 6 record `c92205d`. Batch 7 has no recorded commit until
