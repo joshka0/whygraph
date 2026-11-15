@@ -1204,3 +1204,133 @@ tests. Isolation is by detection, with the same known misses as batch 5.
 This batch measures one agent, one model, a finite set of requests and
 word/diff pass rules. It does not establish the effect on other repos or
 longer sessions.
+
+## Batch 6 results
+
+From `score.txt`. The agent is opencode 1.18.29 with
+`opencode-go/deepseek-v4.1-flash`; the runs are from 2026-11-15. The repo,
+the tasks, the conditions, the pass rules and every count below were fixed
+and committed before the first run. The run left the plan in three ways:
+
+- The runner stopped once, when 139 of the 297 cells were settled. One `stub` run timed
+  out, and its retry broke isolation; the runner takes that pair for a
+  harness failure and stops. It was started again with the same command and
+  the same code. The two runs that the stop cut ran again from the start.
+  The cell that caused the stop (`hono6-conflict-hn-23`, `stub`, repeat 2)
+  then got a third attempt, where the fixed rule gives one retry; it
+  finished and passed. Without that run `stub` holds 39 passes in 57 runs.
+- Two `stub` runs ended within seconds on a server error of the provider
+  and ran again on the next start of the runner, as the fixed rule for an
+  agent error says. The runner was started three times in all.
+- 2 runs are unscored and in no rate: two `stub` conflict runs broke
+  isolation twice. All other 295 runs finished.
+
+| | stub | graph | graph-nosearch | graph - stub | graph-nosearch - stub | graph - graph-nosearch |
+| --- | --- | --- | --- | --- | --- | --- |
+| Twenty ticket conflicts (primary: graph - stub) | 69% | 98% | 100% | **0.31 [0.15, 0.48]** | 0.33 [0.16, 0.49] | -0.02 [-0.05, 0.00] |
+| Same words, 7 tasks | 65% | 100% | 100% | 0.38 [0.10, 0.71] | 0.38 [0.10, 0.71] | 0.00 |
+| One shared term, 7 tasks | 86% | 100% | 100% | 0.14 [0.00, 0.43] | 0.14 [0.00, 0.43] | 0.00 |
+| Other words, 6 tasks | 53% | 94% | 100% | 0.42 [0.17, 0.69] | 0.47 [0.22, 0.72] | -0.06 [-0.17, 0.00] |
+| Five harmless controls | 93% | 100% | 93% | 0.07 [0.00, 0.20] | 0.00 | 0.07 [0.00, 0.20] |
+| Eight governed controls | 100% | 100% | 100% | 0.00 | 0.00 | 0.00 |
+
+| Conflict runs | stub | graph | graph-nosearch |
+| --- | --- | --- | --- |
+| Finished | 58 | 60 | 60 |
+| Changed no file | 50 | 60 | 60 |
+| Named the ticket | 40 | 59 | 60 |
+| Named the ticket, and changed a file | 0 | 0 | 0 |
+| Changed no file, and did not name the ticket | 10 | 1 | 0 |
+
+- **The graph leads on a second repo, by less.** `graph - stub` is 0.31
+  [0.15, 0.48] over 20 requests. With the unscored runs counted as failures
+  it is 0.32 [0.15, 0.48]. `graph` passed 59 of 60 runs and
+  `graph-nosearch` 60 of 60. The lead is smaller than on ripgrep because
+  `stub` passed 40 of 58 runs here. Ten requests carry the lead; on the
+  other 10 `stub` passed every run. The repo and the language both differ
+  from batch 5, so no number here is compared with batch 5 run by run.
+- **No run with the graph changed a file on a conflict**: 60 of 60 in each
+  graph condition. `stub` changed a file in 8 of 58 runs, and in 10 more it
+  held the change and named no record.
+- **The firm rule stopped no harmless change.** In all 24 `graph` runs and
+  all 24 `graph-nosearch` runs on the governed controls, a whygraph answer
+  showed the control's own ticket, and all 48 made the requested change. So
+  did all 24 `stub` runs. No control run of any condition changed no file.
+  The two failed plain controls (one `stub`, one `graph-nosearch`, the same
+  request) changed files, but the diff does not hold the line that the pass
+  rule asks for.
+- With `search` on, a whygraph answer showed the ticket in 59 of 60 `graph`
+  runs, and all 59 replies named it: the link showed it in 56 runs and
+  `search` in 52. Three runs had it from `search` only. The one failed run
+  had it from no answer.
+- With `search` off, the linked part of `carry` or `why` showed the ticket
+  in 56 of 60 runs, and all 56 replies named it. The other 4 replies named
+  it too.
+
+### Post hoc counts
+
+Added after the results were seen; they change no verdict
+(`python3 eval/tickets/routes-posthoc.py . hono6`). They count two ways to
+the ticket that go around the whygraph commands.
+
+| Conflict runs | stub | graph | graph-nosearch |
+| --- | --- | --- | --- |
+| Finished | 58 | 60 | 60 |
+| A `git log`, `git blame` or `git show` answer held the ticket's number | 57 | 42 | 39 |
+| Ran `relate` on the store | 24 | 41 | 43 |
+| A `relate` answer held the ticket | 0 | 38 | 41 |
+
+- **Git history alone shows the ticket's number on this repo.** A hono
+  commit cites the number of its pull request, and the agent reads the
+  history in every `stub` run. In 57 of 58 `stub` runs a git answer held
+  the number of the needed ticket; 40 of those replies named it, and 17 did
+  not (8 of them changed a file). The same count on batch 5
+  (`routes-posthoc.py . ripgrep5`) gives 52 of 55 `stub` runs on ripgrep.
+  So `stub` is not a condition without the ticket's number. It is a
+  condition without the ticket's text, and the agent pays for the search:
+  on the conflicts a `stub` run used about 3.3 times the tokens of a
+  `graph` run (112038869 over 58 runs against 34806289 over 60).
+- **`graph-nosearch` does not isolate the commit link.** The agent has the
+  `relate` program and the store, and it wrote its own queries in 43 of 60
+  `graph-nosearch` runs (41 of 60 `graph` runs); a `relate` answer held the
+  ticket in 41 and 38. Of the 4 `graph-nosearch` runs where no whygraph
+  answer showed the ticket, 3 had it from a `relate` answer and 1 from a
+  git answer. On batch 5 the agent ran `relate` in 30 of 57
+  `graph-nosearch` runs. The scorer's count stands for what the whygraph
+  commands showed (the link, in 56 of 60 runs); it does not show that the
+  reply rests on the link alone.
+- The `stub` runs called `relate` too (24 runs); there it is a stand-in
+  that answers nothing.
+
+Isolation: 16 attempts were archived as invalid and run again (15 `stub`,
+1 `graph`). Ten opened a file of the run folder beside the repo copy with
+the file tool (9 `stub`, 1 `graph`): a script under its `bin/` (in
+`stub` the stand-in tool's own script, where the agent can read that the
+tool answers nothing), the confinement script or the state folder. Three `stub` attempts used scratch files under `/tmp`, one
+made symlinks, and two opened files of the whygraph checkout that holds
+this eval.
+
+Tokens: 217811955 over the 295 finished runs, with a reported cost of
+USD 4.12 (the runs drew on a subscription). The invalid attempts and the
+attempts that a retry replaced are outside these totals.
+
+What batch 6 cannot show:
+
+- One agent and one model again, a repo that the model may know, three
+  repeats, and a verdict on words and a diff.
+- What the graph adds on a repo whose commits cite no ticket. There neither
+  git history nor the commit link shows a ticket, and only `search` can.
+  Every request here comes from a ticket that a commit cites, and many hono
+  tickets are the pull request that made the change.
+- What the commit link does alone. The agent can query the store with
+  `relate` in both graph conditions.
+- Whether the agent would keep a wrong change out when it can run the
+  tests. The repo copy has no installed dependencies.
+- That a firm rule never stops too often. There are eight governed
+  controls, each passes on one added line, and a harmless change that looks
+  like a reversal is not among them.
+- That the runs were isolated. The harness detects a breach in file-tool
+  paths and in shell text; it does not prevent one.
+- What the runner should do when a timeout is followed by an isolation
+  breach. The rule is not defined; the runner stops, and this batch gave
+  that cell a third attempt.
