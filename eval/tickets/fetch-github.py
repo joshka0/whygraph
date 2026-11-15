@@ -20,11 +20,21 @@ def main():
     parser.add_argument('repo')
     parser.add_argument('output', type=Path)
     parser.add_argument('--max-tickets', type=int)
+    parser.add_argument('--expected-tickets', type=int)
+    parser.add_argument('--expected-comments', type=int)
     args = parser.parse_args()
     if not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', args.repo):
         parser.error('repo must be OWNER/REPO')
     if args.max_tickets is not None and args.max_tickets < 1:
         parser.error('--max-tickets must be positive')
+    if any(n is not None and n < 0 for n in (args.expected_tickets, args.expected_comments)):
+        parser.error('expected counts must be nonnegative')
+    if args.expected_tickets is not None and args.expected_comments is not None:
+        count = max(1, (args.expected_tickets + 99) // 100) + max(1, (args.expected_comments + 99) // 100)
+        estimate = str(count)
+    else:
+        estimate = 'ceil(tickets/100) + ceil(comments/100), minimum 2; totals unknown'
+    print(f'Expected requests for {args.repo}: {estimate}; cached pages cost 0; no per-ticket or per-PR requests', file=sys.stderr, flush=True)
     cache = Path(str(args.output) + '.pages')
     cache.mkdir(parents=True, exist_ok=True)
 
@@ -66,22 +76,20 @@ def main():
                 raise ValueError('expected an API page array')
             yield from body
 
+    issues = list(pages(f'https://api.github.com/repos/{args.repo}/issues?state=all&per_page=100&sort=created&direction=asc'))
+    if args.max_tickets:
+        issues = issues[:args.max_tickets]
+    by_number = {str(issue['number']): [] for issue in issues}
+    for comment in pages(f'https://api.github.com/repos/{args.repo}/issues/comments?per_page=100&sort=created&direction=asc'):
+        number = comment['issue_url'].rsplit('/', 1)[-1]
+        if number in by_number and comment.get('author_association') in ('OWNER', 'MEMBER', 'COLLABORATOR'):
+            by_number[number].append({
+                'author': comment['user']['login'], 'association': comment['author_association'],
+                'date': comment['created_at'], 'body': comment.get('body') or '', 'source': comment['html_url']})
     tickets = []
-    url = f'https://api.github.com/repos/{args.repo}/issues?state=all&per_page=100&sort=created&direction=asc'
-    for issue in pages(url):
-        comments = []
-        if issue['comments']:
-            for comment in pages(issue['comments_url'] + '?per_page=100'):
-                if comment.get('author_association') in ('OWNER', 'MEMBER', 'COLLABORATOR'):
-                    comments.append({
-                        'author': comment['user']['login'], 'association': comment['author_association'],
-                        'date': comment['created_at'], 'body': comment.get('body') or '',
-                        'source': comment['html_url']})
-        comments.sort(key=lambda c: (c['date'], c['source']))
-        merged = None
-        if 'pull_request' in issue:
-            pull, _ = fetch(issue['pull_request']['url'])
-            merged = bool(pull['merged'])
+    for issue in issues:
+        comments = sorted(by_number[str(issue['number'])], key=lambda c: (c['date'], c['source']))
+        merged = bool(issue['pull_request'].get('merged_at')) if 'pull_request' in issue else None
         state, reason = issue['state'], issue.get('state_reason')
         if state not in ('open', 'closed') or reason not in (None, 'completed', 'not_planned', 'reopened'):
             raise ValueError(f'unknown outcome for ticket {issue["number"]}: {state}/{reason}')
@@ -91,8 +99,6 @@ def main():
             'state': state, 'state_reason': reason, 'is_pull_request': 'pull_request' in issue,
             'merged': merged, 'comments': comments})
         print(f'{len(tickets)} tickets complete', file=sys.stderr)
-        if args.max_tickets and len(tickets) >= args.max_tickets:
-            break
     pending = args.output.with_suffix(args.output.suffix + '.pending')
     pending.write_text(json.dumps(tickets, ensure_ascii=False))
     pending.replace(args.output)
