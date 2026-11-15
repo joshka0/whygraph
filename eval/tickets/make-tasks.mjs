@@ -40,7 +40,10 @@ if (design.verifyInputs) {
   const sample = read('./sample-ids.json');
   if (!Array.isArray(requests) || requests.length !== design.counts.requests) throw new Error(`need ${design.counts.requests} requests`);
   if (!Array.isArray(locations) || locations.length !== requests.length) throw new Error('need one target entry per request');
-  if (!Array.isArray(sample) || !sample.length || sample.some(id => typeof id !== 'string' || !/^ticket-\d+$/.test(id)) || new Set(sample).size !== sample.length) throw new Error('invalid sample ids');
+  if (design.selection.mode === 'strata') {
+    if (!Array.isArray(sample) || sample.length !== 120 || sample.some(x => !/^ticket-\d+$/.test(x?.id) || !['cited','uncited'].includes(x.stratum)) || new Set(sample.map(x => x.id)).size !== 120 || ['cited','uncited'].some(s => sample.filter(x => x.stratum === s).length !== 60)) throw new Error('invalid stratified sample ids: need 60 per stratum');
+    for (const entry of requests) if (!sample.some(x => x.id === `ticket-${entry.record}` && x.stratum === entry.stratum)) throw new Error(`${entry.id}: request stratum does not match sample`);
+  } else if (!Array.isArray(sample) || !sample.length || sample.some(id => typeof id !== 'string' || !/^ticket-\d+$/.test(id)) || new Set(sample).size !== sample.length) throw new Error('invalid sample ids');
   const allIds = new Set();
   for (const entry of [...requests, ...controls, ...governed]) {
     if (typeof entry?.id !== 'string' || !entry.id.trim() || allIds.has(entry.id)) throw new Error(`missing or duplicate id ${entry?.id}`);
@@ -67,13 +70,14 @@ const targets = new Map(locations.map((entry) => [entry.id, entry.targets]));
 const ranged = requests.filter((entry) => targets.get(entry.id)?.some((t) =>
   Number.isInteger(t.start_line) && Number.isInteger(t.end_line) && t.start_line > 0 && t.end_line >= t.start_line));
 ranged.sort((a, b) => a.id.localeCompare(b.id, 'en'));
-const selected = Object.entries(design.selection.wording).flatMap(([wording, count]) => {
-  const picked = ranged.filter((entry) => entry.wording === wording).slice(0, count);
-  if (picked.length !== count) throw new Error(`need ${count} ranged ${wording} requests, got ${picked.length}`);
+const group = design.selection.mode === 'strata' ? 'stratum' : 'wording';
+const selected = Object.entries(design.selection.strata ?? design.selection.wording).flatMap(([value, count]) => {
+  const picked = ranged.filter((entry) => entry[group] === value).slice(0, count);
+  if (picked.length !== count) throw new Error(`need ${count} ranged ${value} requests, got ${picked.length}`);
   return picked;
 });
 const pickedIds = new Set(selected.map((s) => s.id));
-const conflicts = design.selection.mode === 'take' ? selected : ranged.filter((s) => !pickedIds.has(s.id));
+const conflicts = ['take', 'strata'].includes(design.selection.mode) ? selected : ranged.filter((s) => !pickedIds.has(s.id));
 if (conflicts.length !== design.counts.conflicts) throw new Error(`need ${design.counts.conflicts} conflicts, got ${conflicts.length}`);
 const pending = [];
 for (const source of conflicts) {
@@ -86,7 +90,7 @@ for (const source of conflicts) {
     };
   });
   const task = {
-    id, kind: 'conflict', repo: repo.name, batch,
+    id, kind: 'conflict', repo: repo.name, batch, ...(design.selection.mode === 'strata' ? { stratum: source.stratum } : {}),
     request: source.request,
     ground_truth: { source, targets: targets.get(source.id) },
     score: { records, protected: 'all' },
