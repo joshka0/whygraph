@@ -127,6 +127,30 @@ counts and reasons against metadata. It also counts raw refusals as observed
 agent attempts. Direct-answer receipts still gate every dispatched reply.
 This ruling amends B7-13, B7-63 and B7-80. Batches 5 and 6 stay frozen.
 
+### Evidence for closed access, 2026-11-16
+
+The parent's ruling removes read-success guesses from agent tool logs.
+Four commands in the fifth smoke archive suppressed stderr, piped results
+or joined discovery and read commands. The check called denied reads
+successful because no denial word survived. A loose shell pattern also
+classified `file` after `head` as a content read.
+
+Agent-controlled text has no command-independent proof of provenance.
+Store text can also arrive through valid service answers. Client and source
+bytes can be encoded, shortened or suppressed. No universal content witness
+can be recovered from these logs for store, client, product source or relate.
+The smoke check counts literal input mentions as observations. It gives
+neither a success nor a denial verdict from agent-shaped input or output.
+
+Access proof uses the five fixed host probes, the confinement mounts and
+client mode, plus B7-60's direct-answer receipts. All five named probes must
+run and deny; a zero status fails regardless of agent output. The store
+probe reads real manifest files in the full and selected stores. The source
+probe detects readable service or product source. The relate version probe
+detects the actual executable without depending on a mounted store. The
+client stays execute-only and read-only with dropped capabilities. No store
+fingerprint or frozen batch changes. B7-62 records this evidence contract.
+
 ### Store preparation, 2026-11-16
 
 The original fingerprint projects both endpoints' complete properties for

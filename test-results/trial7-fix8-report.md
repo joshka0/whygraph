@@ -181,3 +181,219 @@ The brief requires scratch retention. You can inspect:
 The evidence folders and console log remain ignored scratch. No process,
 watch, active socket or worktree is needed to inspect them. The unmerged
 branch is `batch-7-refused-requests`. Nothing was pushed.
+
+
+## Part 2: host evidence for closed access
+
+Date: 2026-11-16. Contract:
+`/home/dev/scratch/whygraph-eval/trial7-fix9-brief.md`, plus the parent's
+addition requiring every per-attempt check on the four archived attempts.
+Part 1 at `d1f41cf` was accepted. Work continues on the same branch.
+
+### Evidence and implementation
+
+B7-62 now uses fixed host probe receipts for the access verdict. It requires
+all five distinct named probes with integer nonzero statuses. A zero status,
+missing probe, duplicate name or missing status fails. Tool logs contribute
+literal path/name observations and raw refusal counts only. No shell grammar,
+read-command guess, denial-word list, tool result or tool error flag decides
+whether content reached the agent. Discovery may be observed without being
+classified as access. The PASS line says `observed agent attempts`.
+
+There is no universal content-provenance proof in agent-shaped logs for any
+of the four protected kinds. Store text can come from authorized service
+answers. Client/source bytes can be encoded, shortened or suppressed.
+A direct relate result can match a service answer. Adding markers would
+change protected content and still miss transformed output. This change
+therefore uses the brief's explicit allowance for boundary proof instead:
+fixed probes, mount rules, execute-only client mode and B7-60 direct receipts.
+It does not claim that arbitrary content can be attributed from output text.
+
+The old fixed probes also had blind spots. The real archived full/selected
+stores exist and have `manifest.json`; neither has `CURRENT`. The old store
+probe could deny a nonexistent file even with store data exposed. It now
+reads a manifest at both the full and selected store paths. The old relate
+probe depended on a missing `/store`; it now runs `relate --version`.
+The existing source probe now reads both service and product source, so
+one hidden file cannot hide the other exposed file. Probe names and count
+stay the same. The new commands run only in the closed runner. No store
+file, fingerprint, client mode or mount boundary changes.
+
+B7-62 and its part-1 cross-reference B7-150 are amended with the date and
+`parent's ruling`. B7-153 through B7-167 give the independent failure cases,
+including all four archived commands and actual exposures for every kind.
+ADR 0011 records why agent output has no access verdict. The transport
+ownership and proof records identified in part 1 still govern this change.
+The five-probe updates strengthen that contract; no formal model changes.
+
+### Archive replay
+
+The script loads the actual smoke-check callbacks from `d1f41cf` and from
+the working branch. It does not maintain a second implementation of their
+checks. It registers callbacks without running preflight, plan enumeration
+or scoring. It substitutes normalized service logs in memory only: the old
+frame-limit failure events become refusals, and matching metadata gets the
+new refusal fields. It does not rewrite status or archived bytes.
+
+For evidence, failed `require` calls are collected instead of stopping at the
+first assertion. Every collected failure still yields FAIL. This lets the
+identical-files callback evaluate its later assertions after the global
+coverage failure. No production assertion is skipped or loosened. Detail
+strings printed after a failed assertion are observations, not PASS claims.
+
+| Archived attempt suffix | Old observed count | New observed count | Raw refusals | Old closed-access verdict | New closed-access verdict |
+| --- | --- | --- | --- | --- | --- |
+| graph / 342d19f3 | 7 | 7 | 4 | FAIL, two false successes | PASS |
+| graph / 871e0fea | 7 | 10 | 5 | FAIL, two false successes | PASS |
+| graph-nolink / d69ed185 | 2 | 8 | 1 | PASS | PASS |
+| graph-nolink / valid cell | 1 | 2 | 0 | PASS | PASS |
+
+The new count records literal names in all tool inputs. The old count tried
+to infer read operations from shell syntax. Counts can therefore differ;
+no new count means that an access succeeded or was denied.
+
+For each of the four attempts, the replay prints all five requested checks:
+
+| Check | Result for each attempt | Cause of each FAIL |
+| --- | --- | --- |
+| Condition answers | PASS, all four | None |
+| Identical agent files | FAIL, all four | `not all four tasks have manifests` |
+| Closed store and tool code | PASS, all four | None |
+| Service answered every call | PASS, all four | None |
+| Tokens and wall time | PASS, all four | None |
+
+The complete identical-files callback also runs on all four attempts
+together. Its only failure remains `not all four tasks have manifests`.
+All four attempts belong to `zustand7-conflict-zs-02`, so the archive cannot
+satisfy the full smoke requirement for four tasks. Peer file hashes,
+instruction suffixes and AGENTS.md comparisons pass. This is missing global
+coverage in a partial archive, not a harness false failure. That assertion
+stays unchanged. The replay found no other per-attempt failure to fix or list.
+It does not establish a complete smoke result, plan completion or preflight.
+
+### Actual fixture exposures
+
+A second manual script extracts the fixed probe array from the production
+closed runner and executes those exact commands in real bwrap namespaces.
+It reuses the part-1 fixture store and cached execute-only client. It builds
+one separate readable-client fixture for the exposure case. Extra mounts
+exist only in each short evidence command. No hosted agent starts.
+
+| Evidence case | Positive fixed-probe result | Actual smoke callback |
+| --- | --- | --- |
+| Normal confinement | All five deny; stdout empty | PASS |
+| Store manifest exposed | Exit 0; 941 bytes | FAIL |
+| Client readable | Exit 0; 17,536 bytes | FAIL |
+| Service source exposed | Exit 0; 30,158 bytes | FAIL |
+| Product source exposed, service hidden | Exit 0; 2,205 bytes | FAIL |
+| Real relate executable exposed, no store | Exit 0; 43 bytes | FAIL |
+
+The same callback receives these actual host receipts as an in-memory
+`confinement.json` over one archived attempt. Every exposure fails with
+`a confinement probe succeeded or did not run`; all other probes deny.
+The agent tool log is unchanged. Thus denial words or suppressed agent
+stderr cannot exonerate an actual fixed-probe exposure. The fixture service
+closes in finally. No extra mount or socket survives its evidence command.
+This is manual evidence, not an authored test suite or trial cell.
+
+### Other places of the premise
+
+- `eval/smoke-check.mjs`, closed access: fixed. It used a shell-line pattern
+  plus the absence of denial words. It now uses host receipts for verdicts
+  and literal input mentions for observations only.
+- `eval/closed-run.mjs`, confinement probes: fixed the weak store, relate
+  and product-source coverage. These are host-owned fixed commands, not
+  parsed agent-authored shell lines. Their exit codes establish the probe
+  result independently of log wording.
+- `eval/closed-run.mjs`, `serviceDown`: unchanged. It searches tool results
+  for service/launcher-unavailable text. This is availability classification,
+  not a claim of successful store/code access. Agent-shaped text can also
+  mislead this detector in principle. Removing it would conflict with
+  part-1 ruling 3, B7-14 and ADR 0011's lost-client rule. Work on that part
+  stops here; it needs a separate contract for a trusted client receipt.
+  None of the four archived attempts reports an unavailable real client.
+- `eval/smoke-check.mjs`, service-answered check: unchanged apart from part 1.
+  It also rejects unavailable text in tool results. The same availability
+  contract governs it. It is not repurposed as content evidence.
+- `eval/opencode.mjs:isolationBreaches`: read and unchanged. It does not
+  read tool output. It scans actual escaping symlinks, rejects external
+  native file/patch input paths and matches shell symlink-creation syntax.
+  Those input policies can reject an attempted operation without proving
+  it happened. The command-pattern part shares the broader weak premise
+  that command text proves an action. Git history ties it to batch 5
+  (`88ed5cf`, `2a3a3dc`); its existing checks intentionally impose that
+  policy. ADR 0013 retains the closed caller's normalization and shared
+  checker, while B7-132 freezes the older path. Work on changing those
+  policies stops here. No shared implementation, older caller or closed
+  isolation classification is bypassed. Any redesign must first separate
+  closed access evidence from the frozen attempt-policy contract.
+
+Conflicts with existing checks: `eval/selftest/batch7-smoke.mjs:50` expects
+a fabricated tool result to establish a successful direct read. Line 61
+expects the old `0 denied logged agent attempts` format for discovery.
+Both conflict with the new ruling. They were read but not run, edited,
+skipped or loosened. The independent author must replace these expectations
+from amended B7-62. The existing successful/missing/not-run probe checks
+at lines 36, 48 and 49 remain valid. Part 1's B7-80 conflict at
+`eval/selftest/batch7-host.mjs:190` remains for that author too.
+
+### Verification, remaining limits and scratch
+
+The single-attempt replay and single denied namespace case ran first.
+After their setup was corrected, the four-attempt replay and six small
+namespace cases ran one at a time. The evidence script's first isolated
+context lacked the standard URL constructor; supplying it fixed that script.
+No product change was made for that setup error.
+
+The final replay and all verification commands exited 0. Run each command
+under the resource prefix recorded in part 1:
+
+```sh
+node --check eval/closed-run.mjs
+node --check eval/smoke-check.mjs
+node --check test-results/trial7-fix9-archive.mjs
+node --check test-results/trial7-fix9-probes.mjs
+pnpm check
+node_modules/.bin/memod lint
+node test-results/trial7-fix9-archive.mjs --one
+node test-results/trial7-fix9-probes.mjs --one
+node test-results/trial7-fix9-probes.mjs
+node test-results/trial7-fix9-archive.mjs --probes test-results/trial7-fix9-probes-uEUbPB/observations.json
+git diff --check
+```
+
+`--one` and the unflagged archive replay also save their own JSON reports.
+A zero evidence-script exit means the observations were collected; each
+record's PASS or FAIL is the result. The deliberate exposure failures and
+missing four-task coverage are expected and are preserved in those reports.
+
+`git diff d1f41cf --exit-code` on `eval/opencode.mjs`, the registry, README,
+`eval/selftest/` and `test/` exited 0. No batch 5/6 plan, check, input or report
+changed; their shared launcher remains byte-identical. The smoke entry
+already rejects batches below 7, and the strengthened probes live only in
+the closed runner. No older-batch execution or suite was needed to prove
+that unchanged path. No install, push, delegation, preflight, rehearsal,
+trial cell, hosted model or new formal proof occurred.
+
+The archive cannot retroactively prove that its old weak probes ran the new
+commands. The replay establishes its recorded callbacks and field contracts;
+the separate namespace evidence proves the new commands against actual
+fixture exposures. Full trial coverage and independent tests remain outside
+the code-author role. No content classifier for arbitrary transformed tool
+output is claimed.
+
+Retained scratch and artifacts:
+
+- `test-results/trial7-fix9-archive.mjs`: committed replay script.
+- `test-results/trial7-fix9-probes.mjs`: committed manual exposure script.
+- `test-results/trial7-fix9-archive-one.json`: one-attempt observations.
+- `test-results/trial7-fix9-archive.json`: four-attempt observations.
+- `test-results/trial7-fix9-archive-with-probes.json`: all archived checks and
+  actual probe receipts, with every FAIL preserved.
+- `test-results/trial7-fix9-archive.log`: complete final replay stdout.
+- `test-results/trial7-fix9-probes-qtVbhk/`: single denied-case fixture.
+- `test-results/trial7-fix9-probes-uEUbPB/`: normal and five exposure
+  observations, fixture work folders and the readable-client artifact.
+
+The JSON reports, console log and fixture folders remain ignored scratch.
+Part 1's retained evidence remains available. No data was deleted.

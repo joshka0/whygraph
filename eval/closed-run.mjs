@@ -223,10 +223,10 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     if(rehearsal)writeFileSync(join(work,'config/rehearsal.json'),JSON.stringify({...rehearsal.config,impact:rehearsal.config.impact??String(decisions[0].id)}));
     const preflight=[];
     for(const [name,code] of [
-      ['relate','relate query --database /store "MATCH (n) RETURN n"'],
-      ['store',`cat '${store.replaceAll("'", "'\\''")}/CURRENT'`],
+      ['relate','relate --version'],
+      ['store',`if cat '${store.replaceAll("'", "'\\''")}/manifest.json'; then exit 0; fi; cat '${prepared.store.replaceAll("'", "'\\''")}/manifest.json'`],
       ['tool code','cat /tools/whygraph'],
-      ['service code',`cat '${new URL('./closed-store.mjs',import.meta.url).pathname}'`],
+      ['service code',`if cat '${new URL('./closed-store.mjs',import.meta.url).pathname}'; then exit 0; fi; cat '${new URL('../src/main.ts',import.meta.url).pathname}'`],
       ['other service','cat /whygraph/other/service.sock'],
     ]) {
       const r=spawnSync(confinement[0],[...confinement.slice(1),'--','/bin/bash','-c',code],{env:quiet,encoding:'utf8'});
