@@ -5,8 +5,8 @@ tags: [whygraph, eval, independent-tests]
 ---
 
 > [!abstract] Answer
-> Under B7-93 second form, the final full suites report 1553/1553, exit 0; 1553/1553, exit 0.
-> The focused 50 repetitions and surviving-child plant also completed. See the second-ruling audit for observation counts and elapsed times.
+> The process-disappearance fix passes 1554/1554, exit 0; 1554/1554, exit 0.
+> Three focused batches pass 150/150 runner-death repetitions. All five runs catch the surviving-child plant at the unchanged ten-second bound. See the process-disappearance audit below.
 
 ## Historical third-round audit
 
@@ -584,5 +584,53 @@ The fifth-round section below its historical heading records the superseded firs
 ```sh
 export PATH="$HOME/.opencode/bin:$HOME/.npm-global/bin:$HOME/.local/share/mise/installs/pnpm/12.11.2:$HOME/.local/bin:$PATH"
 TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=2G -p CPUQuota=400% node eval/selftest/batch7-check.mjs B7-93
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/check.mjs
+```
+
+## B7-93 process-disappearance audit
+
+The runner observer accepts ENOENT and ESRCH from either process file as gone. It discards a stat sample if cmdline vanishes during the same observation. Unexpected errors still fail with their original message. The ten-second bound and the surviving-child predicate are unchanged.
+
+### Places changed
+
+- `eval/selftest/batch7-host.mjs:procText`: ENOENT and ESRCH return null. Other errors propagate unchanged.
+- `eval/selftest/batch7-host.mjs:runnerState`: A vanished stat or cmdline makes the whole observation gone. The runner case and surviving-child plant share this observer.
+- `eval/selftest/batch7-host.mjs:live`: Cleanup liveness uses procText and accepts both disappearance errors.
+- `eval/selftest/batch7-host.mjs:ownedPids`: The child scan uses procText. It omits vanished entries and propagates unexpected errors.
+- `eval/selftest/batch7-memory.mjs:fingerprint failure child-state observation`: The recorded-child stat read treats ENOENT and ESRCH as gone. Other errors propagate.
+
+The batch 7 search also found current-worker cgroup and descriptor reads, plus access-denial probes through `/proc/1/root`. These are not observations of another process that may end. They are unchanged.
+
+### Deterministic check
+
+The regression failed before the fix in 8/26 checks. It passes 26/26 checks after the fix. It reads a nonexistent PID and ends and reaps a real child between stat and cmdline reads. Fault injection covers ENOENT and ESRCH at both files and requires EACCES and EIO to propagate unchanged. The global synchronous file boundary is restored in `finally`.
+
+[Before-fix log](../../test-results/b7-93-esrch-before.txt); [after-fix log](../../test-results/b7-93-esrch-deterministic.txt). Each scratch root contains `proc-disappearance-check.json`.
+
+### Repeated runs
+
+| Run | Cases | Exit | Runner repetitions | Surviving-child plant |
+| --- | --- | --- | --- | --- |
+| [focused 1](../../test-results/b7-93-esrch-focused-1.txt) | 3/3 | 0 | 50/50 | caught at ten-second bound |
+| [focused 2](../../test-results/b7-93-esrch-focused-2.txt) | 3/3 | 0 | 50/50 | caught at ten-second bound |
+| [focused 3](../../test-results/b7-93-esrch-focused-3.txt) | 3/3 | 0 | 50/50 | caught at ten-second bound |
+| [full 1](../../test-results/b7-93-esrch-full-1.txt) | 1554/1554 | 0 | 50/50 | caught at ten-second bound |
+| [full 2](../../test-results/b7-93-esrch-full-2.txt) | 1554/1554 | 0 | 50/50 | caught at ten-second bound |
+
+The three focused batches pass 150/150 runner-death repetitions under four CPU-load processes. The two full suites include another 100/100 repetitions. All five suites catch the surviving-child plant while it retains an address space at the bound. Each full suite also runs the new deterministic case.
+
+### Other checks
+
+- `typecheck`: exit 0, [log](../../test-results/b7-93-esrch-typecheck.txt).
+- `memod`: exit 0, [log](../../test-results/b7-93-esrch-memod.txt).
+
+All self-test runs use the required 6G memory scope, 400% CPU quota, and `/mnt/ssd/tmp`. No trial or hosted model ran. No package was installed. No push or scratch deletion ran. Scratch and logs remain under `test-results/`. The JSON audit records the raw evidence paths. Earlier audit sections retain their historical counts.
+
+### Reproduce
+
+```sh
+export PATH="$HOME/.opencode/bin:$HOME/.npm-global/bin:$HOME/.local/share/mise/installs/pnpm/12.11.2:$HOME/.local/bin:$PATH"
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/batch7-check.mjs "proc disappearance"
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/batch7-check.mjs B7-93
 TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/check.mjs
 ```

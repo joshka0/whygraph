@@ -6140,5 +6140,245 @@
       "test-results/ticket-selftest-INw4YV",
       "test-results/ticket-selftest-pZ6OQl"
     ]
+  },
+  "runner_death_proc_disappearance": {
+    "status": "done",
+    "contract_commit": "4d186ad",
+    "base_commit": "9e8d7f3",
+    "ruling": "B7-93 second form",
+    "bound_ms": 10000,
+    "places_changed": [
+      {
+        "file": "eval/selftest/batch7-host.mjs",
+        "symbol": "procText",
+        "change": "ENOENT and ESRCH return null. Other errors propagate unchanged."
+      },
+      {
+        "file": "eval/selftest/batch7-host.mjs",
+        "symbol": "runnerState",
+        "change": "A vanished stat or cmdline makes the whole observation gone. The runner case and surviving-child plant share this observer."
+      },
+      {
+        "file": "eval/selftest/batch7-host.mjs",
+        "symbol": "live",
+        "change": "Cleanup liveness uses procText and accepts both disappearance errors."
+      },
+      {
+        "file": "eval/selftest/batch7-host.mjs",
+        "symbol": "ownedPids",
+        "change": "The child scan uses procText. It omits vanished entries and propagates unexpected errors."
+      },
+      {
+        "file": "eval/selftest/batch7-memory.mjs",
+        "symbol": "fingerprint failure child-state observation",
+        "change": "The recorded-child stat read treats ENOENT and ESRCH as gone. Other errors propagate."
+      }
+    ],
+    "other_proc_reads": [
+      {
+        "file": "eval/selftest/batch7-memory-worker.mjs",
+        "reason": "/proc/self/cgroup is read by its live owner, not an observation of a process that may end."
+      },
+      {
+        "file": "eval/selftest/batch7-attempt-worker.mjs",
+        "reason": "/proc/self/fd opens the current worker descriptors, not a child-state observation."
+      },
+      {
+        "file": "eval/selftest/batch7-closed.mjs",
+        "reason": "/proc/1/root paths are access-denial probes. Their failures must remain visible."
+      }
+    ],
+    "deterministic_before": {
+      "log": "test-results/b7-93-esrch-before.txt",
+      "exit": 1,
+      "passed": 0,
+      "total": 1,
+      "scratch": "test-results/batch7-selftest-DjyYVZ",
+      "failures": [
+        "WRONG B7 B7-93 proc disappearance and unexpected errors are deterministic"
+      ],
+      "failed_checks": [
+        "runnerState stat ESRCH",
+        "procText stat ESRCH",
+        "live stat ESRCH",
+        "runnerState cmdline ESRCH",
+        "procText cmdline ESRCH",
+        "runnerState cmdline ENOENT",
+        "ownedPids cmdline EACCES",
+        "ownedPids cmdline EIO"
+      ]
+    },
+    "deterministic_after": {
+      "log": "test-results/b7-93-esrch-deterministic.txt",
+      "exit": 0,
+      "passed": 1,
+      "total": 1,
+      "scratch": "test-results/batch7-selftest-6l7QVa",
+      "failures": [],
+      "checks": 26
+    },
+    "deterministic_coverage": "A nonexistent PID; a real child killed and reaped between stat and cmdline reads; injected ENOENT and ESRCH at each file; EACCES and EIO propagate by identity from every reader. The synchronous file boundary is restored in finally.",
+    "focused_runs": [
+      {
+        "log": "test-results/b7-93-esrch-focused-1.txt",
+        "exit": 0,
+        "passed": 3,
+        "total": 3,
+        "scratch": "test-results/batch7-selftest-t5ku97",
+        "failures": [],
+        "deterministic": {
+          "checks": 26,
+          "failed": 0
+        },
+        "runner": {
+          "repetitions": 50,
+          "failed": 0,
+          "more_than_one_observation": 14,
+          "evidence": "test-results/batch7-selftest-t5ku97/runner-death-repetitions.json"
+        },
+        "surviving_child_plant": {
+          "caught": true,
+          "assertion": "runner children must be gone or zombie within 10 seconds",
+          "wall_ms": 10001.378047999984,
+          "live_address_spaces_at_bound": 3,
+          "evidence": "test-results/batch7-selftest-t5ku97/plant2-survives-runner.json"
+        }
+      },
+      {
+        "log": "test-results/b7-93-esrch-focused-2.txt",
+        "exit": 0,
+        "passed": 3,
+        "total": 3,
+        "scratch": "test-results/batch7-selftest-iVOtP6",
+        "failures": [],
+        "deterministic": {
+          "checks": 26,
+          "failed": 0
+        },
+        "runner": {
+          "repetitions": 50,
+          "failed": 0,
+          "more_than_one_observation": 13,
+          "evidence": "test-results/batch7-selftest-iVOtP6/runner-death-repetitions.json"
+        },
+        "surviving_child_plant": {
+          "caught": true,
+          "assertion": "runner children must be gone or zombie within 10 seconds",
+          "wall_ms": 10000.595915000013,
+          "live_address_spaces_at_bound": 3,
+          "evidence": "test-results/batch7-selftest-iVOtP6/plant2-survives-runner.json"
+        }
+      },
+      {
+        "log": "test-results/b7-93-esrch-focused-3.txt",
+        "exit": 0,
+        "passed": 3,
+        "total": 3,
+        "scratch": "test-results/batch7-selftest-HjgYdu",
+        "failures": [],
+        "deterministic": {
+          "checks": 26,
+          "failed": 0
+        },
+        "runner": {
+          "repetitions": 50,
+          "failed": 0,
+          "more_than_one_observation": 11,
+          "evidence": "test-results/batch7-selftest-HjgYdu/runner-death-repetitions.json"
+        },
+        "surviving_child_plant": {
+          "caught": true,
+          "assertion": "runner children must be gone or zombie within 10 seconds",
+          "wall_ms": 10001.026781999972,
+          "live_address_spaces_at_bound": 3,
+          "evidence": "test-results/batch7-selftest-HjgYdu/plant2-survives-runner.json"
+        }
+      }
+    ],
+    "full_runs": [
+      {
+        "log": "test-results/b7-93-esrch-full-1.txt",
+        "exit": 0,
+        "passed": 1554,
+        "total": 1554,
+        "scratch": "test-results/batch7-selftest-6zIt0d",
+        "failures": [],
+        "deterministic": {
+          "checks": 26,
+          "failed": 0
+        },
+        "runner": {
+          "repetitions": 50,
+          "failed": 0,
+          "more_than_one_observation": 9,
+          "evidence": "test-results/batch7-selftest-6zIt0d/runner-death-repetitions.json"
+        },
+        "surviving_child_plant": {
+          "caught": true,
+          "assertion": "runner children must be gone or zombie within 10 seconds",
+          "wall_ms": 10001.032204999938,
+          "live_address_spaces_at_bound": 3,
+          "evidence": "test-results/batch7-selftest-6zIt0d/plant2-survives-runner.json"
+        }
+      },
+      {
+        "log": "test-results/b7-93-esrch-full-2.txt",
+        "exit": 0,
+        "passed": 1554,
+        "total": 1554,
+        "scratch": "test-results/batch7-selftest-zKlWoS",
+        "failures": [],
+        "deterministic": {
+          "checks": 26,
+          "failed": 0
+        },
+        "runner": {
+          "repetitions": 50,
+          "failed": 0,
+          "more_than_one_observation": 16,
+          "evidence": "test-results/batch7-selftest-zKlWoS/runner-death-repetitions.json"
+        },
+        "surviving_child_plant": {
+          "caught": true,
+          "assertion": "runner children must be gone or zombie within 10 seconds",
+          "wall_ms": 10000.201098000049,
+          "live_address_spaces_at_bound": 3,
+          "evidence": "test-results/batch7-selftest-zKlWoS/plant2-survives-runner.json"
+        }
+      }
+    ],
+    "checks": {
+      "typecheck": {
+        "log": "test-results/b7-93-esrch-typecheck.txt",
+        "exit": 0
+      },
+      "memod": {
+        "log": "test-results/b7-93-esrch-memod.txt",
+        "exit": 0
+      }
+    },
+    "scope": {
+      "branch": "batch-7-memory",
+      "tracked_edits": [
+        "eval/selftest/"
+      ],
+      "production_changes": 0,
+      "hosted_model_calls": 0,
+      "trial_runs": 0,
+      "installs": 0,
+      "pushes": 0,
+      "scratch_deletions": 0
+    },
+    "resource_rule": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400%",
+    "retained_scratch": [
+      "test-results/batch7-selftest-6l7QVa",
+      "test-results/batch7-selftest-6zIt0d",
+      "test-results/batch7-selftest-DjyYVZ",
+      "test-results/batch7-selftest-HjgYdu",
+      "test-results/batch7-selftest-iVOtP6",
+      "test-results/batch7-selftest-t5ku97",
+      "test-results/batch7-selftest-zKlWoS"
+    ],
+    "evidence_generator": "test-results/b7-93-esrch-audit.py"
   }
 }

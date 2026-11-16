@@ -1,6 +1,8 @@
 /** module: [[whygraph-trial-design]] */
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
+import fs from 'node:fs';
+import {syncBuiltinESMExports} from 'node:module';
 import {createServer,createConnection} from 'node:net';
 import {mkdirSync,existsSync,readFileSync,readdirSync,symlinkSync} from 'node:fs';
 import {join,resolve} from 'node:path';
@@ -21,15 +23,15 @@ function collect(p,input=Buffer.alloc(0),onData){
 }
 async function wire(path,payload){return new Promise((ok,fail)=>{const chunks=[],s=createConnection(path);s.on('connect',()=>s.write(payload));s.on('data',b=>chunks.push(b));s.on('error',e=>{if(e.code!=='ECONNRESET')fail(e);});s.on('close',()=>ok(Buffer.concat(chunks)));});}
 function decode(bytes){let at=0,stdout=[],stderr=[],status;while(at+8<=bytes.length){const type=bytes.readUInt32BE(at),n=bytes.readUInt32BE(at+4),b=bytes.subarray(at+8,at+8+n);assert.equal(b.length,n);if(type===1)stdout.push(b);if(type===2)stderr.push(b);if(type===3)status=b.readUInt32BE();at+=8+n;}assert.equal(at,bytes.length);return {status,stdout:Buffer.concat(stdout),stderr:Buffer.concat(stderr)};}
-function procText(pid,file){try{return readFileSync(`/proc/${pid}/${file}`,'utf8');}catch(e){if(e.code==='ENOENT')return null;throw e;}}
-function live(pid){try{return readFileSync(`/proc/${pid}/stat`,'utf8').split(') ')[1][0]!=='Z';}catch(e){if(e.code==='ENOENT')return false;throw e;}}
+function procText(pid,file){try{return readFileSync(`/proc/${pid}/${file}`,'utf8');}catch(e){if(e.code==='ENOENT'||e.code==='ESRCH')return null;throw e;}}
+function live(pid){const stat=procText(pid,'stat');return stat!==null&&stat.split(') ')[1][0]!=='Z';}
 function runnerState(pid){
  const stat=procText(pid,'stat');if(stat===null)return {pid,gone:true};
- const fields=stat.slice(stat.lastIndexOf(') ')+2).split(' '),cmdline=procText(pid,'cmdline');
+ const fields=stat.slice(stat.lastIndexOf(') ')+2).split(' '),cmdline=procText(pid,'cmdline');if(cmdline===null)return {pid,gone:true};
  const teardown=fields[0]!=='Z'&&(Number(fields[6])&4)!==0&&BigInt(fields[20])===0n&&cmdline==='';
  return {pid,stat,cmdline,state:fields[0],flags:fields[6],vsize:fields[20],teardown,gone:false};
 }
-function ownedPids(token){return readdirSync('/proc').filter(n=>/^\d+$/.test(n)).filter(n=>{try{const args=readFileSync(`/proc/${n}/cmdline`).toString().split('\0');return args.includes('/repo/'+token+'.js')||args[0]==='/bin/bash'&&args.some(a=>a.includes(token));}catch{return false;}}).map(Number);}
+function ownedPids(token){return readdirSync('/proc').filter(n=>/^\d+$/.test(n)).filter(n=>{const cmdline=procText(n,'cmdline');if(cmdline===null)return false;const args=cmdline.split('\0');return args.includes('/repo/'+token+'.js')||args[0]==='/bin/bash'&&args.some(a=>a.includes(token));}).map(Number);}
 /** Host shell contracts through the generated script and live confinement.
  * owns: [[whygraph-batch7-host-selftest]]
  */
@@ -54,6 +56,26 @@ export async function batch7HostChecks({scratch,shared}){
  async function ready(c,needle){if(Buffer.concat([...c.out,...c.err]).includes(Buffer.from(needle)))return;await new Promise((ok,fail)=>{const see=()=>{if(Buffer.concat([...c.out,...c.err]).includes(Buffer.from(needle))){c.p.stdout.off('data',see);c.p.stderr.off('data',see);ok();}};c.p.stdout.on('data',see);c.p.stderr.on('data',see);c.done.then(r=>fail(Error(`closed before ${needle}: ${r.stderr}`)),fail);see();});}
  async function direct(f,args,store=f.r.condition==='graph-nolink'&&args[0]==='impact'?f.store:f.prepared[f.r.condition].store){const c=collect(spawn(process.execPath,[join(h.root,'src/main.ts'),...args,'--store',store],{cwd:f.repo,env:h.env}));return c.done;}
  async function carryOracle(f,target){const full=await direct(f,['carry',target],f.store);let stdout=full.stdout.toString();for(const symbol of target.endsWith(':1-20')?['taxRate','taxOf']:['taxRate']){const before=(await direct(f,['why','src/tax.ts:'+symbol],f.store)).stdout.toString().replace(/\n$/,'').split('\n').slice(2).join('\n'),after=(await direct(f,['why','src/tax.ts:'+symbol])).stdout.toString().replace(/\n$/,'').split('\n').slice(2).join('\n');assert.ok(stdout.includes(before),'fixture contains direct decision section');stdout=stdout.replace(before,after);}return {...triple(full),stdout:Buffer.from(stdout)};}
+ add('B7-93 proc disappearance and unexpected errors are deterministic',async()=>{
+  const results=[],check=(name,fn)=>{try{fn();results.push({name,passed:true});}catch(e){results.push({name,passed:false,error:e.message});}};
+  const absent=2147483647;assert.equal(existsSync(`/proc/${absent}`),false);
+  check('nonexistent PID',()=>{assert.equal(procText(absent,'stat'),null);assert.equal(procText(absent,'cmdline'),null);assert.deepEqual(runnerState(absent),{pid:absent,gone:true});assert.equal(live(absent),false);});
+  const child=collect(spawn(process.execPath,['-e',"process.stdout.write('READY\\n');setInterval(()=>{},100000);"],{env:h.env})),pid=child.p.pid;
+  try{
+   await ready(child,'READY\n');assert.notEqual(procText(pid,'stat'),null);
+   child.p.kill('SIGKILL');await child.done;
+   check('real child ends between stat and cmdline reads',()=>{assert.equal(procText(pid,'cmdline'),null);assert.deepEqual(runnerState(pid),{pid,gone:true});assert.equal(live(pid),false);});
+  }finally{if(child.p.exitCode===null&&child.p.signalCode===null){child.p.kill('SIGKILL');await child.done;}}
+  const original=fs.readFileSync;
+  try{for(const code of ['ESRCH','ENOENT','EACCES','EIO'])for(const file of ['stat','cmdline']){
+   const error=Object.assign(Error(`invented ${code} reading ${file}`),{code}),path=`/proc/${process.pid}/${file}`;
+   fs.readFileSync=(p,...args)=>{if(p===path)throw error;return original(p,...args);};syncBuiltinESMExports();
+   const calls=[['runnerState',()=>runnerState(process.pid),{pid:process.pid,gone:true}],['procText',()=>procText(process.pid,file),null],file==='stat'?['live',()=>live(process.pid),false]:['ownedPids',()=>ownedPids('nonexistent-probe-token'),[]]];
+   for(const [name,fn,want]of calls)check(`${name} ${file} ${code}`,()=>{if(['ESRCH','ENOENT'].includes(code))assert.deepEqual(fn(),want);else assert.throws(fn,e=>e===error);});
+  }}finally{fs.readFileSync=original;syncBuiltinESMExports();}
+  h.write(join(scratch,'proc-disappearance-check.json'),{results});
+  assert.deepEqual(results.filter(r=>!r.passed),[],'process observations must accept only disappearance errors');
+ });
  // B7-72: usable source operations and all commands, including nested cwd.
  add('B7-72 generated shell reads edits and commands in every condition and nested cwd',async()=>{
   for(const condition of ['stub','graph','graph-nolink','graph-nosearch','graph-noterms','graph-norule'])await run(async f=>{

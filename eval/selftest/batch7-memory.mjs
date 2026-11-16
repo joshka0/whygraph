@@ -150,7 +150,7 @@ MATCH (d:Decision {id:'d1'}),(e:Decision {id:'d2'}),(c:Commit),(s:Symbol),(t:Ter
   const f=await fresh(`query-${fault}-${action}`),r=await reuse(f,{fault,action});assert.notEqual(r.status,0,`${fault} query must refuse`);
   assert.match(r.error??r.stderr,fault==='truncated'?/incomplete fingerprint rows/:fault==='exit'?/exited 23/:fault==='spawn'?/ENOENT/:/JSON/);
   assert.equal(existsSync(join(f.directory,'prepared.json')),false,'failed query publishes no ready receipt');
-  const children=lines(r.config.log).filter(e=>e.kind==='child'&&e.child).map(e=>e.child),states=children.map(pid=>{try{return readFileSync(`/proc/${pid}/stat`,'utf8').split(') ')[1][0];}catch(e){if(e.code==='ENOENT')return 'gone';throw e;}});
+  const children=lines(r.config.log).filter(e=>e.kind==='child'&&e.child).map(e=>e.child),states=children.map(pid=>{try{return readFileSync(`/proc/${pid}/stat`,'utf8').split(') ')[1][0];}catch(e){if(e.code==='ENOENT'||e.code==='ESRCH')return 'gone';throw e;}});
   assert.ok(states.every(s=>s==='gone'||s==='Z'),'failed query must leave no running child');h.write(join(f.at,'query-failure.json'),{r,children,states});
  });
  add('B7-92 every read-only open and advisory lock update preserves receipt reuse',async()=>{
