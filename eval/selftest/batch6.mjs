@@ -39,7 +39,11 @@ function copyHarness(at) {
   for (const f of ['run.mjs', 'opencode.mjs', 'score.mjs', 'tasks']) cpSync(join(root,'eval',f),join(at,f),{recursive:true});
   mkdirSync(join(at,'tickets/hono'),{recursive:true});
   cpSync(join(root,'eval/tickets/make-tasks.mjs'),join(at,'tickets/make-tasks.mjs'));
-  for (const f of files) cpSync(join(root,'eval/tickets/hono',f),join(at,'tickets/hono',f));
+  const registry=json(join(at,'registry.json'));
+  for (const name of new Set([3,4,5,6].map(batch=>registry.repos[registry.batches[batch].repo].blind))) {
+    mkdirSync(join(at,name),{recursive:true});
+    for(const file of files)cpSync(join(root,'eval',name,file),join(at,name,file));
+  }
   return at;
 }
 function synthetic() {
@@ -67,6 +71,24 @@ export async function batch6Checks({tasks,scoreRun}) {
       reg.batches[6].sha256[f]=hash(readFileSync(join(at,'tickets/hono',f)));
     });
     changeRegistry(reg);writeFileSync(join(at,'registry.json'),JSON.stringify(reg));return at;
+  }
+  function preservedBytes(at) {
+    const reg=json(join(root,'eval/registry.json'));
+    for(const f of readdirSync(join(root,'eval/tasks'))) {
+      const task=json(join(root,'eval/tasks',f));
+      if(![3,4,5,6].includes(task.batch))continue;
+      const baseline=spawnSync('git',['show',`${task.batch===6?'HEAD':'c92205d'}:eval/tasks/${f}`],{cwd:root});
+      assert.equal(baseline.status,0,baseline.stderr?.toString());
+      assert.deepEqual(readFileSync(join(at,'tasks',f)),baseline.stdout,`preserved task ${f}`);
+    }
+    for(const batch of [3,4,5,6]) {
+      const design=reg.batches[batch],repo=reg.repos[design.repo];
+      for(const f of files) {
+        const path=`${repo.blind}/${f}`,baseline=spawnSync('git',['show',`${batch===6?'HEAD':'c92205d'}:eval/${path}`],{cwd:root});
+        assert.equal(baseline.status,0,baseline.stderr?.toString());
+        assert.deepEqual(readFileSync(join(at,path)),baseline.stdout,`preserved blind ${path}`);
+      }
+    }
   }
   const generate=at=>node(join(at,'tickets/make-tasks.mjs'),['--batch','6']);
   function refuse(at,pattern) {
@@ -164,10 +186,10 @@ export async function batch6Checks({tasks,scoreRun}) {
   for(const [i,w]of words.entries())bad(`B6-18 shortage ${w}`,1,(v)=>{for(let j=i*10+ (i===2?5:6);j<(i+1)*10;j++)v[j].targets=[];return v;},new RegExp(`need ${i===2?6:7} ranged ${w} requests, got ${i===2?5:6}`));
   add('B6-19 reversed inputs select first 7/7/6 by id with no sample filter',()=>{const v=synthetic();v[0].reverse();v[1].reverse();selection(fixture('reversed',v),expected);});
   for(const value of [[],{},['ticket-1','ticket-1'],[1],['bad-ticket'],''])bad(`B6-20 sample ids ${JSON.stringify(value)}`,4,()=>value,/sample|ticket|duplicate/i);
-  add('B6-19 B6-23 two generations match all committed bytes and preserve batches 1 to 5',()=>{
+  add('B6-19 B6-23 two generations preserve committed tasks and blind bytes of batches 3 to 6',()=>{
     const at=fixture('repeat');writeFileSync(join(at,'tasks/sentinel.keep'),'keep\n');const before=snapshot(join(at,'tasks'));
     for(let i=0;i<2;i++){const r=generate(at);assert.equal(r.status,0,r.stderr);assert.equal(r.stdout.trim().split('\n').length,33);assert.deepEqual(snapshot(join(at,'tasks')),before);}
-    for(const f of readdirSync(join(root,'eval/tasks')).filter(f=>!f.startsWith('hono6-'))){const r=spawnSync('git',['show',`c92205d:eval/tasks/${f}`],{cwd:root});assert.equal(r.status,0,r.stderr?.toString());assert.deepEqual(readFileSync(join(at,'tasks',f)),r.stdout);}
+    preservedBytes(at);
   });
   const t=tasks.get('hono6-conflict-hn-01');
   for(const prefix of ['#','ticket-','ticket ','TICKET #','issue ','issues/','PR ','pull request ','pull/'])add(`B6-21 accepted spelling ${prefix}`,()=>assert.equal(scoreRun(t,{final:prefix+'1232',diff:'',tools:[]}).pass,true));
@@ -227,9 +249,12 @@ export async function batch6Checks({tasks,scoreRun}) {
   add('plant 5 none condition caught by 297-cell plan owner',()=>{
     const at=fixture('plant-none-clean'),args=['--plan','--only',allIds.join(','),'--repeats','3'];verifyPlan(node(join(at,'run.mjs'),args));prefix(at,'registry.mjs',registryPlant("r.batches[6].conditions.push('none')"));const faulty=node(join(at,'run.mjs'),args);assert.equal(faulty.status,0,faulty.stderr);killed('5-none','B6-24 plan',()=>verifyPlan(faulty));
   });
-  add('plant 6 batch 5 task byte changed caught by preservation owner',()=>{
-    const at=fixture('plant-old-clean');selection(at,json(join(at,'tickets/hono/requests.json')).filter(r=>allIds.includes(`hono6-conflict-${r.id}`)).sort((a,b)=>words.indexOf(a.wording)-words.indexOf(b.wording)||a.id.localeCompare(b.id)).map(r=>r.id));
-    const old='ripgrep5-conflict-rg-04.json',before=readFileSync(join(at,'tasks',old));writeFileSync(join(at,'tickets/make-tasks.mjs'),read(join(at,'tickets/make-tasks.mjs'))+`\nconst {appendFileSync:appendPlant}=await import('node:fs');appendPlant(new URL('../tasks/${old}',import.meta.url),' ');`);const r=generate(at);assert.equal(r.status,0,r.stderr);killed('6-old-task','B6-23 preservation',()=>assert.deepEqual(readFileSync(join(at,'tasks',old)),before));
+  for(const batch of [3,4,5,6])for(const kind of ['task','blind'])add(`plant 6 batch ${batch} ${kind} byte changed caught by preservation owner`,()=>{
+    const at=fixture('plant-old-clean');preservedBytes(at);
+    const reg=json(join(at,'registry.json')),repo=reg.repos[reg.batches[batch].repo];
+    const path=kind==='task'?join(at,'tasks',readdirSync(join(at,'tasks')).find(f=>json(join(at,'tasks',f)).batch===batch)):join(at,repo.blind,'requests.json');
+    writeFileSync(path,read(path)+' ');
+    killed(`6-old-${batch}-${kind}`,'B6-23 preservation',()=>preservedBytes(at));
   });
 
   add('B6-03 third repo/batch works through registry data for generator, plan and scorer',()=>{
