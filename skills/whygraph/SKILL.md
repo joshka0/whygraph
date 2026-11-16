@@ -41,11 +41,7 @@ section, and the answer says no symbol covers the lines.
    A record that governs the change may have no tag or commit that links it to
    the code; `search` lists up to twenty records, the ten best by words and the
    ten best by meaning fused by rank. Read the candidates and judge: a listed
-   record is a candidate to pick from, not a link. Add `--at <file>:<start>-<end>`
-   to add the term list of the lines you will touch (the same term match `carry`
-   makes, up to ten more candidates, each with its `shared terms:`). When
-   `WHYGRAPH_RERANK` names a model, `search` may instead list the five records a
-   reranker kept; they are still candidates to read and judge, never links.
+   record is a candidate to pick from, not a link.
 3. When a decision changes (a record is edited, replaced or reversed), run
    `impact` on it, and treat every symbol it lists as possibly affected.
 4. When you wonder why code is the way it is, run `why` before you guess.
@@ -74,17 +70,12 @@ section, and the answer says no symbol covers the lines.
   strongest link comes first.
 - "superseded by: X" means the record was replaced; read X too.
 - A record's `author:` line, when it has one, names who decided it, as the
-  record states. It is not indexed and is never sent to the reranker: a
-  `search` answer never prints it.
+  record states. It is not indexed: a `search` answer never prints it.
 - In a `search` answer, `matched: words` means the record shares a word with
   the change, `matched: meaning` means the local model ranked it near, and
   `words and meaning` means both; that line also names the record's source.
   The list is up to twenty records, the ten best by words and the ten best by
-  meaning fused by rank, and the heading names the two lists. With `--at`, a
-  term section follows, `matched: terms` on a reranked record marks a record
-  from it, and the heading says `with these lines`. When `WHYGRAPH_RERANK`
-  names a model, the answer is instead the five records that model kept, best
-  first, and its first line names the count and the model. Neither score is
+  meaning fused by rank, and the heading names the two lists. Neither rank is
   a confidence, and the meaning search always returns its nearest records, so
   the list is candidates to pick from, never links.
 - `Decision records that share the most distinctive terms with its code` (at
@@ -103,7 +94,7 @@ section, and the answer says no symbol covers the lines.
 
 - 0: an answer (an empty one too).
 - 1 with "no store at ...; run whygraph build first": build it (below).
-- 2: the target is not `<file>:<symbol>` (or, for `carry`, `<file>:<start>-<end>`), or a range is bad (a start after the end, below 1, or past the end of the file), or a range was given to `why` or `impact`, or `--at` was given without a range; fix the argument.
+- 2: the target is not `<file>:<symbol>` (or, for `carry`, `<file>:<start>-<end>`), or a range is bad (a start after the end, below 1, or past the end of the file), or a range was given to `why` or `impact`; fix the argument.
 - 3: the graph has no such symbol or record; stderr lists close names, so
   retry with one of them.
 
