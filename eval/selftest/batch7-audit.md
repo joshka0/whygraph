@@ -1022,3 +1022,42 @@ The parent must run its allowed full gates after resolving both reds.
 Sentence for the parent records: The default self-test includes focused
 resolver, native-error and fake preflight cases for B7-119 through B7-133;
 it reuses the existing rehearsal result and adds no hosted model call.
+
+
+## Resolver ruling follow-up (2026-11-16)
+
+Read `git show HEAD` at `e1f4ae2b06d8514ee2c700e716a0e518666cdc07`
+before editing. That commit amends B7-121: private-root and executable-file
+refusals protect new binds only. An input already inside a mounted system
+folder adds no bind. A non-regular target still refuses anywhere.
+ADR 0011's file-only confinement rule stays in force.
+
+The former internal executable-target refusal case now asserts startup
+status 0 and exactly `[]` mount arguments. Its name states the amended
+contract. The external executable-target refusal case is unchanged.
+
+The focused selection passed **17/17**, exit 0. Its case clocks sum to
+**5.728 seconds**. It includes the external executable refusal,
+the amended internal executable allowance, the six-condition host reads
+and the condition-mount plant. The plant still turns its named assertion
+red. No other cases, full gate, stress form, hosted agent, trial cell or
+new rehearsal ran. All commands ran one at a time under the load cap.
+
+Command:
+
+```sh
+PATH="$HOME/.opencode/bin:$HOME/.npm-global/bin:$HOME/.local/share/mise/installs/pnpm/12.11.2:$HOME/.local/bin:$PATH" TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7-120|B7-121'
+```
+
+`node --check eval/selftest/batch7-startup.mjs` also passed in the same
+6 GiB, 200% CPU scope.
+
+Keep `test-results/startup-focused-j23XqW`. Its
+`focused-results.json` records every case and time. The JSON audit names
+the additional work roots. Nothing was deleted or pushed.
+
+The parent reports that B7-122's unchanged timeout case passes after the
+cause fix in `e1f4ae2`. This follow-up inspected the fix but did not rerun
+B7-122. The earlier two-red report is historical: B7-121 is settled by the
+amended contract and this passing check; B7-122 is settled by the parent's
+code fix and reported check. No new independent timeout pass is claimed.

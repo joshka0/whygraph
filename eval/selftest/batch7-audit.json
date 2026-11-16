@@ -8297,5 +8297,130 @@
       "/home/dev/repos/personal/whygraph/test-results/n049788cc",
       "/home/dev/repos/personal/whygraph/test-results/ne908f923"
     ]
+  },
+  "trial7_tests8_rulings": {
+    "basis_commit": "e1f4ae2b06d8514ee2c700e716a0e518666cdc07",
+    "basis": "Read git show HEAD and the parent instruction before changing the case. B7-121 now limits private-root and executable-file refusals to targets that need a new bind. Non-regular targets still refuse anywhere.",
+    "case_change": {
+      "old": "B7-121 executable resolver target inside system folders also refuses startup",
+      "new": "B7-121 executable resolver target inside system folders allows startup without an extra bind",
+      "assertions": [
+        "startup status 0",
+        "resolver mount arguments exactly []"
+      ],
+      "external_executable_refusal": "unchanged and passes"
+    },
+    "command": "PATH=\"$HOME/.opencode/bin:$HOME/.npm-global/bin:$HOME/.local/share/mise/installs/pnpm/12.11.2:$HOME/.local/bin:$PATH\" TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7-120|B7-121'",
+    "exit": 0,
+    "passed": 17,
+    "total": 17,
+    "case_wall_seconds_sum": 5.728,
+    "cases": [
+      {
+        "name": "B7 B7-120 plain resolver and missing optional files need no extra bind",
+        "status": "passed",
+        "wall_ms": 252
+      },
+      {
+        "name": "B7 B7-120 inside resolver and missing optional files need no extra bind",
+        "status": "passed",
+        "wall_ms": 226
+      },
+      {
+        "name": "B7 B7-120 B7-121 dangling resolver refuses before launch",
+        "status": "passed",
+        "wall_ms": 240
+      },
+      {
+        "name": "B7 B7-120 B7-121 unreadable resolver refuses before launch",
+        "status": "passed",
+        "wall_ms": 223
+      },
+      {
+        "name": "B7 B7-120 B7-121 cycle resolver refuses before launch",
+        "status": "passed",
+        "wall_ms": 241
+      },
+      {
+        "name": "B7 B7-120 B7-121 directory resolver refuses before launch",
+        "status": "passed",
+        "wall_ms": 231
+      },
+      {
+        "name": "B7 B7-120 B7-121 private resolver refuses before launch",
+        "status": "passed",
+        "wall_ms": 222
+      },
+      {
+        "name": "B7 B7-120 B7-121 executable resolver refuses before launch",
+        "status": "passed",
+        "wall_ms": 194
+      },
+      {
+        "name": "B7 B7-121 forbidden work resolver dependency refuses",
+        "status": "passed",
+        "wall_ms": 185
+      },
+      {
+        "name": "B7 B7-121 forbidden repo resolver dependency refuses",
+        "status": "passed",
+        "wall_ms": 195
+      },
+      {
+        "name": "B7 B7-121 forbidden checkout resolver dependency refuses",
+        "status": "passed",
+        "wall_ms": 193
+      },
+      {
+        "name": "B7 B7-121 forbidden identity resolver dependency refuses",
+        "status": "passed",
+        "wall_ms": 209
+      },
+      {
+        "name": "B7 B7-121 forbidden proc resolver dependency refuses",
+        "status": "passed",
+        "wall_ms": 197
+      },
+      {
+        "name": "B7 B7-121 forbidden dev resolver dependency refuses",
+        "status": "passed",
+        "wall_ms": 220
+      },
+      {
+        "name": "B7 B7-121 executable resolver target inside system folders allows startup without an extra bind",
+        "status": "passed",
+        "wall_ms": 195
+      },
+      {
+        "name": "B7 B7-119 B7-121 host resolver bytes read-only without siblings in all six confinements",
+        "status": "passed",
+        "wall_ms": 1269
+      },
+      {
+        "name": "B7 plant one condition mount differs turns B7-121 red",
+        "status": "passed",
+        "wall_ms": 1236
+      }
+    ],
+    "syntax_check": {
+      "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node --check eval/selftest/batch7-startup.mjs",
+      "exit": 0
+    },
+    "timeout_case": {
+      "changed": false,
+      "rerun": false,
+      "basis": "Parent reports the unchanged case passes after the B7-122 cause fix in e1f4ae2; its diff was inspected. No independent rerun is claimed in this follow-up."
+    },
+    "scratch": "test-results/startup-focused-j23XqW",
+    "work_roots": [
+      "/home/dev/repos/personal/whygraph/test-results/n5862b038",
+      "/home/dev/repos/personal/whygraph/test-results/n38f3f5ef"
+    ],
+    "production_edits": 0,
+    "hosted_calls": 0,
+    "trial_cells": 0,
+    "new_rehearsals": 0,
+    "deletions": 0,
+    "pushes": 0
   }
 }

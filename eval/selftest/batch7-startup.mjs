@@ -70,7 +70,7 @@ export async function batch7StartupChecks({scratch,shared={}}){
  for(const kind of ['plain','inside'])add(`B7-120 ${kind} resolver and missing optional files need no extra bind`,()=>layoutOK(kind,resolverLayout(kind)));
  for(const [kind,pattern]of [['dangling',/ENOENT/],['unreadable',/EACCES/],['cycle',/cycle/],['directory',/not a regular file/],['private',/private mount boundary/],['executable',/executable/]])add(`B7-120 B7-121 ${kind} resolver refuses before launch`,()=>{const r=resolverLayout(kind);assert.equal(r.status,1);assert.match(r.error,pattern);});
  for(const type of ['work','repo','checkout','identity','proc','dev'])add(`B7-121 forbidden ${type} resolver dependency refuses`,()=>{const r=resolverLayout('forbidden-'+type);assert.equal(r.status,1);assert.match(r.error,/private mount boundary/);});
- add('B7-121 executable resolver target inside system folders also refuses startup',()=>{const r=resolverLayout('inside-executable');assert.equal(r.status,1,'B7-121 requires executable resolver targets to refuse startup');assert.match(r.error,/executable/);});
+ add('B7-121 executable resolver target inside system folders allows startup without an extra bind',()=>{const r=resolverLayout('inside-executable');h.ok(r);assert.deepEqual(r.args,[],'an executable target in an already mounted system folder needs no extra bind');});
 
  async function hostMounts(module=api){
   const common=shortRoot('host'),source=join(common,'source');mkdirSync(source);h.write(join(source,'source.txt'),'ordinary source\n');const client=api.closedClient(join(common,'client')),all=[],mounts=[];
