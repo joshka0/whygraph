@@ -5,8 +5,10 @@ tags: [whygraph, eval, independent-tests]
 ---
 
 > [!abstract] Answer
-> The normal suite passes 1,476/1,476 cases, exit 0. It previously passed 1,222/1,449.
-> The altered-registry suite also passes 1,476/1,476. All 1,476 ordered case verdicts match.
+> The process-disappearance fix passes 1554/1554, exit 0; 1554/1554, exit 0.
+> Three focused batches pass 150/150 runner-death repetitions. All five runs catch the surviving-child plant at the unchanged ten-second bound. See the process-disappearance audit below.
+
+## Historical third-round audit
 
 **What changed**
 
@@ -379,3 +381,256 @@ TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=40
 - The audit is the handoff summary. The brief forbids a separate write outside the test/audit scope. [verified]
 
 [[whygraph-trial-design]]
+
+## Historical fifth-round memory and runner-death audit
+
+The test work is complete. B7-93 remains a production failure. No code outside `eval/selftest/` changed. The branch is `batch-7-memory`; nothing was pushed.
+
+### Final full suites
+
+| Run | Cases | Exit | Runner failures out of 50 | Non-zombie kernel teardown repetitions |
+| --- | --- | --- | --- | --- |
+| [1](../../test-results/trial7-tests5-final-1.txt) | 1551/1553 | 1 | 1 | 5 |
+| [2](../../test-results/trial7-tests5-final-2.txt) | 1551/1553 | 1 | 5 | 4 |
+
+Each load check completed all 50 repetitions. A live process with an address space fails at its first observation. The permitted teardown state requires `PF_EXITING`, zero address-space size and an empty command line. The runner case makes no cleanup call before this observation.
+
+The raw ledger counter includes zombies because zombies also meet that exiting predicate. The table counts non-zombie teardown at the first observation. The JSON audit keeps both counts and each observed state; the raw evidence is unchanged.
+
+### Memory evidence
+
+| Run | Input | Peak bytes | Wall ms | Result |
+| --- | --- | ---: | ---: | --- |
+| 1 | small-stress | 88375296 | 666.36 | success |
+| 1 | synthetic-5000 | 539762688 | 169820.66 | success |
+| 1 | real-zustand | 438685696 | 59149.02 | success |
+| 1 | unbounded | 999997440 | 4290.61 | expected bounded OOM |
+| 2 | small-stress | 89505792 | 478.54 | success |
+| 2 | synthetic-5000 | 535220224 | 133185.00 | success |
+| 2 | real-zustand | 435179520 | 50461.55 | success |
+| 2 | unbounded | 999997440 | 3594.60 | expected bounded OOM |
+| 1 | 2 callers, aggregate scope | 139112448 | 690.41 | success |
+| 1 | 3 callers, aggregate scope | 179118080 | 1094.29 | success |
+| 1 | receipt reuse | 80281600 | 342.13 | success |
+| 2 | 2 callers, aggregate scope | 138715136 | 617.42 | success |
+| 2 | 3 callers, aggregate scope | 180011008 | 879.72 | success |
+| 2 | receipt reuse | 81764352 | 291.35 | success |
+
+Whole-scope cgroup memory.peak includes subprocesses and charged file cache. The B7-83 preparation and OOM scopes request MemoryMax=1000000000 and CPUQuota=400%. Concurrency and receipt reuse run in 2G scopes. Linux rounds MemoryMax down to a page boundary. OOMPolicy=continue preserves the observer after the kernel kills the unbounded relate child; the memory bound does not change. Times are observations under shared load, not speed comparisons.
+
+### Contract coverage
+
+| Item | Check |
+| --- | --- |
+| B7-83 | Two-record build first; committed 5000-record/305000-edge build; exact proofs and peak under the enforced billion-byte limit. Real zustand case runs read-only when present and explicitly reports absence. |
+| B7-84 | Two and three real processes contend under flock; all are alive before publication. One common scope measures their aggregate peak. External instrumentation sees two copies, two mutation queries and six fingerprint query processes. |
+| B7-85 | Fresh-process reuse makes zero copy/query calls and preserves receipt bytes, mtime and ctime. Six simulated-agent cells use the shared receipt fingerprints in real health records. |
+| B7-86 | Vector, text, endpoint, edge properties, unrelated node and edge changes each refuse. Replaced, added and removed files refuse. Exact nanosecond mtime restoration still changes ctime and refuses. |
+| B7-87 | Kill at real copy, mutation, fingerprint, partial proof write and receipt-rename boundaries. Every later caller acquires the released lock, refuses without copy/query, and preserves incomplete evidence. |
+| B7-88 | Foreign source marker, retargeted symlink, algorithm, version, broken JSON, missing/changed proof, changed receipt fingerprint and missing marker each refuse without copy/query. |
+| B7-89 | Vector, text, labels, public/internal node identity, internal edge identity, endpoint, type, properties, parallel multiplicity and unrelated components each change their own digest. Every changed source still passes exact ablation proofs. Terms occupy interior IDs; a renumbering query process refuses. |
+| B7-90 | Source rewrite during a paused real preparation refuses at the final identity check. A missing manifest refuses before query/copy. Neither publishes ready evidence. |
+| B7-91 | Both fingerprint and preparation reject nonzero exit, invalid JSON, spawn failure and successful truncated output. No ready receipt or running query child remains. |
+| B7-92 | Read-only opens and both advisory lock files preserve reuse. Manifest, node snapshot, relationship snapshot and real WAL data mutations each refuse in all three stores. Existing health/smoke byte checks remain in the full suite. |
+| B7-93 | First /proc state is sampled immediately after owner reap, before awaiting client completion. Only gone, zombie, or PF_EXITING + zero vsize + empty cmdline passes. Every later state must stay terminated, disappearance has the stated 10-second bound, and release produces no later file write. Fifty repetitions run under four CPU-load processes; live survivors remain red. |
+
+No item lacks a case. The real zustand store was present and ran in both final suites.
+
+### Required plants
+
+| Fault | Owner | First failing assertion in run 2 |
+| --- | --- | --- |
+| unbounded | B7-83 bounded preparation must succeed | bounded preparation must succeed |
+| per-cell | B7-85 restart makes zero copy and relate calls | restart must make zero copy and relate calls |
+| receipt | B7-88 invalid receipt refuses | changed or incomplete store must refuse |
+| half-made | B7-87 incomplete preparation refuses | changed or incomplete store must refuse |
+| vector | B7-89 changed vector changes node fingerprint | vector must change nodes fingerprint |
+| survives-runner | B7-93 first observation sees no live child with an address space | child 440924 must terminate at first observation after runner death |
+
+Each plant changes a disposable code copy. JSON receipts retain the exact assertion and its values. The unbounded plant must also record `oom_kill > 0` and `SIGKILL`; an assertion caused by missing OOM evidence cannot pass.
+
+### Remaining disagreement
+
+- B7 B7-76 runner ends background and new-session children before returning. B7-93 requires termination at the first observation after owner reap. At least one recorded process still has an address space and fails the exact termination predicate. Production code remains unchanged.
+- B7 B7-93 runner death passes 50 consecutive repetitions under CPU load. B7-93 requires termination at the first observation after owner reap. At least one recorded process still has an address space and fails the exact termination predicate. Production code remains unchanged.
+- B7 B7-76 runner ends background and new-session children before returning. B7-93 requires termination at the first observation after owner reap. At least one recorded process still has an address space and fails the exact termination predicate. Production code remains unchanged.
+- B7 B7-93 runner death passes 50 consecutive repetitions under CPU load. B7-93 requires termination at the first observation after owner reap. At least one recorded process still has an address space and fails the exact termination predicate. Production code remains unchanged.
+
+The parent must rule on B7-93. The tests do not wait for client completion before the first observation, loosen the process predicate, or change the launcher.
+
+### Other checks
+
+| Check | Exit | Evidence |
+| --- | --- | --- |
+| typecheck | 0 | [log](../../test-results/trial7-tests5-typecheck.txt) |
+| memod | 0 | [log](../../test-results/trial7-tests5-memod.txt) |
+| readme | 0 | [log](../../test-results/trial7-tests5-readme.txt) |
+| score | 0 | [log](../../test-results/trial7-tests5-score.txt) |
+
+The saved-score comparison prints no bytes. README checks, memod lint and the tsrs type check run in separate 2G scopes. No trial or hosted model ran.
+
+### Evidence retained
+
+- `test-results/batch7-selftest-v01qaX` holds measurements, store copies, six plant receipts, scope logs and 50 runner observations.
+- `test-results/batch7-selftest-G1QkSi` holds measurements, store copies, six plant receipts, scope logs and 50 runner observations.
+- `test-results/trial7-tests5-*` holds the small probes, focused runs, OOM diagnosis and final logs. Earlier focused `batch7-selftest-*` folders remain as evidence. No scratch file was deleted.
+
+- `test-results/batch4-selftest-Ck8Wwr`.
+- `test-results/batch4-selftest-T0INFu`.
+- `test-results/batch5-selftest-f5hYXY`.
+- `test-results/batch5-selftest-kcwHKf`.
+- `test-results/batch6-selftest-05ZLJ5`.
+- `test-results/batch6-selftest-H8yN2M`.
+- `test-results/batch7-selftest-3w3Ci6`.
+- `test-results/batch7-selftest-6spsSp`.
+- `test-results/batch7-selftest-7G843m`.
+- `test-results/batch7-selftest-CCUvdB`.
+- `test-results/batch7-selftest-G1QkSi`.
+- `test-results/batch7-selftest-Ko7q1L`.
+- `test-results/batch7-selftest-LslcPK`.
+- `test-results/batch7-selftest-Rt4mgm`.
+- `test-results/batch7-selftest-cCvVld`.
+- `test-results/batch7-selftest-gTfQRF`.
+- `test-results/batch7-selftest-iulDn9`.
+- `test-results/batch7-selftest-jL10pl`.
+- `test-results/batch7-selftest-mIIEJn`.
+- `test-results/batch7-selftest-v01qaX`.
+- `test-results/ticket-selftest-hd1has`.
+- `test-results/ticket-selftest-nuj3td`.
+
+The supplied `/var/tmp/whygraph-eval/_zustand/ablations` directory was empty on read-only inspection. `test-results/trial7-tests5-old-ablations.txt` retains that listing. No archive or removal was needed.
+
+The JSON audit holds the full coverage map, exact scratch paths, raw plant assertions and source-history gaps. Prior audit sections describe earlier rounds.
+
+### Reproduce
+
+```sh
+export PATH="$HOME/.opencode/bin:$HOME/.npm-global/bin:$HOME/.local/share/mise/installs/pnpm/12.11.2:$HOME/.local/bin:$PATH"
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/check.mjs
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=2G -p CPUQuota=400% node eval/selftest/batch7-check.mjs memory
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=2G -p CPUQuota=400% node eval/selftest/batch7-check.mjs B7-93
+```
+
+## B7-93 second-ruling audit
+
+Parent ruling `4d186ad` replaces the first-observation requirement. The test now observes until all recorded children are gone or zombies, or ten seconds pass. The timeout and cleanup cases keep their existing rule. No production file changed.
+
+### Results
+
+| Run | Cases | Exit | Repetitions | Needed more than one observation | Longest time to gone or zombie, ms |
+| --- | --- | --- | --- | --- | --- |
+| [focused](../../test-results/trial7-tests5-ruling2-focused.txt) | 2/2 | 0 | 50 | 10 | 52.936 |
+| [full 1](../../test-results/trial7-tests5-ruling2-full-1.txt) | 1553/1553 | 0 | 50 | 15 | 145.553 |
+| [full 2](../../test-results/trial7-tests5-ruling2-full-2.txt) | 1553/1553 | 0 | 50 | 6 | 145.786 |
+
+Each repetition runs under four CPU-load processes. Its clock starts before the owner receives SIGKILL, so the recorded time includes owner reap. Every intermediate process state is retained. The case waits for neither the client nor cleanup before observing the children. A child write during this interval does not fail the case.
+
+### Surviving-child plant
+
+| Run | First failing assertion | Elapsed ms | Live address spaces at bound |
+| --- | --- | --- | --- |
+| focused | runner children must be gone or zombie within 10 seconds | 10000.482 | 3 |
+| full 1 | runner children must be gone or zombie within 10 seconds | 10001.181 | 3 |
+| full 2 | runner children must be gone or zombie within 10 seconds | 10000.184 | 3 |
+
+The plant removes the command PID namespace and parent-death enforcement from a disposable code copy. The case must wait for the full ten-second bound, then fail while a recorded child still has an address space. Fixture cleanup starts after the failing assertion and its evidence have been saved.
+
+### Memory checks repeated by the full suites
+
+| Run | Input | Peak bytes | Wall ms | Result |
+| --- | --- | --- | --- | --- |
+| 1 | small-stress | 87310336 | 417.59 | success |
+| 1 | synthetic-5000 | 541184000 | 155810.77 | success |
+| 1 | real-zustand | 437493760 | 62300.25 | success |
+| 1 | unbounded | 999997440 | 4251.08 | expected bounded OOM |
+| 2 | small-stress | 87138304 | 478.36 | success |
+| 2 | synthetic-5000 | 540704768 | 155743.83 | success |
+| 2 | real-zustand | 419844096 | 62128.95 | success |
+| 2 | unbounded | 999997440 | 4287.76 | expected bounded OOM |
+
+Each full suite also catches the other five memory and receipt plants. The JSON audit holds each assertion receipt. Memory tests still use their own bounded scopes. Each full suite runs inside the required 6G scope. Wall times are observations under shared load.
+
+### Other checks
+
+| Check | Exit | Evidence |
+| --- | --- | --- |
+| typecheck | 0 | [log](../../test-results/trial7-tests5-ruling2-typecheck.txt) |
+| memod | 0 | [log](../../test-results/trial7-tests5-ruling2-memod.txt) |
+| readme | 0 | [log](../../test-results/trial7-tests5-ruling2-readme.txt) |
+| score | 0 | [log](../../test-results/trial7-tests5-ruling2-score.txt) |
+
+No requested item lacks a case. No code/contract disagreement remains under the second ruling.
+
+### Evidence retained
+
+- `test-results/batch4-selftest-5G4CVw`.
+- `test-results/batch4-selftest-hqtG07`.
+- `test-results/batch5-selftest-Gw3Yrm`.
+- `test-results/batch5-selftest-znZ2a3`.
+- `test-results/batch6-selftest-EkbQxN`.
+- `test-results/batch6-selftest-WZPN6w`.
+- `test-results/batch7-selftest-69vbTi`.
+- `test-results/batch7-selftest-Hos7BF`.
+- `test-results/batch7-selftest-OHXuCL`.
+- `test-results/batch7-selftest-hycWpL`.
+- `test-results/ticket-selftest-INw4YV`.
+- `test-results/ticket-selftest-pZ6OQl`.
+- `test-results/trial7-tests5-ruling2-*` holds the focused and full logs, exact exit statuses, and check logs. Earlier evidence remains intact.
+
+The fifth-round section below its historical heading records the superseded first-form ruling. Its failures are historical evidence, not current failures.
+
+### Reproduce
+
+```sh
+export PATH="$HOME/.opencode/bin:$HOME/.npm-global/bin:$HOME/.local/share/mise/installs/pnpm/12.11.2:$HOME/.local/bin:$PATH"
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=2G -p CPUQuota=400% node eval/selftest/batch7-check.mjs B7-93
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/check.mjs
+```
+
+## B7-93 process-disappearance audit
+
+The runner observer accepts ENOENT and ESRCH from either process file as gone. It discards a stat sample if cmdline vanishes during the same observation. Unexpected errors still fail with their original message. The ten-second bound and the surviving-child predicate are unchanged.
+
+### Places changed
+
+- `eval/selftest/batch7-host.mjs:procText`: ENOENT and ESRCH return null. Other errors propagate unchanged.
+- `eval/selftest/batch7-host.mjs:runnerState`: A vanished stat or cmdline makes the whole observation gone. The runner case and surviving-child plant share this observer.
+- `eval/selftest/batch7-host.mjs:live`: Cleanup liveness uses procText and accepts both disappearance errors.
+- `eval/selftest/batch7-host.mjs:ownedPids`: The child scan uses procText. It omits vanished entries and propagates unexpected errors.
+- `eval/selftest/batch7-memory.mjs:fingerprint failure child-state observation`: The recorded-child stat read treats ENOENT and ESRCH as gone. Other errors propagate.
+
+The batch 7 search also found current-worker cgroup and descriptor reads, plus access-denial probes through `/proc/1/root`. These are not observations of another process that may end. They are unchanged.
+
+### Deterministic check
+
+The regression failed before the fix in 8/26 checks. It passes 26/26 checks after the fix. It reads a nonexistent PID and ends and reaps a real child between stat and cmdline reads. Fault injection covers ENOENT and ESRCH at both files and requires EACCES and EIO to propagate unchanged. The global synchronous file boundary is restored in `finally`.
+
+[Before-fix log](../../test-results/b7-93-esrch-before.txt); [after-fix log](../../test-results/b7-93-esrch-deterministic.txt). Each scratch root contains `proc-disappearance-check.json`.
+
+### Repeated runs
+
+| Run | Cases | Exit | Runner repetitions | Surviving-child plant |
+| --- | --- | --- | --- | --- |
+| [focused 1](../../test-results/b7-93-esrch-focused-1.txt) | 3/3 | 0 | 50/50 | caught at ten-second bound |
+| [focused 2](../../test-results/b7-93-esrch-focused-2.txt) | 3/3 | 0 | 50/50 | caught at ten-second bound |
+| [focused 3](../../test-results/b7-93-esrch-focused-3.txt) | 3/3 | 0 | 50/50 | caught at ten-second bound |
+| [full 1](../../test-results/b7-93-esrch-full-1.txt) | 1554/1554 | 0 | 50/50 | caught at ten-second bound |
+| [full 2](../../test-results/b7-93-esrch-full-2.txt) | 1554/1554 | 0 | 50/50 | caught at ten-second bound |
+
+The three focused batches pass 150/150 runner-death repetitions under four CPU-load processes. The two full suites include another 100/100 repetitions. All five suites catch the surviving-child plant while it retains an address space at the bound. Each full suite also runs the new deterministic case.
+
+### Other checks
+
+- `typecheck`: exit 0, [log](../../test-results/b7-93-esrch-typecheck.txt).
+- `memod`: exit 0, [log](../../test-results/b7-93-esrch-memod.txt).
+
+All self-test runs use the required 6G memory scope, 400% CPU quota, and `/mnt/ssd/tmp`. No trial or hosted model ran. No package was installed. No push or scratch deletion ran. Scratch and logs remain under `test-results/`. The JSON audit records the raw evidence paths. Earlier audit sections retain their historical counts.
+
+### Reproduce
+
+```sh
+export PATH="$HOME/.opencode/bin:$HOME/.npm-global/bin:$HOME/.local/share/mise/installs/pnpm/12.11.2:$HOME/.local/bin:$PATH"
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/batch7-check.mjs "proc disappearance"
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/batch7-check.mjs B7-93
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/check.mjs
+```

@@ -1432,12 +1432,67 @@ Full answers and file
 manifests remain outside the agent filesystem for the smoke audit.
 Batches 1 to 6 keep their earlier setup and limits.
 
-**Ablations.** Copy the resolved built store once per ablation. Graph-nolink
-removes CITES relationships. Graph-noterms removes Term nodes and MENTIONS
-relationships. Receipts record copy and mutation milliseconds. Graph
-fingerprints check every unchanged node, relationship, record text and
-search vector. No product flag, environment switch, source change or recipe
-change implements a condition.
+**Ablations.** Prepare both copies once per batch under a kernel `flock`.
+Graph-nolink removes CITES relationships. Graph-noterms removes Term nodes
+and MENTIONS relationships. Later cells and restarted runners validate
+`prepared.json` against the source path, snapshot and WAL file identities,
+and both proof files. This check starts no relate process and copies no
+store. A changed receipt or store refuses as a harness failure. A directory
+without a ready receipt but with partial files requires inspection.
+Preparation preserves those files. The old ablations directory was empty
+when inspected read-only on 2026-11-16; it needs no removal before starting.
+If another start leaves partial files there, archive the whole directory
+before using a fresh preparation directory.
+
+Fingerprints bind full node properties to internal IDs and hash edge rows
+with short endpoint IDs. Clones retain those IDs after deletion. Queries
+range 256 nodes or 4,096 edges before projection; SHA-256 consumes rows as
+they arrive. Expected row counts must match the stream. Every unchanged
+node, relationship, record text and search vector remains checked.
+Memory grows with the loaded graph, one bounded projection, and the small
+query list. It does not multiply relationship count by endpoint text or
+vector size. No product flag, environment switch, source change or recipe
+change implements a condition. See the receipt format and independent
+failure contract in [batch7-failures.md](tickets/batch7-failures.md).
+
+Measured on 2026-11-16 with `MemoryMax=2G`, `CPUQuota=400%` and
+`TMPDIR=/mnt/ssd/tmp`: the real store has 1,934 records, 26,185 nodes,
+152,445 relationships and 18,204,266 bytes, following its symlink.
+The original fingerprint returns 23,477,829 bytes of nodes, then the
+relationship projection hits the 2 GiB scope limit. The kernel kills the
+scope after 9.934 seconds, before any fingerprint returns.
+
+| Preparation, without an agent | Whole-scope peak, bytes | Wall time |
+| --- | ---: | ---: |
+| Real stores alone | 419,663,872 | 50.72 s |
+| Real stores, receipt reused | 80,928,768 | 0.156 s |
+| One smoke cell, including repo, baseline and client | 429,633,536 | 57.46 s |
+| Three cell preparations at once, sharing one preparation | 514,093,056 | 58.59 s |
+| Synthetic: 5,000 records, 305,000 relationships | 550,387,712 to 567,586,816 | 142.20 to 152.02 s |
+| Synthetic, receipt reused | 81,657,856 | 0.233 s |
+
+Each peak comes from cgroup `memory.peak`, which includes all subprocesses
+and charged file cache. Each row has one run, except synthetic preparation
+has two. All successful preparation peaks are below 1,000,000,000 bytes.
+The parent's 6 GiB smoke scope covers the measured preparation peak.
+Agent execution and health queries are outside these measurements.
+Shared host load makes the wall times observations rather than a speed claim.
+A trace of three simultaneous small-store callers records exactly two
+copies and two mutation queries; reuse adds no relate or copy calls.
+
+Reproduce the store-only measurement inside a fresh scope:
+
+```sh
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=2G -p CPUQuota=400% \
+  node eval/measure-preparation.mjs <store> <new-ablation-directory>
+```
+
+Repeat with the same directory to measure receipt reuse. Build synthetic
+input inside the same memory limit with
+`node eval/store-stress.mjs <new-directory> 5000`. Each record has about
+8,000 text bytes and 384 deterministic floats assigned directly; this
+build starts no embedding model. Preparation time is mainly graph loading,
+range scans and hashing. No runner memory-scope guard is added.
 
 Carry omits term candidates already printed as linked decisions. A CITES
 removal alone would therefore change its term section. The eval service

@@ -117,3 +117,51 @@ not a live run: its socket mounts no longer exist. Do not start an agent.
 - B7-80: Send a valid unsupported command, a valid option-bearing command, or an embedded NUL argument. Expected: stdout empty, stderr exactly `usage: whygraph <carry|why|impact|search> <target>\n`, exit 2; no store query. Exec argv cannot carry NUL. Send over 64 tool arguments, an argument over 60,000 bytes, or a total tool frame over 65,536 bytes. Expected: connection closes; stdout empty, stderr `whygraph service unavailable\n`, exit 70, harness failure. The shell protocol permits at most 1,024 fields and a 1 MiB request; stdin frames contain at most 8,192 bytes.
 - B7-81: Hash every initial repo, script and client file across conditions, including `/tools/shell-client`. Expected: byte identity except the exact omitted rule; no socket path, store path or condition occurs in a readable shell script.
 - B7-82: Launch from a repo path reached through a host symlink. Expected: service target mapping uses the canonical repo root; `/repo/...` targets work like relative targets.
+
+
+## Bounded store preparation
+
+These cases call the synchronous exported `ablatedStores(store, directory)`
+in `eval/closed-store.mjs`. They start no agent. `storeFingerprint(store)`
+remains a synchronous independent graph fingerprint entry. Build stress
+input with `node eval/store-stress.mjs <new-directory> 5000`. Each record
+has 384 directly assigned deterministic floats and about 8,000 text bytes.
+There are 305,000 relationships. No embedding model runs.
+
+Run every store command in
+`TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=2G -p CPUQuota=400% <command>`.
+Use a new scope for each measurement. The cgroup `memory.peak` includes all
+processes and charged file cache. `node eval/measure-preparation.mjs <store>
+<ablation-directory>` prints that peak and wall milliseconds. An independent
+author adds the checks; these entries are the failure contract.
+
+The receipt is `<ablation-directory>/prepared.json`. Version 1 fields:
+`version: 1`, `algorithm: "sha256-internal-ids-v1"`, `source` (canonical
+store path), `ms`, `fingerprints` (`graph`, `graph-nolink`, `graph-noterms`),
+`proofs` (two ablation keys), and `files` (three store keys). Fingerprint
+fields remain `nodes`, `edges`, `links`, `terms`, `mentions`, `linkCount`,
+`termCount`, `mentionCount`. A proof holds `full`, `ablated`, `unchanged`.
+Each `files` value is a sorted list of `[relativePath, device, inode,
+byteLength, mtimeNs, ctimeNs]`, with the numbers encoded as decimal strings.
+Only relate's `.cypherlite.lock` and `.cypherlite.writer` files are omitted.
+`<condition>.json` retains `source`, `ms`, `query`.
+`<condition>.proof.json` retains `full`, `ablated`, `unchanged`.
+The kernel lock is `.prepare.lock`; publication renames
+`prepared.next.json` to `prepared.json`. `preparing.json` retains the source
+and start time. No receipt exists until both ablations pass.
+
+- B7-83: Prepare the real 1,934-record zustand store, then the 5,000-record, 305,000-relationship stress store in separate scopes. Expected: successful exact proofs; whole-tree peak resident memory below 1,000,000,000 bytes; report wall time. A whole-scope `memory.peak` below that bound is sufficient, because it also includes file cache. OOM, missing peak or a partial preparation fails.
+- B7-84: Two or three processes call `ablatedStores` simultaneously with the same new directory. Expected: one copy and proof per ablation; later callers wait for publication and return the same paths and fingerprints. No caller observes a partial store. Record the whole-scope peak and wall time. Instrument relate/copy externally to count preparations; do not infer success from matching results alone.
+- B7-85: Restart after successful preparation and call again. Expected: metadata checks only; zero relate or copy calls, unchanged receipt bytes and times, same fingerprints. Measure wall time and whole-scope peak. Per-cell health uses receipt fingerprints without calling `storeFingerprint`.
+- B7-86: Change vector, record text, endpoint, relationship properties or any unrelated node/edge after publication; replace, add or remove a data file. Expected: receipt validation refuses as a harness failure before a cell starts. Reset mtime after a write too: ctime still invalidates the receipt. Lock-file updates alone do not invalidate it.
+- B7-87: Kill preparation while copying, mutating, fingerprinting, writing proofs, or before the receipt rename. Expected: kernel lock releases after its holder ends; a later caller refuses incomplete evidence. It never rebuilds or reads a half-made store. Inspect the supplied old ablations read-only; archive suspect contents outside this preparation entry before a new start.
+- B7-88: Copy a marker from another source, change the source symlink target, alter the algorithm/version, damage JSON, remove a proof or change a proof. Expected: explicit source, invalid receipt, invalid proof or incomplete-preparation failure; no graph query or cell launch on reuse. Existing B7-27 cases remain unchanged.
+- B7-89: Before first preparation, change a node vector, text, labels, identity, an edge endpoint/type/properties, or the multiplicity of parallel edges. Expected: `storeFingerprint` changes in the affected component. Full versus ablated comparisons still prove every unchanged component equal. Deleting Term nodes must not renumber retained IDs; a database that renumbers them causes preparation to refuse.
+- B7-90: Change the source while preparation runs. Expected: the source file identities differ at the final check; no ready receipt publishes. A first build lacking `manifest.json` refuses as an invalid store.
+- B7-91: A query exits nonzero, emits invalid JSON, or its child fails to spawn. Expected: fingerprint and preparation fail, no ready receipt publishes, child processes end. Never hash a truncated successful-looking prefix. A child that exits 0 after fewer rows than the bounds query counted must also fail with `incomplete fingerprint rows`.
+- B7-92: Open every prepared store read-only between receipt checks. Expected: advisory lock changes do not invalidate the receipt; changed manifest, snapshot or WAL data always does. Existing batch 7 health and smoke checks use the same fingerprints and keep their exact byte contracts.
+
+
+## Existing gate failure found during memory work
+
+- B7-93 (the runner-death case of B7-76; parent ruling of 2026-11-16, second form): Kill the launcher owner after both child readiness messages. No cleanup call exists in this case, and nothing is left to wait for the children: the kernel ends them after their owner, a short time later. Expected: every recorded child process is gone or a zombie within 10 seconds of the owner's death; the case observes until that is so or the bound passes. A process that is still alive with an address space when the bound passes fails the case (a child that ignores its owner's death is the planted fault). A file write by a child after the owner's death and before its own end is possible and is not a fault of this case: the attempt of a dead runner is never scored (B7-54). Measured before the ruling, in 50 repetitions twice: at the first observation after the owner was reaped, a child was still alive with its address space in 1 and 5 repetitions, and in kernel teardown (exiting flag set, no address space) in 5 and 4; every child was gone shortly after. The first form of this ruling asked for termination at the first observation; the measurement shows that the kernel does not give that. The timeout and cleanup cases of B7-76 keep their rule: cleanup returns only after the command scope has ended.

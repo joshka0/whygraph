@@ -5222,5 +5222,1163 @@
       "changed-path-suffix": "caught with unchanged total summary",
       "log": "test-results/trial7-tests3-comparator-plants.txt"
     }
+  },
+  "fifth_round": {
+    "contract_commit": "f826221",
+    "production_commit": "2902747",
+    "test_commits": [
+      "f7ed190",
+      "6bae259"
+    ],
+    "coverage": {
+      "B7-83": "Two-record build first; committed 5000-record/305000-edge build; exact proofs and peak under the enforced billion-byte limit. Real zustand case runs read-only when present and explicitly reports absence.",
+      "B7-84": "Two and three real processes contend under flock; all are alive before publication. One common scope measures their aggregate peak. External instrumentation sees two copies, two mutation queries and six fingerprint query processes.",
+      "B7-85": "Fresh-process reuse makes zero copy/query calls and preserves receipt bytes, mtime and ctime. Six simulated-agent cells use the shared receipt fingerprints in real health records.",
+      "B7-86": "Vector, text, endpoint, edge properties, unrelated node and edge changes each refuse. Replaced, added and removed files refuse. Exact nanosecond mtime restoration still changes ctime and refuses.",
+      "B7-87": "Kill at real copy, mutation, fingerprint, partial proof write and receipt-rename boundaries. Every later caller acquires the released lock, refuses without copy/query, and preserves incomplete evidence.",
+      "B7-88": "Foreign source marker, retargeted symlink, algorithm, version, broken JSON, missing/changed proof, changed receipt fingerprint and missing marker each refuse without copy/query.",
+      "B7-89": "Vector, text, labels, public/internal node identity, internal edge identity, endpoint, type, properties, parallel multiplicity and unrelated components each change their own digest. Every changed source still passes exact ablation proofs. Terms occupy interior IDs; a renumbering query process refuses.",
+      "B7-90": "Source rewrite during a paused real preparation refuses at the final identity check. A missing manifest refuses before query/copy. Neither publishes ready evidence.",
+      "B7-91": "Both fingerprint and preparation reject nonzero exit, invalid JSON, spawn failure and successful truncated output. No ready receipt or running query child remains.",
+      "B7-92": "Read-only opens and both advisory lock files preserve reuse. Manifest, node snapshot, relationship snapshot and real WAL data mutations each refuse in all three stores. Existing health/smoke byte checks remain in the full suite.",
+      "B7-93": "First /proc state is sampled immediately after owner reap, before awaiting client completion. Only gone, zombie, or PF_EXITING + zero vsize + empty cmdline passes. Every later state must stay terminated, disappearance has the stated 10-second bound, and release produces no later file write. Fifty repetitions run under four CPU-load processes; live survivors remain red."
+    },
+    "runs": [
+      {
+        "log": "test-results/trial7-tests5-final-1.txt",
+        "exit": 1,
+        "passed": 1551,
+        "total": 1553,
+        "summary": "1551/1553 cases as expected (22 original verdicts, 1531 ticket checks)",
+        "scratch": "test-results/batch7-selftest-v01qaX",
+        "failures": [
+          "WRONG B7 B7-76 runner ends background and new-session children before returning",
+          "WRONG B7 B7-93 runner death passes 50 consecutive repetitions under CPU load"
+        ],
+        "measurements": [
+          {
+            "name": "small-stress",
+            "path": "test-results/batch7-selftest-v01qaX/measurement-small-stress.json",
+            "status": 0,
+            "wall_ms": 666.3591270000001,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p376589-i779528003.scope",
+              "peak": 88375296,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "name": "synthetic-5000",
+            "path": "test-results/batch7-selftest-v01qaX/measurement-synthetic-5000.json",
+            "status": 0,
+            "wall_ms": 169820.658936,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p390481-i779564543.scope",
+              "peak": 539762688,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "name": "real-zustand",
+            "path": "test-results/batch7-selftest-v01qaX/measurement-real-zustand.json",
+            "status": 0,
+            "wall_ms": 59149.017656,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p507838-i779675513.scope",
+              "peak": 438685696,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "name": "unbounded",
+            "path": "test-results/batch7-selftest-v01qaX/measurement-unbounded.json",
+            "status": 1,
+            "wall_ms": 4290.605302,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p600974-i779769562.scope",
+              "peak": 999997440,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 62,
+                "oom": 1,
+                "oom_kill": 1,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          }
+        ],
+        "concurrency": [
+          {
+            "path": "test-results/batch7-selftest-v01qaX/memory-10-concurrent-2/concurrency.json",
+            "callers": 2,
+            "status": 0,
+            "wall_ms": 690.414873,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p549856-i779692900.scope",
+              "peak": 139112448,
+              "limit": "2147483648",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "path": "test-results/batch7-selftest-v01qaX/memory-13-concurrent-3/concurrency.json",
+            "callers": 3,
+            "status": 0,
+            "wall_ms": 1094.290491,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p550450-i779644391.scope",
+              "peak": 179118080,
+              "limit": "2147483648",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          }
+        ],
+        "restart": {
+          "path": "test-results/batch7-selftest-v01qaX/memory-15-restart/restart.json",
+          "wall_ms": 342.125867,
+          "memory": {
+            "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p551843-i779693065.scope",
+            "peak": 80281600,
+            "limit": "2147483648",
+            "events": {
+              "low": 0,
+              "high": 0,
+              "max": 0,
+              "oom": 0,
+              "oom_kill": 0,
+              "oom_group_kill": 0,
+              "sock_throttled": 0
+            }
+          }
+        },
+        "plants": [
+          {
+            "name": "unbounded",
+            "owner": "B7-83 bounded preparation must succeed",
+            "path": "test-results/batch7-selftest-v01qaX/plant-memory-unbounded.json",
+            "first_failing_assertion": "bounded preparation must succeed\n\n1 !== 0\n"
+          },
+          {
+            "name": "per-cell",
+            "owner": "B7-85 restart makes zero copy and relate calls",
+            "path": "test-results/batch7-selftest-v01qaX/plant-memory-per-cell.json",
+            "first_failing_assertion": "restart must make zero copy and relate calls\n\n2 !== 0\n"
+          },
+          {
+            "name": "receipt",
+            "owner": "B7-88 invalid receipt refuses",
+            "path": "test-results/batch7-selftest-v01qaX/plant-memory-receipt.json",
+            "first_failing_assertion": "changed or incomplete store must refuse"
+          },
+          {
+            "name": "half-made",
+            "owner": "B7-87 incomplete preparation refuses",
+            "path": "test-results/batch7-selftest-v01qaX/plant-memory-half-made.json",
+            "first_failing_assertion": "changed or incomplete store must refuse"
+          },
+          {
+            "name": "vector",
+            "owner": "B7-89 changed vector changes node fingerprint",
+            "path": "test-results/batch7-selftest-v01qaX/plant-memory-vector.json",
+            "first_failing_assertion": "vector must change nodes fingerprint"
+          },
+          {
+            "name": "survives-runner",
+            "owner": "B7-93 first observation sees no live child with an address space",
+            "path": "test-results/batch7-selftest-v01qaX/plant2-survives-runner.json",
+            "first_failing_assertion": "child 172090 must terminate at first observation after runner death\n\nfalse !== true\n"
+          }
+        ],
+        "runner": {
+          "path": "test-results/batch7-selftest-v01qaX/runner-death-repetitions.json",
+          "repetitions": 50,
+          "failed": 1,
+          "kernel_teardown_repetitions": 5,
+          "exiting_predicate_repetitions_including_zombies": 14,
+          "teardown_process_observations_by_state": {
+            "Z": 17,
+            "R": 5,
+            "D": 1,
+            "X": 0,
+            "S": 0
+          }
+        }
+      },
+      {
+        "log": "test-results/trial7-tests5-final-2.txt",
+        "exit": 1,
+        "passed": 1551,
+        "total": 1553,
+        "summary": "1551/1553 cases as expected (22 original verdicts, 1531 ticket checks)",
+        "scratch": "test-results/batch7-selftest-G1QkSi",
+        "failures": [
+          "WRONG B7 B7-76 runner ends background and new-session children before returning",
+          "WRONG B7 B7-93 runner death passes 50 consecutive repetitions under CPU load"
+        ],
+        "measurements": [
+          {
+            "name": "small-stress",
+            "path": "test-results/batch7-selftest-G1QkSi/measurement-small-stress.json",
+            "status": 0,
+            "wall_ms": 478.54269000000005,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p595215-i779741442.scope",
+              "peak": 89505792,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "name": "synthetic-5000",
+            "path": "test-results/batch7-selftest-G1QkSi/measurement-synthetic-5000.json",
+            "status": 0,
+            "wall_ms": 133185.001074,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p606121-i779734609.scope",
+              "peak": 535220224,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "name": "real-zustand",
+            "path": "test-results/batch7-selftest-G1QkSi/measurement-real-zustand.json",
+            "status": 0,
+            "wall_ms": 50461.551231000005,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p695769-i779850724.scope",
+              "peak": 435179520,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "name": "unbounded",
+            "path": "test-results/batch7-selftest-G1QkSi/measurement-unbounded.json",
+            "status": 1,
+            "wall_ms": 3594.601551,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p774395-i779945199.scope",
+              "peak": 999997440,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 38,
+                "oom": 1,
+                "oom_kill": 1,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          }
+        ],
+        "concurrency": [
+          {
+            "path": "test-results/batch7-selftest-G1QkSi/memory-10-concurrent-2/concurrency.json",
+            "callers": 2,
+            "status": 0,
+            "wall_ms": 617.422284,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p729659-i779895925.scope",
+              "peak": 138715136,
+              "limit": "2147483648",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "path": "test-results/batch7-selftest-G1QkSi/memory-13-concurrent-3/concurrency.json",
+            "callers": 3,
+            "status": 0,
+            "wall_ms": 879.7202950000001,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p730089-i779876957.scope",
+              "peak": 180011008,
+              "limit": "2147483648",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          }
+        ],
+        "restart": {
+          "path": "test-results/batch7-selftest-G1QkSi/memory-15-restart/restart.json",
+          "wall_ms": 291.345417,
+          "memory": {
+            "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p731221-i779885325.scope",
+            "peak": 81764352,
+            "limit": "2147483648",
+            "events": {
+              "low": 0,
+              "high": 0,
+              "max": 0,
+              "oom": 0,
+              "oom_kill": 0,
+              "oom_group_kill": 0,
+              "sock_throttled": 0
+            }
+          }
+        },
+        "plants": [
+          {
+            "name": "unbounded",
+            "owner": "B7-83 bounded preparation must succeed",
+            "path": "test-results/batch7-selftest-G1QkSi/plant-memory-unbounded.json",
+            "first_failing_assertion": "bounded preparation must succeed\n\n1 !== 0\n"
+          },
+          {
+            "name": "per-cell",
+            "owner": "B7-85 restart makes zero copy and relate calls",
+            "path": "test-results/batch7-selftest-G1QkSi/plant-memory-per-cell.json",
+            "first_failing_assertion": "restart must make zero copy and relate calls\n\n2 !== 0\n"
+          },
+          {
+            "name": "receipt",
+            "owner": "B7-88 invalid receipt refuses",
+            "path": "test-results/batch7-selftest-G1QkSi/plant-memory-receipt.json",
+            "first_failing_assertion": "changed or incomplete store must refuse"
+          },
+          {
+            "name": "half-made",
+            "owner": "B7-87 incomplete preparation refuses",
+            "path": "test-results/batch7-selftest-G1QkSi/plant-memory-half-made.json",
+            "first_failing_assertion": "changed or incomplete store must refuse"
+          },
+          {
+            "name": "vector",
+            "owner": "B7-89 changed vector changes node fingerprint",
+            "path": "test-results/batch7-selftest-G1QkSi/plant-memory-vector.json",
+            "first_failing_assertion": "vector must change nodes fingerprint"
+          },
+          {
+            "name": "survives-runner",
+            "owner": "B7-93 first observation sees no live child with an address space",
+            "path": "test-results/batch7-selftest-G1QkSi/plant2-survives-runner.json",
+            "first_failing_assertion": "child 440924 must terminate at first observation after runner death\n\nfalse !== true\n"
+          }
+        ],
+        "runner": {
+          "path": "test-results/batch7-selftest-G1QkSi/runner-death-repetitions.json",
+          "repetitions": 50,
+          "failed": 5,
+          "kernel_teardown_repetitions": 4,
+          "exiting_predicate_repetitions_including_zombies": 14,
+          "teardown_process_observations_by_state": {
+            "Z": 17,
+            "R": 4,
+            "D": 0,
+            "X": 0,
+            "S": 0
+          }
+        }
+      }
+    ],
+    "checks": {
+      "typecheck": {
+        "log": "test-results/trial7-tests5-typecheck.txt",
+        "exit": 0,
+        "output_bytes": 83
+      },
+      "memod": {
+        "log": "test-results/trial7-tests5-memod.txt",
+        "exit": 0,
+        "output_bytes": 0
+      },
+      "readme": {
+        "log": "test-results/trial7-tests5-readme.txt",
+        "exit": 0,
+        "output_bytes": 23
+      },
+      "score": {
+        "log": "test-results/trial7-tests5-score.txt",
+        "exit": 0,
+        "output_bytes": 0
+      }
+    },
+    "omitted_items": [],
+    "skipped_cases": [],
+    "contract_disagreements": [
+      {
+        "run": "test-results/trial7-tests5-final-1.txt",
+        "case": "WRONG B7 B7-76 runner ends background and new-session children before returning",
+        "contract": "B7-93 requires termination at the first observation after owner reap.",
+        "observed": "At least one recorded process still has an address space and fails the exact termination predicate. Production code remains unchanged."
+      },
+      {
+        "run": "test-results/trial7-tests5-final-1.txt",
+        "case": "WRONG B7 B7-93 runner death passes 50 consecutive repetitions under CPU load",
+        "contract": "B7-93 requires termination at the first observation after owner reap.",
+        "observed": "At least one recorded process still has an address space and fails the exact termination predicate. Production code remains unchanged."
+      },
+      {
+        "run": "test-results/trial7-tests5-final-2.txt",
+        "case": "WRONG B7 B7-76 runner ends background and new-session children before returning",
+        "contract": "B7-93 requires termination at the first observation after owner reap.",
+        "observed": "At least one recorded process still has an address space and fails the exact termination predicate. Production code remains unchanged."
+      },
+      {
+        "run": "test-results/trial7-tests5-final-2.txt",
+        "case": "WRONG B7 B7-93 runner death passes 50 consecutive repetitions under CPU load",
+        "contract": "B7-93 requires termination at the first observation after owner reap.",
+        "observed": "At least one recorded process still has an address space and fails the exact termination predicate. Production code remains unchanged."
+      }
+    ],
+    "scope": {
+      "edits": [
+        "eval/selftest/"
+      ],
+      "installs": 0,
+      "hosted_models_started": 0,
+      "delegation": false,
+      "pushes": 0,
+      "branch": "batch-7-memory"
+    },
+    "measurement_limits": "Whole-scope cgroup memory.peak includes subprocesses and charged file cache. The B7-83 preparation and OOM scopes request MemoryMax=1000000000 and CPUQuota=400%. Concurrency and receipt reuse run in 2G scopes. Linux rounds MemoryMax down to a page boundary. OOMPolicy=continue preserves the observer after the kernel kills the unbounded relate child; the memory bound does not change. Times are observations under shared load, not speed comparisons.",
+    "fixture_corrections": [
+      "Page rounding is asserted using getconf PAGESIZE.",
+      "Snapshot files come from manifest node_parts and rel_parts, not guessed filenames.",
+      "WAL selection excludes advisory lock basenames in nested directories.",
+      "The OOM requirement is checked outside the expected-assertion catcher so missing evidence cannot pass."
+    ],
+    "governing_records": [
+      "B7-83 through B7-93 at f826221",
+      "ADR 0011: store preparation, command scope lifetime, immutable receipts",
+      "eval/README.md: Batch 7, fixed before its first run",
+      "No decided/premise tag governs the edited test functions. No production code or decision record changed."
+    ],
+    "source_history": {
+      "git": "Read 2902747, f826221, 96ef115, b029576 and 455d9c1; memod history of batch7HostChecks.",
+      "fleet_memory": "mem view/topics/history cannot resolve /Users/joshka/repos/personal/whygraph.",
+      "issue_tracker": "The local failure list is the complete task contract; remote issues are irrelevant.",
+      "error_tracking": "No tool needed for offline test fixtures.",
+      "delegation": "Forbidden by the brief; no investigator launched."
+    },
+    "author_model": {
+      "harness": "Codex",
+      "model": "inherited session; exact ID not exposed",
+      "effort": "inherited session; exact setting not exposed",
+      "additional_models_launched": 0
+    },
+    "retained_scratch": [
+      "test-results/batch4-selftest-Ck8Wwr",
+      "test-results/batch4-selftest-T0INFu",
+      "test-results/batch5-selftest-f5hYXY",
+      "test-results/batch5-selftest-kcwHKf",
+      "test-results/batch6-selftest-05ZLJ5",
+      "test-results/batch6-selftest-H8yN2M",
+      "test-results/batch7-selftest-3w3Ci6",
+      "test-results/batch7-selftest-6spsSp",
+      "test-results/batch7-selftest-7G843m",
+      "test-results/batch7-selftest-CCUvdB",
+      "test-results/batch7-selftest-G1QkSi",
+      "test-results/batch7-selftest-Ko7q1L",
+      "test-results/batch7-selftest-LslcPK",
+      "test-results/batch7-selftest-Rt4mgm",
+      "test-results/batch7-selftest-cCvVld",
+      "test-results/batch7-selftest-gTfQRF",
+      "test-results/batch7-selftest-iulDn9",
+      "test-results/batch7-selftest-jL10pl",
+      "test-results/batch7-selftest-mIIEJn",
+      "test-results/batch7-selftest-v01qaX",
+      "test-results/ticket-selftest-hd1has",
+      "test-results/ticket-selftest-nuj3td"
+    ],
+    "old_ablations": {
+      "path": "/var/tmp/whygraph-eval/_zustand/ablations",
+      "inspection": "test-results/trial7-tests5-old-ablations.txt",
+      "result": "empty; inspected read-only; no archive or removal needed"
+    },
+    "superseded_by": "4d186ad: B7-93 second form"
+  },
+  "runner_death_second_ruling": {
+    "contract_commit": "4d186ad",
+    "test_commit": "1e572f6",
+    "ruling": "B7-93 second form",
+    "status": "done",
+    "coverage": "The runner owner dies after both readiness messages. The case samples every recorded PID until all are gone or zombies, or the 10-second bound passes. A surviving child with an address space is refused at the actual bound. Child writes before termination are permitted. Cleanup and timeout cases keep their previous predicate.",
+    "clock": "Elapsed time starts immediately before SIGKILL is requested, so the 10-second bound includes owner reap. No client wait or cleanup precedes the observations.",
+    "runs": [
+      {
+        "kind": "focused",
+        "log": "test-results/trial7-tests5-ruling2-focused.txt",
+        "exit": 0,
+        "passed": 2,
+        "total": 2,
+        "scratch": "test-results/batch7-selftest-69vbTi",
+        "failures": [],
+        "runner": {
+          "path": "test-results/batch7-selftest-69vbTi/runner-death-repetitions.json",
+          "repetitions": 50,
+          "failed": 0,
+          "more_than_one_observation": 10,
+          "longest_time_to_gone_or_zombie_ms": 52.93641199998092,
+          "kernel_teardown_repetitions": 7
+        },
+        "surviving_child_plant": {
+          "path": "test-results/batch7-selftest-69vbTi/plant2-survives-runner.json",
+          "first_failing_assertion": "runner children must be gone or zombie within 10 seconds",
+          "wall_ms": 10000.481742999982,
+          "live_address_spaces_at_bound": 3
+        },
+        "measurements": [],
+        "other_plants": []
+      },
+      {
+        "kind": "full",
+        "log": "test-results/trial7-tests5-ruling2-full-1.txt",
+        "exit": 0,
+        "passed": 1553,
+        "total": 1553,
+        "scratch": "test-results/batch7-selftest-hycWpL",
+        "failures": [],
+        "runner": {
+          "path": "test-results/batch7-selftest-hycWpL/runner-death-repetitions.json",
+          "repetitions": 50,
+          "failed": 0,
+          "more_than_one_observation": 15,
+          "longest_time_to_gone_or_zombie_ms": 145.5531300000148,
+          "kernel_teardown_repetitions": 6
+        },
+        "surviving_child_plant": {
+          "path": "test-results/batch7-selftest-hycWpL/plant2-survives-runner.json",
+          "first_failing_assertion": "runner children must be gone or zombie within 10 seconds",
+          "wall_ms": 10001.181311000022,
+          "live_address_spaces_at_bound": 3
+        },
+        "measurements": [
+          {
+            "name": "small-stress",
+            "path": "test-results/batch7-selftest-hycWpL/measurement-small-stress.json",
+            "status": 0,
+            "wall_ms": 417.59340499999996,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p2309117-i781481169.scope",
+              "peak": 87310336,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "name": "synthetic-5000",
+            "path": "test-results/batch7-selftest-hycWpL/measurement-synthetic-5000.json",
+            "status": 0,
+            "wall_ms": 155810.774104,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p2319400-i781457793.scope",
+              "peak": 541184000,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "name": "real-zustand",
+            "path": "test-results/batch7-selftest-hycWpL/measurement-real-zustand.json",
+            "status": 0,
+            "wall_ms": 62300.254918,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p2423702-i781602985.scope",
+              "peak": 437493760,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "name": "unbounded",
+            "path": "test-results/batch7-selftest-hycWpL/measurement-unbounded.json",
+            "status": 1,
+            "wall_ms": 4251.078978,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p2524371-i781694199.scope",
+              "peak": 999997440,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 51,
+                "oom": 1,
+                "oom_kill": 1,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          }
+        ],
+        "other_plants": [
+          {
+            "name": "unbounded",
+            "path": "test-results/batch7-selftest-hycWpL/plant-memory-unbounded.json",
+            "assertion": "bounded preparation must succeed\n\n1 !== 0\n",
+            "actual": 1,
+            "expected": 0
+          },
+          {
+            "name": "per-cell",
+            "path": "test-results/batch7-selftest-hycWpL/plant-memory-per-cell.json",
+            "assertion": "restart must make zero copy and relate calls\n\n2 !== 0\n",
+            "actual": 2,
+            "expected": 0
+          },
+          {
+            "name": "receipt",
+            "path": "test-results/batch7-selftest-hycWpL/plant-memory-receipt.json",
+            "assertion": "changed or incomplete store must refuse",
+            "actual": 0,
+            "expected": 0
+          },
+          {
+            "name": "half-made",
+            "path": "test-results/batch7-selftest-hycWpL/plant-memory-half-made.json",
+            "assertion": "changed or incomplete store must refuse",
+            "actual": 0,
+            "expected": 0
+          },
+          {
+            "name": "vector",
+            "path": "test-results/batch7-selftest-hycWpL/plant-memory-vector.json",
+            "assertion": "vector must change nodes fingerprint",
+            "actual": "0ccd1f34cbe2ccb6b70a7e574fab782322087e7dfd19e1e667d36cc348443a08",
+            "expected": "0ccd1f34cbe2ccb6b70a7e574fab782322087e7dfd19e1e667d36cc348443a08"
+          }
+        ]
+      },
+      {
+        "kind": "full",
+        "log": "test-results/trial7-tests5-ruling2-full-2.txt",
+        "exit": 0,
+        "passed": 1553,
+        "total": 1553,
+        "scratch": "test-results/batch7-selftest-Hos7BF",
+        "failures": [],
+        "runner": {
+          "path": "test-results/batch7-selftest-Hos7BF/runner-death-repetitions.json",
+          "repetitions": 50,
+          "failed": 0,
+          "more_than_one_observation": 6,
+          "longest_time_to_gone_or_zombie_ms": 145.7860899999505,
+          "kernel_teardown_repetitions": 4
+        },
+        "surviving_child_plant": {
+          "path": "test-results/batch7-selftest-Hos7BF/plant2-survives-runner.json",
+          "first_failing_assertion": "runner children must be gone or zombie within 10 seconds",
+          "wall_ms": 10000.183986000018,
+          "live_address_spaces_at_bound": 3
+        },
+        "measurements": [
+          {
+            "name": "small-stress",
+            "path": "test-results/batch7-selftest-Hos7BF/measurement-small-stress.json",
+            "status": 0,
+            "wall_ms": 478.36321000000004,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p2311426-i781461652.scope",
+              "peak": 87138304,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "name": "synthetic-5000",
+            "path": "test-results/batch7-selftest-Hos7BF/measurement-synthetic-5000.json",
+            "status": 0,
+            "wall_ms": 155743.831665,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p2321554-i781450922.scope",
+              "peak": 540704768,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "name": "real-zustand",
+            "path": "test-results/batch7-selftest-Hos7BF/measurement-real-zustand.json",
+            "status": 0,
+            "wall_ms": 62128.951304999995,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p2425686-i781603071.scope",
+              "peak": 419844096,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "name": "unbounded",
+            "path": "test-results/batch7-selftest-Hos7BF/measurement-unbounded.json",
+            "status": 1,
+            "wall_ms": 4287.757017,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p2526175-i781682851.scope",
+              "peak": 999997440,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 59,
+                "oom": 1,
+                "oom_kill": 1,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          }
+        ],
+        "other_plants": [
+          {
+            "name": "unbounded",
+            "path": "test-results/batch7-selftest-Hos7BF/plant-memory-unbounded.json",
+            "assertion": "bounded preparation must succeed\n\n1 !== 0\n",
+            "actual": 1,
+            "expected": 0
+          },
+          {
+            "name": "per-cell",
+            "path": "test-results/batch7-selftest-Hos7BF/plant-memory-per-cell.json",
+            "assertion": "restart must make zero copy and relate calls\n\n2 !== 0\n",
+            "actual": 2,
+            "expected": 0
+          },
+          {
+            "name": "receipt",
+            "path": "test-results/batch7-selftest-Hos7BF/plant-memory-receipt.json",
+            "assertion": "changed or incomplete store must refuse",
+            "actual": 0,
+            "expected": 0
+          },
+          {
+            "name": "half-made",
+            "path": "test-results/batch7-selftest-Hos7BF/plant-memory-half-made.json",
+            "assertion": "changed or incomplete store must refuse",
+            "actual": 0,
+            "expected": 0
+          },
+          {
+            "name": "vector",
+            "path": "test-results/batch7-selftest-Hos7BF/plant-memory-vector.json",
+            "assertion": "vector must change nodes fingerprint",
+            "actual": "0ccd1f34cbe2ccb6b70a7e574fab782322087e7dfd19e1e667d36cc348443a08",
+            "expected": "0ccd1f34cbe2ccb6b70a7e574fab782322087e7dfd19e1e667d36cc348443a08"
+          }
+        ]
+      }
+    ],
+    "checks": {
+      "typecheck": {
+        "log": "test-results/trial7-tests5-ruling2-typecheck.txt",
+        "exit": 0,
+        "output_bytes": 83
+      },
+      "memod": {
+        "log": "test-results/trial7-tests5-ruling2-memod.txt",
+        "exit": 0,
+        "output_bytes": 0
+      },
+      "readme": {
+        "log": "test-results/trial7-tests5-ruling2-readme.txt",
+        "exit": 0,
+        "output_bytes": 23
+      },
+      "score": {
+        "log": "test-results/trial7-tests5-ruling2-score.txt",
+        "exit": 0,
+        "output_bytes": 0
+      }
+    },
+    "omitted_items": [],
+    "contract_disagreements": [],
+    "scope": {
+      "branch": "batch-7-memory",
+      "tracked_edits": [
+        "eval/selftest/"
+      ],
+      "production_changes": 0,
+      "hosted_model_calls": 0,
+      "installs": 0,
+      "pushes": 0
+    },
+    "retained_scratch": [
+      "test-results/batch4-selftest-5G4CVw",
+      "test-results/batch4-selftest-hqtG07",
+      "test-results/batch5-selftest-Gw3Yrm",
+      "test-results/batch5-selftest-znZ2a3",
+      "test-results/batch6-selftest-EkbQxN",
+      "test-results/batch6-selftest-WZPN6w",
+      "test-results/batch7-selftest-69vbTi",
+      "test-results/batch7-selftest-Hos7BF",
+      "test-results/batch7-selftest-OHXuCL",
+      "test-results/batch7-selftest-hycWpL",
+      "test-results/ticket-selftest-INw4YV",
+      "test-results/ticket-selftest-pZ6OQl"
+    ]
+  },
+  "runner_death_proc_disappearance": {
+    "status": "done",
+    "contract_commit": "4d186ad",
+    "base_commit": "9e8d7f3",
+    "ruling": "B7-93 second form",
+    "bound_ms": 10000,
+    "places_changed": [
+      {
+        "file": "eval/selftest/batch7-host.mjs",
+        "symbol": "procText",
+        "change": "ENOENT and ESRCH return null. Other errors propagate unchanged."
+      },
+      {
+        "file": "eval/selftest/batch7-host.mjs",
+        "symbol": "runnerState",
+        "change": "A vanished stat or cmdline makes the whole observation gone. The runner case and surviving-child plant share this observer."
+      },
+      {
+        "file": "eval/selftest/batch7-host.mjs",
+        "symbol": "live",
+        "change": "Cleanup liveness uses procText and accepts both disappearance errors."
+      },
+      {
+        "file": "eval/selftest/batch7-host.mjs",
+        "symbol": "ownedPids",
+        "change": "The child scan uses procText. It omits vanished entries and propagates unexpected errors."
+      },
+      {
+        "file": "eval/selftest/batch7-memory.mjs",
+        "symbol": "fingerprint failure child-state observation",
+        "change": "The recorded-child stat read treats ENOENT and ESRCH as gone. Other errors propagate."
+      }
+    ],
+    "other_proc_reads": [
+      {
+        "file": "eval/selftest/batch7-memory-worker.mjs",
+        "reason": "/proc/self/cgroup is read by its live owner, not an observation of a process that may end."
+      },
+      {
+        "file": "eval/selftest/batch7-attempt-worker.mjs",
+        "reason": "/proc/self/fd opens the current worker descriptors, not a child-state observation."
+      },
+      {
+        "file": "eval/selftest/batch7-closed.mjs",
+        "reason": "/proc/1/root paths are access-denial probes. Their failures must remain visible."
+      }
+    ],
+    "deterministic_before": {
+      "log": "test-results/b7-93-esrch-before.txt",
+      "exit": 1,
+      "passed": 0,
+      "total": 1,
+      "scratch": "test-results/batch7-selftest-DjyYVZ",
+      "failures": [
+        "WRONG B7 B7-93 proc disappearance and unexpected errors are deterministic"
+      ],
+      "failed_checks": [
+        "runnerState stat ESRCH",
+        "procText stat ESRCH",
+        "live stat ESRCH",
+        "runnerState cmdline ESRCH",
+        "procText cmdline ESRCH",
+        "runnerState cmdline ENOENT",
+        "ownedPids cmdline EACCES",
+        "ownedPids cmdline EIO"
+      ]
+    },
+    "deterministic_after": {
+      "log": "test-results/b7-93-esrch-deterministic.txt",
+      "exit": 0,
+      "passed": 1,
+      "total": 1,
+      "scratch": "test-results/batch7-selftest-6l7QVa",
+      "failures": [],
+      "checks": 26
+    },
+    "deterministic_coverage": "A nonexistent PID; a real child killed and reaped between stat and cmdline reads; injected ENOENT and ESRCH at each file; EACCES and EIO propagate by identity from every reader. The synchronous file boundary is restored in finally.",
+    "focused_runs": [
+      {
+        "log": "test-results/b7-93-esrch-focused-1.txt",
+        "exit": 0,
+        "passed": 3,
+        "total": 3,
+        "scratch": "test-results/batch7-selftest-t5ku97",
+        "failures": [],
+        "deterministic": {
+          "checks": 26,
+          "failed": 0
+        },
+        "runner": {
+          "repetitions": 50,
+          "failed": 0,
+          "more_than_one_observation": 14,
+          "evidence": "test-results/batch7-selftest-t5ku97/runner-death-repetitions.json"
+        },
+        "surviving_child_plant": {
+          "caught": true,
+          "assertion": "runner children must be gone or zombie within 10 seconds",
+          "wall_ms": 10001.378047999984,
+          "live_address_spaces_at_bound": 3,
+          "evidence": "test-results/batch7-selftest-t5ku97/plant2-survives-runner.json"
+        }
+      },
+      {
+        "log": "test-results/b7-93-esrch-focused-2.txt",
+        "exit": 0,
+        "passed": 3,
+        "total": 3,
+        "scratch": "test-results/batch7-selftest-iVOtP6",
+        "failures": [],
+        "deterministic": {
+          "checks": 26,
+          "failed": 0
+        },
+        "runner": {
+          "repetitions": 50,
+          "failed": 0,
+          "more_than_one_observation": 13,
+          "evidence": "test-results/batch7-selftest-iVOtP6/runner-death-repetitions.json"
+        },
+        "surviving_child_plant": {
+          "caught": true,
+          "assertion": "runner children must be gone or zombie within 10 seconds",
+          "wall_ms": 10000.595915000013,
+          "live_address_spaces_at_bound": 3,
+          "evidence": "test-results/batch7-selftest-iVOtP6/plant2-survives-runner.json"
+        }
+      },
+      {
+        "log": "test-results/b7-93-esrch-focused-3.txt",
+        "exit": 0,
+        "passed": 3,
+        "total": 3,
+        "scratch": "test-results/batch7-selftest-HjgYdu",
+        "failures": [],
+        "deterministic": {
+          "checks": 26,
+          "failed": 0
+        },
+        "runner": {
+          "repetitions": 50,
+          "failed": 0,
+          "more_than_one_observation": 11,
+          "evidence": "test-results/batch7-selftest-HjgYdu/runner-death-repetitions.json"
+        },
+        "surviving_child_plant": {
+          "caught": true,
+          "assertion": "runner children must be gone or zombie within 10 seconds",
+          "wall_ms": 10001.026781999972,
+          "live_address_spaces_at_bound": 3,
+          "evidence": "test-results/batch7-selftest-HjgYdu/plant2-survives-runner.json"
+        }
+      }
+    ],
+    "full_runs": [
+      {
+        "log": "test-results/b7-93-esrch-full-1.txt",
+        "exit": 0,
+        "passed": 1554,
+        "total": 1554,
+        "scratch": "test-results/batch7-selftest-6zIt0d",
+        "failures": [],
+        "deterministic": {
+          "checks": 26,
+          "failed": 0
+        },
+        "runner": {
+          "repetitions": 50,
+          "failed": 0,
+          "more_than_one_observation": 9,
+          "evidence": "test-results/batch7-selftest-6zIt0d/runner-death-repetitions.json"
+        },
+        "surviving_child_plant": {
+          "caught": true,
+          "assertion": "runner children must be gone or zombie within 10 seconds",
+          "wall_ms": 10001.032204999938,
+          "live_address_spaces_at_bound": 3,
+          "evidence": "test-results/batch7-selftest-6zIt0d/plant2-survives-runner.json"
+        }
+      },
+      {
+        "log": "test-results/b7-93-esrch-full-2.txt",
+        "exit": 0,
+        "passed": 1554,
+        "total": 1554,
+        "scratch": "test-results/batch7-selftest-zKlWoS",
+        "failures": [],
+        "deterministic": {
+          "checks": 26,
+          "failed": 0
+        },
+        "runner": {
+          "repetitions": 50,
+          "failed": 0,
+          "more_than_one_observation": 16,
+          "evidence": "test-results/batch7-selftest-zKlWoS/runner-death-repetitions.json"
+        },
+        "surviving_child_plant": {
+          "caught": true,
+          "assertion": "runner children must be gone or zombie within 10 seconds",
+          "wall_ms": 10000.201098000049,
+          "live_address_spaces_at_bound": 3,
+          "evidence": "test-results/batch7-selftest-zKlWoS/plant2-survives-runner.json"
+        }
+      }
+    ],
+    "checks": {
+      "typecheck": {
+        "log": "test-results/b7-93-esrch-typecheck.txt",
+        "exit": 0
+      },
+      "memod": {
+        "log": "test-results/b7-93-esrch-memod.txt",
+        "exit": 0
+      }
+    },
+    "scope": {
+      "branch": "batch-7-memory",
+      "tracked_edits": [
+        "eval/selftest/"
+      ],
+      "production_changes": 0,
+      "hosted_model_calls": 0,
+      "trial_runs": 0,
+      "installs": 0,
+      "pushes": 0,
+      "scratch_deletions": 0
+    },
+    "resource_rule": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400%",
+    "retained_scratch": [
+      "test-results/batch7-selftest-6l7QVa",
+      "test-results/batch7-selftest-6zIt0d",
+      "test-results/batch7-selftest-DjyYVZ",
+      "test-results/batch7-selftest-HjgYdu",
+      "test-results/batch7-selftest-iVOtP6",
+      "test-results/batch7-selftest-t5ku97",
+      "test-results/batch7-selftest-zKlWoS"
+    ],
+    "evidence_generator": "test-results/b7-93-esrch-audit.py"
   }
 }

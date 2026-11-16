@@ -1,0 +1,14 @@
+{
+  "base": "e3b0207",
+  "case": "B7 B7-76 runner ends background and new-session children before returning",
+  "failure": "child <pid> must terminate before runner returns; actual true, expected false",
+  "observation": "State R, empty cmdline and zero address-space fields in the retained /proc receipt.",
+  "reproduction": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node /tmp/whygraph-b7-memory/main-runner-repeat.mjs",
+  "main_launcher_sha256": "3b96a2047dbd2fc11c6f424f866a8d6e1063ac5786aeb4b2deb01ec4c6852764",
+  "runs_before_failure": 4,
+  "failed_run": 5,
+  "evidence": "/tmp/whygraph-b7-memory/main-runner-repeat/5-attempt-12/lifetime-runner.json",
+  "log": "/tmp/whygraph-b7-memory/main-runner-repeat.log",
+  "required_result": "1476/1476 existing eval self-test cases pass without changing eval/selftest.",
+  "status": "open; no filtered pass or retry added"
+}

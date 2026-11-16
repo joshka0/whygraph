@@ -5,11 +5,12 @@
 import { createServer } from 'node:net';
 import { spawn, execFile, execFileSync } from 'node:child_process';
 import { promisify } from 'node:util';
-import { appendFileSync, chmodSync, cpSync, existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
+import { appendFileSync, chmodSync, cpSync, existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync, readdirSync, statSync, renameSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { constants } from 'node:os';
+import { createInterface } from 'node:readline';
 import { readQuery } from '../src/tools.ts';
 import { recipe } from '../src/ask.ts';
 import { whyAnswer } from '../src/answers.pure.ts';
@@ -21,47 +22,160 @@ const quiet = { ...process.env, RELATE_TELEMETRY: '0', DO_NOT_TRACK: '1' };
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 
 
-/** Fingerprint every graph component, including search vectors and record text.
+const boundsQuery = 'MATCH (n) RETURN max(id(n)) AS nodeMax, count(n) AS nodeCount; MATCH ()-[r]->() RETURN max(id(r)) AS edgeMax, count(r) AS edgeCount;';
+
+/** Fingerprint all properties once per node and short identities per edge.
  * owns: [[whygraph-closed-store]]
  */
 export function storeFingerprint(store) {
-  const read = query => execFileSync('relate',['--no-agent-mode','--max-rows','0','query','--database',store,'--read-only','--mode','jsonl',query],{env:quiet,encoding:'utf8',maxBuffer:1<<29}).trim().split('\n').filter(Boolean).map(JSON.parse);
-  const canonical = value => Array.isArray(value) ? value.map(canonical) : value && typeof value==='object' ? Object.fromEntries(Object.keys(value).sort().map(k=>[k,canonical(value[k])])) : value;
-  const digest = rows => hash(rows.map(r=>JSON.stringify(canonical(r))).sort().join('\n'));
-  const nodes=read('MATCH (n) RETURN labels(n) AS labels, properties(n) AS props');
-  const edges=read('MATCH (a)-[r]->(b) RETURN labels(a) AS a, properties(a) AS ap, type(r) AS type, properties(r) AS props, labels(b) AS b, properties(b) AS bp');
-  return {nodes:digest(nodes.filter(n=>!n.labels.includes('Term'))),edges:digest(edges.filter(e=>!['CITES','MENTIONS'].includes(e.type))),
-    links:digest(edges.filter(e=>e.type==='CITES')),terms:digest(nodes.filter(n=>n.labels.includes('Term'))),mentions:digest(edges.filter(e=>e.type==='MENTIONS')),
-    linkCount:edges.filter(e=>e.type==='CITES').length,termCount:nodes.filter(n=>n.labels.includes('Term')).length,mentionCount:edges.filter(e=>e.type==='MENTIONS').length};
+  const rows = execFileSync('relate', ['--no-agent-mode','--max-rows','0','query','--database',store,
+    '--read-only','--mode','jsonl',boundsQuery], { env: quiet, encoding: 'utf8', maxBuffer: 65536 });
+  const bounds = Object.assign({}, ...rows.trim().split('\n').filter(Boolean).map(JSON.parse));
+  return JSON.parse(execFileSync(process.execPath, [fileURLToPath(import.meta.url), 'fingerprint', store, JSON.stringify(bounds)],
+    { env: quiet, encoding: 'utf8', maxBuffer: 65536 }));
 }
 
-/** Clone the one built store, then remove only the ablated graph relationships.
- * owns: [[whygraph-closed-store]]
- */
-export function ablatedStores(store, directory) {
-  mkdirSync(directory, { recursive: true });
-  const answer = { graph: realpathSync(store) };
-  const full=storeFingerprint(store);
+async function fingerprint(store, bounds) {
+  const canonical = value => Array.isArray(value) ? value.map(canonical) : value && typeof value === 'object'
+    ? Object.fromEntries(Object.keys(value).sort().map(k => [k, canonical(value[k])])) : value;
+  const digests = Object.fromEntries(['nodes','edges','links','terms','mentions'].map(k => [k, createHash('sha256')]));
+  const counts = { linkCount: 0, termCount: 0, mentionCount: 0 };
+  const read = async (script, consume) => {
+    const child = spawn('relate', ['--no-agent-mode','--max-rows','0','query','--database',store,'--read-only','--mode','jsonl'],
+      { env: quiet, stdio: ['pipe','pipe','inherit'] });
+    let inputError;
+    child.stdin.on('error', error => { inputError = error; });
+    child.stdin.end(script);
+    const ended = new Promise((ok, fail) => {
+      child.once('error', fail);
+      child.once('close', (code, signal) => code === 0 ? ok() : fail(new Error(`fingerprint query exited ${code ?? signal}`)));
+    });
+    // Attach a rejection handler while stdout is read; await the same result below.
+    ended.catch(() => {});
+    try {
+      for await (const line of createInterface({ input: child.stdout, crlfDelay: Infinity })) {
+        if (line.trim()) consume(JSON.parse(line));
+      }
+      await ended;
+      if (inputError) throw inputError;
+    } catch (error) {
+      child.kill('SIGKILL');
+      await ended.catch(() => {});
+      throw error;
+    }
+  };
+  const add = (key, row) => digests[key].update(JSON.stringify(canonical(row)) + '\n');
+  // Range each statement before projection: relate materializes query results.
+  // One database session reuses its loaded graph across all bounded statements.
+  if (!bounds) {
+    bounds = {};
+    await read(boundsQuery, row => Object.assign(bounds, row));
+  }
+  const nodeMax = bounds.nodeMax ?? -1, edgeMax = bounds.edgeMax ?? -1;
+  if (![nodeMax,edgeMax,bounds.nodeCount,bounds.edgeCount].every(Number.isSafeInteger)
+    || nodeMax < -1 || edgeMax < -1 || bounds.nodeCount < 0 || bounds.edgeCount < 0)
+    throw new Error('invalid fingerprint row bounds');
+  let nodeRows = 0, edgeRows = 0;
+  const statements = [];
+  // Clones retain IDs after deletes. Node rows bind short endpoints to every
+  // property, including record text and vectors, without expanding each edge.
+  for (let start = 0; start <= nodeMax; start += 256)
+    statements.push(`MATCH (n) WHERE id(n) >= ${start} AND id(n) < ${start+256} RETURN id(n) AS id, labels(n) AS labels, properties(n) AS props ORDER BY id(n)`);
+  for (let start = 0; start <= edgeMax; start += 4096)
+    statements.push(`MATCH (a)-[r]->(b) WHERE id(r) >= ${start} AND id(r) < ${start+4096} RETURN id(r) AS id, id(a) AS a, type(r) AS type, properties(r) AS props, id(b) AS b ORDER BY id(r)`);
+  if (statements.length) await read(statements.join(';\n') + ';', row => {
+    if (row.labels) {
+      nodeRows++;
+      const key = row.labels.includes('Term') ? 'terms' : 'nodes';
+      add(key, row);
+      if (key === 'terms') counts.termCount++;
+    } else {
+      edgeRows++;
+      const key = row.type === 'CITES' ? 'links' : row.type === 'MENTIONS' ? 'mentions' : 'edges';
+      add(key, row);
+      if (key === 'links') counts.linkCount++;
+      if (key === 'mentions') counts.mentionCount++;
+    }
+  });
+  if (nodeRows !== bounds.nodeCount || edgeRows !== bounds.edgeCount) throw new Error('incomplete fingerprint rows');
+  return { ...Object.fromEntries(Object.entries(digests).map(([k,v]) => [k,v.digest('hex')])), ...counts };
+}
+
+// Read-only opens update relate's advisory lock files. They are not graph data.
+function storeFiles(store) {
+  const files = [];
+  const walk = (directory, prefix = '') => {
+    for (const name of readdirSync(directory).sort()) {
+      if (name === '.cypherlite.lock' || name === '.cypherlite.writer') continue;
+      const path = join(directory, name), rel = join(prefix, name), stat = statSync(path, { bigint: true });
+      if (stat.isDirectory()) walk(path, rel);
+      else files.push([rel, ...['dev','ino','size','mtimeNs','ctimeNs'].map(k => String(stat[k]))]);
+    }
+  };
+  walk(store);
+  if (!files.some(([name]) => name === 'manifest.json')) throw new Error(`invalid store: missing manifest at ${store}`);
+  return files;
+}
+
+async function preparedStores(store, directory) {
+  const source = realpathSync(store), receiptPath = join(directory, 'prepared.json');
+  const paths = { graph: source, 'graph-nolink': join(directory,'graph-nolink'), 'graph-noterms': join(directory,'graph-noterms') };
+  if (existsSync(receiptPath)) {
+    const receipt = JSON.parse(readFileSync(receiptPath, 'utf8'));
+    if (receipt.version !== 1 || receipt.source !== source || receipt.algorithm !== 'sha256-internal-ids-v1')
+      throw new Error('invalid preparation receipt: source or fingerprint algorithm changed');
+    for (const [condition, path] of Object.entries(paths)) {
+      if (JSON.stringify(storeFiles(path)) !== JSON.stringify(receipt.files?.[condition]))
+        throw new Error(`store changed since preparation: ${condition}; inspect the invalid receipt`);
+    }
+    for (const condition of ['graph-nolink','graph-noterms']) {
+      const recorded = JSON.parse(readFileSync(join(directory, `${condition}.json`), 'utf8'));
+      const proof = JSON.parse(readFileSync(join(directory, `${condition}.proof.json`), 'utf8'));
+      if (recorded.source !== source || JSON.stringify(proof) !== JSON.stringify(receipt.proofs?.[condition])
+        || JSON.stringify(proof.full) !== JSON.stringify(receipt.fingerprints?.graph)
+        || JSON.stringify(proof.ablated) !== JSON.stringify(receipt.fingerprints?.[condition]))
+        throw new Error(`invalid ablation proof: ${condition}`);
+    }
+    return { ...paths, fingerprints: receipt.fingerprints };
+  }
+  if (readdirSync(directory).some(name => name !== '.prepare.lock'))
+    throw new Error(`incomplete ablation preparation at ${directory}; inspect it before rebuilding`);
+  const started = Date.now(), before = storeFiles(source);
+  writeFileSync(join(directory, 'preparing.json'), JSON.stringify({ source, started }));
+  const full = await fingerprint(source), fingerprints = { graph: full }, proofs = {};
   for (const [condition, query] of Object.entries({
     'graph-nolink': 'MATCH (:Decision)-[r:CITES]->(:Commit) DELETE r',
     'graph-noterms': 'MATCH (t:Term) DETACH DELETE t',
   })) {
-    const started = Date.now(), path = join(directory, condition);
-    if (!existsSync(join(directory, `${condition}.json`))) {
-      if (existsSync(path)) throw new Error(`incomplete ablation at ${path}; inspect it before rebuilding`);
-      cpSync(realpathSync(store), path, { recursive: true });
-      execFileSync('relate', ['--no-agent-mode','--max-rows','0','query','--database',path,query], { env: quiet });
-      writeFileSync(join(directory, `${condition}.json`), JSON.stringify({ source: realpathSync(store), ms: Date.now()-started, query }));
-    }
-    const recorded = JSON.parse(readFileSync(join(directory, `${condition}.json`)));
-    if (recorded.source !== realpathSync(store)) throw new Error('ablation source changed; prepare a new template');
-    const ablated=storeFingerprint(path);
-    const keys=condition==='graph-nolink'?['nodes','edges','terms','mentions']:['nodes','edges','links'];
-    if(keys.some(k=>full[k]!==ablated[k]) || (condition==='graph-nolink'?ablated.linkCount!==0:ablated.termCount!==0||ablated.mentionCount!==0)) throw new Error(`invalid ablation ${condition}`);
-    writeFileSync(join(directory,`${condition}.proof.json`),JSON.stringify({full,ablated,unchanged:keys},null,2));
-    answer[condition] = path;
+    const copyStarted = Date.now(), path = paths[condition];
+    cpSync(source, path, { recursive: true });
+    execFileSync('relate', ['--no-agent-mode','--max-rows','0','query','--database',path,query], { env: quiet });
+    const ablated = await fingerprint(path);
+    const unchanged = condition === 'graph-nolink' ? ['nodes','edges','terms','mentions'] : ['nodes','edges','links'];
+    if (unchanged.some(k => full[k] !== ablated[k]) || (condition === 'graph-nolink'
+      ? ablated.linkCount !== 0 : ablated.termCount !== 0 || ablated.mentionCount !== 0))
+      throw new Error(`invalid ablation ${condition}`);
+    fingerprints[condition] = ablated;
+    proofs[condition] = { full, ablated, unchanged };
+    writeFileSync(join(directory, `${condition}.json`), JSON.stringify({ source, ms: Date.now()-copyStarted, query }));
+    writeFileSync(join(directory, `${condition}.proof.json`), JSON.stringify(proofs[condition], null, 2));
   }
-  return answer;
+  if (JSON.stringify(before) !== JSON.stringify(storeFiles(source))) throw new Error('source store changed during preparation');
+  const receipt = { version: 1, algorithm: 'sha256-internal-ids-v1', source, ms: Date.now()-started, fingerprints, proofs,
+    files: Object.fromEntries(Object.entries(paths).map(([condition,path]) => [condition,storeFiles(path)])) };
+  writeFileSync(join(directory, 'prepared.next.json'), JSON.stringify(receipt));
+  renameSync(join(directory, 'prepared.next.json'), receiptPath);
+  return { ...paths, fingerprints };
+}
+
+/** Prepare once under a kernel lock; later calls validate file identities only.
+ * owns: [[whygraph-closed-store]]
+ */
+export function ablatedStores(store, directory) {
+  directory = resolve(directory);
+  mkdirSync(directory, { recursive: true });
+  return JSON.parse(execFileSync('flock', ['--exclusive', join(directory,'.prepare.lock'), process.execPath,
+    fileURLToPath(import.meta.url), 'prepare', store, directory], { env: quiet, encoding: 'utf8', maxBuffer: 65536 }));
 }
 
 /** Compile a condition-free, execute-only transport once per source digest.
@@ -299,4 +413,11 @@ export async function startClosedShell({work,repo,client,socket,log}) {
     if(scopeErrors.length)throw new AggregateError(scopeErrors,'shell command scope cleanup failed');
   };
   return {server,stats:()=>({calls,failures}),cancel,stop};
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const [command, store, directory] = process.argv.slice(2);
+  if (command === 'fingerprint') console.log(JSON.stringify(await fingerprint(store, JSON.parse(directory))));
+  else if (command === 'prepare') console.log(JSON.stringify(await preparedStores(store, directory)));
+  else throw new Error('usage: closed-store.mjs <fingerprint store bounds-json|prepare store directory>');
 }
