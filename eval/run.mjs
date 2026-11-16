@@ -424,7 +424,7 @@ function runAgent(args, cwd, env, outFile, errFile, agent = 'claude') {
 }
 
 function archiveResult(out, group, results=RESULTS) {
-  const dest = join(results, group, `${fileKey(out.split('/').at(-1))}__${randomUUID()}`);
+  const dest = join(results, group, `${out.split('/').at(-1)}__${randomUUID()}`);
   mkdirSync(join(results, group), { recursive: true });
   renameSync(out, dest);
   return dest;
