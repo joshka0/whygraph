@@ -868,3 +868,157 @@ merge that changes `eval/run.mjs`, `eval/closed-run.mjs`,
 `eval/closed-store.mjs`, `eval/rehearse.mjs`, the shell launcher or the
 client, one command at a time under
 `TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200%`.
+
+
+## Resolver, failure cause and preflight cases (tests 8, 2026-11-16)
+
+The independent test commit is `d51c1a2` on `batch-7-agent-network`.
+The brief is `/home/dev/scratch/whygraph-eval/trial7-tests8-brief.md`.
+Only `eval/selftest/` changed. No production file changed. No install,
+push, worktree, subagent, hosted call, new rehearsal or trial cell ran.
+No existing file was deleted. Scratch remains for audit.
+
+The latest focused receipts hold **56 passes and two contract failures
+across 58 new cases**. The initial five harness failures were fixed.
+They remain in the run history. All commands ran one at a time.
+Case commands used `TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200%`.
+The parent owns the full gates.
+
+### Contract failures
+
+- B7-121: A constructed `/etc/resolv.conf` links to an executable
+  regular file inside `/etc`. Resolver startup returns exit 0. The item
+  requires refusal. The implementation checks executable permission only
+  for external targets. Keep the case red. Recommended local fix: check
+  final-file executable permission before the system-folder branch.
+  Evidence: `test-results/startup-focused-YhgfGk/focused-results.json`.
+- B7-122: A fake agent times out through the actual closedAttempt path.
+  The metadata has `status: error` and `timed_out: true`, but no reason.
+  The item requires an explicit timeout cause. Keep ADR 0011's agent-end
+  classification and add its cause. Evidence:
+  `test-results/startup-focused-xBeFN8/focused-results.json`.
+
+### Coverage by item
+
+| Item | Cases and limits |
+| --- | --- |
+| B7-119 | Three constructed external link layouts; six separately prepared real host confinements; fake reproduces archived missing-resolver error. DNS/model-name lookup is not exercised. |
+| B7-120 | Plain /etc file, internal link and missing optional inputs add no bind; dangling, unreadable and cyclic links refuse. |
+| B7-121 | Six-condition mounts; read-only file bytes and sibling denial; work/repo/checkout/identity/proc/dev/tmp roots and non-regular/executable external targets refuse. Executable /etc target remains RED. |
+| B7-122 | Native error.data.message, error.message and part.message; explicit missing-event/spawn/signal/timeout/parse causes; real closed-attempt metadata and ledger propagation. Real timeout metadata remains RED. |
+| B7-123 | Full prompt and prompt lines redact before bounded truncation; only first message line and named error fields survive; nested response/file, stderr and tool text do not enter reasons. |
+| B7-124 | Two different real fake-agent errors traverse closedAttempt and settleCell, with separate archives and reasons in both ledger entries, root marker and exception. Also checks the injected retry boundary. |
+| B7-125 | Shared real launch builder with controlled executable; empty repo, fixed prompt, model argv/environment and live shell/store socket mounts. Runner waits for one preflight before recorded cell boundary; settleCell is replaced so no trial cell starts. |
+| B7-126 | Wrong completion, native errors, malformed stream, timeout, actual ENOENT spawn and service setup failure retain bounded preflight records with no cell artifacts. Runner failure reaches no cell boundary. |
+| B7-127 | Positive-token exact trimmed ok passes; zero tokens, wrong word, error after stop, missing finish and tool use fail. |
+| B7-128 | 16/258 plans, preflight-only scorer exclusion, separate real smoke preflight line and 16/16 count; missing/failed preflight is red. |
+| B7-129 | Plan, empty resume and earlier-only execution paths have no preflight record or call. Copied main exports its actual entry and substitutes only the cell boundary. |
+| B7-130 | Standalone entry invokes one controlled fake preflight and no cell; batch 6 and unknown options refuse before launch. No real hosted preflight runs. |
+| B7-131 | Reuses the retained 16-cell rehearsal; marker exclusion, zero tokens, 16/16 smoke and prior smoke checks pass. Default integration reuses the existing rehearsal case promise, with no added rehearsal. |
+| B7-132 | Batch 5/6 plan stdout/stderr match ec76408 with identical saved metadata. Committed shared launcher/task/blind-input/score bytes stay frozen; existing report bytes match. No old-batch agent is launched. |
+| B7-133 | Successful, failed and archived closed attempts retain UUID work copies and service answer logs; both sockets stop. Preflight scratch/records and existing rehearsal work remain. |
+
+### Fixtures and load
+
+`batch7-startup.mjs` is a focused entry and a default-pass case factory.
+It imports the existing small store fixture only for closed-attempt cases.
+The default factory reuses the existing rehearsal case's cached result.
+The focused entry reuses retained real-plan rehearsal evidence. It starts
+no second 16-cell rehearsal.
+
+Alternate resolver layouts use an ordinary scratch directory with an
+`etc` folder and a resolver dependency tree. A private bwrap namespace
+mounts those at `/etc` and `/run/resolver-fixture`. The child imports the
+unchanged resolver implementation. It does not patch the filesystem API.
+No root rights, host-file edit, production flag or production seam is used.
+Six actual prepareClosed calls supply the host confinement checks; only
+the run identity is normalized when comparing complete mount arguments.
+
+The native fake checks resolver readability first. A missing resolver
+emits the archived UnknownError/message, exits 1 and reports zero tokens.
+Its configured shapes include error.data.message, error.message,
+part.message, malformed JSONL, positive/zero tokens, wrong text, tool use,
+an incomplete step and timeout. Actual spawn failure uses ENOENT.
+Only copied code shortens the 20-minute timeout to 100 ms.
+The copy exports main and replaces settleCell with a cell-boundary
+recorder; no trial cell can start in ordering tests.
+
+The latest case clocks sum to 50.018 seconds. Budget about one
+extra minute for the default pass. This is an estimate from focused clocks,
+which include cold fixtures. The default shares fixtures and rehearsal
+results; shared load can change the time. No CPU burner or repetition
+loop was added. No full pass was used to make this estimate.
+
+### Planted faults
+
+Each mutation changes a scratch copy. Each entry below includes the
+executed focused command and its caught red assertion. The JSON audit
+keeps the full assertion, actual and expected values where available.
+The initial count-as-cell mutation failed on missing task metadata; that
+receipt is not accepted. Its corrected run first proves smoke green and
+then fails specifically on 17/16.
+
+- `resolver-folder` → B7-119: `test-results/startup-focused-Gbn6A7/startup/plant-resolver-folder.json`.
+  Command: `TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'`.
+  Red: The expression evaluated to a falsy value:
+
+- `prompt-leak` → B7-123: `test-results/startup-focused-Gbn6A7/startup/plant-prompt-leak.json`.
+  Command: `TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'`.
+  Red: reason must redact PRIVATE FIRST PROMPT LINE
+
+- `empty-reason` → B7-122: `test-results/startup-focused-Gbn6A7/startup/plant-empty-reason.json`.
+  Command: `TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'`.
+  Red: The input did not match the regular expression /Unexpected server error|access denied|part failed/. Input:
+
+- `skip-preflight` → B7-125: `test-results/startup-focused-Gbn6A7/startup/plant-skip-preflight.json`.
+  Command: `TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'`.
+  Red: one awaited preflight precedes every cell boundary
+
+- `accept-zero` → B7-127: `test-results/startup-focused-Gbn6A7/startup/plant-accept-zero.json`.
+  Command: `TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'`.
+  Red: Expected values to be strictly equal:
+
+- `condition-mount` → B7-121: `test-results/startup-focused-AI0xif/startup/plant-condition-mount.json`.
+  Command: `TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'host resolver|plant resolver mount removed|plant one condition mount'`.
+  Red: all six conditions use identical confinement mounts
+
+- `accept-wrong` → B7-127: `test-results/startup-focused-Gbn6A7/startup/plant-accept-wrong.json`.
+  Command: `TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'`.
+  Red: Expected values to be strictly equal:
+
+- `no-resolver` → B7-119: `test-results/startup-focused-AI0xif/startup/plant-no-resolver.json`.
+  Command: `TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'host resolver|plant resolver mount removed|plant one condition mount'`.
+  Red: node:fs:621
+
+- `plan-preflight` → B7-129: `test-results/startup-focused-Gbn6A7/startup/plant-plan-preflight.json`.
+  Command: `TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'`.
+  Red: plans must create no preflight record
+
+- `count-preflight-cell` → B7-128: `test-results/startup-focused-GvT8ah/startup/plant-count-preflight-cell.json`.
+  Command: `TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'counted as cell'`.
+  Red: The input did not match the regular expression /^PASS planned cells: 16\/16$/m. Input:
+
+- `failed-preflight-cell` → B7-126: `test-results/startup-focused-iIpAZu/startup/plant-failed-preflight-cell.json`.
+  Command: `TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'failed preflight starts cell'`.
+  Red: runner exit must match preflight outcome
+
+### Checks, receipts and limits
+
+`node --check` passed on all five changed mjs files. `pnpm check`
+passed with tsrs. `memod lint` and `git diff --check` passed.
+The report and full case times are in
+`test-results/trial7-tests8-report.md` and
+`test-results/trial7-tests8-receipts.json`.
+The JSON audit lists every scratch directory and every work root.
+Nothing was deleted. No file under the real `eval/results/` was written.
+
+DNS lookup of a hosted model name is not covered. These cases prove
+resolver dependency files and confinement bytes without a network call.
+The real agent executable/auth/model connection is deliberately replaced
+by the fake. Default integration with the existing cached rehearsal is
+wired and syntax-checked, but no full default pass runs in this task.
+The parent must run its allowed full gates after resolving both reds.
+
+Sentence for the parent records: The default self-test includes focused
+resolver, native-error and fake preflight cases for B7-119 through B7-133;
+it reuses the existing rehearsal result and adds no hosted model call.
