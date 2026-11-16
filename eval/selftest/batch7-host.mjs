@@ -23,13 +23,19 @@ async function wire(path,payload){return new Promise((ok,fail)=>{const chunks=[]
 function decode(bytes){let at=0,stdout=[],stderr=[],status;while(at+8<=bytes.length){const type=bytes.readUInt32BE(at),n=bytes.readUInt32BE(at+4),b=bytes.subarray(at+8,at+8+n);assert.equal(b.length,n);if(type===1)stdout.push(b);if(type===2)stderr.push(b);if(type===3)status=b.readUInt32BE();at+=8+n;}assert.equal(at,bytes.length);return {status,stdout:Buffer.concat(stdout),stderr:Buffer.concat(stderr)};}
 function procText(pid,file){try{return readFileSync(`/proc/${pid}/${file}`,'utf8');}catch(e){if(e.code==='ENOENT')return null;throw e;}}
 function live(pid){try{return readFileSync(`/proc/${pid}/stat`,'utf8').split(') ')[1][0]!=='Z';}catch(e){if(e.code==='ENOENT')return false;throw e;}}
+function runnerState(pid){
+ const stat=procText(pid,'stat');if(stat===null)return {pid,terminated:true,gone:true};
+ const fields=stat.slice(stat.lastIndexOf(') ')+2).split(' '),cmdline=procText(pid,'cmdline');
+ const teardown=(Number(fields[6])&4)!==0&&BigInt(fields[20])===0n&&cmdline==='';
+ return {pid,stat,cmdline,state:fields[0],flags:fields[6],vsize:fields[20],teardown,terminated:fields[0]==='Z'||teardown,gone:false};
+}
 function ownedPids(token){return readdirSync('/proc').filter(n=>/^\d+$/.test(n)).filter(n=>{try{const args=readFileSync(`/proc/${n}/cmdline`).toString().split('\0');return args.includes('/repo/'+token+'.js')||args[0]==='/bin/bash'&&args.some(a=>a.includes(token));}catch{return false;}}).map(Number);}
 /** Host shell contracts through the generated script and live confinement.
  * owns: [[whygraph-batch7-host-selftest]]
  */
 export async function batch7HostChecks({scratch,shared}){
  const checks=[],add=(name,run)=>checks.push({name:`B7 ${name}`,group:'host',run});let serial=0;
- async function run(fn,{condition='graph',api,client,symlinkRepo=false,worker=false,spawnFailure=false}={}){
+ async function run(fn,{condition='graph',api,client,symlinkRepo=false,worker=false,spawnFailure=false,workerModule}={}){
   const f=await shared.getClosed(),r=await shared.attempt({condition}),work=r.value.work,repo=resolve(h.root,work,'repo'),config=h.json(join(r.out,'command.json'));
   const args=config.args.slice(1,config.args.lastIndexOf('--')+1),opencode=args.indexOf('/tools/opencode');args[opencode-1]=f.opencode;
   if(client)for(let i=0;i<args.length;i++)if(['/tools/whygraph','/tools/relate','/tools/memod','/tools/shell-client'].includes(args[i]))args[i-1]=client;
@@ -38,7 +44,7 @@ export async function batch7HostChecks({scratch,shared}){
   api??=f.api;const socket=join(work,'service.sock'),service=await api.startClosedStore({condition,repo:storeRepo,store:f.prepared[condition].store,fullStore:f.store,socket,log:join(r.at,'host-service.jsonl')});
   const opts={work,repo,client:client??f.client,socket,log:join(r.at,'host-shell.jsonl')};let launcher,owner,ownerDone;
   try{
-   if(worker){const path=h.write(join(r.at,'host-worker.json'),{module:join(f.at,'eval/closed-store.mjs'),options:opts,spawnFailure});owner=spawn(process.execPath,[join(h.root,'eval/selftest/batch7-host-worker.mjs'),path],{cwd:h.root,env:h.env});ownerDone=collect(owner,null);await ready(ownerDone,'READY\n');launcher={stop:async()=>{if(owner.exitCode!==null||owner.signalCode!==null)return;owner.stdin.end('stop');assert.equal((await ownerDone.done).status,0);},stats:()=>({})};}
+   if(worker){const path=h.write(join(r.at,'host-worker.json'),{module:workerModule??join(f.at,'eval/closed-store.mjs'),options:opts,spawnFailure});owner=spawn(process.execPath,[join(h.root,'eval/selftest/batch7-host-worker.mjs'),path],{cwd:h.root,env:h.env});ownerDone=collect(owner,null);await ready(ownerDone,'READY\n');launcher={stop:async()=>{if(owner.exitCode!==null||owner.signalCode!==null)return;owner.stdin.end('stop');assert.equal((await ownerDone.done).status,0);},stats:()=>({})};}
    else launcher=await api.startClosedShell(opts);
    const start=(command,{input=Buffer.alloc(0),cwd='/repo',native=false,onData}={})=>{const a=[...args];a[a.indexOf('--chdir')+1]=cwd;const p=spawn('bwrap',[...a,...(native?command:['/tools/shell','-c',command])],{cwd:h.root,env:config.env});return collect(p,input,onData);};
    const invoke=async(command,options)=>start(command,options).done;
@@ -75,12 +81,40 @@ export async function batch7HostChecks({scratch,shared}){
   h.write(script,"const fs=require('fs');process.stdout.write('CHILD_READY\\n',()=>{fs.closeSync(1);fs.closeSync(2);});fs.watch('/repo',()=>{if(fs.existsSync('/repo/release-"+token+"'))fs.writeFileSync('/repo/late-"+token+"','survived');});setInterval(()=>{},100000);\n");
   const command=`/usr/bin/node /repo/${token}.js & /usr/bin/setsid /usr/bin/node /repo/${token}.js & exec 1>&- 2>&-; wait`;
   const c=f.start(command,{input:null});await ready(c,'CHILD_READY\nCHILD_READY\n');const pids=ownedPids(token);assert.ok(pids.length>=2,'both children started');
-  try{if(mode==='disconnect'){c.p.kill('SIGKILL');await c.done;await f.launcher.stop();}else if(mode==='runner'){f.owner.kill('SIGKILL');await f.ownerDone.done;await c.done;}else{if(mode==='timeout')f.launcher.cancel();await f.launcher.stop();await c.done;}
+  try{if(mode==='disconnect'){c.p.kill('SIGKILL');await c.done;await f.launcher.stop();}else if(mode==='runner'){
+    f.owner.kill('SIGKILL');await f.ownerDone.done;
+    const first=pids.map(runnerState);h.write(join(f.r.at,'runner-first-observation.json'),first);
+    for(const state of first)try{assert.equal(state.terminated,true,`child ${state.pid} must terminate at first observation after runner death`);}catch(e){e.runnerObservation={teardown:first.filter(s=>s.teardown).length,observation:join(f.r.at,'runner-first-observation.json')};throw e;}
+    h.write(join(f.repo,'release-'+token),'release');
+    const start=performance.now();let states=first;
+    while(!states.every(s=>s.gone)){
+     assert.ok(performance.now()-start<10000,'runner children must be gone within 10 seconds');
+     await new Promise(ok=>setTimeout(ok,10));states=pids.map(runnerState);
+     for(const state of states)assert.equal(state.terminated,true,`child ${state.pid} must stay terminated after runner death`);
+     assert.equal(existsSync(join(f.repo,'late-'+token)),false,'no later write');
+    }
+    await c.done;assert.equal(existsSync(join(f.repo,'late-'+token)),false,'no later write');h.write(join(f.r.at,'runner-disappearance.json'),{first,final:states,wall_ms:performance.now()-start});
+    return {teardown:first.filter(s=>s.teardown).length,observation:join(f.r.at,'runner-disappearance.json')};
+   }else{if(mode==='timeout')f.launcher.cancel();await f.launcher.stop();await c.done;}
    h.write(join(f.r.at,'lifetime-'+mode+'.json'),pids.map(pid=>({pid,live:live(pid),cmdline:procText(pid,'cmdline'),stat:procText(pid,'stat')})));for(const pid of pids)assert.equal(live(pid),false,`child ${pid} must terminate before ${mode} returns`);
    h.write(join(f.repo,'release-'+token),'release');assert.equal(existsSync(join(f.repo,'late-'+token)),false,'no later write');
   }finally{for(const pid of pids)if(live(pid))try{process.kill(pid,'SIGKILL');}catch(e){if(e.code!=='ESRCH')throw e;}if(c.p.exitCode===null&&c.p.signalCode===null)c.p.kill('SIGKILL');}
  }
  for(const mode of ['cleanup','timeout','disconnect','runner'])add(`B7-76 ${mode} ends background and new-session children before returning`,()=>run(f=>lifetime(f,mode),{worker:mode==='runner'}));
+ add('B7-93 runner death passes 50 consecutive repetitions under CPU load',async()=>{
+  const load=Array.from({length:4},()=>spawn(process.execPath,['-e','for(;;)Math.sqrt(Math.random());'],{stdio:'ignore',env:h.env}));
+  const results=[];try{for(let i=0;i<50;i++){
+   try{results.push({repetition:i+1,...await run(f=>lifetime(f,'runner'),{worker:true})});}catch(e){if(e.code!=='ERR_ASSERTION')throw e;results.push({repetition:i+1,...e.runnerObservation,error:e.message});}
+   h.write(join(scratch,'runner-death-repetitions.json'),{repetitions:results.length,kernel_teardown_repetitions:results.filter(r=>r.teardown>0).length,results});
+  }}
+  finally{for(const p of load){const ended=new Promise(ok=>p.once('close',ok));p.kill('SIGKILL');await ended;}}
+  assert.equal(results.length,50);assert.equal(results.filter(r=>r.error).length,0,results.find(r=>r.error)?.error);
+ });
+ add('plant child survives dead runner caught by B7-93 first observation',async()=>{
+  await run(f=>lifetime(f,'runner'),{worker:true});
+  const at=h.copy(scratch,'survives-runner');h.wrapped(at,'closed-store.mjs','closedConfinement',"const a=original_closedConfinement(...args);if(!args[0].network)for(const flag of ['--unshare-pid','--die-with-parent'])a.splice(a.indexOf(flag),1);return a;");
+  await caught('survives-runner',()=>run(f=>lifetime(f,'runner'),{worker:true,workerModule:join(at,'eval/closed-store.mjs')}));
+ });
  // B7-77: both another live run and the current launcher remain unreachable.
  const connectProbe=path=>node(`const s=require('net').createConnection(${JSON.stringify(path)});s.on('connect',()=>{process.stdout.write('CONNECTED');s.end();});s.on('error',()=>process.exitCode=1);`);
  const socketProbe=async f=>{const r=await f.invoke(connectProbe('/whygraph/shell.sock'));assert.deepEqual(triple(r),expected(1),'shell cannot reach own launcher');};
