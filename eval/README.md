@@ -139,6 +139,12 @@ node eval/score.mjs                     # the verdicts and the rates
 node eval/score.mjs --json              # one verdict per run, as JSON
 ```
 
+The default self-test runs B7-93 with five repetitions and four CPU burners and
+B7-104 with the 16-cell smoke plan. `node eval/selftest/check.mjs --stress` runs
+only their 50-repetition and 258-cell forms; it loads a machine on purpose, so
+run it alone, on a machine that nobody shares, before a merge that changes the
+runner (see `eval/tickets/batch7-failures.md`).
+
 **Final message, tokens, cost.** A session can end more than once: in the full
 run's first pass an agent could start a Bash command in the background, and
 when it finished the agent was woken and replied again (21 of 209 scored
