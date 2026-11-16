@@ -634,3 +634,79 @@ TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=40
 TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/batch7-check.mjs B7-93
 TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/check.mjs
 ```
+
+## Bounded paths and real-plan rehearsal, 2026-11-16
+
+This extension covers B7-94 through B7-116 at `70857dc`. ADR 0011 governs
+confinement and attempts. ADR 0013 governs path bounds and rehearsal results.
+The test author changes only `eval/selftest/`. No trial, hosted agent, install,
+push, delegation, or new worktree runs.
+
+The 64 new cases use invented tasks, source edits, and a small real store.
+They exercise the public runner, preparation, store service, shell launcher,
+agent confinement, stand-in, event reader, result writer, and smoke checker.
+The identity mount is an empty test directory. No credential file is read.
+The tests retain all scratch and evidence under `test-results/`.
+
+The smoke fixture has two conflicts, one plain control, and one governed
+control. Its two complete rehearsals each execute 16 cells. The default-stage
+case expands the invented task set to twelve conflicts, three plain controls,
+and four governed controls. It executes all 258 cells with three repeats,
+then invokes the real smoke checker. A separate planner case checks the
+258-cell count without preparation.
+
+| Item | Independent cases |
+| --- | --- |
+| B7-94 | Complete smoke plans; the longest named cell; the old 115-byte socket path; UUID work folders and fixed socket leaves. |
+| B7-95 | Exact 128-byte keys; Unicode, separators, reserved digest prefixes, and long task, condition, and repo identities; real smoke reads digest keys. |
+| B7-96 | A 107-byte absolute socket path; one byte over through absolute and relative roots; refusal before markers, reservations, or preparation. |
+| B7-97 | Concurrent attempts of one cell and a shared-prefix cell; mode 0700; distinct live services; cross-access denied through native and shell namespaces; both sockets close. |
+| B7-98 | Per-field argument and environment limits, NUL, and ARG_MAX; prompt refusal before preparation; real shell protocol refusal before exec. Existing B7-80 proves the valid 1 MiB request. |
+| B7-99 | Lexical component and total path limits; mount sources; a short alias with an overlong canonical ancestor. |
+| B7-100 | Trial root, child, ancestor, and alias refuse before writes; trial evidence bytes stay intact. |
+| B7-101 | Trial metadata at the root and in an archive refuse despite a rehearsal marker; fresh runs have distinct UUID result folders. |
+| B7-102 | Trial CLI selectors and a registry stand-in agent refuse; the trial entry imports no rehearsal entry. |
+| B7-103 | Two real 16-cell smoke rehearsals; seven PASS checks; receipt bytes and inode/mtime/ctime unchanged; wall time and scope peak recorded. |
+| B7-104 | Default-stage execution of all 258 invented registered cells; fresh work copies, retained results, one-attempt ledgers, and the real smoke check; independent plan count. |
+| B7-105 | Failed source read, each command diagnostic, and failed edit; error events, nonzero exit, no successful session; actual two-attempt failure. |
+| B7-106 | Each of six denied probes is made to return success at the tool boundary; the actual output is retained and the stand-in rejects it. |
+| B7-107 | Receipt, manifest, answer, and ledger corruption after done cells; the real smoke checker fails and rehearsal propagates failure. |
+| B7-108 | Actual read/shell/edit events, zero tokens/cost, real control diff verdicts, explicit rehearsal scoring, and unchanged default scorer bytes. |
+| B7-109 | Missing fixture, mismatched task hash, absent edit anchor, and missing target refuse before cells start. |
+| B7-110 | Abrupt rehearsal exit leaves a running reservation; resume refuses launch; a failed stand-in preserves both actual attempt archives and a failed measurement. |
+| B7-111 | A valid prepared store is checked, then changed; rehearsal refuses without republishing the receipt. |
+| B7-112 | Trial, hidden-trial, and cycle symlinks under the result root refuse before traversal or writes. |
+| B7-113 | Source targets for carry/why/search; record targets for impact; live-health fallback for plain controls; source-as-impact and omitted-command diagnostics fail. |
+| B7-114 | Controls without ground-truth targets use explicit edit-fixture symbols; why range and carry past-EOF diagnostics fail; every invented control target succeeds through the real store. |
+| B7-115 | Transport import with no registry beside it; exported path/exec guards; changed product sections return exactly status 70, empty stdout, and the service-unavailable stderr. |
+| B7-116 | Readable or digested canonical archive prefixes, appended UUIDs, at most 166 bytes, and preserved binary evidence. Existing batch 5 cases also exercise reuse of an earlier result. |
+
+No whole item lacks a case. One part has no case: B7-114's inventory of the
+committed real control targets in the real prepared store. The brief requires
+invented inputs independent of real batch 7 data. These cases prove target
+presence and grammar with the invented controls; they make no claim about
+that real inventory.
+
+The fault tests alter copies of code. They preserve the stand-in shebang so
+the fault reaches the intended executable step. Smoke-corruption cases reuse
+complete genuine attempt evidence to reach the post-plan boundary. The two
+smoke runs and the full 258-cell case execute every cell through the real path.
+
+Final counts, plant receipts, disagreements, and scratch paths are recorded
+in the `bounded_paths_rehearsal` section of
+[the JSON audit](batch7-audit.json). Final validation is running.
+
+### Contract disagreement
+
+B7-115 remains red. The isolated transport returns status 70 and empty stdout,
+but stderr is `whygraph service unavailable: carry decision section changed; update the eval ablation\n`.
+The contract requires exactly `whygraph service unavailable\n`.
+`eval/closed-store.mjs:247` appends the internal error message. The parent must
+rule on this mismatch. The independent author changes no production code.
+
+Reproduce each full suite in the required scope:
+
+```sh
+export PATH="$HOME/.opencode/bin:$HOME/.npm-global/bin:$HOME/.local/share/mise/installs/pnpm/12.11.2:$HOME/.local/bin:$PATH"
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/check.mjs
+```

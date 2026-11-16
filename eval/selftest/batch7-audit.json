@@ -7,7 +7,7 @@
     "docs/adr/0011-eval-closed-store.md",
     "docs/adr/0012-ticket-record-outcomes.md"
   ],
-  "status": "Complete: normal and altered-registry full suites pass 1476/1476; all ordered case verdicts match; no requested item is omitted and no code/contract disagreement remains.",
+  "status": "B7-94–B7-116 independent cases added; final validation running. Earlier result sections retain historical counts.",
   "scope": {
     "edited": "eval/selftest/ only",
     "branch": "batch-7-integration",
@@ -6380,5 +6380,272 @@
       "test-results/batch7-selftest-zKlWoS"
     ],
     "evidence_generator": "test-results/b7-93-esrch-audit.py"
+  },
+  "bounded_paths_rehearsal": {
+    "brief": "/home/dev/scratch/whygraph-eval/trial7-tests6-brief.md",
+    "contract_commit": "70857dc",
+    "decisions": [
+      "docs/adr/0011-eval-closed-store.md",
+      "docs/adr/0013-eval-rehearsal.md"
+    ],
+    "branch": "batch-7-rehearsal",
+    "status": "One contract disagreement reproduced; final validation running",
+    "previous_top_status": "Complete: normal and altered-registry full suites pass 1476/1476; all ordered case verdicts match; no requested item is omitted and no code/contract disagreement remains.",
+    "scope": {
+      "edited": [
+        "eval/selftest/"
+      ],
+      "production_changes": false,
+      "installs": 0,
+      "hosted_model_calls": 0,
+      "trial_runs": 0,
+      "pushes": 0,
+      "delegation": false,
+      "worktrees_created": 0
+    },
+    "cases_added": 64,
+    "expected_suite_cases": 1618,
+    "items": {
+      "B7-94": {
+        "cases": [
+          "B7 B7-94 B7-103 smoke twice through real preparation launcher confinement and smoke checker",
+          "B7 B7-94 previous 115-byte cell socket regression now listens with UUID work",
+          "B7 B7-94 longest named registry cell also reaches its actual listening service",
+          "B7 plant cell name in socket path caught by B7-94 real long-cell launch"
+        ]
+      },
+      "B7-95": {
+        "cases": [
+          "B7 B7-95 bounded file keys preserve 128 ASCII bytes and digest unsafe Unicode identities",
+          "B7 B7-95 multibyte and separator task repo identities remain in metadata with bounded paths",
+          "B7 plant runner smoke result-key mismatch caught by B7-95 smoke completion"
+        ]
+      },
+      "B7-96": {
+        "cases": [
+          "B7 B7-96 exact 107-byte absolute socket root succeeds and one extra byte refuses",
+          "B7 plant late root guard caught by B7-96 no reservation before refusal"
+        ]
+      },
+      "B7-97": {
+        "cases": [
+          "B7 B7-97 two attempts of one cell and cells sharing a prefix get distinct closed UUID work",
+          "B7 B7-97 B7-98 live simultaneous namespaces cannot reach each other and shell rejects oversized argv"
+        ]
+      },
+      "B7-98": {
+        "cases": [
+          "B7 B7-97 B7-98 live simultaneous namespaces cannot reach each other and shell rejects oversized argv",
+          "B7 B7-98 exec guard rejects long argument environment total and NUL before exec",
+          "B7 B7-98 oversized prompt refuses before real preparation and leaves no work"
+        ]
+      },
+      "B7-99": {
+        "cases": [
+          "B7 B7-99 lexical component and total mount path bounds refuse before bwrap",
+          "B7 B7-99 canonical symlink ancestor over filesystem path limit refuses"
+        ]
+      },
+      "B7-100": {
+        "cases": [
+          "B7 B7-100 trial result root refuses without trial evidence changes",
+          "B7 B7-100 child result root refuses without trial evidence changes",
+          "B7 B7-100 ancestor result root refuses without trial evidence changes",
+          "B7 B7-100 alias result root refuses without trial evidence changes",
+          "B7 plant trial results accepted caught by B7-100 evidence preservation"
+        ]
+      },
+      "B7-101": {
+        "cases": [
+          "B7 B7-101 trial metadata at root refuses despite rehearsal marker",
+          "B7 B7-101 trial metadata in archive refuses despite rehearsal marker"
+        ]
+      },
+      "B7-102": {
+        "cases": [
+          "B7 B7-102 trial CLI rejects every stand-in selector and registry rejects stand-in agent",
+          "B7 plant stand-in registry agent accepted caught by B7-102 registry rejection"
+        ]
+      },
+      "B7-103": {
+        "cases": [
+          "B7 B7-94 B7-103 smoke twice through real preparation launcher confinement and smoke checker"
+        ]
+      },
+      "B7-104": {
+        "cases": [
+          "B7 B7-104 omitted stage executes all 258 invented registered cells and smoke check",
+          "B7 B7-104 nineteen invented tasks produce the contracted 258-cell full plan"
+        ]
+      },
+      "B7-105": {
+        "cases": [
+          "B7 B7-105 B7-113 B7-114 failed read cannot produce a successful session",
+          "B7 B7-105 B7-113 B7-114 failed why cannot produce a successful session",
+          "B7 B7-105 B7-113 B7-114 failed carry cannot produce a successful session",
+          "B7 B7-105 B7-113 B7-114 failed edit cannot produce a successful session",
+          "B7 B7-105 carry nonzero diagnostic fails the stand-in",
+          "B7 B7-105 why nonzero diagnostic fails the stand-in",
+          "B7 B7-105 impact nonzero diagnostic fails the stand-in",
+          "B7 B7-105 search nonzero diagnostic fails the stand-in",
+          "B7 B7-105 B7-106 B7-110 failed stand-in exhausts actual two-attempt harness budget"
+        ]
+      },
+      "B7-106": {
+        "cases": [
+          "B7 B7-106 unexpected store probe success emits actual output and fails",
+          "B7 B7-106 unexpected relate probe success emits actual output and fails",
+          "B7 B7-106 unexpected tool-code probe success emits actual output and fails",
+          "B7 B7-106 unexpected service-code probe success emits actual output and fails",
+          "B7 B7-106 unexpected other-socket probe success emits actual output and fails",
+          "B7 B7-106 unexpected network probe success emits actual output and fails",
+          "B7 B7-105 B7-106 B7-110 failed stand-in exhausts actual two-attempt harness budget",
+          "B7 plant successful store probe counted as pass caught by B7-106 stand-in result"
+        ]
+      },
+      "B7-107": {
+        "cases": [
+          "B7 B7-107 receipt broken after done cells fails real smoke check and rehearsal",
+          "B7 B7-107 manifest broken after done cells fails real smoke check and rehearsal",
+          "B7 B7-107 answer broken after done cells fails real smoke check and rehearsal",
+          "B7 B7-107 ledger broken after done cells fails real smoke check and rehearsal",
+          "B7 plant smoke failure ignored caught by B7-107 rehearsal process status"
+        ]
+      },
+      "B7-108": {
+        "cases": [
+          "B7 B7-108 real events retain read shell edit zero usage and passing control diffs",
+          "B7 B7-108 scorer ignores rehearsal by default and reads it only with results option"
+        ]
+      },
+      "B7-109": {
+        "cases": [
+          "B7 B7-109 B7-114 missing control fixture refuses before any cell starts",
+          "B7 B7-109 B7-114 hash control fixture refuses before any cell starts",
+          "B7 B7-109 B7-114 anchor control fixture refuses before any cell starts",
+          "B7 B7-109 B7-114 target control fixture refuses before any cell starts"
+        ]
+      },
+      "B7-110": {
+        "cases": [
+          "B7 B7-105 B7-106 B7-110 failed stand-in exhausts actual two-attempt harness budget",
+          "B7 B7-110 interrupted rehearsal retains running reservation and resume refuses a third launch"
+        ]
+      },
+      "B7-111": {
+        "cases": [
+          "B7 B7-111 changed prepared store refuses without rebuilding and rehearsal reports failure"
+        ]
+      },
+      "B7-112": {
+        "cases": [
+          "B7 B7-112 trial symlink below rehearsal root refuses before traversal or writes",
+          "B7 B7-112 hidden-trial symlink below rehearsal root refuses before traversal or writes",
+          "B7 B7-112 cycle symlink below rehearsal root refuses before traversal or writes"
+        ]
+      },
+      "B7-113": {
+        "cases": [
+          "B7 B7-105 B7-113 B7-114 failed read cannot produce a successful session",
+          "B7 B7-105 B7-113 B7-114 failed why cannot produce a successful session",
+          "B7 B7-105 B7-113 B7-114 failed carry cannot produce a successful session",
+          "B7 B7-105 B7-113 B7-114 failed edit cannot produce a successful session",
+          "B7 B7-113 impact uses record id and plain control uses live health decision fallback",
+          "B7 B7-113 impact source grammar diagnostic is not a successful step",
+          "B7 B7-113 omitted command receives the real parser diagnostic and fails the stand-in"
+        ]
+      },
+      "B7-114": {
+        "cases": [
+          "B7 B7-105 B7-113 B7-114 failed read cannot produce a successful session",
+          "B7 B7-105 B7-113 B7-114 failed why cannot produce a successful session",
+          "B7 B7-105 B7-113 B7-114 failed carry cannot produce a successful session",
+          "B7 B7-105 B7-113 B7-114 failed edit cannot produce a successful session",
+          "B7 B7-109 B7-114 missing control fixture refuses before any cell starts",
+          "B7 B7-109 B7-114 hash control fixture refuses before any cell starts",
+          "B7 B7-109 B7-114 anchor control fixture refuses before any cell starts",
+          "B7 B7-109 B7-114 target control fixture refuses before any cell starts"
+        ]
+      },
+      "B7-115": {
+        "cases": [
+          "B7 B7-115 transport imports without registry and retains exact unavailable product-format guard"
+        ]
+      },
+      "B7-116": {
+        "cases": [
+          "B7 B7-116 failed archives keep readable bounded prefix UUID and exact evidence bytes",
+          "B7 plant archive prefix dropped caught by B7-116 archive identity"
+        ]
+      }
+    },
+    "shared_cases": {
+      "B7-98": [
+        "B7-80 exact 1 MiB shell request reaches Bash with bounded individual argv",
+        "B7-80 shell protocol accepts 1024 fields and 8192-byte stdin frame"
+      ],
+      "B7-115": [
+        "B7-28 changed product carry section format fails visibly instead of truncating"
+      ],
+      "B7-116": [
+        "B5 runner reusing an existing result preserves it under _attempts"
+      ]
+    },
+    "items_with_no_case": [],
+    "parts_with_no_case": [
+      {
+        "item": "B7-114",
+        "part": "Query every committed real-batch control target in the real prepared store",
+        "reason": "The brief requires invented inputs independent of real batch 7 data. The cases use real store/service queries for every invented control target instead. No claim is made about the real batch control inventory."
+      }
+    ],
+    "disagreements": [
+      {
+        "item": "B7-115",
+        "case": "B7 B7-115 transport imports without registry and retains exact unavailable product-format guard",
+        "expected": {
+          "status": 70,
+          "stdout": "",
+          "stderr": "whygraph service unavailable\n"
+        },
+        "actual": {
+          "status": 70,
+          "stdout": "",
+          "stderr": "whygraph service unavailable: carry decision section changed; update the eval ablation\n"
+        },
+        "cause": "eval/closed-store.mjs:247 appends error.message to the service-unavailable diagnostic.",
+        "evidence": "test-results/trial7-tests6-focused-3.txt",
+        "disposition": "Leave the exact contract case red. Production edits are outside the independent author scope; the parent rules on the mismatch."
+      }
+    ],
+    "final_runs": [],
+    "required_checks": {
+      "score": {
+        "exit": 0,
+        "output_bytes": 0,
+        "log": "test-results/trial7-tests6-score.txt"
+      },
+      "typecheck": {
+        "exit": 0,
+        "log": "test-results/trial7-tests6-typecheck.txt"
+      },
+      "memod": {
+        "exit": 0,
+        "log": "test-results/trial7-tests6-memod.txt"
+      },
+      "readme": {
+        "exit": 0,
+        "log": "test-results/trial7-tests6-readme.txt"
+      }
+    },
+    "plants": [],
+    "evidence": {
+      "focused": "test-results/trial7-tests6-focused-3.txt",
+      "final_logs": [
+        "test-results/trial7-tests6-full-4.txt",
+        "test-results/trial7-tests6-full-5.txt"
+      ],
+      "catalog": "test-results/trial7-tests6-catalog-final/cases.json"
+    }
   }
 }
