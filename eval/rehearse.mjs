@@ -8,7 +8,7 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { batchPlan, evalBatch } from './registry.mjs';
 import { readTasks, scoreRun } from './score.mjs';
-import { ticketTemplate, settleCell } from './run.mjs';
+import { ticketTemplate, settleCell, wrap } from './run.mjs';
 import { closedAttempt } from './closed-run.mjs';
 import { fileKey } from './registry.mjs';
 import { closedWorkRoot, execBudget, filesystemPath } from './closed-store.mjs';
@@ -48,7 +48,7 @@ async function main(args) {
   const controls=JSON.parse(readFileSync(join(here,'rehearsal-controls.json'),'utf8'));
   const templates=new Map();
   for(const {task} of plan) {
-    execBudget('/tools/opencode',[task.request]);
+    execBudget('/tools/opencode',[wrap(task.request)]);
     if(!templates.has(task.repo))templates.set(task.repo,ticketTemplate(task.repo,true));
     if(task.kind==='control') {
       const fixture=controls[task.id];
@@ -81,7 +81,7 @@ async function main(args) {
         store:realpathSync(template.store),serviceCode:join(here,'closed-store.mjs'),
         otherSocket:join(work,'other','service.sock'),networkPort:network.address().port};
       try {
-        return await closedAttempt({task,condition,repeat,workRoot:work,out,prompt:task.request,source:template.repo,store:template.store,
+        return await closedAttempt({task,condition,repeat,workRoot:work,out,prompt:wrap(task.request),source:template.repo,store:template.store,
           rehearsal:{executable:join(here,'stand-in.mjs'),config}});
       } catch(error) {
         const meta={id,task:task.id,condition,repeat,rehearsal:true,status:'invalid',reason:`harness failure: ${error.message}`,tokens:{total:0},wall_ms:0};

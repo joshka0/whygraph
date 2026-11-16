@@ -43,8 +43,10 @@ const GIT_ENV = {
   GIT_AUTHOR_NAME: 'eval', GIT_AUTHOR_EMAIL: 'eval@example.invalid', GIT_COMMITTER_NAME: 'eval', GIT_COMMITTER_EMAIL: 'eval@example.invalid',
 };
 
-/** The text every agent gets around a task's request; the same in every condition. */
-const wrap = (request) => `A teammate sends you this request about the repository in the current folder:
+/** The text every agent gets around a task's request; the same in every condition.
+ * owns: [[whygraph-eval-runner]]
+ */
+export const wrap = (request) => `A teammate sends you this request about the repository in the current folder:
 
 ${request}
 
