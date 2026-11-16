@@ -5,10 +5,10 @@ tags: [whygraph, eval, independent-tests]
 ---
 
 > [!abstract] Answer
-> Tests 10 covers B7-134 through B7-167 and five amended cases.
-> Focused observations: 77 passing cases; two red cases expose one B7-148 fault.
-> Unknown service events still pass the real smoke CLI. No product code changed.
-> Syntax, tsrs and memod checks pass. Earlier results below are historical.
+> The two failures from the parent's 1750/1752 gate are resolved in focused cases.
+> The launcher passes three isolated runs and a final run with its fixed fixture.
+> Its cause was a retained hash alias owned by another attempt, present at 0289d2b.
+> Malformed-log evidence now fails all three dependent checks. No full gate reran.
 
 ## Historical third-round audit
 
@@ -1267,3 +1267,45 @@ coverage, 14 plant receipts (13 distinct plants), eight scratch roots,
 37 retained work roots/aliases and actual CLI artifact paths.
 `test-results/trial7-tests10-receipts.json` holds the same evidence index.
 Keep the inventory script and all named scratch. Nothing was deleted.
+
+
+## Gate follow-up after 3e4f885 (2026-11-16)
+
+The parent's full self-test at 3e4f885 recorded 1750/1752. Its log confirms
+that both B7-148 unknown-event cases are green. The remaining malformed-log
+case expected closed access to PASS despite unreadable service evidence.
+The parent's ruling requires FAIL there. The case now names B7-63/B7-148,
+requires all three dependent FAIL lines and nonzero exit, and retains all
+other PASS assertions. It passes 1/1.
+
+The launcher case passes all three requested isolated runs. The saved
+full-run worker result proves a fixture ownership collision: two different
+attempt paths hash to `43904a`, and the existing global `w43904a` symlink
+points to the old attempt. Preparation correctly refuses its incomplete
+ablations. The host fixture then hides that worker error with a TypeError.
+The same fixture alias code exists at 0289d2b and was unchanged by 1890e91.
+The refusal/probe/smoke changes act after that failed preparation step or
+in a separate entry. This is an old deterministic fixture fault, not a
+product regression or evidence of a load race.
+
+The shared attempt fixture now allocates a short real work directory with
+mkdtemp. No global hash alias is reused. The host helper reports a worker
+error before accessing its value. The original launcher assertions stay
+intact. A new regression first goes red when the old fixture follows a
+seeded foreign alias. The final fixture makes it green and preserves the
+foreign directory's bytes. An intermediate nested layout failed the socket
+length guard; the final flat layout fits and passes. The original launcher
+also passes once with the final fixture. The regression ran three focused
+versions because that intermediate layout failed; no stress form ran.
+
+B7-79, B7-148 and ADRs 0011/0013 govern the edits. There is no product code,
+contract, schema, instruction-history or isolation-rule change. The original
+retained work roots and failed preparation remain untouched. Syntax checks
+on the three changed mjs files, pnpm check with tsrs, memod lint, JSON parsing
+and diff whitespace checks pass. No full suite or new trial/rehearsal ran.
+
+The detailed follow-up is appended to `test-results/trial7-tests10-report.md`.
+`test-results/trial7-tests11-evidence.json` and the JSON audit's
+`gate_followup_tests11` field retain the source cause, all eight focused
+logs and all new scratch/work paths. The parent must run its permitted
+full gate after this commit. No aggregate pass is claimed here.

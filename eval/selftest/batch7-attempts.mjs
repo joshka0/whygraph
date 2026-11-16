@@ -1,18 +1,26 @@
 /** module: [[whygraph-trial-design]] */
 import assert from 'node:assert/strict';
-import {cpSync,existsSync,mkdirSync,readdirSync,symlinkSync} from 'node:fs';
-import {join} from 'node:path';
+import {cpSync,existsSync,mkdirSync,readdirSync,symlinkSync,realpathSync} from 'node:fs';
+import {dirname,join,relative} from 'node:path';
 import {b7 as h} from './batch7-support.mjs';
 /** Runner lifecycle with no actual agent process.
  * owns: [[whygraph-batch7-attempt-selftest]]
  */
 export async function batch7AttemptChecks({scratch,shared}){
  const checks=[],add=(name,run)=>checks.push({name:`B7 ${name}`,run});let serial=0;
- async function attempt({condition='graph',mode='success',at,task,entry='closedAttempt',preparationFailure=false}={}){const f=await shared.getClosed();at??=h.inputs(h.copy(scratch,`attempt-${serial++}`),undefined,r=>r.batches[7].instructionsCommit='c92205d');task??={...h.generated(at)[0],id:'x',ground_truth:{source:{record:'1001',stratum:'cited'},targets:[{file:'src/cart.ts',symbol:'total',start_line:1,end_line:99}]}};const out=join(at,'eval/results',`${task.id}__${condition}__r1`);mkdirSync(out,{recursive:true});const work=join(at,'work');mkdirSync(work,{recursive:true});const workRoot='test-results/w'+h.hash(at).slice(0,6);if(!existsSync(join(h.root,workRoot)))symlinkSync(work,join(h.root,workRoot),'dir');
+ async function attempt({condition='graph',mode='success',at,task,entry='closedAttempt',preparationFailure=false}={}){const f=await shared.getClosed();at??=h.inputs(h.copy(scratch,`attempt-${serial++}`),undefined,r=>r.batches[7].instructionsCommit='c92205d');task??={...h.generated(at)[0],id:'x',ground_truth:{source:{record:'1001',stratum:'cited'},targets:[{file:'src/cart.ts',symbol:'total',start_line:1,end_line:99}]}};const out=join(at,'eval/results',`${task.id}__${condition}__r1`);mkdirSync(out,{recursive:true});const work=h.mkdtempSync(join(h.root,'test-results/w')),workRoot=relative(h.root,work);
  if(entry==='runOne'){const template=join(work,'_zustand');cpSync(f.source,join(template,'repo'),{recursive:true});symlinkSync(f.store,join(template,'store'),'dir');if(!preparationFailure)h.write(join(template,'ready'),'ready\n');}
  const config={module:join(at,'eval',entry==='runOne'?'run.mjs':'closed-run.mjs'),entry,workRoot,options:{task,condition,repeat:1,workRoot,out,prompt:'Invented request; spawn is simulated.',source:f.source,store:f.store}},path=h.write(join(at,`attempt-${serial++}.json`),config);let result;
  {const r=h.node(join(h.root,'eval/selftest/batch7-attempt-worker.mjs'),[path,mode]);h.ok(r);result=JSON.parse(r.stdout.trim().split('\n').at(-1));h.write(join(at,`probe-${serial++}.json`),result);}return{...result,at,out,task,work,condition};}
  shared.attempt=attempt;
+ add('B7-79 fixture work root never reuses a retained alias owned by another attempt',async()=>{
+  const at=h.inputs(h.copy(scratch,'foreign-attempt-alias'),undefined,r=>r.batches[7].instructionsCommit='c92205d');
+  const foreign=join(at,'foreign-work');mkdirSync(foreign);h.write(join(foreign,'owner.txt'),'other attempt\n');
+  const alias=join(h.root,'test-results/w'+h.hash(at).slice(0,6));symlinkSync(foreign,alias,'dir');
+  const before=h.tree(foreign),r=await attempt({at});assert.equal(r.error,undefined,r.error);assert.equal(r.value.status,'done',r.value.reason);
+  assert.notEqual(realpathSync(dirname(r.value.work)),realpathSync(foreign),'a retained alias cannot choose another attempt owner');
+  assert.deepEqual(h.tree(foreign),before,'another attempt work directory stays unchanged');
+ });
  add('B7-85 B7-92 every cell health uses receipt fingerprints without storeFingerprint',async()=>{
   const at=h.inputs(h.copy(scratch,'health-receipts'),undefined,r=>r.batches[7].instructionsCommit='c92205d'),directory=join(at,'shared-ablations');
   h.wrapped(at,'closed-store.mjs','storeFingerprint',"throw Error('cell health must use its preparation receipt');");

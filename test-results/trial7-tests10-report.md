@@ -213,3 +213,85 @@ column is the observed command result, before later fixture corrections.
 | `plant (dispatched failure\|client\|metadata\|smoke\|old\|CURRENT)\|full smoke CLI` | `lEHjYF` | 0; 9/9 |
 | `settles once\|timeout flag\|absent relate\|unknown event must fail full\|rejects locally\|fabricated tool success\|ordinary command discovery` | `hcaEl1` | 1; 7/9; product unknown-event fault and stale discovery count |
 | `ordinary command discovery` | `yWcVQp` | 0; 1/1; corrected literal count |
+
+
+## Focused gate follow-up, 2026-11-16
+
+Base: `3e4f885`. The parent full run recorded 1750/1752, with the two
+unknown-event cases now green. This follow-up ran no full gate.
+
+The malformed-log case now names B7-63 and B7-148 and requires FAIL from
+condition answers, closed store and tool code, and service accounting.
+It retains nonzero CLI exit and PASS requirements for every other check.
+This follows the parent's ruling that an unreadable service log cannot
+produce missing-evidence PASS. The focused case passes 1/1.
+
+The original launcher case passed all three requested isolated runs before
+any launcher fixture edit. The saved full-run worker result gives the
+cause of its TypeError: the fixture selected `test-results/w43904a`, whose
+symlink belonged to an older attempt. These two distinct attempt paths
+both have the SHA-256 prefix `43904a`:
+
+- `test-results/batch7-selftest-5FKgPa/315-attempt-144` was the new attempt.
+- `test-results/batch7-selftest-dmgwXk/316-attempt-141` owned the retained alias.
+
+The alias still points to the old attempt's `work` directory. That directory
+has ablation files without `prepared.json`. The real preparation guard
+correctly refused with `incomplete ablation preparation`. The host helper
+then read `r.value.work` from the worker's error result, hiding the cause.
+
+This is an existing fixture ownership fault. The same hash-and-reuse code
+is present at `0289d2b`. The changes in d1f41cf and a72ba08 act after the
+failed preparation step; 3e4f885 changes only smoke checking and its report.
+The failing fixture code was unchanged by 1890e91. No timing race or product
+fault is needed to explain the saved failure. Nothing in those original
+retained directories was changed or removed.
+
+The shared attempt fixture now gets its short work directory from
+`mkdtemp`. It does not make or reuse a global hash alias. Its existing
+`work` result still names its work root. The host helper checks the worker
+error before reading the value and includes the evidence path on failure.
+The launcher case's assertions remain unchanged.
+
+A new focused regression seeds the old alias with a foreign work directory.
+Before the fix, it fails because the attempt uses that directory. With the
+final fix, it passes and proves that the foreign bytes stay unchanged.
+An intermediate extra directory level failed the existing 107-byte socket
+limit. The final flat root fits the limit and passes. No product guard was
+changed. The original launcher case also passes 1/1 after the fixture fix.
+
+Governing records are B7-79, B7-148, ADR 0011's attempt ownership and startup
+failure rules, and ADR 0013's bounded unique work paths. The existing memod
+owners remain unchanged. No public product contract, schema or boundary
+changed. No ADR change is needed for this local test-fixture correction.
+
+| Focused check | Result | Log |
+| --- | --- | --- |
+| Original launcher, run 1 | 1/1 | `test-results/trial7-tests11-launcher-1.log` |
+| Original launcher, run 2 | 1/1 | `test-results/trial7-tests11-launcher-2.log` |
+| Original launcher, run 3 | 1/1 | `test-results/trial7-tests11-launcher-3.log` |
+| Collision regression before fix | 0/1, expected ownership failure | `test-results/trial7-tests11-alias-before.log` |
+| Intermediate nested fixture | 0/1, socket path too long | `test-results/trial7-tests11-alias-after.log` |
+| Original launcher after final fix | 1/1 | `test-results/trial7-tests11-launcher-after.log` |
+| Amended malformed-log case | 1/1 | `test-results/trial7-tests11-smoke.log` |
+| Collision regression after final fix | 1/1 | `test-results/trial7-tests11-alias-final.log` |
+
+Every case command used the required PATH and resource scope. The exact
+entry is `node eval/selftest/batch7-check.mjs` with the case substring.
+Launcher runs use `B7-79 actual launcher listen failure`. Regression runs
+use `fixture work root never reuses`. The smoke run uses
+`malformed service log fails`. The eight saved logs name each scratch root.
+The new regression needed a third focused invocation because the first
+fix's layout hit the socket bound; no stress or load repetition ran.
+
+Syntax checks on all three changed JavaScript files, tsrs and memod lint
+pass. The final JSON audit and `git diff --check` pass. No full self-test,
+stress form, hosted model, real preflight, trial cell, install, push,
+delegation, worktree or deletion ran. Other suite cases have not been
+rerun with the shared fixture correction.
+
+Keep `test-results/trial7-tests11-evidence.json`, the eight named logs and
+all work roots/aliases listed in that evidence file. They remain under
+`test-results/`. No process remains in those new work roots. Fleet memory
+is unavailable. The parent must rerun its allowed full gate; this follow-up
+does not claim an aggregate full-suite pass.

@@ -7,7 +7,7 @@
     "docs/adr/0011-eval-closed-store.md",
     "docs/adr/0012-ticket-record-outcomes.md"
   ],
-  "status": "77 passing focused observations; two B7-148 red cases for one product fault. No full aggregate run.",
+  "status": "Two reported 3e4f885 gate failures resolved by focused checks. Launcher 3/3 isolated before fixture fix and 1/1 after; malformed log 1/1; collision regression red before and green after. No full gate rerun.",
   "scope": {
     "edited": "eval/selftest/ only",
     "branch": "batch-7-integration",
@@ -10209,5 +10209,295 @@
       "No full self-test, stress, hosted model, real preflight, trial cell or new full rehearsal.",
       "Initial aborted group has stdout observations, not a final machine receipt."
     ]
+  },
+  "status_before_tests11": "77 passing focused observations; two B7-148 red cases for one product fault. No full aggregate run.",
+  "gate_followup_tests11": {
+    "base": "3e4f885",
+    "branch": "batch-7-refused-requests",
+    "scope": "eval/selftest and requested test-results report only; no product change",
+    "ruling": "Malformed service logs fail condition answers, closed access and service accounting under B7-148.",
+    "original_gate": {
+      "log": "/home/dev/scratch/whygraph-eval/b7-gates/selftest.log",
+      "result": "1750/1752",
+      "unknown_event_cases_green": [
+        "ok    B7 B7-148 unknown event fails service accounting",
+        "ok    B7 B7-148 unknown event must fail full smoke CLI with authentic reply fields"
+      ]
+    },
+    "launcher_three_isolated_runs": [
+      {
+        "log": "test-results/trial7-tests11-launcher-1.log",
+        "scratch": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-vTsjSt",
+        "result": "1/1 batch 7 cases as expected",
+        "pass": true,
+        "wrong": []
+      },
+      {
+        "log": "test-results/trial7-tests11-launcher-2.log",
+        "scratch": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-2iMM5m",
+        "result": "1/1 batch 7 cases as expected",
+        "pass": true,
+        "wrong": []
+      },
+      {
+        "log": "test-results/trial7-tests11-launcher-3.log",
+        "scratch": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-pXaM5X",
+        "result": "1/1 batch 7 cases as expected",
+        "pass": true,
+        "wrong": []
+      }
+    ],
+    "runs": [
+      {
+        "log": "test-results/trial7-tests11-launcher-1.log",
+        "scratch": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-vTsjSt",
+        "result": "1/1 batch 7 cases as expected",
+        "pass": true,
+        "wrong": []
+      },
+      {
+        "log": "test-results/trial7-tests11-launcher-2.log",
+        "scratch": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-2iMM5m",
+        "result": "1/1 batch 7 cases as expected",
+        "pass": true,
+        "wrong": []
+      },
+      {
+        "log": "test-results/trial7-tests11-launcher-3.log",
+        "scratch": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-pXaM5X",
+        "result": "1/1 batch 7 cases as expected",
+        "pass": true,
+        "wrong": []
+      },
+      {
+        "log": "test-results/trial7-tests11-alias-before.log",
+        "scratch": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-1e6wOc",
+        "result": "0/1 batch 7 cases as expected",
+        "pass": false,
+        "wrong": [
+          "B7 B7-79 fixture work root never reuses a retained alias owned by another attempt"
+        ]
+      },
+      {
+        "log": "test-results/trial7-tests11-alias-after.log",
+        "scratch": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-HsPH3L",
+        "result": "0/1 batch 7 cases as expected",
+        "pass": false,
+        "wrong": [
+          "B7 B7-79 fixture work root never reuses a retained alias owned by another attempt"
+        ]
+      },
+      {
+        "log": "test-results/trial7-tests11-launcher-after.log",
+        "scratch": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-zpPB5N",
+        "result": "1/1 batch 7 cases as expected",
+        "pass": true,
+        "wrong": []
+      },
+      {
+        "log": "test-results/trial7-tests11-smoke.log",
+        "scratch": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-QS8KaV",
+        "result": "1/1 batch 7 cases as expected",
+        "pass": true,
+        "wrong": [],
+        "smoke_output": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-QS8KaV/9-smoke-fault-0/smoke-output.json",
+        "smoke_exit": 1,
+        "smoke_lines": [
+          "PASS real agent preflight: 123 tokens; 45 ms",
+          "PASS planned cells: 16/16",
+          "FAIL condition answers: Unexpected token 'o', \"not JSON\" is not valid JSON",
+          "PASS identical agent files",
+          "FAIL closed store and tool code: Unexpected token 'o', \"not JSON\" is not valid JSON",
+          "FAIL service answered every call: Unexpected token 'o', \"not JSON\" is not valid JSON",
+          "PASS scorer batch blocks",
+          "  c1__stub__r1: 5 tokens; 4 ms",
+          "  c1__graph__r1: 5 tokens; 3 ms",
+          "  c1__graph-nolink__r1: 5 tokens; 3 ms",
+          "  c1__graph-nosearch__r1: 5 tokens; 3 ms",
+          "  c1__graph-noterms__r1: 5 tokens; 3 ms",
+          "  c1__graph-norule__r1: 5 tokens; 3 ms",
+          "  u1__stub__r1: 5 tokens; 4 ms",
+          "  u1__graph__r1: 5 tokens; 3 ms",
+          "  u1__graph-nolink__r1: 5 tokens; 3 ms",
+          "  u1__graph-nosearch__r1: 5 tokens; 3 ms",
+          "  u1__graph-noterms__r1: 5 tokens; 3 ms",
+          "  u1__graph-norule__r1: 5 tokens; 3 ms",
+          "  p1__stub__r1: 5 tokens; 4 ms",
+          "  p1__graph__r1: 5 tokens; 3 ms",
+          "  g1__stub__r1: 5 tokens; 4 ms",
+          "  g1__graph__r1: 5 tokens; 3 ms",
+          "PASS tokens and wall time per run"
+        ]
+      },
+      {
+        "log": "test-results/trial7-tests11-alias-final.log",
+        "scratch": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MJ38eD",
+        "result": "1/1 batch 7 cases as expected",
+        "pass": true,
+        "wrong": []
+      }
+    ],
+    "collision": {
+      "failed_attempt": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-5FKgPa/315-attempt-144",
+      "previous_owner": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-dmgwXk/316-attempt-141",
+      "alias": "test-results/w43904a",
+      "target": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-dmgwXk/316-attempt-141/work",
+      "expected_target": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-5FKgPa/315-attempt-144/work",
+      "same_hash_prefix": "43904a",
+      "error": "Command failed: flock --exclusive /home/dev/repos/personal/whygraph/test-results/w43904a/_zustand/ablations/.prepare.lock /home/dev/.npm-global/node-v26.5.1/bin/node /home/dev/repos/personal/whygraph/test-results/batch7-selftest-5FKgPa/315-attempt-144/eval/closed-store.mjs prepare /home/dev/repos/personal/whygraph/test-results/batch7-selftest-5FKgPa/179-closed/fixture/.git/whygraph/store /home/dev/repos/personal/whygraph/test-results/w43904a/_zustand/ablations\nfile:///home/dev/repos/personal/whygraph/test-results/batch7-selftest-5FKgPa/315-attempt-144/eval/closed-store.mjs:142\n    throw new Error(`incomplete ablation preparation at ${directory}; inspect it before rebuilding`);\n          ^\n\nError: incomplete ablation preparation at /home/dev/repos/personal/whygraph/test-results/w43904a/_zustand/ablations; inspect it before rebuilding\n    at preparedStores (file:///home/dev/repos/personal/whygraph/test-results/batch7-selftest-5FKgPa/315-attempt-144/eval/closed-store.mjs:142:11)\n    at file:///home/dev/repos/personal/whygraph/test-results/batch7-selftest-5FKgPa/315-attempt-144/eval/closed-store.mjs:556:68\n    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)\n    at async node:internal/modules/esm/loader:650:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v26.5.1\n",
+      "stack": "Error: Command failed: flock --exclusive /home/dev/repos/personal/whygraph/test-results/w43904a/_zustand/ablations/.prepare.lock /home/dev/.npm-global/node-v26.5.1/bin/node /home/dev/repos/personal/whygraph/test-results/batch7-selftest-5FKgPa/315-attempt-144/eval/closed-store.mjs prepare /home/dev/repos/personal/whygraph/test-results/batch7-selftest-5FKgPa/179-closed/fixture/.git/whygraph/store /home/dev/repos/personal/whygraph/test-results/w43904a/_zustand/ablations\nfile:///home/dev/repos/personal/whygraph/test-results/batch7-selftest-5FKgPa/315-attempt-144/eval/closed-store.mjs:142\n    throw new Error(`incomplete ablation preparation at ${directory}; inspect it before rebuilding`);\n          ^\n\nError: incomplete ablation preparation at /home/dev/repos/personal/whygraph/test-results/w43904a/_zustand/ablations; inspect it before rebuilding\n    at preparedStores (file:///home/dev/repos/personal/whygraph/test-results/batch7-selftest-5FKgPa/315-attempt-144/eval/closed-store.mjs:142:11)\n    at file:///home/dev/repos/personal/whygraph/test-results/batch7-selftest-5FKgPa/315-attempt-144/eval/closed-store.mjs:556:68\n    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)\n    at async node:internal/modules/esm/loader:650:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v26.5.1\n\n    at genericNodeError (node:internal/errors:999:15)\n    at wrappedFn (node:internal/errors:544:14)\n    at checkExecSyncError (node:child_process:942:11)\n    at execFileSync (node:child_process:978:15)\n    at ablatedStores (file:///home/dev/repos/personal/whygraph/test-results/batch7-selftest-5FKgPa/315-attempt-144/eval/closed-store.mjs:177:21)\n    at Module.closedAttempt (file:///home/dev/repos/personal/whygraph/test-results/batch7-selftest-5FKgPa/315-attempt-144/eval/closed-run.mjs:193:16)\n    at file:///home/dev/repos/personal/whygraph/eval/selftest/batch7-attempt-worker.mjs:24:285",
+      "ready_receipt_exists": false,
+      "ablation_entries": [
+        ".prepare.lock",
+        "graph-nolink",
+        "graph-nolink.json",
+        "graph-nolink.proof.json",
+        "graph-noterms",
+        "graph-noterms.json",
+        "graph-noterms.proof.json"
+      ],
+      "same_algorithm_at_0289d2b": true
+    },
+    "root_cause": "Existing test fixture reuses a six-hex-character alias owned by a retained attempt; not a product regression or load race.",
+    "fixture_fix": "Allocate a short work directory exclusively with mkdtemp; no symlink, reused name, retry or changed service guard.",
+    "retained_work_roots": [
+      {
+        "config": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-vTsjSt/2-attempt-3/attempt-4.json",
+        "root": "test-results/wf3f242",
+        "actual": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-vTsjSt/2-attempt-3/work"
+      },
+      {
+        "config": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-vTsjSt/1-attempt-0/attempt-1.json",
+        "root": "test-results/wbdb88a",
+        "actual": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-vTsjSt/1-attempt-0/work"
+      },
+      {
+        "config": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-2iMM5m/2-attempt-3/attempt-4.json",
+        "root": "test-results/w1d7def",
+        "actual": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-2iMM5m/2-attempt-3/work"
+      },
+      {
+        "config": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-2iMM5m/1-attempt-0/attempt-1.json",
+        "root": "test-results/w61de40",
+        "actual": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-2iMM5m/1-attempt-0/work"
+      },
+      {
+        "config": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-pXaM5X/2-attempt-3/attempt-4.json",
+        "root": "test-results/w035c96",
+        "actual": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-pXaM5X/2-attempt-3/work"
+      },
+      {
+        "config": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-pXaM5X/1-attempt-0/attempt-1.json",
+        "root": "test-results/wfa321e",
+        "actual": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-pXaM5X/1-attempt-0/work"
+      },
+      {
+        "config": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-1e6wOc/0-foreign-attempt-alias/attempt-0.json",
+        "root": "test-results/w51b0a3",
+        "actual": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-1e6wOc/0-foreign-attempt-alias/foreign-work"
+      },
+      {
+        "config": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-HsPH3L/0-foreign-attempt-alias/attempt-0.json",
+        "root": "test-results/w5hz34f/work",
+        "actual": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-HsPH3L/0-foreign-attempt-alias/work"
+      },
+      {
+        "config": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-zpPB5N/2-attempt-3/attempt-4.json",
+        "root": "test-results/w4j1u8z",
+        "actual": "/home/dev/repos/personal/whygraph/test-results/w4j1u8z"
+      },
+      {
+        "config": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-zpPB5N/1-attempt-0/attempt-1.json",
+        "root": "test-results/wa5ug1Q",
+        "actual": "/home/dev/repos/personal/whygraph/test-results/wa5ug1Q"
+      },
+      {
+        "config": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-QS8KaV/4-attempt-3/attempt-4.json",
+        "root": "test-results/wVj7a8B",
+        "actual": "/home/dev/repos/personal/whygraph/test-results/wVj7a8B"
+      },
+      {
+        "config": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-QS8KaV/6-attempt-9/attempt-10.json",
+        "root": "test-results/w2mN8gu",
+        "actual": "/home/dev/repos/personal/whygraph/test-results/w2mN8gu"
+      },
+      {
+        "config": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-QS8KaV/8-attempt-15/attempt-16.json",
+        "root": "test-results/wVuE2pq",
+        "actual": "/home/dev/repos/personal/whygraph/test-results/wVuE2pq"
+      },
+      {
+        "config": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-QS8KaV/3-attempt-0/attempt-1.json",
+        "root": "test-results/wBVdphY",
+        "actual": "/home/dev/repos/personal/whygraph/test-results/wBVdphY"
+      },
+      {
+        "config": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-QS8KaV/5-attempt-6/attempt-7.json",
+        "root": "test-results/w6zEArH",
+        "actual": "/home/dev/repos/personal/whygraph/test-results/w6zEArH"
+      },
+      {
+        "config": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-QS8KaV/7-attempt-12/attempt-13.json",
+        "root": "test-results/wZYxDzN",
+        "actual": "/home/dev/repos/personal/whygraph/test-results/wZYxDzN"
+      },
+      {
+        "config": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MJ38eD/0-foreign-attempt-alias/attempt-0.json",
+        "root": "test-results/w5ivTJx",
+        "actual": "/home/dev/repos/personal/whygraph/test-results/w5ivTJx"
+      }
+    ],
+    "retained_aliases": [
+      {
+        "path": "test-results/wbdb88a",
+        "target": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-vTsjSt/1-attempt-0/work"
+      },
+      {
+        "path": "test-results/wf3f242",
+        "target": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-vTsjSt/2-attempt-3/work"
+      },
+      {
+        "path": "test-results/w035c96",
+        "target": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-pXaM5X/2-attempt-3/work"
+      },
+      {
+        "path": "test-results/w1d7def",
+        "target": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-2iMM5m/2-attempt-3/work"
+      },
+      {
+        "path": "test-results/wfa321e",
+        "target": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-pXaM5X/1-attempt-0/work"
+      },
+      {
+        "path": "test-results/wb4cc8e",
+        "target": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MJ38eD/0-foreign-attempt-alias/foreign-work"
+      },
+      {
+        "path": "test-results/wd91d1e",
+        "target": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-HsPH3L/0-foreign-attempt-alias/foreign-work"
+      },
+      {
+        "path": "test-results/w61de40",
+        "target": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-2iMM5m/1-attempt-0/work"
+      },
+      {
+        "path": "test-results/w51b0a3",
+        "target": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-1e6wOc/0-foreign-attempt-alias/foreign-work"
+      }
+    ],
+    "checks": {
+      "node --check": 0,
+      "pnpm check (tsrs)": 0,
+      "memod lint": 0
+    },
+    "limits": [
+      "No full suite or stress form.",
+      "An intermediate fixture layout failed the existing socket length guard; final flat layout passes.",
+      "No product code, original retained alias or original failed preparation was changed."
+    ],
+    "cleanup": {
+      "running_processes_in_new_work_roots": [],
+      "deleted": []
+    }
   }
 }

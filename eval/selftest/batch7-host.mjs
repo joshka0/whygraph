@@ -40,7 +40,7 @@ function ownedPids(token){return readdirSync('/proc').filter(n=>/^\d+$/.test(n))
 export async function batch7HostChecks({scratch,shared,stress=false}){
  const checks=[],add=(name,run)=>checks.push({name:`B7 ${name}`,group:'host',run});let serial=0;
  async function run(fn,{condition='graph',api,client,symlinkRepo=false,worker=false,spawnFailure=false,workerModule}={}){
-  const f=await shared.getClosed(),r=await shared.attempt({condition}),work=r.value.work,repo=resolve(h.root,work,'repo'),config=h.json(join(r.out,'command.json'));
+  const f=await shared.getClosed(),r=await shared.attempt({condition});assert.equal(r.error,undefined,`host fixture attempt failed: ${r.error}; evidence: ${r.at}`);const work=r.value.work,repo=resolve(h.root,work,'repo'),config=h.json(join(r.out,'command.json'));
   const args=config.args.slice(1,config.args.lastIndexOf('--')+1),opencode=args.indexOf('/tools/opencode');args[opencode-1]=f.opencode;
   if(client)for(let i=0;i<args.length;i++)if(['/tools/whygraph','/tools/relate','/tools/memod','/tools/shell-client'].includes(args[i]))args[i-1]=client;
   h.ok(h.command('git',['init','-q',repo]));
