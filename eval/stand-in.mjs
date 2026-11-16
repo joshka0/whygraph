@@ -31,7 +31,7 @@ try {
   for(const command of ['carry','why','impact','search'])shell(`whygraph ${command} ${quote(command==='impact'?config.impact:config.target)}`);
   for(const command of [
     `cat ${quote(config.store+'/manifest.json')}`,
-    `relate query --database ${quote(config.store)} 'MATCH (n) RETURN n'`,
+    'relate --version',
     'cat /tools/whygraph',
     `cat ${quote(config.serviceCode)}`,
     `cat ${quote(config.otherSocket)}`,
