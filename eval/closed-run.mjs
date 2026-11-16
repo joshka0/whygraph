@@ -139,7 +139,8 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     const session=opencodeSession(events);
     // Normalize namespace paths for the unchanged isolation checker.
     const tools=session.tools.map(t=>({...t,input:t.input}));
-    const normalized=JSON.parse(JSON.stringify(tools).replaceAll('/repo/',`${repo}/`).replaceAll('"/repo"',JSON.stringify(repo)));
+    const identity=realpathSync(repo);
+    const normalized=JSON.parse(JSON.stringify(tools).replaceAll('/repo/',`${identity}/`).replaceAll('"/repo"',JSON.stringify(identity)));
     const breaches=isolationBreaches(repo,normalized);
     await launcher.stop();
     const stats=service.stats();

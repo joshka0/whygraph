@@ -45,6 +45,9 @@ A short symlink alias to a long physical root is valid. Keep work, result
 and template roots as supplied; do not replace them by canonical paths.
 Resolve both sides of path comparisons the same way. This includes native
 file and patch paths, symlink targets and result-root containment checks.
+ADR 0010 freezes the shared opencode module. The closed runner maps
+namespace paths to the canonical repo identity before it calls that
+unchanged checker; launch paths still retain the alias.
 Confinement mounts keep their constant namespace paths. Long or unsafe
 result and ledger components use a SHA-256 filename; archives add a UUID
 to the bounded result key. Earlier batches keep their readable prefixes.
