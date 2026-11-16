@@ -74,8 +74,8 @@ answers only. The route accepts no caller-selected store or query language.
 A valid unsupported command or a valid option-bearing invocation returns
 stdout empty, stderr `usage: whygraph <carry|why|impact|search> <target>\n`,
 and exit 2. Embedded NUL uses that same rejection because exec argv cannot
-carry NUL. Frames over the transport limits close the connection; the client
-prints `whygraph service unavailable\n` on stderr and exits 70.
+carry NUL. The client rejects calls over its frame limits with the same
+usage diagnostic and exit 2 before connecting.
 A call that fails inside the store service returns exactly
 `whygraph service unavailable\n` on stderr, with exit 70 and empty stdout.
 Its internal cause stays in host-only service logs, attempt metadata, ledger
@@ -97,6 +97,35 @@ Graph-noterms copies the one store and removes Term nodes and MENTIONS edges.
 Graph-nolink copies the store and removes CITES edges. No source or recipe
 changes implement an ablation. Receipts record copy and mutation time.
 Fingerprints check all other nodes, relationships, record text and vectors.
+
+### Refused requests, 2026-11-16
+
+The parent's ruling separates frame refusals from service failures.
+The fifth batch 7 smoke start stopped after about nine minutes. Raw HTTP
+probes caused `invalid argument count` failures in 3 of 4 graph-family
+attempts, although every real client call returned exit 0 or usage exit 2.
+Invalidating only those conditions biases the comparison.
+
+Before dispatch, a count over 64, an argument over 60,000 bytes, or a
+request over 65,536 bytes closes the connection without a reply or query.
+The service logs `{"event":"refused","message":...}` and records `refused`
+and ordered `refusalReasons` apart from `failures` and failure `reasons`.
+Attempt metadata keeps both groups under `service`. A refusal alone leaves
+an attempt valid. Empty connections and incomplete frames within the
+declared limits still count as neither refusals nor failures.
+
+The real client checks all three byte limits before connecting. A bad
+call returns empty stdout, the existing one-line usage diagnostic on stderr
+and exit 2. Calls within the limits keep the direct product diagnostics.
+A dispatched answer failure, a real unavailable client or a launcher fault
+remains a harness failure. Launched commands cannot reach the shell socket:
+their namespace mounts only the store socket. B7-79 stays unchanged.
+
+The smoke checker counts only dispatched replies against `service.calls`,
+requires zero failures and reports refusals separately. It verifies refusal
+counts and reasons against metadata. It also counts raw refusals as observed
+agent attempts. Direct-answer receipts still gate every dispatched reply.
+This ruling amends B7-13, B7-63 and B7-80. Batches 5 and 6 stay frozen.
 
 ### Store preparation, 2026-11-16
 

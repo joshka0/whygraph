@@ -244,8 +244,9 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     await launcher.stop();
     const stats=service.stats();
     const serviceDown=tools.some(t=>/whygraph (?:service|shell launcher) unavailable/.test(String(t.result)));
-    const causes=[...(stats.reasons??[]),...(launcher.stats().reasons??[])];
-    const serviceFailure=stats.failures||serviceDown||launcher.stats().failures;
+    const shellStats=launcher.stats();
+    const causes=[...stats.reasons,...shellStats.reasons];
+    const serviceFailure=stats.failures>0||serviceDown||shellStats.failures>0;
     const harness=r.spawnError||(!r.timedOut&&(malformed||r.code!==0||!session.success))||serviceFailure
       ?closedAgentCause(run,prompt,[...(serviceFailure?['service or shell launcher unavailable']:[]),...causes]):undefined;
     const meta={id:`${task.id}__${condition}__r${repeat}`,task:task.id,condition,repeat,agent:'opencode',model:rehearsal?'rehearsal':OPENCODE_MODEL,...(rehearsal?{rehearsal:true}:{}),

@@ -49,7 +49,7 @@ check('condition answers',()=>{
  require(attempts.length>0,'no attempts');
  for(const {cell,dir} of attempts) {
   const health=read(dir,'health.json'),condition=cell.condition;
-  const answers=readFileSync(join(dir,'service.jsonl'),'utf8').trim().split('\n').filter(Boolean).map(JSON.parse);
+  const answers=readFileSync(join(dir,'service.jsonl'),'utf8').trim().split('\n').filter(Boolean).map(JSON.parse).filter(row=>row.event!=='refused');
   require(health.condition===condition,'wrong health condition');
   require(health.answers.length===4&&new Set(health.answers.map(a=>a.args[0])).size===4,'incomplete health calls');
   for(const a of answers) {
@@ -106,10 +106,12 @@ check('identical agent files',()=>{
 });
 check('closed store and tool code',()=>{
  require(attempts.length>0,'no attempts');
- let probes=0,agentAttempts=0;
+ let probes=0,agentAttempts=0,refused=0;
  for(const {dir} of attempts) {
   const proof=read(dir,'confinement.json');
   require(proof.length===5&&proof.every(p=>Number.isInteger(p.status)&&p.status!==0),'a confinement probe succeeded or did not run');probes+=proof.length;
+  const refusals=readFileSync(join(dir,'service.jsonl'),'utf8').trim().split('\n').filter(Boolean).map(JSON.parse).filter(row=>row.event==='refused');
+  agentAttempts+=refusals.length;refused+=refusals.length;
   for(const tool of read(dir,'tools.json')) {
    const input=JSON.stringify(tool.input??{});
    const attempt=tool.name==='Bash' ? /(?:^|[;&|(\n])\s*(?:(?:env|exec|command)\s+)?(?:\/[^\s]+\/)?relate(?:\s|$)|\b(?:cat|head|tail|less|strings|xxd|od|cp|dd)\b[^\n]*(?:whygraph\/store|\/tools\/whygraph|closed-store\.mjs)/.test(String(tool.input?.command??'')) : /whygraph\/store|\/tools\/whygraph|closed-store\.mjs/.test(input);
@@ -118,16 +120,22 @@ check('closed store and tool code',()=>{
    require(tool.error===true||/Permission denied|No such file|not found|unavailable|denied|cannot access/i.test(String(tool.result)),`successful store/code attempt: ${input}`);
   }
  }
- return `${probes} denied probes; ${agentAttempts} denied logged agent attempts`;
+ return `${probes} denied probes; ${agentAttempts} denied logged agent attempts (${refused} refused raw requests)`;
 });
 check('service answered every call',()=>{
  require(attempts.length>0,'no attempts');
+ let refused=0;
  for(const {dir,meta} of attempts) {
-  const calls=readFileSync(join(dir,'service.jsonl'),'utf8').trim().split('\n').filter(Boolean).map(JSON.parse);
+  const events=readFileSync(join(dir,'service.jsonl'),'utf8').trim().split('\n').filter(Boolean).map(JSON.parse);
+  const refusals=events.filter(row=>row.event==='refused'),calls=events.filter(row=>row.event!=='refused');
+  require(refusals.every(row=>['invalid argument count','argument too large','request too large'].includes(row.message)), 'bad refused request');
+  require(meta.service?.refused===refusals.length&&JSON.stringify(meta.service.refusalReasons)===JSON.stringify(refusals.map(row=>row.message)), 'refused requests differ from metadata');
+  refused+=refusals.length;
   require(meta.service?.failures===0&&meta.service.calls===calls.length&&calls.length>=4,'missing service replies or failure');
   require(calls.every(c=>Number.isInteger(c.code)&&typeof c.stdout==='string'&&typeof c.stderr==='string'&&c.code!==70),'bad service reply');
   require(!read(dir,'tools.json').some(t=>String(t.result).includes('whygraph service unavailable')),'client lost service');
  }
+ return `${refused} refused requests`;
 });
 check('scorer batch blocks',()=>{
  const r=spawnSync(process.execPath,[join(here,'score.mjs'),'--results',results],{encoding:'utf8',maxBuffer:1<<28});
