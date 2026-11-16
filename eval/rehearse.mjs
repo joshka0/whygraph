@@ -10,7 +10,8 @@ import { batchPlan, evalBatch } from './registry.mjs';
 import { readTasks, scoreRun } from './score.mjs';
 import { ticketTemplate, settleCell } from './run.mjs';
 import { closedAttempt } from './closed-run.mjs';
-import { closedWorkRoot, fileKey, execBudget, filesystemPath } from './registry.mjs';
+import { fileKey } from './registry.mjs';
+import { closedWorkRoot, execBudget, filesystemPath } from './closed-store.mjs';
 
 const here=fileURLToPath(new URL('.',import.meta.url));
 const quiet={...process.env,RELATE_TELEMETRY:'0',DO_NOT_TRACK:'1'};
@@ -52,7 +53,7 @@ async function main(args) {
     if(task.kind==='control') {
       const fixture=controls[task.id];
       const digest=createHash('sha256').update(JSON.stringify(task)).digest('hex');
-      if(!fixture||fixture.taskHash!==digest)throw new Error(`missing or mismatched rehearsal edit fixture: ${task.id}`);
+      if(!fixture||fixture.taskHash!==digest||typeof fixture.target!=='string')throw new Error(`missing or mismatched rehearsal edit fixture: ${task.id}`);
       for(const edit of fixture.edits) {
         const text=readFileSync(join(templates.get(task.repo).repo,edit.file),'utf8');
         if(!edit.before||text.split(edit.before).length!==2)throw new Error(`mismatched rehearsal edit anchor: ${task.id}: ${edit.file}`);
@@ -75,7 +76,7 @@ async function main(args) {
       const edits=task.kind==='control'?controls[task.id].edits:[];
       const source=target?.file??edits[0]?.file;
       if(!source)throw new Error(`task has no rehearsal source: ${task.id}`);
-      const config={source:`/repo/${source}`,target:target?`${target.file}:${target.symbol}`:`${source}:1-9999`,edits,
+      const config={source:`/repo/${source}`,target:target?`${target.file}:${target.symbol}`:controls[task.id].target,edits,
         impact:task.ground_truth.source.record?`ticket-${task.ground_truth.source.record}`:task.ground_truth.source.ticket,
         store:realpathSync(template.store),serviceCode:join(here,'closed-store.mjs'),
         otherSocket:join(work,'other','service.sock'),networkPort:network.address().port};

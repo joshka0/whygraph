@@ -7,7 +7,8 @@ import { closedClient, closedConfinement, ablatedStores, startClosedStore, start
 import { batchInstructions } from './registry.mjs';
 import { readQuery } from '../src/tools.ts';
 import { opencodeLaunch, opencodeSession, escapingSymlinks, isolationBreaches, OPENCODE_MODEL } from './opencode.mjs';
-import { closedWorkRoot, fileKey, execBudget, filesystemPath } from './registry.mjs';
+import { fileKey } from './registry.mjs';
+import { closedWorkRoot, execBudget, filesystemPath } from './closed-store.mjs';
 const quiet = { ...process.env, RELATE_TELEMETRY:'0', DO_NOT_TRACK:'1' };
 const gitEnv = { ...quiet, GIT_CONFIG_GLOBAL:'/dev/null',GIT_CONFIG_NOSYSTEM:'1',GIT_AUTHOR_NAME:'eval',GIT_AUTHOR_EMAIL:'eval@example.invalid',GIT_COMMITTER_NAME:'eval',GIT_COMMITTER_EMAIL:'eval@example.invalid' };
 const sh = (cmd,args,options={}) => {

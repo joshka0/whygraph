@@ -16,7 +16,6 @@ import { recipe } from '../src/ask.ts';
 import { whyAnswer } from '../src/answers.pure.ts';
 import { readSymbolTarget } from '../src/target.pure.ts';
 import { readArgs } from '../src/args.pure.ts';
-import { socketPath, filesystemPath, execBudget } from './registry.mjs';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const execute = promisify(execFile);
 const quiet = { ...process.env, RELATE_TELEMETRY: '0', DO_NOT_TRACK: '1' };
@@ -423,6 +422,63 @@ export async function startClosedShell({work,repo,client,socket,log}) {
     if(scopeErrors.length)throw new AggregateError(scopeErrors,'shell command scope cleanup failed');
   };
   return {server,stats:()=>({calls,failures}),cancel,stop};
+}
+
+/** Check the pathname passed to the kernel, in bytes.
+ * owns: [[whygraph-closed-store]]
+ */
+export function socketPath(path) {
+  if (Buffer.byteLength(path) > 107) throw new Error(`Unix socket path exceeds 107 bytes: ${path}`);
+  return path;
+}
+
+/** Reject an unusable root before preparation or a ledger reservation.
+ * owns: [[whygraph-closed-store]]
+ */
+export function closedWorkRoot(root) {
+  if (Buffer.byteLength(join(resolve(root), '0'.repeat(36), 'service.sock')) > 107)
+    throw new Error(`work root too long for Unix sockets (107-byte limit): ${resolve(root)}`);
+  filesystemPath(root);
+  return root;
+}
+
+/** Check mount paths and canonical existing ancestors before exec.
+ * owns: [[whygraph-closed-store]]
+ */
+export function filesystemPath(path) {
+  const absolute = resolve(path);
+  const check = value => {
+    if (Buffer.byteLength(value) >= 4096 || value.split('/').some(part => Buffer.byteLength(part) > 255))
+      throw new Error(`filesystem path limit exceeded: ${path}`);
+  };
+  check(absolute);
+  let ancestor = absolute;
+  while (!existsSync(ancestor) && dirname(ancestor) !== ancestor) ancestor = dirname(ancestor);
+  const canonical = realpathSync(ancestor) + absolute.slice(ancestor.length);
+  check(canonical);
+  return path;
+}
+
+let limits;
+/** Validate the host exec budget, including environment bytes and pointers.
+ * owns: [[whygraph-closed-store]]
+ */
+export function execBudget(command, args, env = process.env) {
+  limits ??= {
+    argument: Number(execFileSync('getconf', ['PAGESIZE'], { encoding: 'utf8' }).trim()) * 32,
+    total: Number(execFileSync('getconf', ['ARG_MAX'], { encoding: 'utf8' }).trim()),
+  };
+  const fields = [command, ...args, ...Object.entries(env).filter(([,v]) => v !== undefined).map(([k,v]) => `${k}=${v}`)];
+  let bytes = (fields.length + 2) * 8;
+  for (const [index, field] of fields.entries()) {
+    const size = Buffer.byteLength(field) + 1;
+    if (field.includes('\0') || size > limits.argument)
+      throw new Error(`exec argument or environment entry ${index} exceeds host limit (${limits.argument - 1} bytes) or contains NUL`);
+    bytes += size;
+  }
+  // Linux also stores the executable pathname and alignment in this budget.
+  if (bytes + Buffer.byteLength(command) + 4096 > limits.total)
+    throw new Error(`exec arguments and environment exceed host ARG_MAX (${limits.total} bytes)`);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

@@ -41,11 +41,16 @@ Attempt work folders use UUIDs rather than cell names. Both socket names
 are constant. Before any attempt starts, the runner checks the absolute work
 root with a complete UUID and the longest socket leaf against 107 bytes.
 Confinement mounts keep their constant namespace paths. Long or unsafe
-result and ledger components use a SHA-256 filename; archives use UUIDs.
+result and ledger components use a SHA-256 filename; archives add a UUID
+to the bounded result key. Earlier batches keep their readable prefixes.
 Cell identity stays in metadata and ledgers. All lengths count UTF-8 bytes.
 Exec validation checks each argument, environment entry and total request
 against the host limits. Oversized paths, prompts or requests refuse with
 the limiting name before exec. No limit is relaxed.
+
+The closed transport owns the socket, mount and exec guards. It remains
+importable without the trial registry. The registry owns filename encoding;
+the runner and smoke checker use that one encoding for cells and ledgers.
 
 | State | Lives in | Owner | Lifetime | Token | Outcome |
 | --- | --- | --- | --- | --- | --- |

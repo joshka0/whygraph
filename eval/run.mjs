@@ -20,7 +20,7 @@ import { randomUUID } from 'node:crypto';
 import { batchInstructions } from './registry.mjs';
 import { batchPlan } from './registry.mjs';
 import { evalBatch, ticketRepo, evalRegistry } from './registry.mjs';
-import { closedWorkRoot, fileKey, execBudget } from './registry.mjs';
+import { fileKey } from './registry.mjs';
 
 const EVAL = fileURLToPath(new URL('./', import.meta.url));
 const WHYGRAPH = join(EVAL, '..');
@@ -422,7 +422,7 @@ function runAgent(args, cwd, env, outFile, errFile, agent = 'claude') {
 }
 
 function archiveResult(out, group, results=RESULTS) {
-  const dest = join(results, group, randomUUID());
+  const dest = join(results, group, `${fileKey(out.split('/').at(-1))}__${randomUUID()}`);
   mkdirSync(join(results, group), { recursive: true });
   renameSync(out, dest);
   return dest;
@@ -460,7 +460,7 @@ export async function runOne(task, condition, repeat, allIds) {
       return meta;
     }
   }
-  const work = join(WORK, id);
+  const work = join(WORK, fileKey(id));
   const { repo, bin, base, confine } = prepare(task, condition, work);
   if (opencode) {
     const escaped = opencode.escapingSymlinks(repo);
@@ -477,7 +477,7 @@ export async function runOne(task, condition, repeat, allIds) {
     join(process.env.HOME, '.config/spec-ledger'), '/home/dev/scratch', '/home/dev/repos/personal/memod',
     EVAL, join(WHYGRAPH, 'scripts'), join(WHYGRAPH, 'test'), join(WHYGRAPH, 'test-results'), join(WHYGRAPH, 'docs'),
     join(WHYGRAPH, 'README.md'), join(WHYGRAPH, '.git'), join(WORK, '_fixture'),
-    ...allIds.filter((o) => o !== id).map((o) => join(WORK, o)),
+    ...allIds.filter((o) => o !== id).map((o) => join(WORK, fileKey(o))),
   ];
   const prompt = wrap(task.request);
   writeFileSync(join(out, 'prompt.txt'), prompt);
@@ -618,8 +618,11 @@ async function main(argv) {
     return 0;
   }
   const allIds = plan.map((p) => p.id);
-  if(plan.some(p=>evalBatch(p.task.batch).storeAccess==='closed'))closedWorkRoot(WORK);
-  for(const p of plan)execBudget('/tools/opencode',[wrap(p.task.request)]);
+  if(plan.some(p=>evalBatch(p.task.batch).storeAccess==='closed')) {
+    const {closedWorkRoot,execBudget}=await import('./closed-store.mjs');
+    closedWorkRoot(WORK);
+    for(const p of plan)execBudget('/tools/opencode',[wrap(p.task.request)]);
+  }
   let next = 0;
   let failed = 0;
   const worker = async () => {
