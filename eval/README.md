@@ -1444,6 +1444,41 @@ retain exit 126 for command denial. Product diagnostics retain their direct
 CLI bytes. Full answers and file manifests remain outside the agent filesystem for the smoke audit.
 Batches 1 to 6 keep their earlier setup and limits.
 
+**Name resolution.** The agent and its shell read the host's resolver
+inputs through `/etc`. The confinement follows the host's links at launch.
+For a resolver file outside the mounted system folders, it mounts only
+that regular file, read-only, at its resolved path. Intermediate external
+links are recreated. No containing resolver folder or sibling file is
+exposed. Plain files in `/etc` get no additional mount. This applies to
+`resolv.conf`, `nsswitch.conf`, `hosts`, `host.conf` and `gai.conf`.
+A dangling link, unreadable input, private target or executable external
+target refuses startup. Mount derivation does not depend on the condition.
+The closed-store probes and file-identity comparison remain unchanged.
+
+**Real agent preflight.** Before the first pending closed-store cell, the
+runner starts the real agent once in an empty scratch repo. Cells and
+preflight share the launch builder, mounts, environment, model and launch
+arguments. The preflight has live private store and shell sockets, with no
+task store or template. Its prompt asks for `ok` with no tool use. Success
+requires exit 0, a successful stop, positive token usage, exactly `ok`
+after whitespace trimming, and no tool event. A failed preflight stops the
+runner before any cell, ledger reservation, cell result or attempt archive.
+Plans and runs with nothing pending start no preflight. Batches 1 to 6
+keep their setup and the frozen shared launcher.
+
+`results/_preflight/<UUID>/` keeps the command, JSONL events, stderr and
+`record.json` with exit, tokens, wall time and scratch path. Its
+`startup.json` compares host and confined resolver, time zone and system
+certificate hashes and checks identity-directory presence without opening
+its files. `_preflight/latest.json` selects the smoke check's record.
+The scorer has no cell metadata to read there. Smoke-check prints the
+preflight's usage and time on its own line. It does not add a planned cell
+or change a score or result key. This command runs only preflight:
+
+```sh
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/preflight.mjs --batch 7
+```
+
 **Ablations.** Prepare both copies once per batch under a kernel `flock`.
 Graph-nolink removes CITES relationships. Graph-noterms removes Term nodes
 and MENTIONS relationships. Later cells and restarted runners validate
@@ -1529,6 +1564,16 @@ Closed ledgers live under `results/_ledger`. A runner rejection leaves its
 reservation for inspection. Earlier batches keep their existing rules,
 including the possible third attempt in the old invalid-then-timeout ladder.
 The 20-minute timeout and five-second kill grace remain.
+A harness-failure reason includes the agent's error name, first message
+line and exit status. Missing events still produce an explicit completion
+or exit cause. The formatter bounds the reason, redacts prompt text before
+truncation, and reads no stderr, tool output or nested response payload.
+Each failed attempt, its ledger entry, the invalid root marker and the
+runner's final error keep the cause. Both retry causes remain visible.
+Closed attempts retain their work copies and full answer logs for audit,
+as ADR 0011 and ADR 0013 specify. This differs from the older runner's
+work-folder removal rule.
+
 
 **Path bounds.** Attempt work folders use UUIDs and mode 0700. The store
 socket is `service.sock`; the shell socket is `shell.sock`. Neither path
@@ -1568,6 +1613,9 @@ checks denied store, relate, code, other-socket and network access, and
 applies committed control edits. A live host listener proves network denial.
 It emits opencode events with zero tokens and cost. The existing reader
 and scorer consume those events. Controls must pass their real diff rules.
+Rehearsal skips real-agent preflight: its stand-in has no model connection
+and emits zero tokens. The rehearsal marker records this choice, and the
+smoke check reports the exclusion on its own line.
 Every unexpected step result fails. The registry has no stand-in agent;
 the trial CLI rejects unknown selectors.
 

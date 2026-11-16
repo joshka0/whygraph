@@ -7,7 +7,7 @@
     "docs/adr/0011-eval-closed-store.md",
     "docs/adr/0012-ticket-record-outcomes.md"
   ],
-  "status": "Both final B7-94–B7-116 suites: 1617/1619, exit 1. Two contract mismatches remain red for parent ruling; eight requested plants caught in each run. Earlier sections retain historical counts.",
+  "status": "Both final B7-94\u2013B7-116 suites: 1617/1619, exit 1. Two contract mismatches remain red for parent ruling; eight requested plants caught in each run. Earlier sections retain historical counts.",
   "scope": {
     "edited": "eval/selftest/ only",
     "branch": "batch-7-integration",
@@ -1367,7 +1367,7 @@
       "name": "query-protocol",
       "owner": "B7-13",
       "assertion": "raw query must return no graph records",
-      "actual": "\u0000\u0000\u0000\u0000\u0000\u0000\u0004�\u0000\u0000\u0000\u0000Decision records that match \"tax\", best match first (candidates to pick from two lists, words and meaning; a candidate, not a link: read the record and judge whether it governs your change):\n  2026-01-02  ADR-0002  One flat tax rate\n      matched: words and meaning; source: docs/adr/0002-flat-tax.md\n  2026-01-03  ADR-0003  Tax rate by region\n      matched: words and meaning; source: docs/adr/0003-regional-tax.md\n  2026-01-02  note-1  Tax is computed once per order, not per line\n      matched: words and meaning; source: /home/dev/repos/personal/whygraph/test-results/batch7-selftest-CcfTiI/179-closed/fixture/decisions/notes.json\n  2026-01-04  note-2  Show thousands separators in totals\n      matched: meaning; source: /home/dev/repos/personal/whygraph/test-results/batch7-selftest-CcfTiI/179-closed/fixture/decisions/notes.json\n  2026-01-01  ADR-0001  Money in cents\n      matched: meaning; source: docs/adr/0001-money-in-cents.md\nSearched: the title and statement of every decision record in the store, for the words: tax, and for the meaning of the request.\nNot searched: the code, the commits and the tags (run whygraph why or carry on a symbol for the links the graph holds); a record's id, date, status and source (only its title and statement are indexed).\n",
+      "actual": "\u0000\u0000\u0000\u0000\u0000\u0000\u0004\ufffd\u0000\u0000\u0000\u0000Decision records that match \"tax\", best match first (candidates to pick from two lists, words and meaning; a candidate, not a link: read the record and judge whether it governs your change):\n  2026-01-02  ADR-0002  One flat tax rate\n      matched: words and meaning; source: docs/adr/0002-flat-tax.md\n  2026-01-03  ADR-0003  Tax rate by region\n      matched: words and meaning; source: docs/adr/0003-regional-tax.md\n  2026-01-02  note-1  Tax is computed once per order, not per line\n      matched: words and meaning; source: /home/dev/repos/personal/whygraph/test-results/batch7-selftest-CcfTiI/179-closed/fixture/decisions/notes.json\n  2026-01-04  note-2  Show thousands separators in totals\n      matched: meaning; source: /home/dev/repos/personal/whygraph/test-results/batch7-selftest-CcfTiI/179-closed/fixture/decisions/notes.json\n  2026-01-01  ADR-0001  Money in cents\n      matched: meaning; source: docs/adr/0001-money-in-cents.md\nSearched: the title and statement of every decision record in the store, for the words: tax, and for the meaning of the request.\nNot searched: the code, the commits and the tags (run whygraph why or carry on a symbol for the links the graph holds); a record's id, date, status and source (only its title and statement are indexed).\n",
       "expected": {},
       "state": "caught in normal 1476-case full run"
     },
@@ -1894,7 +1894,7 @@
       "test-results/trial7-tests3-score.txt"
     ],
     "deletions": 0,
-    "note": "Roots are identified by this run’s logs or explicit scratch prefix. Work aliases target those roots. Each independence root also retains its nested self-test folders and aliases."
+    "note": "Roots are identified by this run\u2019s logs or explicit scratch prefix. Work aliases target those roots. Each independence root also retains its nested self-test folders and aliases."
   },
   "duplicate_removals": [
     {
@@ -7159,6 +7159,1510 @@
     "parent_doc_sentences": {
       "eval/README.md": "The default self-test runs B7-93 with five repetitions and four CPU burners and B7-104 with the 16-cell smoke plan; node eval/selftest/check.mjs --stress runs only their 50-repetition and 258-cell forms.",
       "failure_list": "Run node eval/selftest/check.mjs --stress before a merge that changes eval/run.mjs, eval/closed-run.mjs, eval/closed-store.mjs, eval/rehearse.mjs, the shell launcher or the client, one command at a time under TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200%."
+    }
+  },
+  "trial7_tests8": {
+    "brief": "/home/dev/scratch/whygraph-eval/trial7-tests8-brief.md",
+    "branch": "batch-7-agent-network",
+    "test_commit": "d51c1a2",
+    "scope": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% ",
+    "hosted_model_calls": 0,
+    "trial_cells": 0,
+    "new_rehearsals": 0,
+    "production_edits": 0,
+    "deletions": 0,
+    "pushes": 0,
+    "delegation": false,
+    "focused_unique_cases": 58,
+    "focused_latest_passes": 56,
+    "failures": [
+      {
+        "name": "B7 B7-121 executable resolver target inside system folders also refuses startup",
+        "status": "failed",
+        "wall_ms": 249,
+        "error": "B7-121 requires executable resolver targets to refuse startup\n\n0 !== 1\n",
+        "scratch": "test-results/startup-focused-YhgfGk",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'inside system folders'"
+      },
+      {
+        "name": "B7 B7-122 timed-out closed attempt records an explicit timeout cause",
+        "status": "failed",
+        "wall_ms": 7678,
+        "error": "B7-122 requires an explicit timeout cause in attempt metadata",
+        "scratch": "test-results/startup-focused-xBeFN8",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'timed-out closed attempt'"
+      }
+    ],
+    "coverage": {
+      "B7-119": "Three constructed external link layouts; six separately prepared real host confinements; fake reproduces archived missing-resolver error. DNS/model-name lookup is not exercised.",
+      "B7-120": "Plain /etc file, internal link and missing optional inputs add no bind; dangling, unreadable and cyclic links refuse.",
+      "B7-121": "Six-condition mounts; read-only file bytes and sibling denial; work/repo/checkout/identity/proc/dev/tmp roots and non-regular/executable external targets refuse. Executable /etc target remains RED.",
+      "B7-122": "Native error.data.message, error.message and part.message; explicit missing-event/spawn/signal/timeout/parse causes; real closed-attempt metadata and ledger propagation. Real timeout metadata remains RED.",
+      "B7-123": "Full prompt and prompt lines redact before bounded truncation; only first message line and named error fields survive; nested response/file, stderr and tool text do not enter reasons.",
+      "B7-124": "Two different real fake-agent errors traverse closedAttempt and settleCell, with separate archives and reasons in both ledger entries, root marker and exception. Also checks the injected retry boundary.",
+      "B7-125": "Shared real launch builder with controlled executable; empty repo, fixed prompt, model argv/environment and live shell/store socket mounts. Runner waits for one preflight before recorded cell boundary; settleCell is replaced so no trial cell starts.",
+      "B7-126": "Wrong completion, native errors, malformed stream, timeout, actual ENOENT spawn and service setup failure retain bounded preflight records with no cell artifacts. Runner failure reaches no cell boundary.",
+      "B7-127": "Positive-token exact trimmed ok passes; zero tokens, wrong word, error after stop, missing finish and tool use fail.",
+      "B7-128": "16/258 plans, preflight-only scorer exclusion, separate real smoke preflight line and 16/16 count; missing/failed preflight is red.",
+      "B7-129": "Plan, empty resume and earlier-only execution paths have no preflight record or call. Copied main exports its actual entry and substitutes only the cell boundary.",
+      "B7-130": "Standalone entry invokes one controlled fake preflight and no cell; batch 6 and unknown options refuse before launch. No real hosted preflight runs.",
+      "B7-131": "Reuses the retained 16-cell rehearsal; marker exclusion, zero tokens, 16/16 smoke and prior smoke checks pass. Default integration reuses the existing rehearsal case promise, with no added rehearsal.",
+      "B7-132": "Batch 5/6 plan stdout/stderr match ec76408 with identical saved metadata. Committed shared launcher/task/blind-input/score bytes stay frozen; existing report bytes match. No old-batch agent is launched.",
+      "B7-133": "Successful, failed and archived closed attempts retain UUID work copies and service answer logs; both sockets stop. Preflight scratch/records and existing rehearsal work remain."
+    },
+    "plants": {
+      "resolver-folder": {
+        "evidence": "test-results/startup-focused-Gbn6A7/startup/plant-resolver-folder.json",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'",
+        "red": {
+          "name": "resolver-folder",
+          "owner": "B7-119",
+          "assertion": "The expression evaluated to a falsy value:\n\n  assert.ok(r.args.join(' ').includes('--ro-bind '+target+' '+target))\n",
+          "actual": false,
+          "expected": true
+        }
+      },
+      "prompt-leak": {
+        "evidence": "test-results/startup-focused-Gbn6A7/startup/plant-prompt-leak.json",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'",
+        "red": {
+          "name": "prompt-leak",
+          "owner": "B7-123",
+          "assertion": "reason must redact PRIVATE FIRST PROMPT LINE",
+          "actual": false,
+          "expected": true
+        }
+      },
+      "empty-reason": {
+        "evidence": "test-results/startup-focused-Gbn6A7/startup/plant-empty-reason.json",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'",
+        "red": {
+          "name": "empty-reason",
+          "owner": "B7-122",
+          "assertion": "The input did not match the regular expression /Unexpected server error|access denied|part failed/. Input:\n\n''\n",
+          "actual": "",
+          "expected": {}
+        }
+      },
+      "skip-preflight": {
+        "evidence": "test-results/startup-focused-Gbn6A7/startup/plant-skip-preflight.json",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'",
+        "red": {
+          "name": "skip-preflight",
+          "owner": "B7-125",
+          "assertion": "one awaited preflight precedes every cell boundary\n+ actual - expected\n\n  [\n    {\n-     event: 'preflight'\n-   },\n-   {\n      event: 'cell-boundary',\n+     preflight: false\n-     preflight: true\n    }\n  ]\n",
+          "actual": [
+            {
+              "event": "cell-boundary",
+              "preflight": false
+            }
+          ],
+          "expected": [
+            {
+              "event": "preflight"
+            },
+            {
+              "event": "cell-boundary",
+              "preflight": true
+            }
+          ]
+        }
+      },
+      "accept-zero": {
+        "evidence": "test-results/startup-focused-Gbn6A7/startup/plant-accept-zero.json",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'",
+        "red": {
+          "name": "accept-zero",
+          "owner": "B7-127",
+          "assertion": "Expected values to be strictly equal:\n\n'passed' !== 'failed'\n",
+          "actual": "passed",
+          "expected": "failed"
+        }
+      },
+      "condition-mount": {
+        "evidence": "test-results/startup-focused-AI0xif/startup/plant-condition-mount.json",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'host resolver|plant resolver mount removed|plant one condition mount'",
+        "red": {
+          "owner": "B7-121",
+          "assertion": "all six conditions use identical confinement mounts\n+ actual - expected\n... Skipped lines\n\n  [\n    'bwrap',\n    '--die-with-parent',\n    '--new-session',\n    '--unshare-user',\n...\n    '/repo',\n+   '--dir',\n+   '/condition-leak'\n  ]\n"
+        }
+      },
+      "accept-wrong": {
+        "evidence": "test-results/startup-focused-Gbn6A7/startup/plant-accept-wrong.json",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'",
+        "red": {
+          "name": "accept-wrong",
+          "owner": "B7-127",
+          "assertion": "Expected values to be strictly equal:\n\n'passed' !== 'failed'\n",
+          "actual": "passed",
+          "expected": "failed"
+        }
+      },
+      "no-resolver": {
+        "evidence": "test-results/startup-focused-AI0xif/startup/plant-no-resolver.json",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'host resolver|plant resolver mount removed|plant one condition mount'",
+        "red": {
+          "owner": "B7-119",
+          "assertion": "node:fs:621\n  return binding.open(\n                 ^\n\nError: ENOENT: no such file or directory, open '/etc/resolv.conf'\n    at Object.openSync (node:fs:621:18)\n    at Object.readFileSync (node:fs:487:35)\n    at [eval]:1:42\n    at runScriptInThisContext (node:internal/vm:219:10)\n    at node:internal/process/execution:451:12\n    at [eval]-wrapper:6:24\n    at runScriptInContext (node:internal/process/execution:449:60)\n    at evalFunction (node:internal/process/execution:283:30)\n    at evalTypeScript (node:internal/process/execution:295:3)\n    at node:internal/main/eval_string:71:3 {\n  errno: -2,\n  code: 'ENOENT',\n  syscall: 'open',\n  path: '/etc/resolv.conf'\n}\n\nNode.js v24.21.0\n\n\n1 !== 0\n"
+        }
+      },
+      "plan-preflight": {
+        "evidence": "test-results/startup-focused-Gbn6A7/startup/plant-plan-preflight.json",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'",
+        "red": {
+          "name": "plan-preflight",
+          "owner": "B7-129",
+          "assertion": "plans must create no preflight record\n\ntrue !== false\n",
+          "actual": true,
+          "expected": false
+        }
+      },
+      "count-preflight-cell": {
+        "evidence": "test-results/startup-focused-GvT8ah/startup/plant-count-preflight-cell.json",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'counted as cell'",
+        "red": {
+          "name": "count-preflight-cell",
+          "owner": "B7-128",
+          "assertion": "The input did not match the regular expression /^PASS planned cells: 16\\/16$/m. Input:\n\n'PASS real agent preflight: skipped: stand-in has no model connection or token usage\\n' +\n  'PASS planned cells: 17/16\\n' +\n  'PASS condition answers\\n' +\n  'PASS identical agent files\\n' +\n  'PASS closed store and tool code: 80 denied probes; 48 denied logged agent attempts\\n' +\n  'PASS service answered every call\\n' +\n  'PASS scorer batch blocks\\n' +\n  '  zustand7-conflict-zs-02__stub__r1: 0 tokens; 1168 ms\\n' +\n  '  zustand7-conflict-zs-02__graph__r1: 0 tokens; 15926 ms\\n' +\n  '  zustand7-conflict-zs-02__graph-nolink__r1: 0 tokens; 16512 ms\\n' +\n  '  zustand7-conflict-zs-02__graph-nosearch__r1: 0 tokens; 11986 ms\\n' +\n  '  zustand7-conflict-zs-02__graph-noterms__r1: 0 tokens; 13827 ms\\n' +\n  '  zustand7-conflict-zs-02__graph-norule__r1: 0 tokens; 15132 ms\\n' +\n  '  zustand7-conflict-zs-13__stub__r1: 0 tokens; 1219 ms\\n' +\n  '  zustand7-conflict-zs-13__graph__r1: 0 tokens; 14528 ms\\n' +\n  '  zustand7-conflict-zs-13__graph-nolink__r1: 0 tokens; 18321 ms\\n' +\n  '  zustand7-conflict-zs-13__graph-nosearch__r1: 0 tokens; 10458 ms\\n' +\n  '  zustand7-conflict-zs-13__graph-noterms__r1: 0 tokens; 12269 ms\\n' +\n  '  zustand7-conflict-zs-13__graph-norule__r1: 0 tokens; 15196 ms\\n' +\n  '  zustand7-control-ctl-01__stub__r1: 0 tokens; 1231 ms\\n' +\n  '  zustand7-control-ctl-01__graph__r1: 0 tokens; 14633 ms\\n' +\n  '  zustand7-control-gov-01__stub__r1: 0 tokens; 1232 ms\\n' +\n  '  zustand7-control-gov-01__graph__r1: 0 tokens; 15644 ms\\n' +\n  'PASS tokens and wall time per run\\n'\n",
+          "actual": "PASS real agent preflight: skipped: stand-in has no model connection or token usage\nPASS planned cells: 17/16\nPASS condition answers\nPASS identical agent files\nPASS closed store and tool code: 80 denied probes; 48 denied logged agent attempts\nPASS service answered every call\nPASS scorer batch blocks\n  zustand7-conflict-zs-02__stub__r1: 0 tokens; 1168 ms\n  zustand7-conflict-zs-02__graph__r1: 0 tokens; 15926 ms\n  zustand7-conflict-zs-02__graph-nolink__r1: 0 tokens; 16512 ms\n  zustand7-conflict-zs-02__graph-nosearch__r1: 0 tokens; 11986 ms\n  zustand7-conflict-zs-02__graph-noterms__r1: 0 tokens; 13827 ms\n  zustand7-conflict-zs-02__graph-norule__r1: 0 tokens; 15132 ms\n  zustand7-conflict-zs-13__stub__r1: 0 tokens; 1219 ms\n  zustand7-conflict-zs-13__graph__r1: 0 tokens; 14528 ms\n  zustand7-conflict-zs-13__graph-nolink__r1: 0 tokens; 18321 ms\n  zustand7-conflict-zs-13__graph-nosearch__r1: 0 tokens; 10458 ms\n  zustand7-conflict-zs-13__graph-noterms__r1: 0 tokens; 12269 ms\n  zustand7-conflict-zs-13__graph-norule__r1: 0 tokens; 15196 ms\n  zustand7-control-ctl-01__stub__r1: 0 tokens; 1231 ms\n  zustand7-control-ctl-01__graph__r1: 0 tokens; 14633 ms\n  zustand7-control-gov-01__stub__r1: 0 tokens; 1232 ms\n  zustand7-control-gov-01__graph__r1: 0 tokens; 15644 ms\nPASS tokens and wall time per run\n",
+          "expected": {}
+        }
+      },
+      "failed-preflight-cell": {
+        "evidence": "test-results/startup-focused-iIpAZu/startup/plant-failed-preflight-cell.json",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'failed preflight starts cell'",
+        "red": {
+          "name": "failed-preflight-cell",
+          "owner": "B7-126",
+          "assertion": "runner exit must match preflight outcome\n\n0 !== 1\n",
+          "actual": 0,
+          "expected": 1
+        }
+      }
+    },
+    "runs": [
+      {
+        "scratch": "test-results/startup-focused-exuMBr",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7-119 external'",
+        "exit": 1,
+        "cases": [
+          {
+            "name": "B7 B7-119 external resolver mounts only its final file and recreates links",
+            "status": "failed",
+            "wall_ms": 41,
+            "error": "Unexpected end of JSON input"
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/startup-focused-IFGE9e",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7-119 external'",
+        "exit": 0,
+        "cases": [
+          {
+            "name": "B7 B7-119 external resolver mounts only its final file and recreates links",
+            "status": "passed",
+            "wall_ms": 239
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/startup-focused-suAFlg",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'passing preflight'",
+        "exit": 0,
+        "cases": [
+          {
+            "name": "B7 B7-125 B7-133 passing preflight uses empty repo fixed prompt live sockets and retained records",
+            "status": "passed",
+            "wall_ms": 818
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'",
+        "exit": 1,
+        "cases": [
+          {
+            "name": "B7 B7-119 external resolver mounts only its final file and recreates links",
+            "status": "passed",
+            "wall_ms": 276
+          },
+          {
+            "name": "B7 B7-119 chain resolver mounts only its final file and recreates links",
+            "status": "passed",
+            "wall_ms": 249
+          },
+          {
+            "name": "B7 B7-119 parent resolver mounts only its final file and recreates links",
+            "status": "passed",
+            "wall_ms": 240
+          },
+          {
+            "name": "B7 B7-120 plain resolver and missing optional files need no extra bind",
+            "status": "passed",
+            "wall_ms": 250
+          },
+          {
+            "name": "B7 B7-120 inside resolver and missing optional files need no extra bind",
+            "status": "passed",
+            "wall_ms": 224
+          },
+          {
+            "name": "B7 B7-120 B7-121 dangling resolver refuses before launch",
+            "status": "passed",
+            "wall_ms": 254
+          },
+          {
+            "name": "B7 B7-120 B7-121 unreadable resolver refuses before launch",
+            "status": "passed",
+            "wall_ms": 296
+          },
+          {
+            "name": "B7 B7-120 B7-121 cycle resolver refuses before launch",
+            "status": "passed",
+            "wall_ms": 281
+          },
+          {
+            "name": "B7 B7-120 B7-121 directory resolver refuses before launch",
+            "status": "passed",
+            "wall_ms": 293
+          },
+          {
+            "name": "B7 B7-120 B7-121 private resolver refuses before launch",
+            "status": "failed",
+            "wall_ms": 46,
+            "error": "Unexpected end of JSON input"
+          },
+          {
+            "name": "B7 B7-120 B7-121 executable resolver refuses before launch",
+            "status": "passed",
+            "wall_ms": 346
+          },
+          {
+            "name": "B7 B7-119 B7-121 host resolver bytes read-only without siblings in all six confinements",
+            "status": "passed",
+            "wall_ms": 1182
+          },
+          {
+            "name": "B7 B7-122 native data message error.message and part.message retain named exit cause",
+            "status": "passed",
+            "wall_ms": 0
+          },
+          {
+            "name": "B7 B7-123 redact full prompt and lines before truncation keep first named message only",
+            "status": "passed",
+            "wall_ms": 1
+          },
+          {
+            "name": "B7 B7-122 missing event spawn signal timeout and malformed streams have explicit causes",
+            "status": "passed",
+            "wall_ms": 0
+          },
+          {
+            "name": "B7 B7-124 two harness causes survive both archives ledgers root marker and exception",
+            "status": "passed",
+            "wall_ms": 9
+          },
+          {
+            "name": "B7 B7-125 B7-133 passing preflight uses empty repo fixed prompt live sockets and retained records",
+            "status": "passed",
+            "wall_ms": 673
+          },
+          {
+            "name": "B7 B7-126 B7-127 zero preflight fails with zero cell artifacts and closed services",
+            "status": "passed",
+            "wall_ms": 648
+          },
+          {
+            "name": "B7 B7-126 B7-127 wrong preflight fails with zero cell artifacts and closed services",
+            "status": "passed",
+            "wall_ms": 743
+          },
+          {
+            "name": "B7 B7-126 B7-127 error-after-stop preflight fails with zero cell artifacts and closed services",
+            "status": "passed",
+            "wall_ms": 743
+          },
+          {
+            "name": "B7 B7-126 B7-127 incomplete preflight fails with zero cell artifacts and closed services",
+            "status": "passed",
+            "wall_ms": 683
+          },
+          {
+            "name": "B7 B7-126 B7-127 tool preflight fails with zero cell artifacts and closed services",
+            "status": "passed",
+            "wall_ms": 648
+          },
+          {
+            "name": "B7 B7-126 B7-127 error preflight fails with zero cell artifacts and closed services",
+            "status": "passed",
+            "wall_ms": 640
+          },
+          {
+            "name": "B7 B7-126 B7-127 message preflight fails with zero cell artifacts and closed services",
+            "status": "passed",
+            "wall_ms": 660
+          },
+          {
+            "name": "B7 B7-126 B7-127 part preflight fails with zero cell artifacts and closed services",
+            "status": "passed",
+            "wall_ms": 717
+          },
+          {
+            "name": "B7 B7-126 B7-127 malformed preflight fails with zero cell artifacts and closed services",
+            "status": "passed",
+            "wall_ms": 700
+          },
+          {
+            "name": "B7 B7-126 B7-127 timeout preflight fails with zero cell artifacts and closed services",
+            "status": "passed",
+            "wall_ms": 626
+          },
+          {
+            "name": "B7 B7-126 spawn setup failure records cause without a reservation",
+            "status": "failed",
+            "wall_ms": 11,
+            "error": "one mutation anchor const child=spawn(confinement[0],invocation\n\n3 !== 2\n"
+          },
+          {
+            "name": "B7 B7-126 service setup failure records cause without a reservation",
+            "status": "passed",
+            "wall_ms": 381
+          },
+          {
+            "name": "B7 B7-125 runner awaits exactly one preflight before reaching first cell boundary",
+            "status": "passed",
+            "wall_ms": 694
+          },
+          {
+            "name": "B7 B7-126 runner failed preflight starts zero cells and writes no ledger",
+            "status": "passed",
+            "wall_ms": 805
+          },
+          {
+            "name": "B7 B7-129 plans empty resume and earlier-only runs never start preflight",
+            "status": "passed",
+            "wall_ms": 362
+          },
+          {
+            "name": "B7 B7-130 standalone preflight launches fake once no cells and rejects unsupported CLI",
+            "status": "passed",
+            "wall_ms": 1149
+          },
+          {
+            "name": "B7 B7-128 plans stay 16 and 258 scorer ignores preflight-only evidence",
+            "status": "passed",
+            "wall_ms": 891
+          },
+          {
+            "name": "B7 B7-128 real smoke reports preflight separately missing or failed evidence refuses",
+            "status": "failed",
+            "wall_ms": 431,
+            "error": "PASS real agent preflight: 123 tokens; 45 ms\nFAIL planned cells: batch 7: no tasks; waiting for blind inputs and task generation\nFAIL condition answers: no attempts\nFAIL identical agent files: not all four tasks have manifests\nFAIL closed store and tool code: no attempts\nFAIL service answered every call: no attempts\nFAIL scorer batch blocks: file:///home/dev/repos/personal/whygraph/test-results/startup-focused-Gbn6A7/startup/31-smoke/eval/score.mjs:380\n    if (task === undefined) throw new Error(`${id}: no task ${meta.task}`);\n                                  ^\n\nError: zustand7-conflict-zs-02__graph-nolink__r1: no task zustand7-conflict-zs-02\n    at main (file:///home/dev/repos/personal/whygraph/test-results/startup-focused-Gbn6A7/startup/31-smoke/eval/score.mjs:380:35)\n    at file:///home/dev/repos/personal/whygraph/test-results/startup-focused-Gbn6A7/startup/31-smoke/eval/score.mjs:476:76\n    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)\n    at async node:internal/modules/esm/loader:650:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v26.5.1\n\nFAIL tokens and wall time per run: no attempts\n\n\n1 !== 0\n"
+          },
+          {
+            "name": "B7 B7-131 reuse existing rehearsal exclusion all sixteen cells and prior smoke checks pass",
+            "status": "failed",
+            "wall_ms": 201,
+            "error": "PASS real agent preflight: skipped: stand-in has no model connection or token usage\nFAIL planned cells: batch 7: no tasks; waiting for blind inputs and task generation\nFAIL condition answers: no attempts\nFAIL identical agent files: not all four tasks have manifests\nFAIL closed store and tool code: no attempts\nFAIL service answered every call: no attempts\nFAIL scorer batch blocks: file:///home/dev/repos/personal/whygraph/test-results/startup-focused-Gbn6A7/startup/32-smoke/eval/score.mjs:380\n    if (task === undefined) throw new Error(`${id}: no task ${meta.task}`);\n                                  ^\n\nError: zustand7-conflict-zs-02__graph-nolink__r1: no task zustand7-conflict-zs-02\n    at main (file:///home/dev/repos/personal/whygraph/test-results/startup-focused-Gbn6A7/startup/32-smoke/eval/score.mjs:380:35)\n    at file:///home/dev/repos/personal/whygraph/test-results/startup-focused-Gbn6A7/startup/32-smoke/eval/score.mjs:476:76\n    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)\n    at async node:internal/modules/esm/loader:650:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v26.5.1\n\nFAIL tokens and wall time per run: no attempts\n\n\n1 !== 0\n"
+          },
+          {
+            "name": "B7 B7-132 earlier plans launcher setup task input and old score bytes match ec76408",
+            "status": "passed",
+            "wall_ms": 2648
+          },
+          {
+            "name": "B7 plant resolver mount removed turns B7-119 red",
+            "status": "passed",
+            "wall_ms": 327
+          },
+          {
+            "name": "B7 plant resolver folder bound turns B7-119 red",
+            "status": "passed",
+            "wall_ms": 225
+          },
+          {
+            "name": "B7 plant one condition mount differs turns B7-121 red",
+            "status": "passed",
+            "wall_ms": 950
+          },
+          {
+            "name": "B7 plant empty-reason turns named failure-cause case red",
+            "status": "passed",
+            "wall_ms": 14
+          },
+          {
+            "name": "B7 plant prompt-leak turns named failure-cause case red",
+            "status": "passed",
+            "wall_ms": 11
+          },
+          {
+            "name": "B7 plant accept zero preflight turns B7-127 red",
+            "status": "passed",
+            "wall_ms": 631
+          },
+          {
+            "name": "B7 plant accept wrong preflight turns B7-127 red",
+            "status": "passed",
+            "wall_ms": 679
+          },
+          {
+            "name": "B7 plant skip preflight turns B7-125 red",
+            "status": "passed",
+            "wall_ms": 208
+          },
+          {
+            "name": "B7 plant failed preflight starts cell turns B7-126 red",
+            "status": "failed",
+            "wall_ms": 682,
+            "error": "The validation function is expected to return \"true\". Received false\n\nCaught error:\n\nTypeError [ERR_INVALID_ARG_TYPE]: The \"message\" argument must be one of type string or function. Received undefined"
+          },
+          {
+            "name": "B7 plant preflight counted as cell turns B7-128 red",
+            "status": "passed",
+            "wall_ms": 220
+          },
+          {
+            "name": "B7 plant preflight during plan turns B7-129 red",
+            "status": "passed",
+            "wall_ms": 702
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/startup-focused-BXJX0x",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'private resolver'",
+        "exit": 0,
+        "cases": [
+          {
+            "name": "B7 B7-120 B7-121 private resolver refuses before launch",
+            "status": "passed",
+            "wall_ms": 220
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/startup-focused-gD46Do",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'spawn setup'",
+        "exit": 0,
+        "cases": [
+          {
+            "name": "B7 B7-126 spawn setup failure records cause without a reservation",
+            "status": "passed",
+            "wall_ms": 528
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/startup-focused-afWond",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'smoke reports'",
+        "exit": 0,
+        "cases": [
+          {
+            "name": "B7 B7-128 real smoke reports preflight separately missing or failed evidence refuses",
+            "status": "passed",
+            "wall_ms": 1032
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/startup-focused-G1YbAM",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'reuse existing rehearsal'",
+        "exit": 0,
+        "cases": [
+          {
+            "name": "B7 B7-131 reuse existing rehearsal exclusion all sixteen cells and prior smoke checks pass",
+            "status": "passed",
+            "wall_ms": 321
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/startup-focused-iIpAZu",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'failed preflight starts cell'",
+        "exit": 0,
+        "cases": [
+          {
+            "name": "B7 plant failed preflight starts cell turns B7-126 red",
+            "status": "passed",
+            "wall_ms": 709
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/startup-focused-GvT8ah",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'counted as cell'",
+        "exit": 0,
+        "cases": [
+          {
+            "name": "B7 plant preflight counted as cell turns B7-128 red",
+            "status": "passed",
+            "wall_ms": 652
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/startup-focused-LN3GWS",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'real closed failures'",
+        "exit": 0,
+        "cases": [
+          {
+            "name": "B7 B7-122 B7-124 B7-133 real closed failures retain causes work copies answers and close both services",
+            "status": "passed",
+            "wall_ms": 14539
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/startup-focused-YhgfGk",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'inside system folders'",
+        "exit": 1,
+        "cases": [
+          {
+            "name": "B7 B7-121 executable resolver target inside system folders also refuses startup",
+            "status": "failed",
+            "wall_ms": 249,
+            "error": "B7-121 requires executable resolver targets to refuse startup\n\n0 !== 1\n"
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/startup-focused-esZqkK",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7-121 forbidden'",
+        "exit": 0,
+        "cases": [
+          {
+            "name": "B7 B7-121 forbidden work resolver dependency refuses",
+            "status": "passed",
+            "wall_ms": 240
+          },
+          {
+            "name": "B7 B7-121 forbidden repo resolver dependency refuses",
+            "status": "passed",
+            "wall_ms": 248
+          },
+          {
+            "name": "B7 B7-121 forbidden checkout resolver dependency refuses",
+            "status": "passed",
+            "wall_ms": 224
+          },
+          {
+            "name": "B7 B7-121 forbidden identity resolver dependency refuses",
+            "status": "passed",
+            "wall_ms": 230
+          },
+          {
+            "name": "B7 B7-121 forbidden proc resolver dependency refuses",
+            "status": "passed",
+            "wall_ms": 231
+          },
+          {
+            "name": "B7 B7-121 forbidden dev resolver dependency refuses",
+            "status": "passed",
+            "wall_ms": 199
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/startup-focused-tblkzd",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'fake refuses missing resolver'",
+        "exit": 0,
+        "cases": [
+          {
+            "name": "B7 B7-119 B7-122 fake refuses missing resolver with the archived error exit one zero tokens",
+            "status": "passed",
+            "wall_ms": 631
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/startup-focused-xBeFN8",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'timed-out closed attempt'",
+        "exit": 1,
+        "cases": [
+          {
+            "name": "B7 B7-122 timed-out closed attempt records an explicit timeout cause",
+            "status": "failed",
+            "wall_ms": 7678,
+            "error": "B7-122 requires an explicit timeout cause in attempt metadata"
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/startup-focused-AI0xif",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'host resolver|plant resolver mount removed|plant one condition mount'",
+        "exit": 0,
+        "cases": [
+          {
+            "name": "B7 B7-119 B7-121 host resolver bytes read-only without siblings in all six confinements",
+            "status": "passed",
+            "wall_ms": 1141
+          },
+          {
+            "name": "B7 plant resolver mount removed turns B7-119 red",
+            "status": "passed",
+            "wall_ms": 302
+          },
+          {
+            "name": "B7 plant one condition mount differs turns B7-121 red",
+            "status": "passed",
+            "wall_ms": 1044
+          }
+        ]
+      }
+    ],
+    "latest_cases": [
+      {
+        "name": "B7 B7-119 external resolver mounts only its final file and recreates links",
+        "status": "passed",
+        "wall_ms": 276,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-125 B7-133 passing preflight uses empty repo fixed prompt live sockets and retained records",
+        "status": "passed",
+        "wall_ms": 673,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-119 chain resolver mounts only its final file and recreates links",
+        "status": "passed",
+        "wall_ms": 249,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-119 parent resolver mounts only its final file and recreates links",
+        "status": "passed",
+        "wall_ms": 240,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-120 plain resolver and missing optional files need no extra bind",
+        "status": "passed",
+        "wall_ms": 250,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-120 inside resolver and missing optional files need no extra bind",
+        "status": "passed",
+        "wall_ms": 224,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-120 B7-121 dangling resolver refuses before launch",
+        "status": "passed",
+        "wall_ms": 254,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-120 B7-121 unreadable resolver refuses before launch",
+        "status": "passed",
+        "wall_ms": 296,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-120 B7-121 cycle resolver refuses before launch",
+        "status": "passed",
+        "wall_ms": 281,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-120 B7-121 directory resolver refuses before launch",
+        "status": "passed",
+        "wall_ms": 293,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-120 B7-121 private resolver refuses before launch",
+        "status": "passed",
+        "wall_ms": 220,
+        "scratch": "test-results/startup-focused-BXJX0x",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'private resolver'"
+      },
+      {
+        "name": "B7 B7-120 B7-121 executable resolver refuses before launch",
+        "status": "passed",
+        "wall_ms": 346,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-119 B7-121 host resolver bytes read-only without siblings in all six confinements",
+        "status": "passed",
+        "wall_ms": 1141,
+        "scratch": "test-results/startup-focused-AI0xif",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'host resolver|plant resolver mount removed|plant one condition mount'"
+      },
+      {
+        "name": "B7 B7-122 native data message error.message and part.message retain named exit cause",
+        "status": "passed",
+        "wall_ms": 0,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-123 redact full prompt and lines before truncation keep first named message only",
+        "status": "passed",
+        "wall_ms": 1,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-122 missing event spawn signal timeout and malformed streams have explicit causes",
+        "status": "passed",
+        "wall_ms": 0,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-124 two harness causes survive both archives ledgers root marker and exception",
+        "status": "passed",
+        "wall_ms": 9,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-126 B7-127 zero preflight fails with zero cell artifacts and closed services",
+        "status": "passed",
+        "wall_ms": 648,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-126 B7-127 wrong preflight fails with zero cell artifacts and closed services",
+        "status": "passed",
+        "wall_ms": 743,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-126 B7-127 error-after-stop preflight fails with zero cell artifacts and closed services",
+        "status": "passed",
+        "wall_ms": 743,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-126 B7-127 incomplete preflight fails with zero cell artifacts and closed services",
+        "status": "passed",
+        "wall_ms": 683,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-126 B7-127 tool preflight fails with zero cell artifacts and closed services",
+        "status": "passed",
+        "wall_ms": 648,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-126 B7-127 error preflight fails with zero cell artifacts and closed services",
+        "status": "passed",
+        "wall_ms": 640,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-126 B7-127 message preflight fails with zero cell artifacts and closed services",
+        "status": "passed",
+        "wall_ms": 660,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-126 B7-127 part preflight fails with zero cell artifacts and closed services",
+        "status": "passed",
+        "wall_ms": 717,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-126 B7-127 malformed preflight fails with zero cell artifacts and closed services",
+        "status": "passed",
+        "wall_ms": 700,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-126 B7-127 timeout preflight fails with zero cell artifacts and closed services",
+        "status": "passed",
+        "wall_ms": 626,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-126 spawn setup failure records cause without a reservation",
+        "status": "passed",
+        "wall_ms": 528,
+        "scratch": "test-results/startup-focused-gD46Do",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'spawn setup'"
+      },
+      {
+        "name": "B7 B7-126 service setup failure records cause without a reservation",
+        "status": "passed",
+        "wall_ms": 381,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-125 runner awaits exactly one preflight before reaching first cell boundary",
+        "status": "passed",
+        "wall_ms": 694,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-126 runner failed preflight starts zero cells and writes no ledger",
+        "status": "passed",
+        "wall_ms": 805,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-129 plans empty resume and earlier-only runs never start preflight",
+        "status": "passed",
+        "wall_ms": 362,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-130 standalone preflight launches fake once no cells and rejects unsupported CLI",
+        "status": "passed",
+        "wall_ms": 1149,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-128 plans stay 16 and 258 scorer ignores preflight-only evidence",
+        "status": "passed",
+        "wall_ms": 891,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-128 real smoke reports preflight separately missing or failed evidence refuses",
+        "status": "passed",
+        "wall_ms": 1032,
+        "scratch": "test-results/startup-focused-afWond",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'smoke reports'"
+      },
+      {
+        "name": "B7 B7-131 reuse existing rehearsal exclusion all sixteen cells and prior smoke checks pass",
+        "status": "passed",
+        "wall_ms": 321,
+        "scratch": "test-results/startup-focused-G1YbAM",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'reuse existing rehearsal'"
+      },
+      {
+        "name": "B7 B7-132 earlier plans launcher setup task input and old score bytes match ec76408",
+        "status": "passed",
+        "wall_ms": 2648,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 plant resolver mount removed turns B7-119 red",
+        "status": "passed",
+        "wall_ms": 302,
+        "scratch": "test-results/startup-focused-AI0xif",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'host resolver|plant resolver mount removed|plant one condition mount'"
+      },
+      {
+        "name": "B7 plant resolver folder bound turns B7-119 red",
+        "status": "passed",
+        "wall_ms": 225,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 plant one condition mount differs turns B7-121 red",
+        "status": "passed",
+        "wall_ms": 1044,
+        "scratch": "test-results/startup-focused-AI0xif",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'host resolver|plant resolver mount removed|plant one condition mount'"
+      },
+      {
+        "name": "B7 plant empty-reason turns named failure-cause case red",
+        "status": "passed",
+        "wall_ms": 14,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 plant prompt-leak turns named failure-cause case red",
+        "status": "passed",
+        "wall_ms": 11,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 plant accept zero preflight turns B7-127 red",
+        "status": "passed",
+        "wall_ms": 631,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 plant accept wrong preflight turns B7-127 red",
+        "status": "passed",
+        "wall_ms": 679,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 plant skip preflight turns B7-125 red",
+        "status": "passed",
+        "wall_ms": 208,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 plant failed preflight starts cell turns B7-126 red",
+        "status": "passed",
+        "wall_ms": 709,
+        "scratch": "test-results/startup-focused-iIpAZu",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'failed preflight starts cell'"
+      },
+      {
+        "name": "B7 plant preflight counted as cell turns B7-128 red",
+        "status": "passed",
+        "wall_ms": 652,
+        "scratch": "test-results/startup-focused-GvT8ah",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'counted as cell'"
+      },
+      {
+        "name": "B7 plant preflight during plan turns B7-129 red",
+        "status": "passed",
+        "wall_ms": 702,
+        "scratch": "test-results/startup-focused-Gbn6A7",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7'"
+      },
+      {
+        "name": "B7 B7-122 B7-124 B7-133 real closed failures retain causes work copies answers and close both services",
+        "status": "passed",
+        "wall_ms": 14539,
+        "scratch": "test-results/startup-focused-LN3GWS",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'real closed failures'"
+      },
+      {
+        "name": "B7 B7-121 executable resolver target inside system folders also refuses startup",
+        "status": "failed",
+        "wall_ms": 249,
+        "error": "B7-121 requires executable resolver targets to refuse startup\n\n0 !== 1\n",
+        "scratch": "test-results/startup-focused-YhgfGk",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'inside system folders'"
+      },
+      {
+        "name": "B7 B7-121 forbidden work resolver dependency refuses",
+        "status": "passed",
+        "wall_ms": 240,
+        "scratch": "test-results/startup-focused-esZqkK",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7-121 forbidden'"
+      },
+      {
+        "name": "B7 B7-121 forbidden repo resolver dependency refuses",
+        "status": "passed",
+        "wall_ms": 248,
+        "scratch": "test-results/startup-focused-esZqkK",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7-121 forbidden'"
+      },
+      {
+        "name": "B7 B7-121 forbidden checkout resolver dependency refuses",
+        "status": "passed",
+        "wall_ms": 224,
+        "scratch": "test-results/startup-focused-esZqkK",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7-121 forbidden'"
+      },
+      {
+        "name": "B7 B7-121 forbidden identity resolver dependency refuses",
+        "status": "passed",
+        "wall_ms": 230,
+        "scratch": "test-results/startup-focused-esZqkK",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7-121 forbidden'"
+      },
+      {
+        "name": "B7 B7-121 forbidden proc resolver dependency refuses",
+        "status": "passed",
+        "wall_ms": 231,
+        "scratch": "test-results/startup-focused-esZqkK",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7-121 forbidden'"
+      },
+      {
+        "name": "B7 B7-121 forbidden dev resolver dependency refuses",
+        "status": "passed",
+        "wall_ms": 199,
+        "scratch": "test-results/startup-focused-esZqkK",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7-121 forbidden'"
+      },
+      {
+        "name": "B7 B7-119 B7-122 fake refuses missing resolver with the archived error exit one zero tokens",
+        "status": "passed",
+        "wall_ms": 631,
+        "scratch": "test-results/startup-focused-tblkzd",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'fake refuses missing resolver'"
+      },
+      {
+        "name": "B7 B7-122 timed-out closed attempt records an explicit timeout cause",
+        "status": "failed",
+        "wall_ms": 7678,
+        "error": "B7-122 requires an explicit timeout cause in attempt metadata",
+        "scratch": "test-results/startup-focused-xBeFN8",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'timed-out closed attempt'"
+      }
+    ],
+    "checks": {
+      "node_check": "exit 0 on all five changed mjs files; startup syntax rechecked after its last edit",
+      "pnpm_check": "exit 0 (tsrs)",
+      "memod_lint": "exit 0",
+      "git_diff_check": "exit 0"
+    },
+    "added_default_time": {
+      "estimated_seconds": 60,
+      "sum_latest_case_seconds": 50.018,
+      "derivation": "Budget about one extra minute from the sum of the 58 latest focused case clocks. This includes cold fixture builds reused by the default pass; shared load and callback reuse differ. No new full/default pass was run."
+    },
+    "limits": [
+      "B7-119 host-resolvable model-name DNS is not measured; no network/model call is made. File bytes and resolver dependency mounts are checked.",
+      "Alternate-root resolver derivation runs unchanged code in a private bwrap namespace; no production seam or host change is needed. Full six-condition confinement reads use the actual host layout.",
+      "Default integration with the existing rehearsal promise is wired and syntax-checked; its end-to-end full default pass is left to the parent.",
+      "Real executable version/auth/model access is substituted by the controlled fake. All model-access failures are simulated.",
+      "Initial harness-only failures remain in runs. The first count-preflight-cell plant had unrelated missing-task evidence; only the corrected GvT8ah plant is accepted."
+    ],
+    "scratch_directories": [
+      "test-results/startup-focused-exuMBr",
+      "test-results/startup-focused-IFGE9e",
+      "test-results/startup-focused-suAFlg",
+      "test-results/startup-focused-Gbn6A7",
+      "test-results/startup-focused-BXJX0x",
+      "test-results/startup-focused-gD46Do",
+      "test-results/startup-focused-afWond",
+      "test-results/startup-focused-G1YbAM",
+      "test-results/startup-focused-iIpAZu",
+      "test-results/startup-focused-GvT8ah",
+      "test-results/startup-focused-LN3GWS",
+      "test-results/startup-focused-YhgfGk",
+      "test-results/startup-focused-esZqkK",
+      "test-results/startup-focused-tblkzd",
+      "test-results/startup-focused-xBeFN8",
+      "test-results/startup-focused-AI0xif"
+    ],
+    "work_roots": [
+      "/home/dev/repos/personal/whygraph/test-results/n709edaa7",
+      "/home/dev/repos/personal/whygraph/test-results/n90347b0a",
+      "/home/dev/repos/personal/whygraph/test-results/nd52a5c5e",
+      "/home/dev/repos/personal/whygraph/test-results/n64102108",
+      "/home/dev/repos/personal/whygraph/test-results/n558a2c23",
+      "/home/dev/repos/personal/whygraph/test-results/n07af0476",
+      "/home/dev/repos/personal/whygraph/test-results/nf76d9960",
+      "/home/dev/repos/personal/whygraph/test-results/n1c9c3082",
+      "/home/dev/repos/personal/whygraph/test-results/n8be95666",
+      "/home/dev/repos/personal/whygraph/test-results/na43389e3",
+      "/home/dev/repos/personal/whygraph/test-results/n11dcae20",
+      "/home/dev/repos/personal/whygraph/test-results/n9d0a199c",
+      "/home/dev/repos/personal/whygraph/test-results/ndf1a7661",
+      "/home/dev/repos/personal/whygraph/test-results/nd78e2c1c",
+      "/home/dev/repos/personal/whygraph/test-results/na9aad650",
+      "/home/dev/repos/personal/whygraph/test-results/n7c38d0b4",
+      "/home/dev/repos/personal/whygraph/test-results/n3f8b2b8b",
+      "/home/dev/repos/personal/whygraph/test-results/ncf1a6531",
+      "/home/dev/repos/personal/whygraph/test-results/n43d8c1b9",
+      "/home/dev/repos/personal/whygraph/test-results/n5a979907",
+      "/home/dev/repos/personal/whygraph/test-results/n10197c0e",
+      "/home/dev/repos/personal/whygraph/test-results/na8bf135b",
+      "/home/dev/repos/personal/whygraph/test-results/n108e0783",
+      "/home/dev/repos/personal/whygraph/test-results/nd861fc27",
+      "/home/dev/repos/personal/whygraph/test-results/nb210cafe",
+      "/home/dev/repos/personal/whygraph/test-results/nd5b66718",
+      "/home/dev/repos/personal/whygraph/test-results/n8b308e4f",
+      "/home/dev/repos/personal/whygraph/test-results/n5269fb2b",
+      "/home/dev/repos/personal/whygraph/test-results/n868dc718",
+      "/home/dev/repos/personal/whygraph/test-results/n55b8860e",
+      "/home/dev/repos/personal/whygraph/test-results/n57e1073d",
+      "/home/dev/repos/personal/whygraph/test-results/nf3232578",
+      "/home/dev/repos/personal/whygraph/test-results/n40927ed8",
+      "/home/dev/repos/personal/whygraph/test-results/n9a5334e7",
+      "/home/dev/repos/personal/whygraph/test-results/n3f4882b6",
+      "/home/dev/repos/personal/whygraph/test-results/n049788cc",
+      "/home/dev/repos/personal/whygraph/test-results/ne908f923"
+    ]
+  },
+  "trial7_tests8_rulings": {
+    "basis_commit": "e1f4ae2b06d8514ee2c700e716a0e518666cdc07",
+    "basis": "Read git show HEAD and the parent instruction before changing the case. B7-121 now limits private-root and executable-file refusals to targets that need a new bind. Non-regular targets still refuse anywhere.",
+    "case_change": {
+      "old": "B7-121 executable resolver target inside system folders also refuses startup",
+      "new": "B7-121 executable resolver target inside system folders allows startup without an extra bind",
+      "assertions": [
+        "startup status 0",
+        "resolver mount arguments exactly []"
+      ],
+      "external_executable_refusal": "unchanged and passes"
+    },
+    "command": "PATH=\"$HOME/.opencode/bin:$HOME/.npm-global/bin:$HOME/.local/share/mise/installs/pnpm/12.11.2:$HOME/.local/bin:$PATH\" TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7-120|B7-121'",
+    "exit": 0,
+    "passed": 17,
+    "total": 17,
+    "case_wall_seconds_sum": 5.728,
+    "cases": [
+      {
+        "name": "B7 B7-120 plain resolver and missing optional files need no extra bind",
+        "status": "passed",
+        "wall_ms": 252
+      },
+      {
+        "name": "B7 B7-120 inside resolver and missing optional files need no extra bind",
+        "status": "passed",
+        "wall_ms": 226
+      },
+      {
+        "name": "B7 B7-120 B7-121 dangling resolver refuses before launch",
+        "status": "passed",
+        "wall_ms": 240
+      },
+      {
+        "name": "B7 B7-120 B7-121 unreadable resolver refuses before launch",
+        "status": "passed",
+        "wall_ms": 223
+      },
+      {
+        "name": "B7 B7-120 B7-121 cycle resolver refuses before launch",
+        "status": "passed",
+        "wall_ms": 241
+      },
+      {
+        "name": "B7 B7-120 B7-121 directory resolver refuses before launch",
+        "status": "passed",
+        "wall_ms": 231
+      },
+      {
+        "name": "B7 B7-120 B7-121 private resolver refuses before launch",
+        "status": "passed",
+        "wall_ms": 222
+      },
+      {
+        "name": "B7 B7-120 B7-121 executable resolver refuses before launch",
+        "status": "passed",
+        "wall_ms": 194
+      },
+      {
+        "name": "B7 B7-121 forbidden work resolver dependency refuses",
+        "status": "passed",
+        "wall_ms": 185
+      },
+      {
+        "name": "B7 B7-121 forbidden repo resolver dependency refuses",
+        "status": "passed",
+        "wall_ms": 195
+      },
+      {
+        "name": "B7 B7-121 forbidden checkout resolver dependency refuses",
+        "status": "passed",
+        "wall_ms": 193
+      },
+      {
+        "name": "B7 B7-121 forbidden identity resolver dependency refuses",
+        "status": "passed",
+        "wall_ms": 209
+      },
+      {
+        "name": "B7 B7-121 forbidden proc resolver dependency refuses",
+        "status": "passed",
+        "wall_ms": 197
+      },
+      {
+        "name": "B7 B7-121 forbidden dev resolver dependency refuses",
+        "status": "passed",
+        "wall_ms": 220
+      },
+      {
+        "name": "B7 B7-121 executable resolver target inside system folders allows startup without an extra bind",
+        "status": "passed",
+        "wall_ms": 195
+      },
+      {
+        "name": "B7 B7-119 B7-121 host resolver bytes read-only without siblings in all six confinements",
+        "status": "passed",
+        "wall_ms": 1269
+      },
+      {
+        "name": "B7 plant one condition mount differs turns B7-121 red",
+        "status": "passed",
+        "wall_ms": 1236
+      }
+    ],
+    "syntax_check": {
+      "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node --check eval/selftest/batch7-startup.mjs",
+      "exit": 0
+    },
+    "timeout_case": {
+      "changed": false,
+      "rerun": false,
+      "basis": "Parent reports the unchanged case passes after the B7-122 cause fix in e1f4ae2; its diff was inspected. No independent rerun is claimed in this follow-up."
+    },
+    "scratch": "test-results/startup-focused-j23XqW",
+    "work_roots": [
+      "/home/dev/repos/personal/whygraph/test-results/n5862b038",
+      "/home/dev/repos/personal/whygraph/test-results/n38f3f5ef"
+    ],
+    "production_edits": 0,
+    "hosted_calls": 0,
+    "trial_cells": 0,
+    "new_rehearsals": 0,
+    "deletions": 0,
+    "pushes": 0
+  },
+  "ninth_round": {
+    "date": "2026-11-16",
+    "base_commit": "ab7cc0c",
+    "branch": "batch-7-agent-network",
+    "status": "done",
+    "contract": [
+      "docs/adr/0011-eval-closed-store.md: resolver and real-agent preflight",
+      "docs/adr/0013-eval-rehearsal.md: explicit preflight exclusion",
+      "eval/tickets/batch7-failures.md: B7-125 through B7-128"
+    ],
+    "scope": {
+      "tracked_edits": "eval/selftest/ only",
+      "production_changes": 0,
+      "hosted_model_calls": 0,
+      "trial_cells": 0,
+      "new_rehearsals": 0,
+      "installs": 0,
+      "pushes": 0,
+      "full_suite_runs": 0,
+      "stress_runs": 0,
+      "load": "one command at a time; cases under MemoryMax=6G and CPUQuota=200%"
+    },
+    "baseline": {
+      "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-check.mjs 'plant third launch after timeout'",
+      "log": "test-results/trial7-tests9-baseline-plant.txt",
+      "result": "0/1, exit 1",
+      "cause": "Missing _preflight/latest.json keeps the planted checker exit at 1. The unplanted ledger output also reports invalid attempt budget."
+    },
+    "case_changes": [
+      {
+        "case": "B7-59 through B7-65 B7-128 all eight checks PASS",
+        "change": "Add one passing UUID preflight record in closedPreflight writer shape, a local latest.json pointer, the eighth label, and exact preflight usage output."
+      },
+      {
+        "case": "plant third launch after timeout and breach caught by B7-59 attempt budget",
+        "change": "Prove clean smoke green; require the exact invalid attempt budget failure with preflight passing; retain planted output and the red owner assertion."
+      },
+      {
+        "case": "B7-59 B7-60 B7-65 archived attempt retains receipts and contributes its own usage",
+        "change": "Require all eight labels. Count the 17 indented attempt usage lines separately from the preflight line."
+      },
+      {
+        "case": "B7-62 ordinary command discovery and native repo read do not count as store access",
+        "change": "Inherit the passing preflight fixture and assert the eighth label while keeping the zero denied logged attempts assertion."
+      }
+    ],
+    "other_fixtures_aligned": [
+      "Every real smoke clone in batch7-smoke.mjs receives the full preflight record; latest.json points inside that clone. All bad() fault cases require preflight PASS, so an unrelated preflight failure cannot satisfy a named failure.",
+      "B7-66 empty evidence now requires preflight FAIL as well as the seven existing failures.",
+      "B7-128 startup real-smoke case replaces shortened passed and failed records with records from the real closedPreflight writer through controlled fake agents. Missing evidence must also return nonzero.",
+      "batch7-rehearsal.mjs success() asserts the eighth output label. Rehearsal keeps its legitimate skipped-preflight marker and receives no passing record."
+    ],
+    "runs": [
+      {
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node test-results/trial7-tests9-focused.mjs 'all eight checks PASS'",
+        "log": "test-results/trial7-tests9-small.txt",
+        "scratch": "test-results/trial7-tests9-smoke-rWlPqT",
+        "cases": [
+          {
+            "name": "B7 smoke B7-59 through B7-65 B7-128 all eight checks PASS from actual service evidence, no task verdict",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node test-results/trial7-tests9-focused.mjs 'all eight checks PASS|plant third launch|archived attempt retains|ordinary command discovery|unfinished cell fails|empty evidence|plant smoke accepts missing cell'",
+        "log": "test-results/trial7-tests9-smoke.txt",
+        "scratch": "test-results/trial7-tests9-smoke-5tUXBZ",
+        "cases": [
+          {
+            "name": "B7 smoke B7-59 through B7-65 B7-128 all eight checks PASS from actual service evidence, no task verdict",
+            "status": "passed"
+          },
+          {
+            "name": "B7 smoke B7-59 unfinished cell fails planned cells alone",
+            "status": "passed"
+          },
+          {
+            "name": "B7 smoke plant third launch after timeout and breach caught by B7-59 attempt budget",
+            "status": "passed"
+          },
+          {
+            "name": "B7 smoke B7-59 B7-60 B7-65 archived attempt retains receipts and contributes its own usage",
+            "status": "passed"
+          },
+          {
+            "name": "B7 smoke B7-62 ordinary command discovery and native repo read do not count as store access",
+            "status": "passed"
+          },
+          {
+            "name": "B7 smoke B7-66 empty evidence makes every relevant check fail",
+            "status": "passed"
+          },
+          {
+            "name": "B7 smoke plant smoke accepts missing cell caught by B7-59 planned-cell owner",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7-128'",
+        "log": "test-results/trial7-tests9-startup.txt",
+        "scratch": "test-results/startup-focused-98n7GE",
+        "cases": [
+          {
+            "name": "B7 B7-128 plans stay 16 and 258 scorer ignores preflight-only evidence",
+            "status": "passed",
+            "wall_ms": 723
+          },
+          {
+            "name": "B7 B7-128 real smoke reports preflight separately missing or failed evidence refuses",
+            "status": "passed",
+            "wall_ms": 2311
+          },
+          {
+            "name": "B7 plant preflight counted as cell turns B7-128 red",
+            "status": "passed",
+            "wall_ms": 634
+          }
+        ]
+      },
+      {
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'reuse existing rehearsal'",
+        "log": "test-results/trial7-tests9-rehearsal.txt",
+        "scratch": "test-results/startup-focused-4Xoo99",
+        "cases": [
+          {
+            "name": "B7 B7-131 reuse existing rehearsal exclusion all sixteen cells and prior smoke checks pass",
+            "status": "passed",
+            "wall_ms": 362
+          }
+        ]
+      }
+    ],
+    "plant": {
+      "clean": "test-results/trial7-tests9-smoke-5tUXBZ/1-smoke-clean/plant-baseline.json",
+      "unplanted": "test-results/trial7-tests9-smoke-5tUXBZ/10-smoke-fault-1/smoke-output.json",
+      "planted": "test-results/trial7-tests9-smoke-5tUXBZ/10-smoke-fault-1/planted-smoke-output.json",
+      "assertion_receipt": "test-results/trial7-tests9-smoke-5tUXBZ/plant-third-attempt.json"
+    },
+    "syntax_checks": [
+      "node --check eval/selftest/batch7-smoke.mjs",
+      "node --check eval/selftest/batch7-startup.mjs",
+      "node --check eval/selftest/batch7-rehearsal.mjs"
+    ],
+    "retained_scratch": [
+      "test-results/batch7-selftest-VcNN9W",
+      "test-results/trial7-tests9-smoke-rWlPqT",
+      "test-results/trial7-tests9-smoke-5tUXBZ",
+      "test-results/startup-focused-98n7GE",
+      "test-results/startup-focused-4Xoo99"
+    ],
+    "retained_work_roots": [
+      "test-results/n0167c864",
+      "test-results/n25b8dc47",
+      "test-results/nc5663fdf",
+      "test-results/w1a37a7",
+      "test-results/w1f0408",
+      "test-results/w26c8d2",
+      "test-results/w428315",
+      "test-results/w57ec71",
+      "test-results/w57f038",
+      "test-results/w61ff50",
+      "test-results/wad772f",
+      "test-results/wb849bf",
+      "test-results/wd16c18",
+      "test-results/wd49ee9",
+      "test-results/wd72a55",
+      "test-results/we43eb4",
+      "test-results/we81d02",
+      "test-results/we8fb67",
+      "test-results/wef3793",
+      "test-results/wefcced",
+      "test-results/wff06de"
+    ],
+    "retained_files": [
+      "test-results/trial7-tests9-focused.mjs",
+      "test-results/trial7-tests9-baseline-plant.txt",
+      "test-results/trial7-tests9-small.txt",
+      "test-results/trial7-tests9-smoke.txt",
+      "test-results/trial7-tests9-startup.txt",
+      "test-results/trial7-tests9-rehearsal.txt",
+      "test-results/trial7-tests9-receipts.json",
+      "test-results/trial7-tests9-typecheck.txt"
+    ],
+    "limits": [
+      "Focused cases only; no full or stress suite.",
+      "The rehearsal assertion list was syntax-checked; retained real rehearsal evidence passed B7-131. The full B7-103/B7-104 rehearsal cases were not rerun.",
+      "Other shared smoke fault fixtures were aligned by the common fixture and label list. Only the seven named smoke cases ran.",
+      "Fleet memory is unavailable. aux stops because gondr is missing. No credentials are needed."
+    ],
+    "aligned_real_smoke_cases": [
+      "B7 smoke B7-59 through B7-65 B7-128 all eight checks PASS from actual service evidence, no task verdict",
+      "B7 smoke B7-59 unfinished cell fails planned cells alone",
+      "B7 smoke B7-60 disabled command leaking an answer fails condition answers alone",
+      "B7 smoke B7-60 raw CLI receipt absent fails condition answers alone",
+      "B7 smoke B7-61 different client bytes fails identical agent files alone",
+      "B7 smoke B7-61 norule rule text retained fails identical agent files alone",
+      "B7 smoke B7-62 successful probe fails closed store and tool code alone",
+      "B7 smoke B7-63 mismatched service call totals fails service answered every call alone",
+      "B7 smoke B7-64 missing scorer block fails scorer batch blocks alone",
+      "B7 smoke B7-65 missing wall time fails tokens and wall time per run alone",
+      "B7 smoke B7-59 running ledger entry fails planned cells alone",
+      "B7 smoke B7-59 third attempt after timeout and breach fails planned cells alone",
+      "B7 smoke B7-59 missing archive fails planned cells alone",
+      "B7 smoke B7-60 changed unrelated store node fails condition answers alone",
+      "B7 smoke B7-60 enabled health call returns no result fails condition answers alone",
+      "B7 smoke B7-60 health command fails fails condition answers alone",
+      "B7 smoke B7-62 missing probe fails closed store and tool code alone",
+      "B7 smoke B7-62 probe did not run fails closed store and tool code alone",
+      "B7 smoke B7-62 logged successful direct store access fails closed store and tool code alone",
+      "B7 smoke B7-63 malformed service reply fails service and answer checks",
+      "B7 smoke B7-65 negative tokens fails usage check alone",
+      "B7 smoke B7-65 negative wall_ms fails usage check alone",
+      "B7 smoke plant third launch after timeout and breach caught by B7-59 attempt budget",
+      "B7 smoke B7-59 B7-60 B7-65 archived attempt retains receipts and contributes its own usage",
+      "B7 smoke B7-60 archived receipt differs from its saved answer fails answer check alone",
+      "B7 smoke B7-65 archived attempt missing tokens fails usage check alone",
+      "B7 smoke B7-61 original norule text differs beyond omitted suffix fails file identity alone",
+      "B7 smoke B7-60 graph-nolink retains linkCount fails answer proof alone",
+      "B7 smoke B7-60 graph-noterms retains termCount fails answer proof alone",
+      "B7 smoke B7-60 graph-noterms retains mentionCount fails answer proof alone",
+      "B7 smoke B7-60 saved reply 2 differs from reference fails answers alone",
+      "B7 smoke B7-60 saved reply 3 differs from reference fails answers alone",
+      "B7 smoke B7-60 saved reply 4 differs from reference fails answers alone",
+      "B7 smoke B7-64 scorer lacks === Batch 7: stratum cited fails scorer blocks alone",
+      "B7 smoke B7-64 scorer lacks === Batch 7: stratum uncited fails scorer blocks alone",
+      "B7 smoke B7-64 scorer lacks graph - graph-nolink fails scorer blocks alone",
+      "B7 smoke B7-64 scorer lacks graph - graph-nosearch fails scorer blocks alone",
+      "B7 smoke B7-64 scorer lacks graph - graph-noterms fails scorer blocks alone",
+      "B7 smoke B7-64 scorer lacks graph - graph-norule fails scorer blocks alone",
+      "B7 smoke B7-62 ordinary command discovery and native repo read do not count as store access",
+      "B7 smoke plant smoke accepts missing cell caught by B7-59 planned-cell owner"
+    ],
+    "checks": {
+      "javascript_syntax": "three changed mjs files: exit 0",
+      "audit_json": "parsed successfully",
+      "pnpm_check": "exit 0; tsrs; test-results/trial7-tests9-typecheck.txt",
+      "memod_lint": "exit 0 in escalated resource scope",
+      "git_diff_check": "exit 0"
     }
   }
 }

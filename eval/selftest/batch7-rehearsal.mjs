@@ -11,7 +11,7 @@ import {pathToFileURL} from 'node:url';
 import {b7 as h} from './batch7-support.mjs';
 
 const conditions=['stub','graph','graph-nolink','graph-nosearch','graph-noterms','graph-norule'];
-const labels=['planned cells','condition answers','identical agent files','closed store and tool code','service answered every call','scorer batch blocks','tokens and wall time per run'];
+const labels=['real agent preflight','planned cells','condition answers','identical agent files','closed store and tool code','service answered every call','scorer batch blocks','tokens and wall time per run'];
 const uuid=/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/;
 const key=id=>/^[\w.-]+$/.test(id)&&!id.startsWith('id-')&&!['.','..'].includes(id)&&Buffer.byteLength(id)<=128?id:'id-'+h.hash(id);
 const replace=(file,from,to)=>{const text=h.read(file);assert.equal(text.split(from).length,2,`one mutation anchor: ${from}`);h.write(file,text.replace(from,to));};
@@ -56,6 +56,7 @@ export async function batch7RehearsalChecks({scratch,shared,scoreRun,stress=fals
   const match=r.stdout.match(/^Rehearsal results: (.+)$/m),results=match?.[1];h.write(join(f.at,`invocation-${serial++}.json`),{...r,results,resultRoot});return {...r,results,resultRoot};
  }
  function success(r,count=16){assert.equal(r.status,0,r.stdout+r.stderr);assert.ok(r.results,'rehearsal must retain a marked result folder');assert.match(basename(r.results),uuid);const marker=h.json(join(r.results,'rehearsal.json')),measurement=h.json(join(r.results,'measurement.json'));assert.equal(marker.rehearsal,true);assert.equal(marker.cells.length,count);assert.equal(measurement.success,true);assert.equal(measurement.cells,count);assert.equal(measurement.smoke_exit,0);assert.ok(Number.isFinite(measurement.wall_ms)&&measurement.wall_ms>=0);assert.ok(Number.isFinite(measurement.scope_peak_bytes)&&measurement.scope_peak_bytes>0);for(const label of labels)assert.match(r.stdout,new RegExp(`^PASS ${label}(?:$|:)`,'m'));return marker;}
+ shared.getStartupRehearsal=()=>baseline();
  function baseline(){return baselinePromise??=(async()=>{const f=await fixture(),first=await rehearse(f);success(first);const receipt=join(f.template,'ablations/prepared.json');const before=readFileSync(receipt),identity=statSync(receipt,{bigint:true});const second=await rehearse(f);success(second);return {...f,first,second,before,identity,receipt};})();}
  async function attempt({label='attempt',condition='graph',config={},task,modify,work}={}){
   const f=await clone(label);modify?.(f);task??=f.tasks[0];work??=f.work;const out=join(f.at,'attempt-result');mkdirSync(out);

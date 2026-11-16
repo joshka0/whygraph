@@ -536,7 +536,7 @@ export async function settleCell(p, allIds=[], {runAttempt=runOne, results=RESUL
     if(action.kind==='stop'&&action.reason==='interrupted')throw new Error(`interrupted attempt ${p.id}; inspect its files before continuing`);
     if(action.kind==='stop'&&action.reason==='exhausted')throw new Error(`attempt budget exhausted for ${p.id}; inspect and archive the cell before restarting`);
     if(action.kind==='unscored'||action.kind==='stop') {
-      if(rule==='closed')meta={...meta,status:action.kind==='unscored'?'error':'invalid',unscored:action.kind==='unscored',...(action.kind==='stop'?{reason:'harness failure after one retry'}:{}),attempts:attempts.map(a=>a.archived)};
+      if(rule==='closed')meta={...meta,status:action.kind==='unscored'?'error':'invalid',unscored:action.kind==='unscored',...(action.kind==='stop'?{reason:`harness failure after one retry: ${attempts.map(a=>a.meta?.reason??`agent exit ${a.meta?.exit??'none'}; ${a.meta?.status??'unknown status'}`).join('; ')}`} :{}),attempts:attempts.map(a=>a.archived)};
       else if(action.kind==='unscored')meta=meta.status==='invalid'?{...meta,status:'error',unscored:true,timed_out:false}:{...meta,unscored:true};
       if(rule==='closed'||action.kind==='unscored'){
         mkdirSync(join(results,fileKey(p.id)),{recursive:true});writeFileSync(join(results,fileKey(p.id),'meta.json'),JSON.stringify(meta,null,2));
@@ -546,7 +546,7 @@ export async function settleCell(p, allIds=[], {runAttempt=runOne, results=RESUL
           if(attempts[0]?.meta.status==='invalid'&&attempts[1]?.meta.status==='invalid')throw new Error(`repeated harness failure ${p.id}: ${meta.reason}; archived ${meta.archived}`);
           throw new Error(`harness failure on timeout retry ${p.id}: ${meta.reason}; archived ${meta.archived}`);
         }
-        throw new Error(`harness failure after one retry ${p.id}; both attempts archived: ${attempts.map(a=>a.meta?.reason).filter(Boolean).join('; ')}`);
+        throw new Error(`harness failure after one retry ${p.id}; both attempts archived: ${meta.reason}`);
       }
       return meta;
     }
@@ -624,6 +624,10 @@ async function main(argv) {
     const {closedWorkRoot,execBudget}=await import('./closed-store.mjs');
     closedWorkRoot(WORK);
     for(const p of plan)execBudget('/tools/opencode',[wrap(p.task.request)]);
+  }
+  if(todo.some(p=>evalBatch(p.task.batch).storeAccess==='closed')) {
+    const {closedPreflight}=await import('./closed-run.mjs');
+    await closedPreflight({workRoot:WORK,results:RESULTS});
   }
   let next = 0;
   let failed = 0;

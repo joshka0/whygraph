@@ -5,8 +5,8 @@
 import { createServer } from 'node:net';
 import { spawn, execFile, execFileSync } from 'node:child_process';
 import { promisify } from 'node:util';
-import { appendFileSync, chmodSync, cpSync, existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync, readdirSync, statSync, renameSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { appendFileSync, chmodSync, cpSync, existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync, readdirSync, statSync, renameSync, lstatSync, readlinkSync } from 'node:fs';
+import { dirname, join, resolve, parse } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { constants } from 'node:os';
@@ -193,6 +193,53 @@ export function closedClient(directory) {
   return dest;
 }
 
+const systemFolders = ['/usr','/bin','/lib','/lib64','/etc'];
+const under = (parent, path) => path === parent || path.startsWith(parent + '/');
+
+/** Follow the host resolver's file links without mounting their containing folders.
+ * owns: [[whygraph-closed-store]]
+ */
+export function resolverMounts({ work, repo, client }) {
+  const mounted = path => systemFolders.some(folder => under(folder, path));
+  const forbidden = [root, dirname(resolve(work)), repo, dirname(client), process.env.HOME,
+    '/proc','/dev','/tmp','/identity','/tools','/whygraph'].filter(Boolean).map(canonicalPath);
+  const safe = path => {
+    filesystemPath(path);
+    if (forbidden.some(folder => under(folder, canonicalPath(path))))
+      throw new Error(`resolver dependency crosses a private mount boundary: ${path}`);
+  };
+  const links = new Map(), files = new Set();
+  for (const input of ['/etc/resolv.conf','/etc/nsswitch.conf','/etc/hosts','/etc/host.conf','/etc/gai.conf']) {
+    if (!lstatSync(input, { throwIfNoEntry: false })) continue;
+    let path = input, followed = 0;
+    for (;;) {
+      const parts = path.slice(parse(path).root.length).split('/');
+      let prefix = '/', changed = false;
+      for (let i = 0; i < parts.length; i++) {
+        prefix = join(prefix, parts[i]);
+        const stat = lstatSync(prefix);
+        if (!stat.isSymbolicLink()) continue;
+        if (++followed > 40) throw new Error(`resolver symlink cycle: ${input}`);
+        const target = readlinkSync(prefix);
+        if (!mounted(prefix)) { safe(prefix); links.set(prefix, target); }
+        path = resolve(dirname(prefix), target, ...parts.slice(i + 1));
+        changed = true; break;
+      }
+      if (!changed) break;
+    }
+    // Opening verifies readability; the bytes are never included in diagnostics.
+    if (!statSync(path).isFile()) throw new Error(`resolver dependency is not a regular file: ${input}`);
+    if (!mounted(path)) {
+      safe(path);
+      if (statSync(path).mode & 0o111) throw new Error(`resolver dependency is executable: ${input}`);
+      files.add(path);
+    }
+    readFileSync(path);
+  }
+  return [...[...links].flatMap(([path, target]) => ['--symlink', target, path]),
+    ...[...files].flatMap(path => ['--ro-bind', path, path])];
+}
+
 /** A minimal filesystem shared by the whole agent process and all its file tools.
  * owns: [[whygraph-closed-store]]
  */
@@ -200,7 +247,8 @@ export function closedConfinement({ work, repo, client, socket, network = false,
   for (const path of [work, repo, client, socket, ...(opencode ? [opencode] : [])]) filesystemPath(path);
   const args = ['bwrap','--die-with-parent','--new-session','--unshare-user','--unshare-pid','--unshare-ipc','--unshare-uts','--cap-drop','ALL'];
   if (!network) args.push('--unshare-net');
-  for (const path of ['/usr','/bin','/lib','/lib64','/etc']) if (existsSync(path)) args.push('--ro-bind',path,path);
+  for (const path of systemFolders) if (existsSync(path)) args.push('--ro-bind',path,path);
+  args.push(...resolverMounts({work,repo,client}));
   args.push('--proc','/proc','--dev','/dev','--tmpfs','/tmp','--tmpfs','/home','--dir','/whygraph','--dir','/tools',
     '--bind',repo,'/repo','--bind',join(work,'home'),'/home/agent','--bind',join(work,'config'),'/config',
     '--bind',join(work,'cache'),'/cache','--bind',join(work,'state'),'/state',

@@ -60,7 +60,7 @@ async function main(args) {
     }
   }
   const results=join(resultRoot,randomUUID());mkdirSync(results,{recursive:true});
-  writeFileSync(join(results,'rehearsal.json'),JSON.stringify({version:1,rehearsal:true,batch,stage,cells:plan.map(p=>p.id)},null,2));
+  writeFileSync(join(results,'rehearsal.json'),JSON.stringify({version:1,rehearsal:true,batch,stage,preflight:'skipped: stand-in has no model connection or token usage',cells:plan.map(p=>p.id)},null,2));
   console.log(`Rehearsal results: ${results}`);
   // A live host listener makes network denial a real confinement check.
   const network=createServer(connection=>connection.end());
