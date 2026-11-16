@@ -24,9 +24,9 @@ import { fileKey } from './registry.mjs';
 
 const EVAL = fileURLToPath(new URL('./', import.meta.url));
 const WHYGRAPH = join(EVAL, '..');
-let RESULTS = join(EVAL, 'results');
+const RESULTS = join(EVAL, 'results');
 // On disk, not in /tmp: /tmp is an 8 GB tmpfs on this box, and three memoryd copies with their snapshots do not fit in it.
-let WORK = process.env.WHYGRAPH_EVAL_WORK ?? '/var/tmp/whygraph-eval';
+const WORK = process.env.WHYGRAPH_EVAL_WORK ?? '/var/tmp/whygraph-eval';
 const MEMOD_REPO = '/home/dev/scratch/whygraph-eval/tasks2/memod';
 const MEMORYD_REPO = '/home/dev/scratch/whygraph-eval/tasks2/memoryd';
 /**
@@ -154,7 +154,7 @@ export function ticketTemplate(name, requireReady = false) {
   const store = join(base, 'store');
   if (existsSync(join(base, 'ready'))) {
     if (!existsSync(repo) || !existsSync(store)) throw new Error(`ready ${config.name} template or store is missing`);
-    return { repo:realpathSync(repo), store:realpathSync(store) };
+    return { repo, store };
   }
   if (requireReady) throw new Error(`requires the ready ${config.name} template and store; do not rebuild`);
   mkdirSync(base, { recursive: true });
@@ -167,7 +167,7 @@ export function ticketTemplate(name, requireReady = false) {
   });
   writeFileSync(join(base, 'build.json'), JSON.stringify({ build_ms: Date.now() - started }, null, 2));
   writeFileSync(join(base, 'ready'), '');
-  return { repo:realpathSync(repo), store:realpathSync(store) };
+  return { repo, store };
 }
 
 /** The template a task's repo is copied from. */
@@ -621,9 +621,8 @@ async function main(argv) {
   }
   const allIds = plan.map((p) => p.id);
   if(plan.some(p=>evalBatch(p.task.batch).storeAccess==='closed')) {
-    const {canonicalPath,closedWorkRoot,execBudget}=await import('./closed-store.mjs');
-    WORK=closedWorkRoot(WORK);
-    RESULTS=canonicalPath(RESULTS);
+    const {closedWorkRoot,execBudget}=await import('./closed-store.mjs');
+    closedWorkRoot(WORK);
     for(const p of plan)execBudget('/tools/opencode',[wrap(p.task.request)]);
   }
   let next = 0;

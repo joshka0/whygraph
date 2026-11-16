@@ -15,7 +15,7 @@ import { canonicalPath, closedWorkRoot, execBudget, filesystemPath } from './clo
 
 const here=fileURLToPath(new URL('.',import.meta.url));
 const quiet={...process.env,RELATE_TELEMETRY:'0',DO_NOT_TRACK:'1'};
-const within=(parent,path)=>{const rel=relative(parent,path);return rel===''||(!isAbsolute(rel)&&rel!=='..'&&!rel.startsWith('..'+sep));};
+const within=(parent,path)=>{const rel=relative(canonicalPath(parent),canonicalPath(path));return rel===''||(!isAbsolute(rel)&&rel!=='..'&&!rel.startsWith('..'+sep));};
 
 async function main(args) {
   const started=performance.now();
@@ -29,8 +29,8 @@ async function main(args) {
   if(!Number.isInteger(batch)||evalBatch(batch).storeAccess!=='closed')throw new Error('rehearsal requires a registered closed-store batch');
   const plan=batchPlan(readTasks(),{batch,stage});
   const work=closedWorkRoot(process.env.WHYGRAPH_EVAL_WORK??'/var/tmp/whygraph-eval');
-  const resultRoot=canonicalPath(resolve(options['--results']??join(here,'../test-results/rehearsals')));
-  const trial=canonicalPath(join(here,'results'));
+  const resultRoot=resolve(options['--results']??join(here,'../test-results/rehearsals'));
+  const trial=join(here,'results');
   if(within(trial,resultRoot)||within(resultRoot,trial))throw new Error('rehearsal results must be outside eval/results and its ancestors');
   const inspect=dir=>{
     if(!existsSync(dir))return;

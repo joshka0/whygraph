@@ -87,7 +87,7 @@ export function opencodeSession(events) {
 }
 
 const inside = (repo, path) => {
-  const rel = relative(repo, resolve(path));
+  const rel = relative(resolvedTarget(repo), resolvedTarget(path));
   return rel === '' || (rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel));
 };
 

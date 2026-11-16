@@ -336,7 +336,7 @@ export async function startClosedShell({work,repo,client,socket,log}) {
     };
     const fail=message=>{
       failure(message);
-      frame(2,Buffer.from('whygraph service unavailable\n'));finish(70);
+      frame(2,Buffer.from(`whygraph shell launcher unavailable: ${message}\n`));finish(70);
     };
     connection.on('error',()=>{});
     connection.on('close',()=>{connections.delete(connection);if(child&&children.has(child))kill(child);});
@@ -445,14 +445,13 @@ export function socketPath(path) {
  * owns: [[whygraph-closed-store]]
  */
 export function closedWorkRoot(root) {
-  root=canonicalPath(root);
-  if (Buffer.byteLength(join(root, '0'.repeat(36), 'service.sock')) > 107)
+  if (Buffer.byteLength(join(resolve(root), '0'.repeat(36), 'service.sock')) > 107)
     throw new Error(`work root too long for Unix sockets (107-byte limit): ${resolve(root)}`);
   filesystemPath(root);
   return root;
 }
 
-/** Resolve existing ancestors once, including roots not yet created.
+/** Resolve path identities for comparisons and filesystem guards, without changing launch paths.
  * owns: [[whygraph-closed-store]]
  */
 export function canonicalPath(path) {

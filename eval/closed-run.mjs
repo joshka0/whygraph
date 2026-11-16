@@ -62,7 +62,7 @@ export function prepareClosed({task,condition,work,source,stores,client}) {
  * owns: [[whygraph-closed-runner]]
  */
 export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,source,store,rehearsal}) {
-  workRoot=closedWorkRoot(workRoot);
+  closedWorkRoot(workRoot);
   for(const path of [source,store,out])filesystemPath(path);
   execBudget('/tools/opencode',[prompt],quiet);
   const work=join(workRoot,randomUUID());
