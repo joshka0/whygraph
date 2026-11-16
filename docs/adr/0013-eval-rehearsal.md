@@ -40,19 +40,20 @@ step emits an error event and exits nonzero. No token or cost is invented.
 Attempt work folders use UUIDs rather than cell names. Both socket names
 are constant. Before any attempt starts, the runner checks the absolute work
 root with a complete UUID and the longest socket leaf against 107 bytes.
-Resolve the work root to its canonical absolute path before this length
-check and before reservations. Derive mounts, sockets, native-read mappings,
-isolation checks and retained work paths from that value. Resolve result
-and ready template roots too; an alias must not become a second identity.
+The socket limit applies to the pathname passed to listen and connect.
+A short symlink alias to a long physical root is valid. Keep work, result
+and template roots as supplied; do not replace them by canonical paths.
+Resolve both sides of path comparisons the same way. This includes native
+file and patch paths, symlink targets and result-root containment checks.
 Confinement mounts keep their constant namespace paths. Long or unsafe
 result and ledger components use a SHA-256 filename; archives add a UUID
 to the bounded result key. Earlier batches keep their readable prefixes.
 Cell identity stays in metadata and ledgers. All lengths count UTF-8 bytes.
 Exec validation checks each argument, environment entry and total request
 against the host limits. Oversized paths, prompts or requests refuse with
-the limiting name before exec. For a closed shell request, that name stays
-in host-only failure records; the agent receives ADR 0011's constant reply.
-No limit is relaxed.
+the limiting name before exec. A closed shell refusal keeps its descriptive
+argument, environment or missing-program diagnostic. Only store-service
+internal causes use ADR 0011's constant reply. No limit is relaxed.
 
 The closed transport owns the socket, mount and exec guards. It remains
 importable without the trial registry. The registry owns filename encoding;
