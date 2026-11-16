@@ -6971,5 +6971,194 @@
       ],
       "cleanup": "All final suite processes exited. Scratch retained; no deletion, push, or new worktree."
     }
+  },
+  "short_stress_forms": {
+    "date": "2026-11-16",
+    "branch": "batch-7-rehearsal",
+    "implementation_commit": "0ed0eaf",
+    "status": "Focused short forms and burner parent-death check pass. Full default pass and stress form deliberately not run.",
+    "decisions": [
+      "ADRs 0011 and 0013 retain the runner lifetime, attempt, confinement and rehearsal contracts. Only self-test launch glue changes.",
+      "The B7-93 ten-second disappearance predicate remains unchanged."
+    ],
+    "default_command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/check.mjs",
+    "stress_command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/check.mjs --stress",
+    "forms": [
+      {
+        "item": "B7-93",
+        "default_repetitions": 5,
+        "stress_repetitions": 50,
+        "burners": 4,
+        "same_assertions": true
+      },
+      {
+        "item": "B7-104",
+        "default_cells": 16,
+        "default_stage": "smoke",
+        "stress_cells": 258,
+        "stress_stage": "full (stage omitted)",
+        "same_assertions": true
+      }
+    ],
+    "selection": {
+      "stress_case_count": 2,
+      "stress_runs_other_cases": false,
+      "default_keeps_all_cases": true,
+      "default_adds_parent_death_case": true,
+      "expected_default_case_count": 1620,
+      "counts_basis": "1619 prior cases plus one burner-lifetime case; not a full-run result"
+    },
+    "stress_required": "Before a merge that changes eval/run.mjs, eval/closed-run.mjs, eval/closed-store.mjs, eval/rehearse.mjs, the shell launcher, or the client (currently eval/closed-client.c). Run serially at a quiet time in the required scope.",
+    "plants": {
+      "moved": [],
+      "long_only_existing_plants": [],
+      "explanation": "The two shortened owners have no separate long-only copied-code plants. The surviving-child plant still runs in the default pass at the unchanged ten-second bound. All eight rehearsal plants stay in the default pass. Stress retains the full 50-repetition and 258-cell owner assertions; none are removed."
+    },
+    "burner_lifetime": {
+      "mechanism": "Each burner runs in a bwrap PID namespace with --die-with-parent. Normal failure or exception awaits scope closure in finally; partial startup closes every acquired scope. Owner death triggers kernel namespace teardown.",
+      "signals_tested": [
+        "SIGKILL",
+        "SIGTERM"
+      ],
+      "before_each": 4,
+      "after_each": 0,
+      "evidence": "test-results/batch7-selftest-wc0lOW/burner-parent-death.json",
+      "global_count_command": "ps -eo args | grep -c \"[M]ath.sqrt\"",
+      "global_count_stdout": "0",
+      "global_count_exit": 1,
+      "count_note": "grep exits 1 when zero lines match; stdout 0 means no burner or bwrap monitor remains."
+    },
+    "focused_runs": [
+      {
+        "case": "runner death passes",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-check.mjs 'runner death passes'",
+        "exit": 0,
+        "passed": 1,
+        "total": 1,
+        "wall_seconds": 127.3,
+        "log": "test-results/trial7-tests7-runner-short.log",
+        "time_file": "test-results/trial7-tests7-runner-short.time",
+        "scratch": "test-results/batch7-selftest-vkG32z",
+        "burners_after": 0
+      },
+      {
+        "case": "invented-plan rehearsal executes",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-check.mjs 'invented-plan rehearsal executes'",
+        "exit": 0,
+        "passed": 1,
+        "total": 1,
+        "wall_seconds": 133.27,
+        "log": "test-results/trial7-tests7-rehearsal-short.log",
+        "time_file": "test-results/trial7-tests7-rehearsal-short.time",
+        "scratch": "test-results/batch7-selftest-Hg1Poc",
+        "burners_after": 0
+      },
+      {
+        "case": "burner scope",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-check.mjs 'burner scope'",
+        "exit": 0,
+        "passed": 1,
+        "total": 1,
+        "wall_seconds": 1.92,
+        "log": "test-results/trial7-tests7-burner-lifetime-4.log",
+        "time_file": "test-results/trial7-tests7-burner-lifetime-4.time",
+        "scratch": "test-results/batch7-selftest-wc0lOW",
+        "burners_after": 0
+      }
+    ],
+    "diagnostics": [
+      {
+        "log": null,
+        "case_started": false,
+        "cause": "Sandbox denied the systemd user bus; rerun through approved escalation.",
+        "evidence": "Tool transcript; escalation rerun replaced the initial redirected log."
+      },
+      {
+        "log": "test-results/trial7-tests7-burner-lifetime.log",
+        "wall_seconds": 0.62,
+        "exit": 1,
+        "cause": "Initial nested worker could not spawn Node: EACCES before any burner started."
+      },
+      {
+        "log": "test-results/trial7-tests7-burner-lifetime-2.log",
+        "wall_seconds": 0.61,
+        "exit": 1,
+        "cause": "Changing the Node path did not fix nested spawn EACCES. Replaced the nested worker with direct bwrap burner scopes using explicit system mounts and /dev."
+      },
+      {
+        "log": "test-results/trial7-tests7-burner-lifetime-3.log",
+        "wall_seconds": 1.53,
+        "exit": 1,
+        "cause": "Counter included eight bwrap monitors alongside four burners. Restricted counter to Node processes; failure cleanup left zero burners."
+      }
+    ],
+    "checks": {
+      "node_check": {
+        "exit": 0,
+        "files": [
+          "eval/selftest/check.mjs",
+          "eval/selftest/batch7-host.mjs",
+          "eval/selftest/batch7-rehearsal.mjs",
+          "eval/selftest/batch7-burners.mjs"
+        ]
+      },
+      "pnpm_check": {
+        "exit": 0,
+        "log": "test-results/trial7-tests7-check.log"
+      },
+      "memod_lint": {
+        "exit": 0,
+        "log": "test-results/trial7-tests7-memod.log"
+      }
+    },
+    "default_idle_estimate": {
+      "planning_seconds": 2076,
+      "planning_minutes": 34.6,
+      "range_minutes": [
+        25,
+        45
+      ],
+      "not_measured": true,
+      "derivation": {
+        "historical_full_log_seconds": [
+          4514.54493505,
+          4510.348972671
+        ],
+        "historical_full_log_clock": "File birth-to-final-modification times for retained trial7-tests6-full-6.txt and trial7-tests6-full-7.txt (stat -c %w/%y). These are historical concurrent runs, not an idle measurement.",
+        "historical_full_rehearsal_seconds": [
+          1748.100899573,
+          1747.025882468
+        ],
+        "new_short_rehearsal_seconds": 121.556527086,
+        "historical_runner_seconds_per_repetition": [
+          18.050597356290233,
+          18.044699060673615
+        ],
+        "runner_clock": "First-to-last runner observation file modification span divided by 49 in each retained historical 50-repetition receipt.",
+        "removed_runner_repetitions": 45,
+        "new_parent_death_case_seconds": 1.92,
+        "formula": "mean(old full log duration) - mean(old 258-cell rehearsal) + new 16-cell rehearsal - 45 * mean(old runner repetition gap) + new parent-death case",
+        "limitation": "About 35 minutes is a planning estimate for one idle-box pass, not a measured speedup. Historical runs were concurrent; current focused runs were capped at two cores. Shared load, cold fixtures and the tighter CPU quota can move the result outside the range."
+      }
+    },
+    "not_verified": [
+      "Complete default selection executing end to end",
+      "Stress long forms and stress end-to-end failure propagation",
+      "Historical unrelated B7-96 and B7-115 reds are not rerun or resolved here",
+      "No plants rerun in this focused-only task"
+    ],
+    "scratch_policy": "Keep all trial7-tests7 logs/time files and the six new batch7-selftest directories under test-results; delete nothing. No eval/results writes, hosted model, trial, install, push, or worktree.",
+    "scratch_directories": [
+      "test-results/batch7-selftest-97r2Hm",
+      "test-results/batch7-selftest-J5NUal",
+      "test-results/batch7-selftest-kGr6tT",
+      "test-results/batch7-selftest-wc0lOW",
+      "test-results/batch7-selftest-vkG32z",
+      "test-results/batch7-selftest-Hg1Poc"
+    ],
+    "parent_doc_sentences": {
+      "eval/README.md": "The default self-test runs B7-93 with five repetitions and four CPU burners and B7-104 with the 16-cell smoke plan; node eval/selftest/check.mjs --stress runs only their 50-repetition and 258-cell forms.",
+      "failure_list": "Run node eval/selftest/check.mjs --stress before a merge that changes eval/run.mjs, eval/closed-run.mjs, eval/closed-store.mjs, eval/rehearse.mjs, the shell launcher or the client, one command at a time under TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200%."
+    }
   }
 }

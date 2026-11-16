@@ -5,8 +5,8 @@ tags: [whygraph, eval, independent-tests]
 ---
 
 > [!abstract] Answer
-> The process-disappearance fix passes 1554/1554, exit 0; 1554/1554, exit 0.
-> Three focused batches pass 150/150 runner-death repetitions. All five runs catch the surviving-child plant at the unchanged ten-second bound. See the process-disappearance audit below.
+> The short runner-death case, 16-cell rehearsal and burner parent-death case each pass 1/1. Syntax, type and memod checks pass.
+> The full default pass and stress form were not run. See the short and stress forms audit below. Earlier sections retain historical results.
 
 ## Historical third-round audit
 
@@ -759,3 +759,111 @@ Reproduce each full suite in the required scope:
 export PATH="$HOME/.opencode/bin:$HOME/.npm-global/bin:$HOME/.local/share/mise/installs/pnpm/12.11.2:$HOME/.local/bin:$PATH"
 TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/check.mjs
 ```
+
+
+## Short and stress forms audit, 2026-11-16
+
+Implementation: `0ed0eaf`, branch `batch-7-rehearsal`. Only `eval/selftest/`
+changes. ADRs 0011 and 0013 still govern process lifetime, confinement,
+attempt budgets and rehearsal checks. No production contract changes.
+
+| Case | Default form | Stress form |
+| --- | --- | --- |
+| B7-93 runner death under four CPU burners | 5 repetitions | 50 repetitions |
+| B7-104 invented-plan rehearsal | 16 smoke cells | 258 full-plan cells, stage omitted |
+
+The default keeps every existing case and adds one burner parent-death
+case. Its expected count is 1620, derived from the previous 1619 plus one;
+this is not a measured full-pass result. Each shortened case prints `SHORT`,
+its size and `node eval/selftest/check.mjs --stress`.
+
+The stress command selects only the two long forms. Its summary reports
+`2 stress cases`, and the shared runner sets exit 1 if either fails.
+The long forms use the same owner assertions. No copied-code plant moved:
+these two owners have no separate long-only plants. The surviving-child
+plant stays in the default pass at its unchanged ten-second bound. All
+eight rehearsal plants also stay in the default pass. No plant ran here.
+
+Run stress before a merge that changes `eval/run.mjs`, `eval/closed-run.mjs`,
+`eval/closed-store.mjs`, `eval/rehearse.mjs`, the shell launcher or the client
+(currently `eval/closed-client.c`). Run serially at a quiet time:
+
+```sh
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/check.mjs
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/check.mjs --stress
+```
+
+Neither command above ran in this task. Only these focused commands ran,
+each with the same `TMPDIR` and scope prefix:
+
+| Focused command after the prefix | Result | Wall seconds | Burners after |
+| --- | --- | --- | --- |
+| `node eval/selftest/batch7-check.mjs 'runner death passes'` | 1/1, exit 0; 5 repetitions | 127.30 | 0 |
+| `node eval/selftest/batch7-check.mjs 'invented-plan rehearsal executes'` | 1/1, exit 0; 16 cells | 133.27 | 0 |
+| `node eval/selftest/batch7-check.mjs 'burner scope'` | 1/1, exit 0; SIGKILL and SIGTERM | 1.92 | 0 |
+
+Logs and time files use the prefix `test-results/trial7-tests7-`, with
+`runner-short`, `rehearsal-short` and `burner-lifetime-4` suffixes. Each run
+used `/usr/bin/time -f '%e' -o <time-file>` inside the required scope.
+The JSON `short_stress_forms.focused_runs` records the exact commands and
+scratch paths. The required `ps -eo args | grep -c "[M]ath.sqrt"` printed
+`0` after each run. Grep exits 1 for zero matches.
+
+Each burner has a bwrap PID namespace and `--die-with-parent`. Normal
+completion, assertion failure and exceptions await acquired scope closure
+in `finally`. Partial startup closes all acquired scopes. If the self-test
+process dies, the kernel ends its burner namespaces. The focused case
+starts a disposable owner through the same `startBurners` function, counts
+four Node burners, kills the owner, then counts zero live burners. It does
+this for both SIGKILL and SIGTERM. Evidence:
+`test-results/batch7-selftest-wc0lOW/burner-parent-death.json`.
+
+Three setup runs failed before the final parent-death result. A nested
+worker could not spawn either Node path (0.62 and 0.61 seconds). The final
+launcher starts each confined burner directly with explicit system mounts
+and `/dev`. A counter then counted eight bwrap monitors as burners
+(1.53 seconds). The corrected counter accepts only Node processes. That
+failed assertion also exercised owner cleanup; the global count was zero.
+The initial sandbox denial of the systemd bus ran no case. Approved
+escalation supplied the required scope; no unscoped case ran.
+
+`node --check` exits 0 for all four changed `.mjs` files. `pnpm check` and
+`node_modules/.bin/memod lint` exit 0. Their logs are
+`test-results/trial7-tests7-check.log` and
+`test-results/trial7-tests7-memod.log`.
+
+Plan for about **35 minutes** for one default pass on an idle box, with a
+rough 25–45 minute range. This is an estimate, not an idle measurement:
+
+- Retained full logs 6 and 7 span 4514.54 and 4510.35 seconds from file
+  birth to final modification (`stat -c '%w %y'`).
+- Their 258-cell rehearsals took 1748.10 and 1747.03 seconds. Replace their
+  mean with the new 16-cell internal measurement, 121.56 seconds.
+- Their runner observation files span 884.48 and 884.19 seconds over 49
+  repetition gaps. Remove 45 gaps at their mean, 18.05 seconds each.
+- Add the 1.92-second parent-death case. The estimate is 2076.22 seconds,
+  or 34.6 minutes.
+
+Historical passes ran concurrently. Current focused passes use a two-core
+quota. Cold fixtures, shared load and that tighter quota limit this estimate;
+the result can fall outside the range. No new full pass was used to derive it.
+
+The full default composition, both stress forms, stress failure propagation
+and copied-code plants remain unverified in this task. Earlier unrelated
+B7-96 and B7-115 reds were neither rerun nor changed. Keep the six new
+`batch7-selftest-*` folders listed in the JSON and all `trial7-tests7-*`
+evidence. No trial, hosted model, install, push, worktree or write to
+`eval/results/` occurred. Nothing was deleted.
+
+### Sentences for the parent
+
+For `eval/README.md`: The default self-test runs B7-93 with five repetitions
+and four CPU burners and B7-104 with the 16-cell smoke plan;
+`node eval/selftest/check.mjs --stress` runs only their 50-repetition and
+258-cell forms.
+
+For the failure list: Run `node eval/selftest/check.mjs --stress` before a
+merge that changes `eval/run.mjs`, `eval/closed-run.mjs`,
+`eval/closed-store.mjs`, `eval/rehearse.mjs`, the shell launcher or the
+client, one command at a time under
+`TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200%`.
