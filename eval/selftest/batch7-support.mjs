@@ -8,7 +8,7 @@ import {createHash} from 'node:crypto';
 import {dirname,join} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 const root=fileURLToPath(new URL('../../',import.meta.url));
-const env={...process.env,PATH:`${root}/node_modules/.bin:${process.env.HOME}/.npm-global/bin:${process.env.HOME}/.local/share/mise/installs/pnpm/12.11.2:${process.env.HOME}/.local/bin:${process.env.PATH}`,RELATE_TELEMETRY:'0',DO_NOT_TRACK:'1',HF_HUB_OFFLINE:'1',TRANSFORMERS_OFFLINE:'1',GIT_CONFIG_GLOBAL:'/dev/null',GIT_CONFIG_NOSYSTEM:'1',GIT_AUTHOR_NAME:'contract',GIT_AUTHOR_EMAIL:'contract@example.invalid',GIT_COMMITTER_NAME:'contract',GIT_COMMITTER_EMAIL:'contract@example.invalid'};
+const env={...process.env,PATH:`${root}/node_modules/.bin:${process.env.HOME}/.opencode/bin:${process.env.HOME}/.npm-global/bin:${process.env.HOME}/.local/share/mise/installs/pnpm/12.11.2:${process.env.HOME}/.local/bin:${process.env.PATH}`,RELATE_TELEMETRY:'0',DO_NOT_TRACK:'1',HF_HUB_OFFLINE:'1',TRANSFORMERS_OFFLINE:'1',GIT_CONFIG_GLOBAL:'/dev/null',GIT_CONFIG_NOSYSTEM:'1',GIT_AUTHOR_NAME:'contract',GIT_AUTHOR_EMAIL:'contract@example.invalid',GIT_COMMITTER_NAME:'contract',GIT_COMMITTER_EMAIL:'contract@example.invalid'};
 const read=p=>readFileSync(p,'utf8'),json=p=>JSON.parse(read(p)),hash=v=>createHash('sha256').update(v).digest('hex');
 function write(p,v){mkdirSync(dirname(p),{recursive:true});writeFileSync(p,typeof v==='string'||Buffer.isBuffer(v)?v:JSON.stringify(v,null,2)+'\n');return p;}
 function command(cmd,args=[],options={}){const r=spawnSync(cmd,args,{cwd:root,env,encoding:'utf8',maxBuffer:32*1024*1024,...options});assert.ifError(r.error);return r;}
@@ -30,7 +30,7 @@ const plain=Array.from({length:3},(_,i)=>({id:`plain-${i}`,request:'Add a source
 const governed=Array.from({length:4},(_,i)=>({id:`governed-${i}`,request:'Add a source comment',kind:'comment',file:'src/example.ts',added:'ExactComment',ticket:`ticket-${8000+i}`,commit:'a'.repeat(40),decided:'Keep behavior',why_not_against:'Keeps behavior',evidence:'A source comment'}));
 return[requests,targets,plain,governed,requests.map(r=>({id:`ticket-${r.record}`,stratum:r.stratum}))];}
 const files=['requests.json','targets.json','controls.json','controls2.json','sample-ids.json'];
-function inputs(at,values=synthetic(),change=()=>{}){const r=json(join(at,'eval/registry.json'));files.forEach((f,i)=>{write(join(at,'eval/tickets/zustand',f),values[i]);r.batches[7].sha256[f]=hash(readFileSync(join(at,'eval/tickets/zustand',f)));});change(r);write(join(at,'eval/registry.json'),r);return at;}
+function inputs(at,values=synthetic(),change=()=>{}){const r=json(join(at,'eval/registry.json'));r.batches[7].counts.requests=120;r.batches[7].sampleCounts={cited:60,uncited:60};files.forEach((f,i)=>{write(join(at,'eval/tickets/zustand',f),values[i]);r.batches[7].sha256[f]=hash(readFileSync(join(at,'eval/tickets/zustand',f)));});change(r);write(join(at,'eval/registry.json'),r);return at;}
 const generate=at=>node(join(at,'eval/tickets/make-tasks.mjs'),['--batch','7']);
 function generated(at){const r=generate(at);ok(r);return r.stdout.trim().split('\n').map(id=>json(join(at,'eval/tasks',`${id}.json`)));}
 function refuse(at,pattern){const before=tree(join(at,'eval/tasks')),r=generate(at);assert.notEqual(r.status,0,'invalid inputs must refuse');if(pattern)assert.match(r.stderr.split('\n').filter(l=>/^\w*Error:/.test(l)).join('\n'),pattern);assert.deepEqual(tree(join(at,'eval/tasks')),before,'refusal writes no tasks');return r;}
