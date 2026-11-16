@@ -8,6 +8,7 @@ import {mkdirSync,existsSync,readFileSync,readdirSync,symlinkSync} from 'node:fs
 import {join,resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {b7 as h} from './batch7-support.mjs';
+import {startBurners} from './batch7-burners.mjs';
 const quote=s=>"'"+s.replaceAll("'","'\\''")+"'";
 const node=s=>'/usr/bin/node -e '+quote(s);
 const u=n=>{const b=Buffer.alloc(4);b.writeUInt32BE(n);return b;};
@@ -31,11 +32,12 @@ function runnerState(pid){
  const teardown=fields[0]!=='Z'&&(Number(fields[6])&4)!==0&&BigInt(fields[20])===0n&&cmdline==='';
  return {pid,stat,cmdline,state:fields[0],flags:fields[6],vsize:fields[20],teardown,gone:false};
 }
+function burnerPids(token){return readdirSync('/proc').filter(n=>/^\d+$/.test(n)).filter(n=>{const args=procText(n,'cmdline')?.split('\0')??[];return args[0]==='/usr/bin/node'&&args.includes(token)&&args.some(a=>a.includes('Math.sqrt'));}).map(Number);}
 function ownedPids(token){return readdirSync('/proc').filter(n=>/^\d+$/.test(n)).filter(n=>{const cmdline=procText(n,'cmdline');if(cmdline===null)return false;const args=cmdline.split('\0');return args.includes('/repo/'+token+'.js')||args[0]==='/bin/bash'&&args.some(a=>a.includes(token));}).map(Number);}
 /** Host shell contracts through the generated script and live confinement.
  * owns: [[whygraph-batch7-host-selftest]]
  */
-export async function batch7HostChecks({scratch,shared}){
+export async function batch7HostChecks({scratch,shared,stress=false}){
  const checks=[],add=(name,run)=>checks.push({name:`B7 ${name}`,group:'host',run});let serial=0;
  async function run(fn,{condition='graph',api,client,symlinkRepo=false,worker=false,spawnFailure=false,workerModule}={}){
   const f=await shared.getClosed(),r=await shared.attempt({condition}),work=r.value.work,repo=resolve(h.root,work,'repo'),config=h.json(join(r.out,'command.json'));
@@ -75,6 +77,24 @@ export async function batch7HostChecks({scratch,shared}){
   }}finally{fs.readFileSync=original;syncBuiltinESMExports();}
   h.write(join(scratch,'proc-disappearance-check.json'),{results});
   assert.deepEqual(results.filter(r=>!r.passed),[],'process observations must accept only disappearance errors');
+ });
+ add('B7-93 burner scope ends after self-test SIGKILL and SIGTERM',async()=>{
+  const results=[];
+  for(const signal of ['SIGKILL','SIGTERM']){
+   const token=`burner-lifetime-${process.pid}-${signal}`;
+   const owner=collect(spawn(process.execPath,[join(h.root,'eval/selftest/batch7-burners.mjs'),'--hold',token],{env:h.env}));
+   let before;
+   try{
+    await ready(owner,'READY\n');
+    before=burnerPids(token);assert.equal(before.length,4,'four ready burners before owner death');
+    owner.p.kill(signal);await owner.done;
+    const start=performance.now();let remaining;
+    do{remaining=before.filter(live);if(!remaining.length)break;await new Promise(ok=>setTimeout(ok,10));}while(performance.now()-start<10000);
+    results.push({signal,before,remaining,wall_ms:performance.now()-start});
+    assert.deepEqual(remaining,[],'no burner may survive the self-test process');
+   }finally{if(owner.p.exitCode===null&&owner.p.signalCode===null){owner.p.kill('SIGKILL');await owner.done;}}
+  }
+  h.write(join(scratch,'burner-parent-death.json'),results);
  });
  // B7-72: usable source operations and all commands, including nested cwd.
  add('B7-72 generated shell reads edits and commands in every condition and nested cwd',async()=>{
@@ -121,15 +141,18 @@ export async function batch7HostChecks({scratch,shared}){
   }finally{for(const pid of pids)if(live(pid))try{process.kill(pid,'SIGKILL');}catch(e){if(e.code!=='ESRCH')throw e;}if(c.p.exitCode===null&&c.p.signalCode===null)c.p.kill('SIGKILL');}
  }
  for(const mode of ['cleanup','timeout','disconnect','runner'])add(`B7-76 ${mode} ends background and new-session children before returning`,()=>run(f=>lifetime(f,mode),{worker:mode==='runner'}));
- add('B7-93 runner death passes 50 consecutive repetitions under CPU load',async()=>{
-  const load=Array.from({length:4},()=>spawn(process.execPath,['-e','for(;;)Math.sqrt(Math.random());'],{stdio:'ignore',env:h.env}));
-  const results=[];try{for(let i=0;i<50;i++){
+ add(`B7-93 runner death passes ${stress?50:5} consecutive repetitions under CPU load`,async()=>{
+  if(!stress)console.log('SHORT B7-93: 5 repetitions with four burners; long form: node eval/selftest/check.mjs --stress');
+  const load=await startBurners('runner-'+process.pid);
+  const repetitions=stress?50:5;
+  const results=[];try{for(let i=0;i<repetitions;i++){
    try{results.push({repetition:i+1,...await run(f=>lifetime(f,'runner'),{worker:true})});}catch(e){if(e.code!=='ERR_ASSERTION')throw e;results.push({repetition:i+1,...e.runnerObservation,error:e.message});}
    h.write(join(scratch,'runner-death-repetitions.json'),{repetitions:results.length,more_than_one_observation:results.filter(r=>r.observation_count>1).length,longest_time_to_gone_or_zombie_ms:Math.max(...results.filter(r=>!r.error).map(r=>r.wall_ms)),kernel_teardown_repetitions:results.filter(r=>r.teardown>0).length,results});
   }}
-  finally{for(const p of load){const ended=new Promise(ok=>p.once('close',ok));p.kill('SIGKILL');await ended;}}
-  assert.equal(results.length,50);assert.equal(results.filter(r=>r.error).length,0,results.find(r=>r.error)?.error);
+  finally{await load.stop();}
+  assert.equal(results.length,repetitions);assert.equal(results.filter(r=>r.error).length,0,results.find(r=>r.error)?.error);
  });
+ checks.at(-1).stress=true;
  add('plant child survives dead runner caught by B7-93 ten-second bound',async()=>{
   await run(f=>lifetime(f,'runner'),{worker:true});
   const at=h.copy(scratch,'survives-runner');h.wrapped(at,'closed-store.mjs','closedConfinement',"const a=original_closedConfinement(...args);if(!args[0].network)for(const flag of ['--unshare-pid','--die-with-parent'])a.splice(a.indexOf(flag),1);return a;");

@@ -20,6 +20,7 @@ import { randomUUID } from 'node:crypto';
 import { batchInstructions } from './registry.mjs';
 import { batchPlan } from './registry.mjs';
 import { evalBatch, ticketRepo, evalRegistry } from './registry.mjs';
+import { fileKey } from './registry.mjs';
 
 const EVAL = fileURLToPath(new URL('./', import.meta.url));
 const WHYGRAPH = join(EVAL, '..');
@@ -42,8 +43,10 @@ const GIT_ENV = {
   GIT_AUTHOR_NAME: 'eval', GIT_AUTHOR_EMAIL: 'eval@example.invalid', GIT_COMMITTER_NAME: 'eval', GIT_COMMITTER_EMAIL: 'eval@example.invalid',
 };
 
-/** The text every agent gets around a task's request; the same in every condition. */
-const wrap = (request) => `A teammate sends you this request about the repository in the current folder:
+/** The text every agent gets around a task's request; the same in every condition.
+ * owns: [[whygraph-eval-runner]]
+ */
+export const wrap = (request) => `A teammate sends you this request about the repository in the current folder:
 
 ${request}
 
@@ -146,7 +149,7 @@ export function memorydTemplate() {
 export function ticketTemplate(name, requireReady = false) {
   const config = evalRegistry.repos[name];
   if (!config) throw new Error(`unknown ticket repo ${name}`);
-  const base = join(WORK, `_${config.name}`);
+  const base = join(WORK, `_${fileKey(config.name)}`);
   const repo = join(base, 'repo');
   const store = join(base, 'store');
   if (existsSync(join(base, 'ready'))) {
@@ -421,7 +424,7 @@ function runAgent(args, cwd, env, outFile, errFile, agent = 'claude') {
 }
 
 function archiveResult(out, group, results=RESULTS) {
-  const dest = join(results, group, `${out.split('/').at(-1)}__${Date.now()}__${randomUUID()}`);
+  const dest = join(results, group, `${out.split('/').at(-1)}__${randomUUID()}`);
   mkdirSync(join(results, group), { recursive: true });
   renameSync(out, dest);
   return dest;
@@ -443,7 +446,7 @@ function invalidRun(out, work, meta, details, reason = 'isolation breach') {
  */
 export async function runOne(task, condition, repeat, allIds) {
   const id = `${task.id}__${condition}__r${repeat}`;
-  const out = join(RESULTS, id);
+  const out = join(RESULTS, fileKey(id));
   const opencode = evalBatch(task.batch).agent === 'opencode' ? await import('./opencode.mjs') : undefined;
   if (opencode && existsSync(out)) archiveResult(out, '_attempts');
   else rmSync(out, { recursive: true, force: true });
@@ -459,7 +462,7 @@ export async function runOne(task, condition, repeat, allIds) {
       return meta;
     }
   }
-  const work = join(WORK, id);
+  const work = join(WORK, fileKey(id));
   const { repo, bin, base, confine } = prepare(task, condition, work);
   if (opencode) {
     const escaped = opencode.escapingSymlinks(repo);
@@ -476,7 +479,7 @@ export async function runOne(task, condition, repeat, allIds) {
     join(process.env.HOME, '.config/spec-ledger'), '/home/dev/scratch', '/home/dev/repos/personal/memod',
     EVAL, join(WHYGRAPH, 'scripts'), join(WHYGRAPH, 'test'), join(WHYGRAPH, 'test-results'), join(WHYGRAPH, 'docs'),
     join(WHYGRAPH, 'README.md'), join(WHYGRAPH, '.git'), join(WORK, '_fixture'),
-    ...allIds.filter((o) => o !== id).map((o) => join(WORK, o)),
+    ...allIds.filter((o) => o !== id).map((o) => join(WORK, fileKey(o))),
   ];
   const prompt = wrap(task.request);
   writeFileSync(join(out, 'prompt.txt'), prompt);
@@ -523,7 +526,7 @@ export async function runOne(task, condition, repeat, allIds) {
 export async function settleCell(p, allIds=[], {runAttempt=runOne, results=RESULTS, rule}={}) {
   const {attemptDecision}=await import('../scripts/attempts.pure.ts');
   rule??=evalBatch(p.task.batch).storeAccess==='closed'?'closed':evalBatch(p.task.batch).agent==='opencode'?'opencode':'single';
-  const ledgerDir=join(results,'_ledger'), ledgerFile=join(ledgerDir,`${p.id}.json`);
+  const ledgerDir=join(results,'_ledger'), ledgerFile=join(ledgerDir,`${fileKey(p.id)}.json`);
   const attempts=rule==='closed'&&existsSync(ledgerFile)?JSON.parse(readFileSync(ledgerFile,'utf8')):[];
   const save=()=>{if(rule==='closed'){mkdirSync(ledgerDir,{recursive:true});writeFileSync(ledgerFile,JSON.stringify(attempts,null,2));}};
   for(;;) {
@@ -536,14 +539,14 @@ export async function settleCell(p, allIds=[], {runAttempt=runOne, results=RESUL
       if(rule==='closed')meta={...meta,status:action.kind==='unscored'?'error':'invalid',unscored:action.kind==='unscored',...(action.kind==='stop'?{reason:'harness failure after one retry'}:{}),attempts:attempts.map(a=>a.archived)};
       else if(action.kind==='unscored')meta=meta.status==='invalid'?{...meta,status:'error',unscored:true,timed_out:false}:{...meta,unscored:true};
       if(rule==='closed'||action.kind==='unscored'){
-        mkdirSync(join(results,p.id),{recursive:true});writeFileSync(join(results,p.id,'meta.json'),JSON.stringify(meta,null,2));
+        mkdirSync(join(results,fileKey(p.id)),{recursive:true});writeFileSync(join(results,fileKey(p.id),'meta.json'),JSON.stringify(meta,null,2));
       }
       if(action.kind==='stop') {
         if(rule==='opencode') {
           if(attempts[0]?.meta.status==='invalid'&&attempts[1]?.meta.status==='invalid')throw new Error(`repeated harness failure ${p.id}: ${meta.reason}; archived ${meta.archived}`);
           throw new Error(`harness failure on timeout retry ${p.id}: ${meta.reason}; archived ${meta.archived}`);
         }
-        throw new Error(`harness failure after one retry ${p.id}; both attempts archived`);
+        throw new Error(`harness failure after one retry ${p.id}; both attempts archived: ${attempts.map(a=>a.meta?.reason).filter(Boolean).join('; ')}`);
       }
       return meta;
     }
@@ -555,7 +558,7 @@ export async function settleCell(p, allIds=[], {runAttempt=runOne, results=RESUL
     meta=await runAttempt(p.task,p.condition,p.repeat,allIds);
     attempts.pop();
     const kind=meta.status==='done'?'done':meta.reason?.startsWith('harness failure:')?'harness':meta.reason==='isolation breach'||meta.timed_out?'agent':'harness';
-    const archived=rule==='closed'&&kind!=='done'?archiveResult(join(results,p.id),kind==='agent'?'_attempts':'_invalid',results):meta.archived;
+    const archived=rule==='closed'&&kind!=='done'?archiveResult(join(results,fileKey(p.id)),kind==='agent'?'_attempts':'_invalid',results):meta.archived;
     attempts.push({kind,meta,...(archived?{archived}:{})});save();
   }
 }
@@ -566,6 +569,11 @@ function option(argv, name, fallback) {
 }
 
 async function main(argv) {
+  const values=new Set(['--only','--conditions','--repeats','--jobs','--batch','--stage']);
+  for(let i=0;i<argv.length;i++) {
+    if(values.has(argv[i])) { if(argv[++i]===undefined||argv[i].startsWith('--'))throw new Error('missing option value'); }
+    else if(!['--plan','--reextract'].includes(argv[i]))throw new Error(`unknown trial option: ${argv[i]}`);
+  }
   const tasks = readTasks();
   const only = option(argv, '--only', undefined)?.split(',');
   const chosenConditions = option(argv, '--conditions', undefined)?.split(',');
@@ -598,7 +606,7 @@ async function main(argv) {
     return 0;
   }
   const isDone = (p) => {
-    const m = join(RESULTS, p.id, 'meta.json');
+    const m = join(RESULTS, fileKey(p.id), 'meta.json');
     if (!existsSync(m)) return false;
     const meta = JSON.parse(readFileSync(m, 'utf8'));
     return meta.status === 'done' || (evalBatch(p.task.batch).agent === 'opencode' && meta.unscored === true);
@@ -612,6 +620,11 @@ async function main(argv) {
     return 0;
   }
   const allIds = plan.map((p) => p.id);
+  if(plan.some(p=>evalBatch(p.task.batch).storeAccess==='closed')) {
+    const {closedWorkRoot,execBudget}=await import('./closed-store.mjs');
+    closedWorkRoot(WORK);
+    for(const p of plan)execBudget('/tools/opencode',[wrap(p.task.request)]);
+  }
   let next = 0;
   let failed = 0;
   const worker = async () => {

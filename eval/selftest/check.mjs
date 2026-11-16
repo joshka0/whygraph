@@ -14,9 +14,12 @@ import { batch5Checks } from './batch5.mjs';
 import { batch6Checks } from './batch6.mjs';
 import { batch7Checks } from './batch7.mjs';
 
+const stress = process.argv.slice(2).includes('--stress');
+if (process.argv.slice(2).some(arg => arg !== '--stress')) throw new Error('usage: node eval/selftest/check.mjs [--stress]');
 const tasks = readTasks();
+const verdicts = stress ? [] : cases;
 let wrong = 0;
-for (const c of cases) {
+for (const c of verdicts) {
   const task = tasks.get(c.task);
   if (task === undefined) throw new Error(`${c.name}: no task ${c.task}`);
   // A case given as stream events goes through the runner's extraction, as a saved run does.
@@ -28,7 +31,7 @@ for (const c of cases) {
   for (const [k, want, got = v[k]] of bad) console.log(`        ${k}: expected ${JSON.stringify(want)}, got ${JSON.stringify(got)}`);
   wrong += bad.length === 0 ? 0 : 1;
 }
-const checks = [
+const checks = stress ? (await batch7Checks({ tasks, scoreRun, stress })).filter(c => c.stress) : [
   ...await ticketChecks({ tasks, scoreRun, recordIds }),
   ...await batch4Checks({ tasks, scoreRun }),
   ...await batch5Checks({ tasks, scoreRun }),
@@ -44,6 +47,6 @@ for (const c of checks) {
     console.log(`WRONG ${c.name}\n        ${error.message}`);
   }
 }
-const total = cases.length + checks.length;
-console.log(`${total - wrong}/${total} cases as expected (${cases.length} original verdicts, ${checks.length} ticket checks)`);
+const total = verdicts.length + checks.length;
+console.log(`${total - wrong}/${total} cases as expected (${verdicts.length} original verdicts, ${checks.length} ${stress ? 'stress cases' : 'ticket checks'})`);
 process.exitCode = wrong === 0 ? 0 : 1;

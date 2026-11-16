@@ -7,7 +7,7 @@
     "docs/adr/0011-eval-closed-store.md",
     "docs/adr/0012-ticket-record-outcomes.md"
   ],
-  "status": "Complete: normal and altered-registry full suites pass 1476/1476; all ordered case verdicts match; no requested item is omitted and no code/contract disagreement remains.",
+  "status": "Both final B7-94–B7-116 suites: 1617/1619, exit 1. Two contract mismatches remain red for parent ruling; eight requested plants caught in each run. Earlier sections retain historical counts.",
   "scope": {
     "edited": "eval/selftest/ only",
     "branch": "batch-7-integration",
@@ -6380,5 +6380,785 @@
       "test-results/batch7-selftest-zKlWoS"
     ],
     "evidence_generator": "test-results/b7-93-esrch-audit.py"
+  },
+  "bounded_paths_rehearsal": {
+    "brief": "/home/dev/scratch/whygraph-eval/trial7-tests6-brief.md",
+    "contract_commit": "70857dc",
+    "decisions": [
+      "docs/adr/0011-eval-closed-store.md",
+      "docs/adr/0013-eval-rehearsal.md"
+    ],
+    "branch": "batch-7-rehearsal",
+    "status": "Complete independent test author work: both final suites report 1617/1619, exit 1. B7-96 and B7-115 remain red for the parent. All eight plants are caught in both runs.",
+    "previous_top_status": "Complete: normal and altered-registry full suites pass 1476/1476; all ordered case verdicts match; no requested item is omitted and no code/contract disagreement remains.",
+    "scope": {
+      "edited": [
+        "eval/selftest/"
+      ],
+      "production_changes": false,
+      "installs": 0,
+      "hosted_model_calls": 0,
+      "trial_runs": 0,
+      "pushes": 0,
+      "delegation": false,
+      "worktrees_created": 0
+    },
+    "cases_added": 65,
+    "expected_suite_cases": 1619,
+    "items": {
+      "B7-94": {
+        "cases": [
+          "B7 B7-94 B7-103 smoke twice through real preparation launcher confinement and smoke checker",
+          "B7 B7-94 previous 115-byte cell socket regression now listens with UUID work",
+          "B7 B7-94 longest named registry cell also reaches its actual listening service",
+          "B7 plant cell name in socket path caught by B7-94 real long-cell launch"
+        ]
+      },
+      "B7-95": {
+        "cases": [
+          "B7 B7-95 bounded file keys preserve 128 ASCII bytes and digest unsafe Unicode identities",
+          "B7 B7-95 multibyte and separator task repo identities remain in metadata with bounded paths",
+          "B7 plant runner smoke result-key mismatch caught by B7-95 smoke completion"
+        ]
+      },
+      "B7-96": {
+        "cases": [
+          "B7 B7-96 exact 107-byte absolute socket root succeeds and one extra byte refuses",
+          "B7 B7-96 valid absolute symlink work root keeps native source reads inside the attempt",
+          "B7 plant late root guard caught by B7-96 no reservation before refusal"
+        ]
+      },
+      "B7-97": {
+        "cases": [
+          "B7 B7-97 two attempts of one cell and cells sharing a prefix get distinct closed UUID work",
+          "B7 B7-97 B7-98 live simultaneous namespaces cannot reach each other and shell rejects oversized argv"
+        ]
+      },
+      "B7-98": {
+        "cases": [
+          "B7 B7-97 B7-98 live simultaneous namespaces cannot reach each other and shell rejects oversized argv",
+          "B7 B7-98 exec guard rejects long argument environment total and NUL before exec",
+          "B7 B7-98 oversized prompt refuses before real preparation and leaves no work"
+        ]
+      },
+      "B7-99": {
+        "cases": [
+          "B7 B7-99 lexical component and total mount path bounds refuse before bwrap",
+          "B7 B7-99 canonical symlink ancestor over filesystem path limit refuses"
+        ]
+      },
+      "B7-100": {
+        "cases": [
+          "B7 B7-100 trial result root refuses without trial evidence changes",
+          "B7 B7-100 child result root refuses without trial evidence changes",
+          "B7 B7-100 ancestor result root refuses without trial evidence changes",
+          "B7 B7-100 alias result root refuses without trial evidence changes",
+          "B7 plant trial results accepted caught by B7-100 evidence preservation"
+        ]
+      },
+      "B7-101": {
+        "cases": [
+          "B7 B7-101 trial metadata at root refuses despite rehearsal marker",
+          "B7 B7-101 trial metadata in archive refuses despite rehearsal marker"
+        ]
+      },
+      "B7-102": {
+        "cases": [
+          "B7 B7-102 trial CLI rejects every stand-in selector and registry rejects stand-in agent",
+          "B7 plant stand-in registry agent accepted caught by B7-102 registry rejection"
+        ]
+      },
+      "B7-103": {
+        "cases": [
+          "B7 B7-94 B7-103 smoke twice through real preparation launcher confinement and smoke checker"
+        ]
+      },
+      "B7-104": {
+        "cases": [
+          "B7 B7-104 omitted stage executes all 258 invented registered cells and smoke check",
+          "B7 B7-104 nineteen invented tasks produce the contracted 258-cell full plan"
+        ]
+      },
+      "B7-105": {
+        "cases": [
+          "B7 B7-105 B7-113 B7-114 failed read cannot produce a successful session",
+          "B7 B7-105 B7-113 B7-114 failed why cannot produce a successful session",
+          "B7 B7-105 B7-113 B7-114 failed carry cannot produce a successful session",
+          "B7 B7-105 B7-113 B7-114 failed edit cannot produce a successful session",
+          "B7 B7-105 carry nonzero diagnostic fails the stand-in",
+          "B7 B7-105 why nonzero diagnostic fails the stand-in",
+          "B7 B7-105 impact nonzero diagnostic fails the stand-in",
+          "B7 B7-105 search nonzero diagnostic fails the stand-in",
+          "B7 B7-105 B7-106 B7-110 failed stand-in exhausts actual two-attempt harness budget"
+        ]
+      },
+      "B7-106": {
+        "cases": [
+          "B7 B7-106 unexpected store probe success emits actual output and fails",
+          "B7 B7-106 unexpected relate probe success emits actual output and fails",
+          "B7 B7-106 unexpected tool-code probe success emits actual output and fails",
+          "B7 B7-106 unexpected service-code probe success emits actual output and fails",
+          "B7 B7-106 unexpected other-socket probe success emits actual output and fails",
+          "B7 B7-106 unexpected network probe success emits actual output and fails",
+          "B7 B7-105 B7-106 B7-110 failed stand-in exhausts actual two-attempt harness budget",
+          "B7 plant successful store probe counted as pass caught by B7-106 stand-in result"
+        ]
+      },
+      "B7-107": {
+        "cases": [
+          "B7 B7-107 receipt broken after done cells fails real smoke check and rehearsal",
+          "B7 B7-107 manifest broken after done cells fails real smoke check and rehearsal",
+          "B7 B7-107 answer broken after done cells fails real smoke check and rehearsal",
+          "B7 B7-107 ledger broken after done cells fails real smoke check and rehearsal",
+          "B7 plant smoke failure ignored caught by B7-107 rehearsal process status"
+        ]
+      },
+      "B7-108": {
+        "cases": [
+          "B7 B7-108 real events retain read shell edit zero usage and passing control diffs",
+          "B7 B7-108 scorer ignores rehearsal by default and reads it only with results option"
+        ]
+      },
+      "B7-109": {
+        "cases": [
+          "B7 B7-109 B7-114 missing control fixture refuses before any cell starts",
+          "B7 B7-109 B7-114 hash control fixture refuses before any cell starts",
+          "B7 B7-109 B7-114 anchor control fixture refuses before any cell starts",
+          "B7 B7-109 B7-114 target control fixture refuses before any cell starts"
+        ]
+      },
+      "B7-110": {
+        "cases": [
+          "B7 B7-105 B7-106 B7-110 failed stand-in exhausts actual two-attempt harness budget",
+          "B7 B7-110 interrupted rehearsal retains running reservation and resume refuses a third launch"
+        ]
+      },
+      "B7-111": {
+        "cases": [
+          "B7 B7-111 changed prepared store refuses without rebuilding and rehearsal reports failure"
+        ]
+      },
+      "B7-112": {
+        "cases": [
+          "B7 B7-112 trial symlink below rehearsal root refuses before traversal or writes",
+          "B7 B7-112 hidden-trial symlink below rehearsal root refuses before traversal or writes",
+          "B7 B7-112 cycle symlink below rehearsal root refuses before traversal or writes"
+        ]
+      },
+      "B7-113": {
+        "cases": [
+          "B7 B7-105 B7-113 B7-114 failed read cannot produce a successful session",
+          "B7 B7-105 B7-113 B7-114 failed why cannot produce a successful session",
+          "B7 B7-105 B7-113 B7-114 failed carry cannot produce a successful session",
+          "B7 B7-105 B7-113 B7-114 failed edit cannot produce a successful session",
+          "B7 B7-113 impact uses record id and plain control uses live health decision fallback",
+          "B7 B7-113 impact source grammar diagnostic is not a successful step",
+          "B7 B7-113 omitted command receives the real parser diagnostic and fails the stand-in"
+        ]
+      },
+      "B7-114": {
+        "cases": [
+          "B7 B7-105 B7-113 B7-114 failed read cannot produce a successful session",
+          "B7 B7-105 B7-113 B7-114 failed why cannot produce a successful session",
+          "B7 B7-105 B7-113 B7-114 failed carry cannot produce a successful session",
+          "B7 B7-105 B7-113 B7-114 failed edit cannot produce a successful session",
+          "B7 B7-109 B7-114 missing control fixture refuses before any cell starts",
+          "B7 B7-109 B7-114 hash control fixture refuses before any cell starts",
+          "B7 B7-109 B7-114 anchor control fixture refuses before any cell starts",
+          "B7 B7-109 B7-114 target control fixture refuses before any cell starts"
+        ]
+      },
+      "B7-115": {
+        "cases": [
+          "B7 B7-115 transport imports without registry and retains exact unavailable product-format guard"
+        ]
+      },
+      "B7-116": {
+        "cases": [
+          "B7 B7-116 failed archives keep readable bounded prefix UUID and exact evidence bytes",
+          "B7 plant archive prefix dropped caught by B7-116 archive identity"
+        ]
+      }
+    },
+    "shared_cases": {
+      "B7-98": [
+        "B7-80 exact 1 MiB shell request reaches Bash with bounded individual argv",
+        "B7-80 shell protocol accepts 1024 fields and 8192-byte stdin frame"
+      ],
+      "B7-115": [
+        "B7-28 changed product carry section format fails visibly instead of truncating"
+      ],
+      "B7-116": [
+        "B5 runner reusing an existing result preserves it under _attempts"
+      ]
+    },
+    "items_with_no_case": [],
+    "parts_with_no_case": [
+      {
+        "item": "B7-114",
+        "part": "Query every committed real-batch control target in the real prepared store",
+        "reason": "The brief requires invented inputs independent of real batch 7 data. The cases use real store/service queries for every invented control target instead. No claim is made about the real batch control inventory."
+      }
+    ],
+    "disagreements": [
+      {
+        "item": "B7-96",
+        "case": "B7 B7-96 valid absolute symlink work root keeps native source reads inside the attempt",
+        "expected": {
+          "status": "done",
+          "exit": 0,
+          "service_calls": 8
+        },
+        "actual": {
+          "status": "invalid",
+          "exit": 0,
+          "service_calls": 8,
+          "reason": "isolation breach",
+          "isolation": "external file-tool path for the attempt own source file through its absolute work-root alias"
+        },
+        "cause": "closed-run.mjs normalizes namespace paths with the alias repo path. isolationBreaches uses a canonical repo root and rejects that lexical alias as external. Both the alias and canonical root pass closedWorkRoot.",
+        "evidence": "test-results/trial7-tests6-work-alias.txt",
+        "disposition": "Keep the valid-alias case red. The parent rules on this path-contract mismatch.",
+        "final_logs": [
+          "test-results/trial7-tests6-full-6.txt",
+          "test-results/trial7-tests6-full-7.txt"
+        ]
+      },
+      {
+        "item": "B7-115",
+        "case": "B7 B7-115 transport imports without registry and retains exact unavailable product-format guard",
+        "expected": {
+          "status": 70,
+          "stdout": "",
+          "stderr": "whygraph service unavailable\n"
+        },
+        "actual": {
+          "status": 70,
+          "stdout": "",
+          "stderr": "whygraph service unavailable: carry decision section changed; update the eval ablation\n"
+        },
+        "cause": "eval/closed-store.mjs:247 appends error.message to the service-unavailable diagnostic.",
+        "evidence": "test-results/trial7-tests6-focused-3.txt",
+        "disposition": "Leave the exact contract case red. Production edits are outside the independent author scope; the parent rules on the mismatch.",
+        "final_logs": [
+          "test-results/trial7-tests6-full-6.txt",
+          "test-results/trial7-tests6-full-7.txt"
+        ]
+      }
+    ],
+    "final_runs": [
+      {
+        "log": "test-results/trial7-tests6-full-6.txt",
+        "source_test_commit": "2770798",
+        "passed": 1617,
+        "total": 1619,
+        "exit": 1,
+        "red_cases": [
+          "B7 B7-96 valid absolute symlink work root keeps native source reads inside the attempt",
+          "B7 B7-115 transport imports without registry and retains exact unavailable product-format guard"
+        ],
+        "scratch": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j",
+        "rehearsals": [
+          {
+            "results": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/416-4-full/rehearsals/f95ab571-c1df-41f6-ac1f-2f43a8824bb1",
+            "stage": "full",
+            "completed_cells": 258,
+            "planned_cells": 258,
+            "smoke_checks_passed": 7,
+            "service_replies": 2064,
+            "measurement": {
+              "success": true,
+              "cells": 258,
+              "wall_ms": 1748100.899573,
+              "scope_peak_bytes": 1175502848,
+              "smoke_exit": 0
+            }
+          },
+          {
+            "results": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/415-0-invented-plan/rehearsals/d78eccb5-94ce-4be4-a77b-34c06498cef0",
+            "stage": "smoke",
+            "completed_cells": 16,
+            "planned_cells": 16,
+            "smoke_checks_passed": 7,
+            "service_replies": 128,
+            "measurement": {
+              "success": true,
+              "cells": 16,
+              "wall_ms": 100034.417655,
+              "scope_peak_bytes": 1150820352,
+              "smoke_exit": 0
+            }
+          },
+          {
+            "results": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/415-0-invented-plan/rehearsals/435514d3-f83f-47b5-88b9-a92e6b3e2965",
+            "stage": "smoke",
+            "completed_cells": 16,
+            "planned_cells": 16,
+            "smoke_checks_passed": 7,
+            "service_replies": 128,
+            "measurement": {
+              "success": true,
+              "cells": 16,
+              "wall_ms": 95584.42230399999,
+              "scope_peak_bytes": 1150820352,
+              "smoke_exit": 0
+            }
+          }
+        ],
+        "plants_caught": 8
+      },
+      {
+        "log": "test-results/trial7-tests6-full-7.txt",
+        "source_test_commit": "2770798",
+        "passed": 1617,
+        "total": 1619,
+        "exit": 1,
+        "red_cases": [
+          "B7 B7-96 valid absolute symlink work root keeps native source reads inside the attempt",
+          "B7 B7-115 transport imports without registry and retains exact unavailable product-format guard"
+        ],
+        "scratch": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2",
+        "rehearsals": [
+          {
+            "results": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/416-4-full/rehearsals/db331209-22ce-4f50-834f-0bf647e1cc0e",
+            "stage": "full",
+            "completed_cells": 258,
+            "planned_cells": 258,
+            "smoke_checks_passed": 7,
+            "service_replies": 2064,
+            "measurement": {
+              "success": true,
+              "cells": 258,
+              "wall_ms": 1747025.8824679998,
+              "scope_peak_bytes": 1206984704,
+              "smoke_exit": 0
+            }
+          },
+          {
+            "results": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/415-0-invented-plan/rehearsals/3fe02621-5e7a-463d-b02b-2e81c8142060",
+            "stage": "smoke",
+            "completed_cells": 16,
+            "planned_cells": 16,
+            "smoke_checks_passed": 7,
+            "service_replies": 128,
+            "measurement": {
+              "success": true,
+              "cells": 16,
+              "wall_ms": 98835.729326,
+              "scope_peak_bytes": 1177047040,
+              "smoke_exit": 0
+            }
+          },
+          {
+            "results": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/415-0-invented-plan/rehearsals/8f7a9bd3-3867-4511-82d6-1e64ae1a4077",
+            "stage": "smoke",
+            "completed_cells": 16,
+            "planned_cells": 16,
+            "smoke_checks_passed": 7,
+            "service_replies": 128,
+            "measurement": {
+              "success": true,
+              "cells": 16,
+              "wall_ms": 95994.94388,
+              "scope_peak_bytes": 1177047040,
+              "smoke_exit": 0
+            }
+          }
+        ],
+        "plants_caught": 8
+      }
+    ],
+    "required_checks": {
+      "score": {
+        "exit": 0,
+        "output_bytes": 0,
+        "log": "test-results/trial7-tests6-score.txt",
+        "final_log": "test-results/trial7-tests6-final-score.txt",
+        "final_exit": 0,
+        "final_output_bytes": 0
+      },
+      "typecheck": {
+        "exit": 0,
+        "log": "test-results/trial7-tests6-typecheck.txt",
+        "final_log": "test-results/trial7-tests6-final-typecheck.txt",
+        "final_exit": 0
+      },
+      "memod": {
+        "exit": 0,
+        "log": "test-results/trial7-tests6-memod.txt",
+        "final_log": "test-results/trial7-tests6-final-memod.txt",
+        "final_exit": 0
+      },
+      "readme": {
+        "exit": 0,
+        "log": "test-results/trial7-tests6-readme.txt",
+        "final_log": "test-results/trial7-tests6-final-readme.txt",
+        "final_exit": 0
+      }
+    },
+    "plants": [
+      {
+        "fault": "archive-prefix",
+        "owner": "B7-116",
+        "first_failing_assertion": "archive must retain its canonical result-key prefix",
+        "assertion": "archive must retain its canonical result-key prefix",
+        "receipt": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-archive-prefix.json",
+        "case": "B7 plant archive prefix dropped caught by B7-116 archive identity",
+        "final_receipts": [
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-archive-prefix.json",
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/plant-archive-prefix.json"
+        ]
+      },
+      {
+        "fault": "cell-socket",
+        "owner": "B7-94",
+        "first_failing_assertion": "long cells must start a live service using bounded UUID paths",
+        "assertion": "long cells must start a live service using bounded UUID paths\n+ actual - expected\n\n+ undefined\n- 'done'\n",
+        "receipt": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-cell-socket.json",
+        "case": "B7 plant cell name in socket path caught by B7-94 real long-cell launch",
+        "final_receipts": [
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-cell-socket.json",
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/plant-cell-socket.json"
+        ]
+      },
+      {
+        "fault": "late-root",
+        "owner": "B7-96",
+        "first_failing_assertion": "invalid root must refuse before any result marker or cell reservation",
+        "assertion": "invalid root must refuse before any result marker or cell reservation\n+ actual - expected\n\n+ '/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/470-89-plant-root-order/rehearsals/a69795a5-4426-42e7-81a4-057c45cf5896'\n- undefined\n",
+        "receipt": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-late-root.json",
+        "case": "B7 plant late root guard caught by B7-96 no reservation before refusal",
+        "final_receipts": [
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-late-root.json",
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/plant-late-root.json"
+        ]
+      },
+      {
+        "fault": "result-key",
+        "owner": "B7-95",
+        "first_failing_assertion": "runner and smoke checker must use the same result key",
+        "assertion": "runner and smoke checker must use the same result key",
+        "receipt": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-result-key.json",
+        "case": "B7 plant runner smoke result-key mismatch caught by B7-95 smoke completion",
+        "final_receipts": [
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-result-key.json",
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/plant-result-key.json"
+        ]
+      },
+      {
+        "fault": "smoke-pass",
+        "owner": "B7-107",
+        "first_failing_assertion": "a failed smoke check must fail rehearsal",
+        "assertion": "a failed smoke check must fail rehearsal",
+        "receipt": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-smoke-pass.json",
+        "case": "B7 plant smoke failure ignored caught by B7-107 rehearsal process status",
+        "final_receipts": [
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-smoke-pass.json",
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/plant-smoke-pass.json"
+        ]
+      },
+      {
+        "fault": "stand-in-agent",
+        "owner": "B7-102",
+        "first_failing_assertion": "stand-in is not a valid trial registry agent",
+        "assertion": "stand-in is not a valid trial registry agent",
+        "receipt": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-stand-in-agent.json",
+        "case": "B7 plant stand-in registry agent accepted caught by B7-102 registry rejection",
+        "final_receipts": [
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-stand-in-agent.json",
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/plant-stand-in-agent.json"
+        ]
+      },
+      {
+        "fault": "store-probe-pass",
+        "owner": "B7-106",
+        "first_failing_assertion": "a failed stand-in step must not finish successfully",
+        "assertion": "a failed stand-in step must not finish successfully",
+        "receipt": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-store-probe-pass.json",
+        "case": "B7 plant successful store probe counted as pass caught by B7-106 stand-in result",
+        "final_receipts": [
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-store-probe-pass.json",
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/plant-store-probe-pass.json"
+        ]
+      },
+      {
+        "fault": "trial-results",
+        "owner": "B7-100",
+        "first_failing_assertion": "rehearsal must write no marker or ledger into trial results",
+        "assertion": "rehearsal must write no marker or ledger into trial results\n+ actual - expected\n\n+ [\n+   [\n+     'df44eb9d-bd4c-4ccc-a75f-eef2a642ccb8',\n+     [\n+       [\n+         '_ledger',\n+         [\n+           [\n+             'id-7565684bc37386ab450ec07ee33a48a7b71269978f8c1af76a24557e1f7bccbc.json',\n+             '73f44d439b6e1baaa10271e0dbe9b950da5a942e192442f97801e37b29e01a0c'\n+           ]\n+         ]\n+       ],\n+       [\n+         'id-7565684bc37386ab450ec07ee33a48a7b71269978f8c1af76a24557e1f7bccbc',\n+         []\n+       ],\n+       [\n+         'rehearsal.json',\n+         '3119b41493724e6fa731e0d22362a6aa613184f5fa7e52b40048a7d0dcb7590c'\n+       ]\n+     ]\n+   ]\n+ ]\n- []\n",
+        "receipt": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-trial-results.json",
+        "case": "B7 plant trial results accepted caught by B7-100 evidence preservation",
+        "final_receipts": [
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-trial-results.json",
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/plant-trial-results.json"
+        ]
+      }
+    ],
+    "evidence": {
+      "focused": "test-results/trial7-tests6-focused-3.txt",
+      "final_logs": [
+        "test-results/trial7-tests6-full-6.txt",
+        "test-results/trial7-tests6-full-7.txt"
+      ],
+      "catalog": "test-results/trial7-tests6-catalog-complete/cases.json",
+      "scratch_index": "test-results/trial7-tests6-scratch.json"
+    },
+    "diagnostic_runs": [
+      {
+        "log": "test-results/trial7-tests6-focused-1.txt",
+        "exit": 143,
+        "state": "stopped",
+        "reason": "The invented control fixture lacked score metadata; corrected before later runs."
+      },
+      {
+        "log": "test-results/trial7-tests6-focused-2.txt",
+        "exit": 1,
+        "passed": 49,
+        "total": 62,
+        "state": "diagnostic",
+        "reason": "Corrected fixture byte arithmetic, native event name expectations, and the mutation helper shebang."
+      },
+      {
+        "log": "test-results/trial7-tests6-focused-3.txt",
+        "exit": 1,
+        "passed": 62,
+        "total": 64,
+        "state": "diagnostic",
+        "reason": "Contained the corrected-later 115-byte name arithmetic and the retained exact B7-115 failure; all eight plants caught."
+      },
+      {
+        "logs": [
+          "test-results/trial7-tests6-full-2.txt",
+          "test-results/trial7-tests6-full-3.txt"
+        ],
+        "exit": 143,
+        "state": "stopped",
+        "reason": "Loaded the outdated 115-byte fixture before its measured correction."
+      },
+      {
+        "logs": [
+          "test-results/trial7-tests6-full-4.txt",
+          "test-results/trial7-tests6-full-5.txt"
+        ],
+        "exit": 143,
+        "state": "stopped",
+        "reason": "Loaded the old 64-case list before the absolute work-root alias finding became an explicit red regression."
+      },
+      {
+        "log": "test-results/trial7-tests6-full-1.txt",
+        "exit": 1,
+        "passed": 1616,
+        "total": 1618,
+        "state": "complete diagnostic, not a final run",
+        "reason": "All 1554 pre-existing checks passed. This earlier snapshot has the old 115-byte fixture arithmetic and the exact B7-115 red case; its full-stage invented fixture has 16 cells, not the final 258-cell case."
+      }
+    ],
+    "completion": {
+      "tracked_edits": "eval/selftest/ only",
+      "branch": "batch-7-rehearsal",
+      "branch_state": "Local, unmerged; no push. No worktree created.",
+      "production_changes": false,
+      "scratch_retained": true
+    },
+    "scratch": {
+      "index": "test-results/trial7-tests6-scratch.json",
+      "log_derived_scratch_roots": 45,
+      "work_roots": 41,
+      "catalog_roots": 3,
+      "final_roots": [
+        "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j",
+        "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2"
+      ],
+      "cleanup": "All final suite processes exited. Scratch retained; no deletion, push, or new worktree."
+    }
+  },
+  "short_stress_forms": {
+    "date": "2026-11-16",
+    "branch": "batch-7-rehearsal",
+    "implementation_commit": "0ed0eaf",
+    "status": "Focused short forms and burner parent-death check pass. Full default pass and stress form deliberately not run.",
+    "decisions": [
+      "ADRs 0011 and 0013 retain the runner lifetime, attempt, confinement and rehearsal contracts. Only self-test launch glue changes.",
+      "The B7-93 ten-second disappearance predicate remains unchanged."
+    ],
+    "default_command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/check.mjs",
+    "stress_command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/check.mjs --stress",
+    "forms": [
+      {
+        "item": "B7-93",
+        "default_repetitions": 5,
+        "stress_repetitions": 50,
+        "burners": 4,
+        "same_assertions": true
+      },
+      {
+        "item": "B7-104",
+        "default_cells": 16,
+        "default_stage": "smoke",
+        "stress_cells": 258,
+        "stress_stage": "full (stage omitted)",
+        "same_assertions": true
+      }
+    ],
+    "selection": {
+      "stress_case_count": 2,
+      "stress_runs_other_cases": false,
+      "default_keeps_all_cases": true,
+      "default_adds_parent_death_case": true,
+      "expected_default_case_count": 1620,
+      "counts_basis": "1619 prior cases plus one burner-lifetime case; not a full-run result"
+    },
+    "stress_required": "Before a merge that changes eval/run.mjs, eval/closed-run.mjs, eval/closed-store.mjs, eval/rehearse.mjs, the shell launcher, or the client (currently eval/closed-client.c). Run serially at a quiet time in the required scope.",
+    "plants": {
+      "moved": [],
+      "long_only_existing_plants": [],
+      "explanation": "The two shortened owners have no separate long-only copied-code plants. The surviving-child plant still runs in the default pass at the unchanged ten-second bound. All eight rehearsal plants stay in the default pass. Stress retains the full 50-repetition and 258-cell owner assertions; none are removed."
+    },
+    "burner_lifetime": {
+      "mechanism": "Each burner runs in a bwrap PID namespace with --die-with-parent. Normal failure or exception awaits scope closure in finally; partial startup closes every acquired scope. Owner death triggers kernel namespace teardown.",
+      "signals_tested": [
+        "SIGKILL",
+        "SIGTERM"
+      ],
+      "before_each": 4,
+      "after_each": 0,
+      "evidence": "test-results/batch7-selftest-wc0lOW/burner-parent-death.json",
+      "global_count_command": "ps -eo args | grep -c \"[M]ath.sqrt\"",
+      "global_count_stdout": "0",
+      "global_count_exit": 1,
+      "count_note": "grep exits 1 when zero lines match; stdout 0 means no burner or bwrap monitor remains."
+    },
+    "focused_runs": [
+      {
+        "case": "runner death passes",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-check.mjs 'runner death passes'",
+        "exit": 0,
+        "passed": 1,
+        "total": 1,
+        "wall_seconds": 127.3,
+        "log": "test-results/trial7-tests7-runner-short.log",
+        "time_file": "test-results/trial7-tests7-runner-short.time",
+        "scratch": "test-results/batch7-selftest-vkG32z",
+        "burners_after": 0
+      },
+      {
+        "case": "invented-plan rehearsal executes",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-check.mjs 'invented-plan rehearsal executes'",
+        "exit": 0,
+        "passed": 1,
+        "total": 1,
+        "wall_seconds": 133.27,
+        "log": "test-results/trial7-tests7-rehearsal-short.log",
+        "time_file": "test-results/trial7-tests7-rehearsal-short.time",
+        "scratch": "test-results/batch7-selftest-Hg1Poc",
+        "burners_after": 0
+      },
+      {
+        "case": "burner scope",
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-check.mjs 'burner scope'",
+        "exit": 0,
+        "passed": 1,
+        "total": 1,
+        "wall_seconds": 1.92,
+        "log": "test-results/trial7-tests7-burner-lifetime-4.log",
+        "time_file": "test-results/trial7-tests7-burner-lifetime-4.time",
+        "scratch": "test-results/batch7-selftest-wc0lOW",
+        "burners_after": 0
+      }
+    ],
+    "diagnostics": [
+      {
+        "log": null,
+        "case_started": false,
+        "cause": "Sandbox denied the systemd user bus; rerun through approved escalation.",
+        "evidence": "Tool transcript; escalation rerun replaced the initial redirected log."
+      },
+      {
+        "log": "test-results/trial7-tests7-burner-lifetime.log",
+        "wall_seconds": 0.62,
+        "exit": 1,
+        "cause": "Initial nested worker could not spawn Node: EACCES before any burner started."
+      },
+      {
+        "log": "test-results/trial7-tests7-burner-lifetime-2.log",
+        "wall_seconds": 0.61,
+        "exit": 1,
+        "cause": "Changing the Node path did not fix nested spawn EACCES. Replaced the nested worker with direct bwrap burner scopes using explicit system mounts and /dev."
+      },
+      {
+        "log": "test-results/trial7-tests7-burner-lifetime-3.log",
+        "wall_seconds": 1.53,
+        "exit": 1,
+        "cause": "Counter included eight bwrap monitors alongside four burners. Restricted counter to Node processes; failure cleanup left zero burners."
+      }
+    ],
+    "checks": {
+      "node_check": {
+        "exit": 0,
+        "files": [
+          "eval/selftest/check.mjs",
+          "eval/selftest/batch7-host.mjs",
+          "eval/selftest/batch7-rehearsal.mjs",
+          "eval/selftest/batch7-burners.mjs"
+        ]
+      },
+      "pnpm_check": {
+        "exit": 0,
+        "log": "test-results/trial7-tests7-check.log"
+      },
+      "memod_lint": {
+        "exit": 0,
+        "log": "test-results/trial7-tests7-memod.log"
+      }
+    },
+    "default_idle_estimate": {
+      "planning_seconds": 2076,
+      "planning_minutes": 34.6,
+      "range_minutes": [
+        25,
+        45
+      ],
+      "not_measured": true,
+      "derivation": {
+        "historical_full_log_seconds": [
+          4514.54493505,
+          4510.348972671
+        ],
+        "historical_full_log_clock": "File birth-to-final-modification times for retained trial7-tests6-full-6.txt and trial7-tests6-full-7.txt (stat -c %w/%y). These are historical concurrent runs, not an idle measurement.",
+        "historical_full_rehearsal_seconds": [
+          1748.100899573,
+          1747.025882468
+        ],
+        "new_short_rehearsal_seconds": 121.556527086,
+        "historical_runner_seconds_per_repetition": [
+          18.050597356290233,
+          18.044699060673615
+        ],
+        "runner_clock": "First-to-last runner observation file modification span divided by 49 in each retained historical 50-repetition receipt.",
+        "removed_runner_repetitions": 45,
+        "new_parent_death_case_seconds": 1.92,
+        "formula": "mean(old full log duration) - mean(old 258-cell rehearsal) + new 16-cell rehearsal - 45 * mean(old runner repetition gap) + new parent-death case",
+        "limitation": "About 35 minutes is a planning estimate for one idle-box pass, not a measured speedup. Historical runs were concurrent; current focused runs were capped at two cores. Shared load, cold fixtures and the tighter CPU quota can move the result outside the range."
+      }
+    },
+    "not_verified": [
+      "Complete default selection executing end to end",
+      "Stress long forms and stress end-to-end failure propagation",
+      "Historical unrelated B7-96 and B7-115 reds are not rerun or resolved here",
+      "No plants rerun in this focused-only task"
+    ],
+    "scratch_policy": "Keep all trial7-tests7 logs/time files and the six new batch7-selftest directories under test-results; delete nothing. No eval/results writes, hosted model, trial, install, push, or worktree.",
+    "scratch_directories": [
+      "test-results/batch7-selftest-97r2Hm",
+      "test-results/batch7-selftest-J5NUal",
+      "test-results/batch7-selftest-kGr6tT",
+      "test-results/batch7-selftest-wc0lOW",
+      "test-results/batch7-selftest-vkG32z",
+      "test-results/batch7-selftest-Hg1Poc"
+    ],
+    "parent_doc_sentences": {
+      "eval/README.md": "The default self-test runs B7-93 with five repetitions and four CPU burners and B7-104 with the 16-cell smoke plan; node eval/selftest/check.mjs --stress runs only their 50-repetition and 258-cell forms.",
+      "failure_list": "Run node eval/selftest/check.mjs --stress before a merge that changes eval/run.mjs, eval/closed-run.mjs, eval/closed-store.mjs, eval/rehearse.mjs, the shell launcher or the client, one command at a time under TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200%."
+    }
   }
 }

@@ -139,6 +139,12 @@ node eval/score.mjs                     # the verdicts and the rates
 node eval/score.mjs --json              # one verdict per run, as JSON
 ```
 
+The default self-test runs B7-93 with five repetitions and four CPU burners and
+B7-104 with the 16-cell smoke plan. `node eval/selftest/check.mjs --stress` runs
+only their 50-repetition and 258-cell forms; it loads a machine on purpose, so
+run it only on request, alone, on a machine that nobody shares (see
+`eval/tickets/batch7-failures.md`).
+
 **Final message, tokens, cost.** A session can end more than once: in the full
 run's first pass an agent could start a Bash command in the background, and
 when it finished the agent was woken and replied again (21 of 209 scored
@@ -1348,8 +1354,8 @@ The agent and model remain opencode 1.18.29 and
 **Historical inputs.** Each registry batch records `instructionsCommit`.
 Preparation reads the skill and rule from that commit with `git show`.
 Missing commits or files stop preparation before it changes a work folder.
-Batches 1 to 6 record `c92205d`. Batch 7 remains unrecorded until the parent
-cleans the skill and records its commit. This work does not edit `skills/`.
+Batches 1 to 6 record `c92205d`. Batch 7 records `c1ae17c`.
+This work does not edit `skills/`.
 The independent author moves B6-26's skill byte check to the recorded
 commit and keeps its launcher check. See [ADR 0010](../docs/adr/0010-eval-instruction-history.md).
 
@@ -1425,11 +1431,17 @@ only carry, why, impact and search, each with one target. It accepts no
 caller-selected store path or Cypher. Invalid invocations use the product
 parser and direct CLI diagnostics, including help. Valid unsupported commands,
 valid option-bearing invocations and embedded NUL receive exit 2 with empty
-stdout and `usage: whygraph <carry|why|impact|search> <target>\n` on stderr. A lost service prints `whygraph service unavailable`,
-exits 70, and makes the attempt a harness failure. A lost launcher prints
-`whygraph shell launcher unavailable` and has the same exit and classification.
-Full answers and file
-manifests remain outside the agent filesystem for the smoke audit.
+stdout and `usage: whygraph <carry|why|impact|search> <target>\n` on stderr.
+A call that fails inside the store service returns exactly
+`whygraph service unavailable\n` on stderr, empty stdout and exit 70.
+Its internal cause stays in host-only logs, attempt metadata, ledgers and
+rehearsal failure output. A lost shell launcher prints
+`whygraph shell launcher unavailable\n` and exits 70. The shell launcher
+keeps descriptive input refusals, including argument and environment limits
+and a program that does not exist. These diagnostics are identical in every
+condition and name nothing of the trial. Disabled tool aliases print `tool unavailable\n` and
+retain exit 126 for command denial. Product diagnostics retain their direct
+CLI bytes. Full answers and file manifests remain outside the agent filesystem for the smoke audit.
 Batches 1 to 6 keep their earlier setup and limits.
 
 **Ablations.** Prepare both copies once per batch under a kernel `flock`.
@@ -1518,6 +1530,23 @@ reservation for inspection. Earlier batches keep their existing rules,
 including the possible third attempt in the old invalid-then-timeout ladder.
 The 20-minute timeout and five-second kill grace remain.
 
+**Path bounds.** Attempt work folders use UUIDs and mode 0700. The store
+socket is `service.sock`; the shell socket is `shell.sock`. Neither path
+contains a cell name. Work, result and template roots keep their supplied
+paths. A short symlink alias to a long physical root is valid. Path identity
+checks resolve both sides the same way, including native file and patch
+paths, symlink targets and result containment. Before a cell starts, the
+absolute work root plus
+a UUID and the longest socket leaf must fit the 107-byte Unix pathname
+limit. The default root gives a 72-byte service path. A longer root refuses
+with `work root too long for Unix sockets`. Namespace mount destinations
+remain constant. Result and ledger names accept at most 128 safe ASCII
+bytes; other identities use `id-` and a full SHA-256 digest. That prefix is
+reserved for digests. Archive names add a UUID to a bounded result key;
+they fit within 166 bytes. Metadata retains the full cell ID.
+Mount paths check both lexical and canonical lengths. Launches check host
+argument, environment and total exec limits before exec.
+
 **Smoke and full plans.** The smoke plan uses repeat 1 of four tasks:
 the first cited conflict, first uncited conflict, first plain control and
 first governed control. It has 16 cells. The full plan has three repeats:
@@ -1530,11 +1559,58 @@ node eval/run.mjs --batch 7 --stage smoke --plan
 node eval/run.mjs --batch 7 --plan
 ```
 
-The following commands are for the parent. Preparation does not run them:
+**Rehearsal before smoke.** The rehearsal runs the committed plan with real
+templates, stores, preparation, services, shell launcher, confinement,
+attempt ledger and result writer. Only the agent executable changes.
+The committed `stand-in.mjs` runs inside the agent's confinement through
+the same launch path. It reads source, calls carry, why, impact and search,
+checks denied store, relate, code, other-socket and network access, and
+applies committed control edits. A live host listener proves network denial.
+It emits opencode events with zero tokens and cost. The existing reader
+and scorer consume those events. Controls must pass their real diff rules.
+Every unexpected step result fails. The registry has no stand-in agent;
+the trial CLI rejects unknown selectors.
+
+Each invocation creates a fresh UUID result folder under
+`test-results/rehearsals/`. `--results <root>` selects another rehearsal
+root. Trial evidence paths, their ancestors, symlinks within the root and
+any root that holds trial metadata refuse before writes. Rehearsal markers
+and attempt metadata identify these results. The default scorer still reads
+only `eval/results/`. Rehearsal invokes the real smoke checker and propagates
+its exit status. Full rehearsal runs 258 cells and then checks the smoke
+subset. Each run prints wall milliseconds and the scope's `memory.peak`.
+See [ADR 0013](../docs/adr/0013-eval-rehearsal.md).
+
+```sh
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/rehearse.mjs --batch 7 --stage smoke
+```
+
+Omit `--stage smoke` to rehearse the full plan. A second invocation reuses
+the real prepared stores and creates fresh work and results. Rehearsal
+results never count as trial results.
+
+Measured on 2026-11-16 in two fresh `MemoryMax=6G`, `CPUQuota=400%` scopes:
+
+| Smoke rehearsal | Finished cells | Command wall time | Scope peak, bytes |
+| --- | ---: | ---: | ---: |
+| First | 16/16 | 446.95 s | 577,150,976 |
+| Second, prepared stores reused | 16/16 | 443.05 s | 557,506,560 |
+
+Each run has 16 attempts, 128 service replies, zero service failures and
+seven smoke-check PASS results. The prepared receipt's hash and file
+identity stay unchanged, as do all runtime source hashes. The default
+scorer output stays byte-identical; `eval/results/` has no new or changed
+file. These are two resource observations, not a speed comparison.
+Whole-command wall time comes from `/usr/bin/time`; peak memory comes from
+the scope's `memory.peak` after all cells and smoke checks. Logs, measurements
+and receipt identities remain in `test-results/trial7-fix5/`. Rehearsal
+results remain under `test-results/rehearsals/`.
+
+After rehearsal passes, the parent runs smoke and then the full trial:
 
 ```sh
 TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/run.mjs --batch 7 --stage smoke
-node eval/smoke-check.mjs --batch 7
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/smoke-check.mjs --batch 7
 TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/run.mjs --batch 7
 ```
 

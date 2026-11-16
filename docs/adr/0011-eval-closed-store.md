@@ -50,7 +50,7 @@ before that pidfd becomes ready. Killing the bwrap monitor alone cannot
 prove this end condition. Cancellation has a 10-second bound. If the scope
 does not end within that bound, cleanup rejects and the attempt has a harness
 failure. `--die-with-parent` ends commands if the
-runner dies. A lost launcher prints `whygraph shell launcher unavailable`,
+runner dies. A lost launcher prints `whygraph shell launcher unavailable\n` on stderr,
 exits 70, and makes the attempt a harness failure. The runner owns both
 services inside one `try`/`finally`, including a partial launcher start.
 
@@ -76,9 +76,18 @@ stdout empty, stderr `usage: whygraph <carry|why|impact|search> <target>\n`,
 and exit 2. Embedded NUL uses that same rejection because exec argv cannot
 carry NUL. Frames over the transport limits close the connection; the client
 prints `whygraph service unavailable\n` on stderr and exits 70.
-A lost service prints `whygraph service unavailable`, exits 70, and makes
-the attempt a harness failure. Complete service answers stay outside the
-agent filesystem in `service.jsonl`. Each reply keeps its raw direct-CLI
+A call that fails inside the store service returns exactly
+`whygraph service unavailable\n` on stderr, with exit 70 and empty stdout.
+Its internal cause stays in host-only service logs, attempt metadata, ledger
+entries and rehearsal failure output. Product diagnostics keep their direct
+CLI bytes. The shell launcher keeps its own failure texts. Refusals that
+describe the caller's input, including a host argument limit or a program
+that does not exist, keep their descriptive text. These diagnostics are
+identical in every condition and name nothing of the trial. The disabled `relate` and `memod` aliases
+retain their command-denial diagnostic and exit 126: `tool unavailable\n`. It contains no trial text.
+Output already streamed by a shell command remains command output. A lost
+service makes the attempt a harness failure. Complete service answers stay
+outside the agent filesystem in `service.jsonl`. Each reply keeps its raw direct-CLI
 reference, selected store and any decision-section replacements. The smoke
 checker compares reply bytes with those receipts and health calls.
 

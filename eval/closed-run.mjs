@@ -7,9 +7,12 @@ import { closedClient, closedConfinement, ablatedStores, startClosedStore, start
 import { batchInstructions } from './registry.mjs';
 import { readQuery } from '../src/tools.ts';
 import { opencodeLaunch, opencodeSession, escapingSymlinks, isolationBreaches, OPENCODE_MODEL } from './opencode.mjs';
+import { fileKey } from './registry.mjs';
+import { closedWorkRoot, execBudget, filesystemPath } from './closed-store.mjs';
 const quiet = { ...process.env, RELATE_TELEMETRY:'0', DO_NOT_TRACK:'1' };
 const gitEnv = { ...quiet, GIT_CONFIG_GLOBAL:'/dev/null',GIT_CONFIG_NOSYSTEM:'1',GIT_AUTHOR_NAME:'eval',GIT_AUTHOR_EMAIL:'eval@example.invalid',GIT_COMMITTER_NAME:'eval',GIT_COMMITTER_EMAIL:'eval@example.invalid' };
 const sh = (cmd,args,options={}) => {
+  execBudget(cmd,args,options.env??quiet);
   const r=spawnSync(cmd,args,{encoding:'utf8',maxBuffer:1<<28,...options,env:options.env??quiet});
   if(r.status!==0) throw new Error(`${cmd}: ${r.stderr || r.error?.message}`);
   return r.stdout;
@@ -36,6 +39,7 @@ export function agentFiles(repo) {
 export function prepareClosed({task,condition,work,source,stores,client}) {
   const instructions=batchInstructions(task.batch);
   if(existsSync(work)) throw new Error(`work already exists: ${work}`);
+  mkdirSync(work,{recursive:true,mode:0o700});
   for(const dir of ['repo','home','config','cache','state']) mkdirSync(join(work,dir),{recursive:true});
   const repo=join(work,'repo');
   cpSync(source,repo,{recursive:true,verbatimSymlinks:true});
@@ -57,10 +61,13 @@ export function prepareClosed({task,condition,work,source,stores,client}) {
 /** One isolated attempt, retaining its work folder and full service answers as evidence.
  * owns: [[whygraph-closed-runner]]
  */
-export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,source,store}) {
-  const work=join(workRoot,`${task.id}__${condition}__r${repeat}__${randomUUID()}`);
+export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,source,store,rehearsal}) {
+  closedWorkRoot(workRoot);
+  for(const path of [source,store,out])filesystemPath(path);
+  execBudget('/tools/opencode',[prompt],quiet);
+  const work=join(workRoot,randomUUID());
   const client=closedClient(join(workRoot,'_closed-client'));
-  const stores=ablatedStores(store,join(workRoot,`_${task.repo}`,'ablations'));
+  const stores=ablatedStores(store,join(workRoot,`_${fileKey(task.repo)}`,'ablations'));
   const prepared=prepareClosed({task,condition,work,source,stores,client});
   const {repo,base,socket,files}=prepared;
   const log=join(out,'service.jsonl');
@@ -71,8 +78,8 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     // The shell wrapper is identical in every condition and contains no service configuration.
     const shell=join(work,'shell');
     writeFileSync(shell,'#!/bin/sh\nexec /tools/shell-client "$@"\n'); chmodSync(shell,0o555);
-    const command=sh('bash',['-c','command -v opencode']).trim();
-    if(sh(command,['--version']).trim()!=='1.18.29') throw new Error('requires opencode 1.18.29');
+    const command=rehearsal?.executable??sh('bash',['-c','command -v opencode']).trim();
+    if(!rehearsal&&sh(command,['--version']).trim()!=='1.18.29') throw new Error('requires opencode 1.18.29');
     const confinement=closedConfinement({work,repo,client,socket,network:true,opencode:command});
     confinement.push('--ro-bind',shell,'/tools/shell','--ro-bind',client,'/tools/shell-client','--ro-bind',join(work,'shell.sock'),'/whygraph/shell.sock');
     const launch=opencodeLaunch(prompt,repo,'/tools','/tools/shell',work);
@@ -81,6 +88,7 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     const config=JSON.parse(launch.env.OPENCODE_CONFIG_CONTENT);
     config.permission.external_directory['/identity/opencode/tool-output/*']='deny';
     launch.env.OPENCODE_CONFIG_CONTENT=JSON.stringify(config);
+    execBudget('/tools/opencode',launch.args,launch.env);
     for(const name of ['whygraph','relate','memod','shell-client']) files[`/tools/${name}`]=readFileSync(`${client}.sha256`,'utf8');
     files['/tools/shell']=createHash('sha256').update(readFileSync(shell)).digest('hex');
     writeFileSync(join(out,'files.json'),JSON.stringify(files,null,2));
@@ -92,7 +100,8 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     const health={condition,stores:{full:realpathSync(stores.graph),current:realpathSync(prepared.store)},full:stores.fingerprints.graph,current:stores.fingerprints[condition]??stores.fingerprints.graph,answers:[]};
     for(const args of [['carry',symbol],['why',symbol],['impact',String(decisions[0].id)],['search',String(decisions[0].title)]]) {
       const answer=await new Promise((resolve,reject)=>{
-        const child=spawn(confinement[0],[...confinement.slice(1),'--','/tools/whygraph',...args],{env:quiet});const out=[],err=[];
+        const invocation=[...confinement.slice(1),'--','/tools/whygraph',...args];execBudget(confinement[0],invocation,quiet);
+        const child=spawn(confinement[0],invocation,{env:quiet});const out=[],err=[];
         child.stdout.on('data',b=>out.push(b));child.stderr.on('data',b=>err.push(b));child.on('error',reject);
         child.on('close',code=>resolve({args,code,stdout:Buffer.concat(out).toString(),stderr:Buffer.concat(err).toString()}));
       });
@@ -100,6 +109,7 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
       if(answer.code!==0||!answer.stdout.trim()) throw new Error(`health route failed for ${args[0]}: ${answer.stderr}`);
     }
     writeFileSync(join(out,'health.json'),JSON.stringify(health,null,2));
+    if(rehearsal)writeFileSync(join(work,'config/rehearsal.json'),JSON.stringify({...rehearsal.config,impact:rehearsal.config.impact??String(decisions[0].id)}));
     writeFileSync(join(out,'command.json'),JSON.stringify({args:[...confinement,'--','/tools/opencode',...launch.args],env:launch.env},null,2));
     const preflight=[];
     for(const [name,code] of [
@@ -116,7 +126,8 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     if(preflight.some(p=>p.status===0)) throw new Error('closed-store preflight succeeded in a forbidden read');
     const started=Date.now(), stdout=openSync(join(out,'output.jsonl'),'w'), stderr=openSync(join(out,'stderr.txt'),'w');
     const r=await new Promise(resolve=>{
-      const child=spawn(confinement[0],[...confinement.slice(1),'--','/tools/opencode',...launch.args],{env:launch.env,stdio:['ignore',stdout,stderr]});
+      const invocation=[...confinement.slice(1),'--','/tools/opencode',...launch.args];execBudget(confinement[0],invocation,launch.env);
+      const child=spawn(confinement[0],invocation,{env:launch.env,stdio:['ignore',stdout,stderr]});
       closeSync(stdout);closeSync(stderr);
       let timedOut=false,spawnError,killTimer;
       const timer=setTimeout(()=>{timedOut=true;launcher.cancel();child.kill('SIGTERM');killTimer=setTimeout(()=>child.kill('SIGKILL'),5000);},20*60*1000);
@@ -128,13 +139,15 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     const session=opencodeSession(events);
     // Normalize namespace paths for the unchanged isolation checker.
     const tools=session.tools.map(t=>({...t,input:t.input}));
-    const normalized=JSON.parse(JSON.stringify(tools).replaceAll('/repo/',`${repo}/`).replaceAll('"/repo"',JSON.stringify(repo)));
+    const identity=realpathSync(repo);
+    const normalized=JSON.parse(JSON.stringify(tools).replaceAll('/repo/',`${identity}/`).replaceAll('"/repo"',JSON.stringify(identity)));
     const breaches=isolationBreaches(repo,normalized);
     await launcher.stop();
     const stats=service.stats();
     const serviceDown=tools.some(t=>/whygraph (?:service|shell launcher) unavailable/.test(String(t.result)));
-    const harness=r.spawnError || (!r.timedOut&&malformed?'malformed JSONL':undefined) || (stats.failures||serviceDown||launcher.stats().failures?'service or shell launcher unavailable':undefined);
-    const meta={id:`${task.id}__${condition}__r${repeat}`,task:task.id,condition,repeat,agent:'opencode',model:OPENCODE_MODEL,
+    const causes=[...(stats.reasons??[]),...(launcher.stats().reasons??[])];
+    const harness=r.spawnError || (!r.timedOut&&malformed?'malformed JSONL':undefined) || (stats.failures||serviceDown||launcher.stats().failures?`service or shell launcher unavailable${causes.length?': '+causes.join('; '):''}`:undefined);
+    const meta={id:`${task.id}__${condition}__r${repeat}`,task:task.id,condition,repeat,agent:'opencode',model:rehearsal?'rehearsal':OPENCODE_MODEL,...(rehearsal?{rehearsal:true}:{}),
       status:harness||breaches.length?'invalid':r.code===0&&session.success&&!r.timedOut?'done':'error',
       ...(harness?{reason:`harness failure: ${harness}`} : breaches.length?{reason:'isolation breach',isolation:breaches}:{}),
       timed_out:r.timedOut,exit:r.code,signal:r.signal,wall_ms:Date.now()-started,tokens:session.tokens,cost_usd:session.cost_usd,turns:session.turns,replies:session.replies,work,service:stats};
@@ -145,7 +158,9 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     writeFileSync(join(out,'meta.json'),JSON.stringify(meta,null,2));
     return meta;
   } catch(error) {
-    const meta={id:`${task.id}__${condition}__r${repeat}`,task:task.id,condition,repeat,agent:'opencode',model:OPENCODE_MODEL,status:'invalid',reason:`harness failure: ${error.message}`,wall_ms:0,tokens:{total:0},work,service:service.stats()};
+    const causes=[...(service.stats().reasons??[]),...(launcher?.stats().reasons??[])];
+    const reason=`harness failure: ${error.message}${causes.length?': '+causes.join('; '):''}`;
+    const meta={id:`${task.id}__${condition}__r${repeat}`,task:task.id,condition,repeat,agent:'opencode',model:rehearsal?'rehearsal':OPENCODE_MODEL,...(rehearsal?{rehearsal:true}:{}),status:'invalid',reason,wall_ms:0,tokens:{total:0},work,service:service.stats()};
     writeFileSync(join(out,'meta.json'),JSON.stringify(meta,null,2));
     return meta;
   } finally { try { await launcher?.stop(); } finally { await service.stop(); } }

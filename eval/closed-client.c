@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
   signal(SIGPIPE,SIG_IGN);
   if (!strcmp(name,"shell-scope")) return shell_scope();
   if (!strcmp(name,"shell-client")) return shell_client(argc,argv);
-  if (strcmp(name,"whygraph")) { fputs("tool unavailable in this evaluation\n",stderr); return 126; }
+  if (strcmp(name,"whygraph")) { fputs("tool unavailable\n",stderr); return 126; }
   int fd = socket(AF_UNIX,SOCK_STREAM,0);
   struct sockaddr_un addr = {.sun_family=AF_UNIX}; strcpy(addr.sun_path,"/whygraph/service.sock");
   if(fd<0 || connect(fd,(struct sockaddr*)&addr,sizeof(addr))) {fputs("whygraph service unavailable\n",stderr); return 70;}

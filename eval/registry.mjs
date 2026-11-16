@@ -1,6 +1,7 @@
 /** module: [[whygraph-trial-design]] */
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 
 const registry = JSON.parse(readFileSync(new URL('./registry.json', import.meta.url), 'utf8'));
 if (!registry.repos || !registry.batches || Array.isArray(registry.repos) || Array.isArray(registry.batches)) throw new Error('registry: missing repos or batches');
@@ -98,4 +99,12 @@ export function batchPlan(tasks, { batch, stage = 'full', only, conditions, repe
     for(let repeat=1;repeat<=(stage==='smoke'?1:repeats??design.repeats??5);repeat++) for(const condition of modes) plan.push({task,condition,repeat,id:`${task.id}__${condition}__r${repeat}`});
   }
   return plan;
+}
+
+/** Bound every generated filename, including ledger suffixes.
+ * owns: [[whygraph-trial-design]]
+ */
+export function fileKey(identity) {
+  return /^[\w.-]+$/.test(identity) && !identity.startsWith('id-') && identity !== '.' && identity !== '..' && Buffer.byteLength(identity) <= 128
+    ? identity : `id-${createHash('sha256').update(identity).digest('hex')}`;
 }

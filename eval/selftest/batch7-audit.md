@@ -5,8 +5,8 @@ tags: [whygraph, eval, independent-tests]
 ---
 
 > [!abstract] Answer
-> The process-disappearance fix passes 1554/1554, exit 0; 1554/1554, exit 0.
-> Three focused batches pass 150/150 runner-death repetitions. All five runs catch the surviving-child plant at the unchanged ten-second bound. See the process-disappearance audit below.
+> The short runner-death case, 16-cell rehearsal and burner parent-death case each pass 1/1. Syntax, type and memod checks pass.
+> The full default pass and stress form were not run. See the short and stress forms audit below. Earlier sections retain historical results.
 
 ## Historical third-round audit
 
@@ -634,3 +634,237 @@ TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=40
 TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/batch7-check.mjs B7-93
 TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/check.mjs
 ```
+
+## Bounded paths and real-plan rehearsal, 2026-11-16
+
+This extension covers B7-94 through B7-116 at `70857dc`. ADR 0011 governs
+confinement and attempts. ADR 0013 governs path bounds and rehearsal results.
+The test author changes only `eval/selftest/`. No trial, hosted agent, install,
+push, delegation, or new worktree runs.
+
+The 65 new cases use invented tasks, source edits, and a small real store.
+They exercise the public runner, preparation, store service, shell launcher,
+agent confinement, stand-in, event reader, result writer, and smoke checker.
+The identity mount is an empty test directory. No credential file is read.
+The tests retain all scratch and evidence under `test-results/`.
+
+The smoke fixture has two conflicts, one plain control, and one governed
+control. Its two complete rehearsals each execute 16 cells. The default-stage
+case expands the invented task set to twelve conflicts, three plain controls,
+and four governed controls. It executes all 258 cells with three repeats,
+then invokes the real smoke checker. A separate planner case checks the
+258-cell count without preparation.
+
+| Item | Independent cases |
+| --- | --- |
+| B7-94 | Complete smoke plans; the longest named cell; the old 115-byte socket path; UUID work folders and fixed socket leaves. |
+| B7-95 | Exact 128-byte keys; Unicode, separators, reserved digest prefixes, and long task, condition, and repo identities; real smoke reads digest keys. |
+| B7-96 | A 107-byte absolute socket path; one byte over through absolute and relative roots; refusal before markers, reservations, or preparation. |
+| B7-97 | Concurrent attempts of one cell and a shared-prefix cell; mode 0700; distinct live services; cross-access denied through native and shell namespaces; both sockets close. |
+| B7-98 | Per-field argument and environment limits, NUL, and ARG_MAX; prompt refusal before preparation; real shell protocol refusal before exec. Existing B7-80 proves the valid 1 MiB request. |
+| B7-99 | Lexical component and total path limits; mount sources; a short alias with an overlong canonical ancestor. |
+| B7-100 | Trial root, child, ancestor, and alias refuse before writes; trial evidence bytes stay intact. |
+| B7-101 | Trial metadata at the root and in an archive refuse despite a rehearsal marker; fresh runs have distinct UUID result folders. |
+| B7-102 | Trial CLI selectors and a registry stand-in agent refuse; the trial entry imports no rehearsal entry. |
+| B7-103 | Two real 16-cell smoke rehearsals; seven PASS checks; receipt bytes and inode/mtime/ctime unchanged; wall time and scope peak recorded. |
+| B7-104 | Default-stage execution of all 258 invented registered cells; fresh work copies, retained results, one-attempt ledgers, and the real smoke check; independent plan count. |
+| B7-105 | Failed source read, each command diagnostic, and failed edit; error events, nonzero exit, no successful session; actual two-attempt failure. |
+| B7-106 | Each of six denied probes is made to return success at the tool boundary; the actual output is retained and the stand-in rejects it. |
+| B7-107 | Receipt, manifest, answer, and ledger corruption after done cells; the real smoke checker fails and rehearsal propagates failure. |
+| B7-108 | Actual read/shell/edit events, zero tokens/cost, real control diff verdicts, explicit rehearsal scoring, and unchanged default scorer bytes. |
+| B7-109 | Missing fixture, mismatched task hash, absent edit anchor, and missing target refuse before cells start. |
+| B7-110 | Abrupt rehearsal exit leaves a running reservation; resume refuses launch; a failed stand-in preserves both actual attempt archives and a failed measurement. |
+| B7-111 | A valid prepared store is checked, then changed; rehearsal refuses without republishing the receipt. |
+| B7-112 | Trial, hidden-trial, and cycle symlinks under the result root refuse before traversal or writes. |
+| B7-113 | Source targets for carry/why/search; record targets for impact; live-health fallback for plain controls; source-as-impact and omitted-command diagnostics fail. |
+| B7-114 | Controls without ground-truth targets use explicit edit-fixture symbols; why range and carry past-EOF diagnostics fail; every invented control target succeeds through the real store. |
+| B7-115 | Transport import with no registry beside it; exported path/exec guards; changed product sections return exactly status 70, empty stdout, and the service-unavailable stderr. |
+| B7-116 | Readable or digested canonical archive prefixes, appended UUIDs, at most 166 bytes, and preserved binary evidence. Existing batch 5 cases also exercise reuse of an earlier result. |
+
+No whole item lacks a case. One part has no case: B7-114's inventory of the
+committed real control targets in the real prepared store. The brief requires
+invented inputs independent of real batch 7 data. These cases prove target
+presence and grammar with the invented controls; they make no claim about
+that real inventory.
+
+The fault tests alter copies of code. They preserve the stand-in shebang so
+the fault reaches the intended executable step. Smoke-corruption cases reuse
+complete genuine attempt evidence to reach the post-plan boundary. The two
+smoke runs and the full 258-cell case execute every cell through the real path.
+
+Final counts, plant receipts, disagreements, and scratch paths are recorded
+in the `bounded_paths_rehearsal` section of
+[the JSON audit](batch7-audit.json). Both final runs completed with two red contract cases.
+
+| Final run | Cases | Exit | Smoke rehearsals | Full rehearsal | Plants caught |
+| --- | --- | --- | --- | --- | --- |
+| [Run 6](../../test-results/trial7-tests6-full-6.txt) | 1617/1619 | 1 | 16/16 twice | 258/258 | 8/8 |
+| [Run 7](../../test-results/trial7-tests6-full-7.txt) | 1617/1619 | 1 | 16/16 twice | 258/258 | 8/8 |
+
+Each genuine rehearsal has seven smoke-check PASS results. Each final full
+rehearsal retains 258 done results, 258 distinct work copies, and 2,064 real
+service replies. Both final runs use test code at `2770798`. B7-96's accepted
+absolute work-root alias and B7-115's exact error diagnostic are the only red
+cases. The cases stay red for the parent; no production fix is attempted.
+
+The final type-check, memod lint, and README check exit 0. The default score
+comparison exits 0 and prints zero bytes. The JSON audit links all four logs.
+The earlier full diagnostic also verifies all 1,554 pre-existing checks.
+Its obsolete fixture failure is recorded separately from the final runs.
+
+The final scratch roots are `test-results/batch7-selftest-7b1z7j` and
+`test-results/batch7-selftest-MhLTr2`. The
+[scratch index](../../test-results/trial7-tests6-scratch.json) lists all
+log-derived scratch roots, short work roots, catalog folders, and logs.
+All scratch stays as the brief requires. Both final suite processes have
+exited. No push or new worktree ran; `batch-7-rehearsal` stays local and
+unmerged.
+
+### Planted faults
+
+All eight faults change code copies. Each plant reaches the named contract
+assertion. The JSON audit retains each full assertion and raw receipt.
+
+| Fault | Case | First failing assertion |
+| --- | --- | --- |
+| archive-prefix | B7-116 | archive must retain its canonical result-key prefix |
+| cell-socket | B7-94 | long cells must start a live service using bounded UUID paths |
+| late-root | B7-96 | invalid root must refuse before any result marker or cell reservation |
+| result-key | B7-95 | runner and smoke checker must use the same result key |
+| smoke-pass | B7-107 | a failed smoke check must fail rehearsal |
+| stand-in-agent | B7-102 | stand-in is not a valid trial registry agent |
+| store-probe-pass | B7-106 | a failed stand-in step must not finish successfully |
+| trial-results | B7-100 | rehearsal must write no marker or ledger into trial results |
+
+### Contract disagreements
+
+B7-96 also remains red. A valid absolute symlink work root passes both path
+guards. The stand-in exits 0 after eight service calls. The runner then marks
+its own native source read as an isolation breach. The runner maps `/repo`
+to the alias path, but the isolation checker compares it with the canonical
+repo path. The focused reproduction is
+[the work-root alias log](../../test-results/trial7-tests6-work-alias.txt).
+The baseline uses physical work roots; the explicit alias case keeps this
+failure visible. The parent must rule on it.
+
+B7-115 remains red. The isolated transport returns status 70 and empty stdout,
+but stderr is `whygraph service unavailable: carry decision section changed; update the eval ablation\n`.
+The contract requires exactly `whygraph service unavailable\n`.
+`eval/closed-store.mjs:247` appends the internal error message. The parent must
+rule on this mismatch. The independent author changes no production code.
+
+Reproduce each full suite in the required scope:
+
+```sh
+export PATH="$HOME/.opencode/bin:$HOME/.npm-global/bin:$HOME/.local/share/mise/installs/pnpm/12.11.2:$HOME/.local/bin:$PATH"
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/check.mjs
+```
+
+
+## Short and stress forms audit, 2026-11-16
+
+Implementation: `0ed0eaf`, branch `batch-7-rehearsal`. Only `eval/selftest/`
+changes. ADRs 0011 and 0013 still govern process lifetime, confinement,
+attempt budgets and rehearsal checks. No production contract changes.
+
+| Case | Default form | Stress form |
+| --- | --- | --- |
+| B7-93 runner death under four CPU burners | 5 repetitions | 50 repetitions |
+| B7-104 invented-plan rehearsal | 16 smoke cells | 258 full-plan cells, stage omitted |
+
+The default keeps every existing case and adds one burner parent-death
+case. Its expected count is 1620, derived from the previous 1619 plus one;
+this is not a measured full-pass result. Each shortened case prints `SHORT`,
+its size and `node eval/selftest/check.mjs --stress`.
+
+The stress command selects only the two long forms. Its summary reports
+`2 stress cases`, and the shared runner sets exit 1 if either fails.
+The long forms use the same owner assertions. No copied-code plant moved:
+these two owners have no separate long-only plants. The surviving-child
+plant stays in the default pass at its unchanged ten-second bound. All
+eight rehearsal plants also stay in the default pass. No plant ran here.
+
+Run stress only on request (operator rule of 2026-11-16). Its subject is
+`eval/run.mjs`, `eval/closed-run.mjs`, `eval/closed-store.mjs`,
+`eval/rehearse.mjs`, the shell launcher and the client (currently
+`eval/closed-client.c`). Run serially, on a machine that nobody shares:
+
+```sh
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/check.mjs
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/check.mjs --stress
+```
+
+Neither command above ran in this task. Only these focused commands ran,
+each with the same `TMPDIR` and scope prefix:
+
+| Focused command after the prefix | Result | Wall seconds | Burners after |
+| --- | --- | --- | --- |
+| `node eval/selftest/batch7-check.mjs 'runner death passes'` | 1/1, exit 0; 5 repetitions | 127.30 | 0 |
+| `node eval/selftest/batch7-check.mjs 'invented-plan rehearsal executes'` | 1/1, exit 0; 16 cells | 133.27 | 0 |
+| `node eval/selftest/batch7-check.mjs 'burner scope'` | 1/1, exit 0; SIGKILL and SIGTERM | 1.92 | 0 |
+
+Logs and time files use the prefix `test-results/trial7-tests7-`, with
+`runner-short`, `rehearsal-short` and `burner-lifetime-4` suffixes. Each run
+used `/usr/bin/time -f '%e' -o <time-file>` inside the required scope.
+The JSON `short_stress_forms.focused_runs` records the exact commands and
+scratch paths. The required `ps -eo args | grep -c "[M]ath.sqrt"` printed
+`0` after each run. Grep exits 1 for zero matches.
+
+Each burner has a bwrap PID namespace and `--die-with-parent`. Normal
+completion, assertion failure and exceptions await acquired scope closure
+in `finally`. Partial startup closes all acquired scopes. If the self-test
+process dies, the kernel ends its burner namespaces. The focused case
+starts a disposable owner through the same `startBurners` function, counts
+four Node burners, kills the owner, then counts zero live burners. It does
+this for both SIGKILL and SIGTERM. Evidence:
+`test-results/batch7-selftest-wc0lOW/burner-parent-death.json`.
+
+Three setup runs failed before the final parent-death result. A nested
+worker could not spawn either Node path (0.62 and 0.61 seconds). The final
+launcher starts each confined burner directly with explicit system mounts
+and `/dev`. A counter then counted eight bwrap monitors as burners
+(1.53 seconds). The corrected counter accepts only Node processes. That
+failed assertion also exercised owner cleanup; the global count was zero.
+The initial sandbox denial of the systemd bus ran no case. Approved
+escalation supplied the required scope; no unscoped case ran.
+
+`node --check` exits 0 for all four changed `.mjs` files. `pnpm check` and
+`node_modules/.bin/memod lint` exit 0. Their logs are
+`test-results/trial7-tests7-check.log` and
+`test-results/trial7-tests7-memod.log`.
+
+Plan for about **35 minutes** for one default pass on an idle box, with a
+rough 25–45 minute range. This is an estimate, not an idle measurement:
+
+- Retained full logs 6 and 7 span 4514.54 and 4510.35 seconds from file
+  birth to final modification (`stat -c '%w %y'`).
+- Their 258-cell rehearsals took 1748.10 and 1747.03 seconds. Replace their
+  mean with the new 16-cell internal measurement, 121.56 seconds.
+- Their runner observation files span 884.48 and 884.19 seconds over 49
+  repetition gaps. Remove 45 gaps at their mean, 18.05 seconds each.
+- Add the 1.92-second parent-death case. The estimate is 2076.22 seconds,
+  or 34.6 minutes.
+
+Historical passes ran concurrently. Current focused passes use a two-core
+quota. Cold fixtures, shared load and that tighter quota limit this estimate;
+the result can fall outside the range. No new full pass was used to derive it.
+
+The full default composition, both stress forms, stress failure propagation
+and copied-code plants remain unverified in this task. Earlier unrelated
+B7-96 and B7-115 reds were neither rerun nor changed. Keep the six new
+`batch7-selftest-*` folders listed in the JSON and all `trial7-tests7-*`
+evidence. No trial, hosted model, install, push, worktree or write to
+`eval/results/` occurred. Nothing was deleted.
+
+### Sentences for the parent
+
+For `eval/README.md`: The default self-test runs B7-93 with five repetitions
+and four CPU burners and B7-104 with the 16-cell smoke plan;
+`node eval/selftest/check.mjs --stress` runs only their 50-repetition and
+258-cell forms.
+
+For the failure list: Run `node eval/selftest/check.mjs --stress` before a
+merge that changes `eval/run.mjs`, `eval/closed-run.mjs`,
+`eval/closed-store.mjs`, `eval/rehearse.mjs`, the shell launcher or the
+client, one command at a time under
+`TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200%`.

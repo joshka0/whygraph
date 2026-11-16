@@ -197,6 +197,7 @@ export function closedClient(directory) {
  * owns: [[whygraph-closed-store]]
  */
 export function closedConfinement({ work, repo, client, socket, network = false, opencode }) {
+  for (const path of [work, repo, client, socket, ...(opencode ? [opencode] : [])]) filesystemPath(path);
   const args = ['bwrap','--die-with-parent','--new-session','--unshare-user','--unshare-pid','--unshare-ipc','--unshare-uts','--cap-drop','ALL'];
   if (!network) args.push('--unshare-net');
   for (const path of ['/usr','/bin','/lib','/lib64','/etc']) if (existsSync(path)) args.push('--ro-bind',path,path);
@@ -209,6 +210,7 @@ export function closedConfinement({ work, repo, client, socket, network = false,
   if (network && opencode) {
     args.push('--ro-bind',opencode,'/tools/opencode');
     const data = process.env.XDG_DATA_HOME ?? join(process.env.HOME,'.local/share');
+    filesystemPath(join(data,'opencode'));
     args.push('--bind',join(data,'opencode'),'/identity/opencode');
   }
   return args;
@@ -218,8 +220,11 @@ export function closedConfinement({ work, repo, client, socket, network = false,
  * owns: [[whygraph-closed-store]]
  */
 export async function startClosedStore({ condition, repo, store, fullStore = store, socket, log }) {
+  socketPath(socket);
   repo=realpathSync(repo);
   let failures = 0, calls = 0;
+  const reasons=[];
+  const failure=message=>{failures++;reasons.push(message);appendFileSync(log,JSON.stringify({event:'failure',message})+'\n');};
   const abort=new AbortController(), connections=new Set();
   const server = createServer(connection => {
     connections.add(connection);connection.on('close',()=>connections.delete(connection));
@@ -228,20 +233,25 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
     connection.on('data', chunk => {
       if (dispatched) return;
       input = Buffer.concat([input,chunk]);
-      if (input.length > 65536) { connection.destroy(); failures++; return; }
+      if (input.length > 65536) { connection.destroy(); failure('request too large'); return; }
       if (input.length < 4) return;
       const count = input.readUInt32BE();
-      if (count > 64) { connection.destroy(); failures++; return; }
+      if (count > 64) { connection.destroy(); failure('invalid argument count'); return; }
       let at=4; const args=[];
       for(let i=0;i<count;i++) {
         if(input.length < at+4) return;
         const size=input.readUInt32BE(at); at+=4;
-        if(size>60000) { connection.destroy(); failures++; return; }
+        if(size>60000) { connection.destroy(); failure('argument too large'); return; }
         if(input.length < at+size) return;
         args.push(input.subarray(at,at+size).toString()); at+=size;
       }
       dispatched=true;
-      void answer(args).then(respond, error => { failures++; respond({stdout:'',stderr:`whygraph service unavailable: ${error.message}\n`,code:70}); });
+      void answer(args).then(respond, error => {
+        failure(error.message);
+        const result={stdout:'',stderr:'whygraph service unavailable\n',code:70};
+        appendFileSync(log,JSON.stringify({args,...result,failure:error.message,sections:[]})+'\n');
+        respond(result);
+      });
     });
     function respond(result) {
       dispatched=true;
@@ -284,14 +294,14 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
         if (!Number.isInteger(error.code)) throw error;
         result={stdout:error.stdout??'',stderr:error.stderr??'',code:error.code};
         reference={...result};
-        if(error.code===1) failures++;
+        if(error.code===1) throw new Error(error.stderr || 'product command failed');
       }
     }
     appendFileSync(log,JSON.stringify({args,...result,reference:reference??{...result},referenceStore,sections})+'\n');
     return result;
   }
   await new Promise((ok,fail) => {server.once('error',fail); server.listen(socket,ok);});
-  return { server, stats:()=>({calls,failures}), stop:()=>new Promise((ok,fail)=>{abort.abort();for(const connection of connections)connection.destroy();server.close(error=>error?fail(error):ok());}) };
+  return { server, stats:()=>({calls,failures,reasons:[...reasons]}), stop:()=>new Promise((ok,fail)=>{abort.abort();for(const connection of connections)connection.destroy();server.close(error=>error?fail(error):ok());}) };
 }
 
 /** Launch shell commands from the host, outside the agent's user namespace.
@@ -299,6 +309,8 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
  */
 export async function startClosedShell({work,repo,client,socket,log}) {
   let failures=0, calls=0, stopped=false;
+  const reasons=[];
+  const failure=message=>{failures++;reasons.push(message);appendFileSync(log,JSON.stringify({event:'failure',message})+'\n');};
   const connections=new Set(), children=new Map(), completions=new Set(), scopeErrors=[];
   const kill=child=>{
     child.stdout.resume();child.stderr.resume();
@@ -323,7 +335,7 @@ export async function startClosedShell({work,repo,client,socket,log}) {
       appendFileSync(log,JSON.stringify({event:'end',code:code??null,signal:signal??null})+'\n');
     };
     const fail=message=>{
-      failures++;
+      failure(message);
       frame(2,Buffer.from(`whygraph shell launcher unavailable: ${message}\n`));finish(70);
     };
     connection.on('error',()=>{});
@@ -350,8 +362,14 @@ export async function startClosedShell({work,repo,client,socket,log}) {
         if(args.some(a=>a.includes('\0')) || cwd.includes('\0') || !(cwd==='/repo'||cwd.startsWith('/repo/')) || cwd.split('/').includes('..')){fail('invalid working directory or argument');return;}
         if(stopped){fail('run ended');return;}
         calls++;
-        const confinement=closedConfinement({work,repo,client,socket});
-        const atCwd=confinement.indexOf('--chdir');confinement[atCwd+1]=cwd;
+        let confinement;
+        try {
+          filesystemPath(join(repo,cwd.slice(6)));
+          confinement=closedConfinement({work,repo,client,socket});
+          const atCwd=confinement.indexOf('--chdir');confinement[atCwd+1]=cwd;
+          execBudget(confinement[0],[...confinement.slice(1),'--info-fd','3','--block-fd','4','--','/bin/bash',...args],{PATH:'/tools:/usr/bin:/bin',HOME:'/home/agent',LANG:'C.UTF-8',RELATE_TELEMETRY:'0',DO_NOT_TRACK:'1'});
+        }
+        catch(error) { fail(error.message); return; }
         appendFileSync(log,JSON.stringify({event:'start',args,cwd})+'\n');
         child=spawn(confinement[0],[...confinement.slice(1),'--info-fd','3','--block-fd','4','--','/bin/bash',...args],{
           detached:true,env:{PATH:'/tools:/usr/bin:/bin',HOME:'/home/agent',LANG:'C.UTF-8',RELATE_TELEMETRY:'0',DO_NOT_TRACK:'1'},stdio:['pipe','pipe','pipe','pipe','pipe'],
@@ -398,9 +416,9 @@ export async function startClosedShell({work,repo,client,socket,log}) {
       }
     });
   });
-  server.on('close',()=>{if(!stopped)failures++;});
-  server.on('error',()=>{failures++;});
-  await new Promise((ok,fail)=>{server.once('error',fail);server.listen(join(work,'shell.sock'),ok);});
+  server.on('close',()=>{if(!stopped)failure('shell launcher closed unexpectedly');});
+  server.on('error',error=>{failure(error.message);});
+  await new Promise((ok,fail)=>{server.once('error',fail);server.listen(socketPath(join(work,'shell.sock')),ok);});
   const cancel=()=>{
     stopped=true;
     for(const child of children.keys())kill(child);
@@ -412,7 +430,72 @@ export async function startClosedShell({work,repo,client,socket,log}) {
     await Promise.all([closed,...completions]);
     if(scopeErrors.length)throw new AggregateError(scopeErrors,'shell command scope cleanup failed');
   };
-  return {server,stats:()=>({calls,failures}),cancel,stop};
+  return {server,stats:()=>({calls,failures,reasons:[...reasons]}),cancel,stop};
+}
+
+/** Check the pathname passed to the kernel, in bytes.
+ * owns: [[whygraph-closed-store]]
+ */
+export function socketPath(path) {
+  if (Buffer.byteLength(path) > 107) throw new Error(`Unix socket path exceeds 107 bytes: ${path}`);
+  return path;
+}
+
+/** Reject an unusable root before preparation or a ledger reservation.
+ * owns: [[whygraph-closed-store]]
+ */
+export function closedWorkRoot(root) {
+  if (Buffer.byteLength(join(resolve(root), '0'.repeat(36), 'service.sock')) > 107)
+    throw new Error(`work root too long for Unix sockets (107-byte limit): ${resolve(root)}`);
+  filesystemPath(root);
+  return root;
+}
+
+/** Resolve path identities for comparisons and filesystem guards, without changing launch paths.
+ * owns: [[whygraph-closed-store]]
+ */
+export function canonicalPath(path) {
+  const absolute=resolve(path);
+  let ancestor=absolute;
+  while (!existsSync(ancestor) && dirname(ancestor)!==ancestor) ancestor=dirname(ancestor);
+  return realpathSync(ancestor)+absolute.slice(ancestor.length);
+}
+
+/** Check mount paths and canonical existing ancestors before exec.
+ * owns: [[whygraph-closed-store]]
+ */
+export function filesystemPath(path) {
+  const absolute = resolve(path);
+  const check = value => {
+    if (Buffer.byteLength(value) >= 4096 || value.split('/').some(part => Buffer.byteLength(part) > 255))
+      throw new Error(`filesystem path limit exceeded: ${path}`);
+  };
+  check(absolute);
+  const canonical = canonicalPath(absolute);
+  check(canonical);
+  return path;
+}
+
+let limits;
+/** Validate the host exec budget, including environment bytes and pointers.
+ * owns: [[whygraph-closed-store]]
+ */
+export function execBudget(command, args, env = process.env) {
+  limits ??= {
+    argument: Number(execFileSync('getconf', ['PAGESIZE'], { encoding: 'utf8' }).trim()) * 32,
+    total: Number(execFileSync('getconf', ['ARG_MAX'], { encoding: 'utf8' }).trim()),
+  };
+  const fields = [command, ...args, ...Object.entries(env).filter(([,v]) => v !== undefined).map(([k,v]) => `${k}=${v}`)];
+  let bytes = (fields.length + 2) * 8;
+  for (const [index, field] of fields.entries()) {
+    const size = Buffer.byteLength(field) + 1;
+    if (field.includes('\0') || size > limits.argument)
+      throw new Error(`exec argument or environment entry ${index} exceeds host limit (${limits.argument - 1} bytes) or contains NUL`);
+    bytes += size;
+  }
+  // Linux also stores the executable pathname and alignment in this budget.
+  if (bytes + Buffer.byteLength(command) + 4096 > limits.total)
+    throw new Error(`exec arguments and environment exceed host ARG_MAX (${limits.total} bytes)`);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
