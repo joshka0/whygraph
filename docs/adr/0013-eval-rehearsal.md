@@ -50,7 +50,9 @@ to the bounded result key. Earlier batches keep their readable prefixes.
 Cell identity stays in metadata and ledgers. All lengths count UTF-8 bytes.
 Exec validation checks each argument, environment entry and total request
 against the host limits. Oversized paths, prompts or requests refuse with
-the limiting name before exec. No limit is relaxed.
+the limiting name before exec. For a closed shell request, that name stays
+in host-only failure records; the agent receives ADR 0011's constant reply.
+No limit is relaxed.
 
 The closed transport owns the socket, mount and exec guards. It remains
 importable without the trial registry. The registry owns filename encoding;
