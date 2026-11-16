@@ -1,12 +1,14 @@
 ---
 title: Batch 7 independent test audit
-status: done
+status: blocked
 tags: [whygraph, eval, independent-tests]
 ---
 
 > [!abstract] Answer
-> The normal suite passes 1,476/1,476 cases, exit 0. It previously passed 1,222/1,449.
-> The altered-registry suite also passes 1,476/1,476. All 1,476 ordered case verdicts match.
+> Both final suites complete 1553 cases. Results: 1551/1553, exit 1; 1551/1553, exit 1.
+> B7-93 remains red because live children can retain address spaces after owner reap. See the fifth-round audit below.
+
+## Historical third-round audit
 
 **What changed**
 
@@ -379,3 +381,132 @@ TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=40
 - The audit is the handoff summary. The brief forbids a separate write outside the test/audit scope. [verified]
 
 [[whygraph-trial-design]]
+
+## Fifth-round memory and runner-death audit
+
+The test work is complete. B7-93 remains a production failure. No code outside `eval/selftest/` changed. The branch is `batch-7-memory`; nothing was pushed.
+
+### Final full suites
+
+| Run | Cases | Exit | Runner failures out of 50 | Non-zombie kernel teardown repetitions |
+| --- | --- | --- | --- | --- |
+| [1](../../test-results/trial7-tests5-final-1.txt) | 1551/1553 | 1 | 1 | 5 |
+| [2](../../test-results/trial7-tests5-final-2.txt) | 1551/1553 | 1 | 5 | 4 |
+
+Each load check completed all 50 repetitions. A live process with an address space fails at its first observation. The permitted teardown state requires `PF_EXITING`, zero address-space size and an empty command line. The runner case makes no cleanup call before this observation.
+
+The raw ledger counter includes zombies because zombies also meet that exiting predicate. The table counts non-zombie teardown at the first observation. The JSON audit keeps both counts and each observed state; the raw evidence is unchanged.
+
+### Memory evidence
+
+| Run | Input | Peak bytes | Wall ms | Result |
+| --- | --- | ---: | ---: | --- |
+| 1 | small-stress | 88375296 | 666.36 | success |
+| 1 | synthetic-5000 | 539762688 | 169820.66 | success |
+| 1 | real-zustand | 438685696 | 59149.02 | success |
+| 1 | unbounded | 999997440 | 4290.61 | expected bounded OOM |
+| 2 | small-stress | 89505792 | 478.54 | success |
+| 2 | synthetic-5000 | 535220224 | 133185.00 | success |
+| 2 | real-zustand | 435179520 | 50461.55 | success |
+| 2 | unbounded | 999997440 | 3594.60 | expected bounded OOM |
+| 1 | 2 callers, aggregate scope | 139112448 | 690.41 | success |
+| 1 | 3 callers, aggregate scope | 179118080 | 1094.29 | success |
+| 1 | receipt reuse | 80281600 | 342.13 | success |
+| 2 | 2 callers, aggregate scope | 138715136 | 617.42 | success |
+| 2 | 3 callers, aggregate scope | 180011008 | 879.72 | success |
+| 2 | receipt reuse | 81764352 | 291.35 | success |
+
+Whole-scope cgroup memory.peak includes subprocesses and charged file cache. The B7-83 preparation and OOM scopes request MemoryMax=1000000000 and CPUQuota=400%. Concurrency and receipt reuse run in 2G scopes. Linux rounds MemoryMax down to a page boundary. OOMPolicy=continue preserves the observer after the kernel kills the unbounded relate child; the memory bound does not change. Times are observations under shared load, not speed comparisons.
+
+### Contract coverage
+
+| Item | Check |
+| --- | --- |
+| B7-83 | Two-record build first; committed 5000-record/305000-edge build; exact proofs and peak under the enforced billion-byte limit. Real zustand case runs read-only when present and explicitly reports absence. |
+| B7-84 | Two and three real processes contend under flock; all are alive before publication. One common scope measures their aggregate peak. External instrumentation sees two copies, two mutation queries and six fingerprint query processes. |
+| B7-85 | Fresh-process reuse makes zero copy/query calls and preserves receipt bytes, mtime and ctime. Six simulated-agent cells use the shared receipt fingerprints in real health records. |
+| B7-86 | Vector, text, endpoint, edge properties, unrelated node and edge changes each refuse. Replaced, added and removed files refuse. Exact nanosecond mtime restoration still changes ctime and refuses. |
+| B7-87 | Kill at real copy, mutation, fingerprint, partial proof write and receipt-rename boundaries. Every later caller acquires the released lock, refuses without copy/query, and preserves incomplete evidence. |
+| B7-88 | Foreign source marker, retargeted symlink, algorithm, version, broken JSON, missing/changed proof, changed receipt fingerprint and missing marker each refuse without copy/query. |
+| B7-89 | Vector, text, labels, public/internal node identity, internal edge identity, endpoint, type, properties, parallel multiplicity and unrelated components each change their own digest. Every changed source still passes exact ablation proofs. Terms occupy interior IDs; a renumbering query process refuses. |
+| B7-90 | Source rewrite during a paused real preparation refuses at the final identity check. A missing manifest refuses before query/copy. Neither publishes ready evidence. |
+| B7-91 | Both fingerprint and preparation reject nonzero exit, invalid JSON, spawn failure and successful truncated output. No ready receipt or running query child remains. |
+| B7-92 | Read-only opens and both advisory lock files preserve reuse. Manifest, node snapshot, relationship snapshot and real WAL data mutations each refuse in all three stores. Existing health/smoke byte checks remain in the full suite. |
+| B7-93 | First /proc state is sampled immediately after owner reap, before awaiting client completion. Only gone, zombie, or PF_EXITING + zero vsize + empty cmdline passes. Every later state must stay terminated, disappearance has the stated 10-second bound, and release produces no later file write. Fifty repetitions run under four CPU-load processes; live survivors remain red. |
+
+No item lacks a case. The real zustand store was present and ran in both final suites.
+
+### Required plants
+
+| Fault | Owner | First failing assertion in run 2 |
+| --- | --- | --- |
+| unbounded | B7-83 bounded preparation must succeed | bounded preparation must succeed |
+| per-cell | B7-85 restart makes zero copy and relate calls | restart must make zero copy and relate calls |
+| receipt | B7-88 invalid receipt refuses | changed or incomplete store must refuse |
+| half-made | B7-87 incomplete preparation refuses | changed or incomplete store must refuse |
+| vector | B7-89 changed vector changes node fingerprint | vector must change nodes fingerprint |
+| survives-runner | B7-93 first observation sees no live child with an address space | child 440924 must terminate at first observation after runner death |
+
+Each plant changes a disposable code copy. JSON receipts retain the exact assertion and its values. The unbounded plant must also record `oom_kill > 0` and `SIGKILL`; an assertion caused by missing OOM evidence cannot pass.
+
+### Remaining disagreement
+
+- B7 B7-76 runner ends background and new-session children before returning. B7-93 requires termination at the first observation after owner reap. At least one recorded process still has an address space and fails the exact termination predicate. Production code remains unchanged.
+- B7 B7-93 runner death passes 50 consecutive repetitions under CPU load. B7-93 requires termination at the first observation after owner reap. At least one recorded process still has an address space and fails the exact termination predicate. Production code remains unchanged.
+- B7 B7-76 runner ends background and new-session children before returning. B7-93 requires termination at the first observation after owner reap. At least one recorded process still has an address space and fails the exact termination predicate. Production code remains unchanged.
+- B7 B7-93 runner death passes 50 consecutive repetitions under CPU load. B7-93 requires termination at the first observation after owner reap. At least one recorded process still has an address space and fails the exact termination predicate. Production code remains unchanged.
+
+The parent must rule on B7-93. The tests do not wait for client completion before the first observation, loosen the process predicate, or change the launcher.
+
+### Other checks
+
+| Check | Exit | Evidence |
+| --- | --- | --- |
+| typecheck | 0 | [log](../../test-results/trial7-tests5-typecheck.txt) |
+| memod | 0 | [log](../../test-results/trial7-tests5-memod.txt) |
+| readme | 0 | [log](../../test-results/trial7-tests5-readme.txt) |
+| score | 0 | [log](../../test-results/trial7-tests5-score.txt) |
+
+The saved-score comparison prints no bytes. README checks, memod lint and the tsrs type check run in separate 2G scopes. No trial or hosted model ran.
+
+### Evidence retained
+
+- `test-results/batch7-selftest-v01qaX` holds measurements, store copies, six plant receipts, scope logs and 50 runner observations.
+- `test-results/batch7-selftest-G1QkSi` holds measurements, store copies, six plant receipts, scope logs and 50 runner observations.
+- `test-results/trial7-tests5-*` holds the small probes, focused runs, OOM diagnosis and final logs. Earlier focused `batch7-selftest-*` folders remain as evidence. No scratch file was deleted.
+
+- `test-results/batch4-selftest-Ck8Wwr`.
+- `test-results/batch4-selftest-T0INFu`.
+- `test-results/batch5-selftest-f5hYXY`.
+- `test-results/batch5-selftest-kcwHKf`.
+- `test-results/batch6-selftest-05ZLJ5`.
+- `test-results/batch6-selftest-H8yN2M`.
+- `test-results/batch7-selftest-3w3Ci6`.
+- `test-results/batch7-selftest-6spsSp`.
+- `test-results/batch7-selftest-7G843m`.
+- `test-results/batch7-selftest-CCUvdB`.
+- `test-results/batch7-selftest-G1QkSi`.
+- `test-results/batch7-selftest-Ko7q1L`.
+- `test-results/batch7-selftest-LslcPK`.
+- `test-results/batch7-selftest-Rt4mgm`.
+- `test-results/batch7-selftest-cCvVld`.
+- `test-results/batch7-selftest-gTfQRF`.
+- `test-results/batch7-selftest-iulDn9`.
+- `test-results/batch7-selftest-jL10pl`.
+- `test-results/batch7-selftest-mIIEJn`.
+- `test-results/batch7-selftest-v01qaX`.
+- `test-results/ticket-selftest-hd1has`.
+- `test-results/ticket-selftest-nuj3td`.
+
+The supplied `/var/tmp/whygraph-eval/_zustand/ablations` directory was empty on read-only inspection. `test-results/trial7-tests5-old-ablations.txt` retains that listing. No archive or removal was needed.
+
+The JSON audit holds the full coverage map, exact scratch paths, raw plant assertions and source-history gaps. Prior audit sections describe earlier rounds.
+
+### Reproduce
+
+```sh
+export PATH="$HOME/.opencode/bin:$HOME/.npm-global/bin:$HOME/.local/share/mise/installs/pnpm/12.11.2:$HOME/.local/bin:$PATH"
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/check.mjs
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=2G -p CPUQuota=400% node eval/selftest/batch7-check.mjs memory
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=2G -p CPUQuota=400% node eval/selftest/batch7-check.mjs B7-93
+```
