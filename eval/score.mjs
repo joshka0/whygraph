@@ -18,6 +18,7 @@ const here = fileURLToPath(new URL('./', import.meta.url));
 
 /** A Bash command that runs whygraph as a command word, not one that only names a path such as /tmp/whygraph-eval. */
 const WHYGRAPH_CALL = /(^|[;&|(\n]|\s)whygraph\s+(carry|search|why|impact|build|decisions|mcp|help)\b/;
+const commandText = (text, batch) => evalBatch(batch).storeAccess==='closed' ? String(text??'').replace(/(^|[;&|(\n]|\s)(?:\/[^\s'";&|()]+)+\/whygraph(?=\s)/g,'$1whygraph') : String(text??'');
 /**
  * The fixture tasks whose records exist only outside the repo: none and stub cannot name them, so they
  * score 0/100/0 by design. The post hoc block leaves them out; it was added after the results were seen.
@@ -119,7 +120,7 @@ export function scoreRun(task, run) {
   const text = run.final ?? '';
   const diff = readDiff(run.diff ?? '');
   const changed = [...diff.keys()];
-  const whygraphCalls = (run.tools ?? []).filter((t) => t.name === 'Bash' && WHYGRAPH_CALL.test(String(t.input?.command ?? ''))).length;
+  const whygraphCalls = (run.tools ?? []).filter((t) => t.name === 'Bash' && WHYGRAPH_CALL.test(commandText(t.input?.command,task.batch))).length;
   const reasons = [];
   const out = { pass: false, reasons, changed, whygraphCalls };
   if (task.kind === 'conflict') {
@@ -214,7 +215,7 @@ function pct(x) {
 
 /** The lines `graph - none` and `graph - stub` from per-task pass rates. */
 function differences(perTask, batch = 4) {
-  const pairs = evalBatch(batch).conditions.includes('graph-nosearch')
+  const pairs = evalBatch(batch).selection.mode === 'strata' ? [['graph','stub'], ...evalBatch(batch).conditions.filter(c=>!['stub','graph'].includes(c)).map(c=>['graph',c])] : evalBatch(batch).conditions.includes('graph-nosearch')
     ? [['graph', 'stub'], ['graph-nosearch', 'stub'], ['graph', 'graph-nosearch'], ...(evalBatch(batch).conditions.includes('none') ? [['graph', 'none']] : [])]
     : [['graph', 'none'], ['graph', 'stub']];
   return pairs.map(([left, other]) => {
@@ -276,8 +277,8 @@ function ticketBatchReport(rows, unscored, tasks, results, batch = 4) {
   console.log(`\nBatch ${batch}: ${rows.length} finished runs\n\nRuns:`);
   for (const r of rows) console.log(`  ${r.verdict.pass ? 'PASS' : 'FAIL'}  ${r.id}  whygraph calls: ${r.verdict.whygraphCalls}${r.verdict.reasons.length ? `  (${r.verdict.reasons.join('; ')})` : ''}`);
   rates(conflicts, tasks, `Batch ${batch}: ${countName(design.counts.conflicts)} ${repo.display} ticket conflicts (primary result: graph - stub)`, batch);
-  for (const wording of ['same-words', 'partial', 'other-words']) {
-    rates(conflicts.filter((r) => r.task.ground_truth.source.wording === wording), tasks, `Batch ${batch}: wording ${wording}`, batch);
+  for (const value of design.selection.mode==='strata'?['cited','uncited']:['same-words', 'partial', 'other-words']) {
+    rates(conflicts.filter((r) => (design.selection.mode==='strata'?(r.task.stratum??r.task.ground_truth.source.stratum):r.task.ground_truth.source.wording) === value), tasks, `Batch ${batch}: ${design.selection.mode==='strata'?'stratum':'wording'} ${value}`, batch);
   }
   const plainControls = design.counts.governed > 0 ? controls.filter(r => !r.task.ground_truth.source.ticket) : controls;
   rates(plainControls, tasks, `Batch ${batch}: ${countName(design.counts.plain)} harmless controls`, batch);
@@ -303,7 +304,7 @@ function ticketBatchReport(rows, unscored, tasks, results, batch = 4) {
     const has = text => ids.some(id => id && new RegExp(`${id}(?!\\d)`).test(text));
     const seen = new Set();
     for (const call of runs.get(r.id).tools) {
-      const cmd = call.input?.command;
+      const cmd = commandText(call.input?.command,batch);
       if (call.name !== 'Bash' || typeof cmd !== 'string' || !WHYGRAPH_CALL.test(cmd)) continue;
       const out = typeof call.result === 'string' ? call.result : JSON.stringify(call.result ?? '');
       if (!has(out)) continue;
@@ -320,7 +321,7 @@ function ticketBatchReport(rows, unscored, tasks, results, batch = 4) {
     }
     return seen;
   };
-  for (const condition of conditions.filter(c => c === 'graph' || c === 'graph-nosearch')) {
+  for (const condition of conditions.filter(c => design.selection.mode==='strata' || c === 'graph' || c === 'graph-nosearch')) {
     const rs = conflicts.filter(r => r.meta.condition === condition);
     const sources = new Map(rs.map(r => [r.id, shownSources(r)]));
     const shown = rs.filter(r => sources.get(r.id).size > 0);
@@ -351,7 +352,7 @@ function ticketBatchReport(rows, unscored, tasks, results, batch = 4) {
   };
   for (const condition of conditions) {
     const rs = rows.filter((r) => r.meta.condition === condition);
-    console.log(`  ${condition}: ${Object.entries(commands).map(([name, pattern]) => `${name}: ${rs.filter((r) => runs.get(r.id).tools.some((t) => t.name === 'Bash' && pattern.test(String(t.input?.command ?? '')))).length}`).join('; ')}`);
+    console.log(`  ${condition}: ${Object.entries(commands).map(([name, pattern]) => `${name}: ${rs.filter((r) => runs.get(r.id).tools.some((t) => t.name === 'Bash' && pattern.test(commandText(t.input?.command,batch)))).length}`).join('; ')}`);
   }
   console.log(`\nBatch ${batch} unscored runs: ${unscored.length}`);
   for (const r of unscored) console.log(`  ${r.id}  (exit ${r.meta.exit}, ${Math.round(r.meta.wall_ms / 1000)} s)`);
@@ -379,6 +380,8 @@ function main(argv) {
     if (task === undefined) throw new Error(`${id}: no task ${meta.task}`);
     ticketRepo(task);
     if (!evalBatch(task.batch).conditions.includes(meta.condition)) throw new Error(`${id}: batch ${task.batch ?? 1} does not run condition ${meta.condition}`);
+    if(task.kind==='control' && !evalBatch(task.batch).controlConditions.includes(meta.condition)) throw new Error(`${id}: control condition ${meta.condition} is not run`);
+    if(evalBatch(task.batch).selection.mode==='strata' && task.kind==='conflict' && !['cited','uncited'].includes(task.stratum??task.ground_truth.source.stratum)) throw new Error(`${id}: missing conflict stratum`);
     const run = readRun(dir, meta);
     if (run.meta.status !== 'done') {
       unscored.push({ id, task, meta: run.meta, verdict: { pass: false, reasons: ['unscored'], whygraphCalls: 0 } });

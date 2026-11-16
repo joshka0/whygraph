@@ -1,0 +1,364 @@
+[
+  {
+    "id": "zs-01",
+    "targets": [],
+    "confidence": "high",
+    "how_found": "Searched source for storage event registration and read persist initialization; no window storage listener or cross-tab synchronization implementation exists.",
+    "not_found": true
+  },
+  {
+    "id": "zs-02",
+    "targets": [
+      {
+        "file": "src/middleware/redux.ts",
+        "symbol": "Action",
+        "start_line": 6,
+        "end_line": 6
+      },
+      {
+        "file": "src/middleware/redux.ts",
+        "symbol": "Redux",
+        "start_line": 19,
+        "end_line": 26
+      },
+      {
+        "file": "src/middleware/redux.ts",
+        "symbol": "ReduxImpl",
+        "start_line": 34,
+        "end_line": 37
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Followed redux dispatch typing to Action and the public and implementation generic constraints.",
+    "not_found": false
+  },
+  {
+    "id": "zs-03",
+    "targets": [
+      {
+        "file": "src/middleware/persist.ts",
+        "symbol": "persistImpl: api.setState override",
+        "start_line": 218,
+        "end_line": 223
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Read the public setState wrapper, which calls savedSetState and then writes storage through setItem.",
+    "not_found": false
+  },
+  {
+    "id": "zs-04",
+    "targets": [
+      {
+        "file": "src/middleware/immer.ts",
+        "symbol": "StoreImmer",
+        "start_line": 40,
+        "end_line": 67
+      },
+      {
+        "file": "src/middleware/immer.ts",
+        "symbol": "SetStateType",
+        "start_line": 36,
+        "end_line": 36
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Followed Immer setter overloads to their current argument-derived SetStateType rather than a getState return type.",
+    "not_found": false
+  },
+  {
+    "id": "zs-05",
+    "targets": [
+      {
+        "file": "src/middleware/devtools.ts",
+        "symbol": "devtoolsImpl: api.setState",
+        "start_line": 267,
+        "end_line": 296
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Found findCallerName inside the short-circuit action-label expression in the setState wrapper.",
+    "not_found": false
+  },
+  {
+    "id": "zs-06",
+    "targets": [
+      {
+        "file": "src/middleware/devtools.ts",
+        "symbol": "parseJsonThen",
+        "start_line": 564,
+        "end_line": 579
+      },
+      {
+        "file": "src/middleware/devtools.ts",
+        "symbol": "devtoolsImpl: ACTION JSON parsing",
+        "start_line": 416,
+        "end_line": 441
+      },
+      {
+        "file": "src/middleware/devtools.ts",
+        "symbol": "parseDropdownArgs",
+        "start_line": 722,
+        "end_line": 740
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Searched devtools JSON.parse calls and found reviver-aware state, custom-action, and dropdown-argument parsing.",
+    "not_found": false
+  },
+  {
+    "id": "zs-07",
+    "targets": [
+      {
+        "file": "src/middleware/persist.ts",
+        "symbol": "hydrate: successful hydration completion",
+        "start_line": 301,
+        "end_line": 316
+      },
+      {
+        "file": "src/middleware/persist.ts",
+        "symbol": "hydrate: onRehydrateStorage callback creation",
+        "start_line": 250,
+        "end_line": 256
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Traced onRehydrateStorage from its pre-hydration invocation to the completion callback that currently receives get().",
+    "not_found": false
+  },
+  {
+    "id": "zs-08",
+    "targets": [
+      {
+        "file": "src/middleware/persist.ts",
+        "symbol": "hydrate: stored version and migration branch",
+        "start_line": 260,
+        "end_line": 284
+      },
+      {
+        "file": "src/middleware/persist.ts",
+        "symbol": "StorageValue",
+        "start_line": 13,
+        "end_line": 16
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Read the stored envelope type and hydration version branch, which currently accepts envelopes without a numeric version.",
+    "not_found": false
+  },
+  {
+    "id": "zs-09",
+    "targets": [
+      {
+        "file": "src/middleware/devtools.ts",
+        "symbol": "setStateFromDevtools",
+        "start_line": 313,
+        "end_line": 318
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Found the helper that temporarily disables recording and then restores the prior isRecording value.",
+    "not_found": false
+  },
+  {
+    "id": "zs-10",
+    "targets": [],
+    "confidence": "high",
+    "how_found": "Searched subscribers and read vanilla subscription management; listeners use a Set with immediate deletion, and no subscribers array or unmount compaction exists.",
+    "not_found": true
+  },
+  {
+    "id": "zs-11",
+    "targets": [
+      {
+        "file": "src/vanilla.ts",
+        "symbol": "SetStateInternal",
+        "start_line": 1,
+        "end_line": 7
+      },
+      {
+        "file": "src/middleware/combine.ts",
+        "symbol": "combine",
+        "start_line": 5,
+        "end_line": 15
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Traced combine inference through StateCreator to SetStateInternal, whose input union uses T and Partial<T>.",
+    "not_found": false
+  },
+  {
+    "id": "zs-12",
+    "targets": [
+      {
+        "file": "src/react.ts",
+        "symbol": "useStore",
+        "start_line": 26,
+        "end_line": 37
+      },
+      {
+        "file": "src/traditional.ts",
+        "symbol": "useStoreWithEqualityFn",
+        "start_line": 31,
+        "end_line": 45
+      }
+    ],
+    "confidence": "medium",
+    "how_found": "Followed selector results into the React hooks that return each selected slice without retaining the previous non-null value.",
+    "not_found": false
+  },
+  {
+    "id": "zs-13",
+    "targets": [
+      {
+        "file": "src/vanilla.ts",
+        "symbol": "SetStateInternal",
+        "start_line": 1,
+        "end_line": 7
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Found the setter declaration using the method-indexing bivariance pattern in both the overload container and updater inputs.",
+    "not_found": false
+  },
+  {
+    "id": "zs-14",
+    "targets": [],
+    "confidence": "high",
+    "how_found": "Enumerated source modules and searched slice-related symbols; there is no built-in namespaced slice module or factory.",
+    "not_found": true
+  },
+  {
+    "id": "zs-15",
+    "targets": [
+      {
+        "file": "src/vanilla.ts",
+        "symbol": "createStoreImpl: setState",
+        "start_line": 66,
+        "end_line": 81
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Read the update function, whose Object.is guard compares the incoming object reference before merging and notifying listeners.",
+    "not_found": false
+  },
+  {
+    "id": "zs-16",
+    "targets": [
+      {
+        "file": "src/middleware/subscribeWithSelector.ts",
+        "symbol": "StoreSubscribeWithSelector",
+        "start_line": 28,
+        "end_line": 40
+      },
+      {
+        "file": "src/middleware/subscribeWithSelector.ts",
+        "symbol": "subscribeWithSelectorImpl: api.subscribe",
+        "start_line": 50,
+        "end_line": 68
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Located the selected-subscription overload and runtime wrapper, which already take selector before listener in this snapshot.",
+    "not_found": false
+  },
+  {
+    "id": "zs-17",
+    "targets": [
+      {
+        "file": "src/middleware/persist.ts",
+        "symbol": "StorePersist",
+        "start_line": 125,
+        "end_line": 146
+      },
+      {
+        "file": "src/middleware/persist.ts",
+        "symbol": "persistImpl: persist.rehydrate",
+        "start_line": 345,
+        "end_line": 351
+      },
+      {
+        "file": "src/middleware/persist.ts",
+        "symbol": "PersistOptions: hydration configuration",
+        "start_line": 112,
+        "end_line": 120
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Traced the exposed rehydrate type and implementation to the setup-time hydration options that would receive the refresh callback.",
+    "not_found": false
+  },
+  {
+    "id": "zs-18",
+    "targets": [
+      {
+        "file": "src/middleware/persist.ts",
+        "symbol": "persistImpl: persist.setOptions",
+        "start_line": 330,
+        "end_line": 339
+      },
+      {
+        "file": "src/middleware/persist.ts",
+        "symbol": "StorePersist: persist API",
+        "start_line": 136,
+        "end_line": 144
+      },
+      {
+        "file": "src/middleware/persist.ts",
+        "symbol": "setItem",
+        "start_line": 210,
+        "end_line": 216
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Followed mutable options.name from setOptions and its public type to the key used by storage writes.",
+    "not_found": false
+  },
+  {
+    "id": "zs-19",
+    "targets": [],
+    "confidence": "high",
+    "how_found": "Read the available React hooks and create factory; this snapshot has useSyncExternalStore-based hooks and no v3 useStore implementation.",
+    "not_found": true
+  },
+  {
+    "id": "zs-20",
+    "targets": [],
+    "confidence": "high",
+    "how_found": "Read the React hooks and searched source for proxies or access tracking; field-read tracking and automatic dependency subscriptions do not exist.",
+    "not_found": true
+  },
+  {
+    "id": "zs-21",
+    "targets": [
+      {
+        "file": "src/middleware/devtools.ts",
+        "symbol": "Devtools",
+        "start_line": 136,
+        "end_line": 144
+      },
+      {
+        "file": "src/middleware/devtools.ts",
+        "symbol": "DevtoolsImpl",
+        "start_line": 146,
+        "end_line": 149
+      },
+      {
+        "file": "src/middleware/devtools.ts",
+        "symbol": "devtoolsImpl: options default",
+        "start_line": 237,
+        "end_line": 241
+      }
+    ],
+    "confidence": "high",
+    "how_found": "Found the optional second parameter in both devtools type signatures and the implementation default that permits omitted options.",
+    "not_found": false
+  },
+  {
+    "id": "zs-22",
+    "targets": [],
+    "confidence": "high",
+    "how_found": "Read PersistOptions and hydration startup; skipHydration and explicit rehydrate exist, but no promise-valued client-render hydration deferral option exists.",
+    "not_found": true
+  }
+]

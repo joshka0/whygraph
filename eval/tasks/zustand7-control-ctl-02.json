@@ -1,0 +1,27 @@
+{
+  "id": "zustand7-control-ctl-02",
+  "kind": "control",
+  "repo": "zustand",
+  "batch": 7,
+  "request": "In tests/vanilla/subscribe.test.tsx, add a test in the subscribe() describe block titled 'unsubscribing twice leaves other listeners active'. Use a plain createStore with two distinct listener spies, call the first listener's unsubscribe function twice before one state update, and assert that only the second listener is called, exactly once, without changing source code.",
+  "ground_truth": {
+    "source": {
+      "id": "ctl-02",
+      "request": "In tests/vanilla/subscribe.test.tsx, add a test in the subscribe() describe block titled 'unsubscribing twice leaves other listeners active'. Use a plain createStore with two distinct listener spies, call the first listener's unsubscribe function twice before one state update, and assert that only the second listener is called, exactly once, without changing source code.",
+      "kind": "unit-test",
+      "file": "tests/vanilla/subscribe.test.tsx",
+      "added": "unsubscribing twice leaves other listeners active",
+      "why_harmless": "The existing unsubscribe closure deletes only its listener from a Set, so a repeated deletion leaves other listeners active; neither the test file nor src/vanilla.ts has a bug-fix subject in its last five file commits.",
+      "evidence": "src/vanilla.ts:91: \"    return () => listeners.delete(listener)\"; tests/vanilla/subscribe.test.tsx:5: \"describe('subscribe()', () => {\""
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "tests/vanilla/subscribe.test.tsx",
+        "added": "unsubscribing twice leaves other listeners active"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

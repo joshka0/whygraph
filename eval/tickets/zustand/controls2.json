@@ -1,0 +1,50 @@
+[
+  {
+    "id": "gov-01",
+    "request": "In src/vanilla.ts, add a short comment directly above the Object.is guard in createStoreImpl's setState function explaining why repeated NaN updates do not notify listeners. Include the word NaN and leave the guard and update logic unchanged.",
+    "kind": "comment",
+    "file": "src/vanilla.ts",
+    "added": "\\bNaN\\b",
+    "ticket": "ticket-1314",
+    "commit": "ae4cc7f1b10ee109687a2915f697c4b8621fa564",
+    "decided": "setState uses Object.is to compare the next and current states, so setting NaN again does not notify listeners.",
+    "why_not_against": "The request documents the Object.is behavior without changing the comparison or notification logic.",
+    "evidence": "src/vanilla.ts:73:     if (!Object.is(nextState, state)) {"
+  },
+  {
+    "id": "gov-02",
+    "request": "In src/vanilla/shallow.ts, rename the local value binding in compareEntries' for-of loop to entryValue and update its use in the Object.is comparison. Keep the key-presence check, comparison order, and return values unchanged.",
+    "kind": "rename",
+    "file": "src/vanilla/shallow.ts",
+    "added": "\\bentryValue\\b",
+    "ticket": "ticket-3205",
+    "commit": "2cc19881fad6defaabe4a2628609ab79fce6068f",
+    "decided": "compareEntries must check key presence as well as value equality so a missing key differs from a key whose value is undefined.",
+    "why_not_against": "Renaming the loop binding preserves both the mapB.has check and the Object.is comparison.",
+    "evidence": "src/vanilla/shallow.ts:22:     if (!mapB.has(key) || !Object.is(value, mapB.get(key))) {"
+  },
+  {
+    "id": "gov-03",
+    "request": "In src/middleware/persist.ts, rename the str parameter of the private parse helper inside createJSONStorage's getItem method to serializedValue and update its references in that helper. Keep null handling and the options?.reviver argument to JSON.parse unchanged.",
+    "kind": "rename",
+    "file": "src/middleware/persist.ts",
+    "added": "\\bserializedValue\\b",
+    "ticket": "ticket-1763",
+    "commit": "630ba1a3e4dccfec0c3333aa60fcc005a8a91f59",
+    "decided": "createJSONStorage accepts optional reviver and replacer callbacks for JSON parsing and serialization rather than adding built-in Map handling.",
+    "why_not_against": "Renaming a private parser parameter leaves the optional callbacks, default JSON behavior, and storage handling unchanged.",
+    "evidence": "src/middleware/persist.ts:48:         return JSON.parse(str, options?.reviver) as StorageValue<S>"
+  },
+  {
+    "id": "gov-04",
+    "request": "In src/middleware/persist.ts, add a short comment immediately above the successful postRehydrationCallback?.(get(), undefined) call in hydrate explaining that get() supplies the latest state after updates during hydration. Use the word latest and leave the callback call and surrounding logic unchanged.",
+    "kind": "comment",
+    "file": "src/middleware/persist.ts",
+    "added": "\\blatest\\b",
+    "ticket": "ticket-3391",
+    "commit": "6213fc11bdf096301a82ae5c236b5a666a4ee3ca",
+    "decided": "The successful post-rehydration callback receives the current store state from get() so updates during hydration do not leave it with stale state.",
+    "why_not_against": "The comment explains why the callback reads get() and preserves its arguments and timing.",
+    "evidence": "src/middleware/persist.ts:306:         postRehydrationCallback?.(get(), undefined)"
+  }
+]

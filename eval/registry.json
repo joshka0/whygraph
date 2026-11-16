@@ -13,6 +13,21 @@
       "decisions": "/home/dev/scratch/whygraph-eval/tickets2/hono.decisions.json",
       "blind": "tickets/hono",
       "display": "hono"
+    },
+    "zustand": {
+      "name": "zustand",
+      "source": "/home/dev/scratch/whygraph-eval/tickets3/zustand",
+      "decisions": "/home/dev/scratch/whygraph-eval/tickets3/zustand.decisions.json",
+      "blind": "tickets/zustand",
+      "display": "zustand",
+      "sourceExtensions": [
+        ".ts",
+        ".tsx",
+        ".js",
+        ".jsx",
+        ".mjs",
+        ".cjs"
+      ]
     }
   },
   "batches": {
@@ -41,7 +56,14 @@
       ],
       "sha256": {},
       "verifyInputs": false,
-      "hashChecks": []
+      "hashChecks": [],
+      "instructionsCommit": "c92205d",
+      "storeAccess": "direct",
+      "controlConditions": [
+        "none",
+        "graph",
+        "stub"
+      ]
     },
     "2": {
       "repo": [
@@ -68,7 +90,14 @@
       ],
       "sha256": {},
       "verifyInputs": false,
-      "hashChecks": []
+      "hashChecks": [],
+      "instructionsCommit": "c92205d",
+      "storeAccess": "direct",
+      "controlConditions": [
+        "none",
+        "graph",
+        "stub"
+      ]
     },
     "3": {
       "repo": "ripgrep",
@@ -99,7 +128,14 @@
         "sample-ids.json": "b77aec4f179edd680d7badf1eb1f1bd457cd8ca69b623fd1a41916f8530aa982"
       },
       "verifyInputs": false,
-      "hashChecks": []
+      "hashChecks": [],
+      "instructionsCommit": "c92205d",
+      "storeAccess": "direct",
+      "controlConditions": [
+        "none",
+        "graph",
+        "stub"
+      ]
     },
     "4": {
       "repo": "ripgrep",
@@ -131,7 +167,14 @@
         "sample-ids.json": "b77aec4f179edd680d7badf1eb1f1bd457cd8ca69b623fd1a41916f8530aa982"
       },
       "verifyInputs": false,
-      "hashChecks": []
+      "hashChecks": [],
+      "instructionsCommit": "c92205d",
+      "storeAccess": "direct",
+      "controlConditions": [
+        "none",
+        "graph",
+        "stub"
+      ]
     },
     "5": {
       "repo": "ripgrep",
@@ -167,6 +210,14 @@
       "verifyInputs": false,
       "hashChecks": [
         "controls2.json"
+      ],
+      "instructionsCommit": "c92205d",
+      "storeAccess": "direct",
+      "controlConditions": [
+        "none",
+        "stub",
+        "graph",
+        "graph-nosearch"
       ]
     },
     "6": {
@@ -206,6 +257,66 @@
         "controls.json",
         "controls2.json",
         "sample-ids.json"
+      ],
+      "instructionsCommit": "c92205d",
+      "storeAccess": "direct",
+      "controlConditions": [
+        "stub",
+        "graph",
+        "graph-nosearch"
+      ]
+    },
+    "7": {
+      "repo": "zustand",
+      "agent": "opencode",
+      "conditions": [
+        "stub",
+        "graph",
+        "graph-nolink",
+        "graph-nosearch",
+        "graph-noterms",
+        "graph-norule"
+      ],
+      "counts": {
+        "conflicts": 12,
+        "plain": 3,
+        "governed": 4,
+        "requests": 22
+      },
+      "selection": {
+        "mode": "strata",
+        "strata": {
+          "cited": 6,
+          "uncited": 6
+        }
+      },
+      "prefix": "zustand7",
+      "sha256": {
+        "requests.json": "c8eac55361f294f879e8c0bc98300ead7eb87a12005d879ca71dceca1231ff0e",
+        "targets.json": "f2578cccd832256ba3a3a0ea2786fbc05f9ea868e7d0a2ad1c00a02a5b3e2465",
+        "controls.json": "46a045451072cc6129b2ed05bd46c9ccc94dcb16cb1cc680e158321230404d1e",
+        "controls2.json": "cf3155b3a85820633d6c62044b04a1e1ab867208eae1678697ab2e2d377065c2",
+        "sample-ids.json": "d25fb3c6634be52fd0fddde20a4bcf38b03b92f394051e8864e5673ca5583952"
+      },
+      "verifyInputs": true,
+      "hashChecks": [
+        "requests.json",
+        "targets.json",
+        "controls.json",
+        "controls2.json",
+        "sample-ids.json"
+      ],
+      "instructionsCommit": "c1ae17c",
+      "repeats": 3,
+      "sampleSeed": "whygraph-batch-7",
+      "sampleCounts": {
+        "cited": 60,
+        "uncited": 60
+      },
+      "storeAccess": "closed",
+      "controlConditions": [
+        "stub",
+        "graph"
       ]
     }
   }

@@ -1,0 +1,307 @@
+[
+  {
+    "id": "zs-01",
+    "stratum": "cited",
+    "request": "Please make persist automatically attach a window storage listener and reload matching changes from other tabs; cross-tab sync should work without application setup.",
+    "wording": "same-words",
+    "record": "1075",
+    "settled": "The merged change exposed getOptions while maintainers kept browser-specific event handling outside persist so it could support non-DOM storage.",
+    "shared_terms": [
+      "persist",
+      "window",
+      "storage",
+      "listener"
+    ],
+    "also": [],
+    "why": "This puts browser-specific synchronization inside persist despite the decision to leave that integration to users."
+  },
+  {
+    "id": "zs-02",
+    "stratum": "cited",
+    "request": "Loosen the public redux middleware Action constraint so callers can dispatch values without a type property; our command bus already knows how to route them.",
+    "wording": "same-words",
+    "record": "1206",
+    "settled": "The merged change restored the public redux action constraint requiring a type property for compatibility with devtools.",
+    "shared_terms": [
+      "redux",
+      "middleware",
+      "Action",
+      "type"
+    ],
+    "also": [],
+    "why": "This removes the public action requirement that the ticket deliberately restored."
+  },
+  {
+    "id": "zs-03",
+    "stratum": "cited",
+    "request": "Please make direct writes through the public store handle update memory only; our background refreshes should leave the saved session untouched.",
+    "wording": "other-words",
+    "record": "251",
+    "settled": "The merged fix made api.setState updates persist the store.",
+    "shared_terms": [],
+    "also": [],
+    "why": "This stops public store writes from being persisted, undoing the fix."
+  },
+  {
+    "id": "zs-04",
+    "stratum": "cited",
+    "request": "For Immer, derive the write method's accepted input from the read method's result type; that would let our generated fields flow through one common shape.",
+    "wording": "partial",
+    "record": "2696",
+    "settled": "The merged fix inferred Immer's setState type from the store's setState rather than getState to prevent read-side type changes from leaking into writes.",
+    "shared_terms": [
+      "Immer"
+    ],
+    "also": [],
+    "why": "This restores the read-to-write type inference that the fix removed."
+  },
+  {
+    "id": "zs-05",
+    "stratum": "cited",
+    "request": "Call findCallerName() on every update, even when nameOrAction or anonymousActionType already supplies a label; we want a consistent caller lookup for our debugging workflow.",
+    "wording": "same-words",
+    "record": "3147",
+    "settled": "The merged fix skipped caller-name inference when an explicit action name or configured anonymous action type was already available.",
+    "shared_terms": [
+      "findCallerName",
+      "nameOrAction",
+      "anonymousActionType"
+    ],
+    "also": [],
+    "why": "This reintroduces the unnecessary caller-name lookup that the fix eliminated."
+  },
+  {
+    "id": "zs-06",
+    "stratum": "cited",
+    "request": "Parse incoming devtools messages with bare JSON.parse and ignore serialize.reviver; plain objects would make our time-travel inspection output easier to compare.",
+    "wording": "same-words",
+    "record": "3568",
+    "settled": "The merged fix applied serialize.reviver to incoming devtools messages so restored values retained their configured types.",
+    "shared_terms": [
+      "devtools",
+      "JSON.parse",
+      "serialize.reviver"
+    ],
+    "also": [],
+    "why": "This bypasses the configured decoder and restores the type-loss bug."
+  },
+  {
+    "id": "zs-07",
+    "stratum": "cited",
+    "request": "Please give the completion callback the data from before saved values were loaded, so we can compare our startup defaults against what the app eventually displays.",
+    "wording": "other-words",
+    "record": "455",
+    "settled": "The merged fix made the onRehydrateStorage callback argument contain the final state.",
+    "shared_terms": [],
+    "also": [],
+    "why": "This supplies the earlier data instead of the final restored state required by the fix."
+  },
+  {
+    "id": "zs-08",
+    "stratum": "cited",
+    "request": "Only restore saved data when its envelope includes a schema revision; we'd rather reject old entries that have no such marker.",
+    "wording": "other-words",
+    "record": "470",
+    "settled": "The merged fix allowed hydration when a stored item did not contain a version.",
+    "shared_terms": [],
+    "also": [],
+    "why": "This rejects unversioned saved data and recreates the hydration failure."
+  },
+  {
+    "id": "zs-09",
+    "stratum": "cited",
+    "request": "After a state change from devtools, always resume capturing updates even if the user had disabled capture beforehand; otherwise it's too easy to miss the next interaction.",
+    "wording": "partial",
+    "record": "720",
+    "settled": "The merged fix restored the previous recording setting after a devtools state change rather than always turning recording on.",
+    "shared_terms": [
+      "devtools"
+    ],
+    "also": [],
+    "why": "This replaces restoration of the prior paused setting with unconditional recording."
+  },
+  {
+    "id": "zs-10",
+    "stratum": "cited",
+    "request": "Compact the subscribers array on each state update instead of waiting for unmount; we'd like to reclaim empty slots immediately.",
+    "wording": "same-words",
+    "record": "85",
+    "settled": "The merged fix moved subscriber-array compaction to unmount to prevent indices assigned during render from overwriting existing subscribers.",
+    "shared_terms": [
+      "subscribers",
+      "array",
+      "unmount"
+    ],
+    "also": [],
+    "why": "This moves compaction back into updates and recreates the index-shift race described in the ticket."
+  },
+  {
+    "id": "zs-11",
+    "stratum": "cited",
+    "request": "Allow setState({ count: undefined }) even when combine inferred count as a required number; our reset helper uses that value to clear fields.",
+    "wording": "same-words",
+    "record": "320",
+    "settled": "The merged type fix rejected assigning undefined to a required numeric field, including when using combine.",
+    "shared_terms": [
+      "setState",
+      "count",
+      "undefined",
+      "combine"
+    ],
+    "also": [],
+    "why": "This permits the invalid assignment that maintainers confirmed the fix rejects."
+  },
+  {
+    "id": "zs-12",
+    "stratum": "cited",
+    "request": "When a chosen field becomes null, leave the view at its last nonempty value; that would stop a reset from flashing an empty screen.",
+    "wording": "partial",
+    "record": "5",
+    "settled": "The bug was fixed and published so changing a selected state value to null updated the component without crashing.",
+    "shared_terms": [
+      "null"
+    ],
+    "also": [],
+    "why": "This prevents the view update for null that the fix restored."
+  },
+  {
+    "id": "zs-13",
+    "stratum": "uncited",
+    "request": "Please replace the bivariant trick in the setter's declaration with a plain function type; the simpler signature would make our generated API reference easier to read.",
+    "wording": "partial",
+    "record": "1977",
+    "settled": "Maintainers declined simplifying SetStateInternal because its existing form intentionally made the types bivariant.",
+    "shared_terms": [
+      "bivariant"
+    ],
+    "also": [],
+    "why": "This removes the intentional variance behavior for the same simplification the ticket declined."
+  },
+  {
+    "id": "zs-14",
+    "stratum": "uncited",
+    "request": "Add a built-in slice module with a factory for namespaced slices, so teams can avoid property collisions without installing another package.",
+    "wording": "same-words",
+    "record": "2397",
+    "settled": "Maintainers declined the namespaced slice module to keep the core minimal and put such features in the ecosystem.",
+    "shared_terms": [
+      "slice",
+      "namespaced",
+      "slices",
+      "factory"
+    ],
+    "also": [],
+    "why": "This adds the core feature that maintainers explicitly directed to a separate package."
+  },
+  {
+    "id": "zs-15",
+    "stratum": "uncited",
+    "request": "Please suppress whole-store change notifications when an update repeats the current field values, so background polling doesn't wake every observer.",
+    "wording": "other-words",
+    "record": "311",
+    "settled": "Maintainers confirmed that partial updates merge into a new object and notify subscribers without selectors even if the supplied field values are unchanged.",
+    "shared_terms": [],
+    "also": [],
+    "why": "This suppresses notifications that the ticket described as intentional for these partial updates."
+  },
+  {
+    "id": "zs-16",
+    "stratum": "uncited",
+    "request": "Swap subscribe's arguments so the selector comes before the listener, letting the callback infer its input without an explicit generic; that would remove repeated type annotations in our subscriptions.",
+    "wording": "same-words",
+    "record": "331",
+    "settled": "Maintainers declined swapping subscription arguments solely to solve the TypeScript inference limitation.",
+    "shared_terms": [
+      "subscribe",
+      "selector",
+      "listener"
+    ],
+    "also": [],
+    "why": "This makes the API change that maintainers explicitly refused to make just for types."
+  },
+  {
+    "id": "zs-17",
+    "stratum": "uncited",
+    "request": "Move rehydrate off the returned store handle and make it available only through a setup option that receives the refresh function; our integrations are configured entirely at construction time.",
+    "wording": "partial",
+    "record": "374",
+    "settled": "Maintainers chose to expose on-demand rehydrate through the persist API rather than through an option and closed the request into that API work.",
+    "shared_terms": [
+      "rehydrate"
+    ],
+    "also": [],
+    "why": "This replaces the chosen API method with the option-based design that maintainers passed over."
+  },
+  {
+    "id": "zs-18",
+    "stratum": "uncited",
+    "request": "Freeze the disk entry key at construction time and remove the ability to change it later, so an account switch has to build a fresh store instead of repointing an existing one.",
+    "wording": "other-words",
+    "record": "513",
+    "settled": "Maintainers confirmed that persist.setOptions could change the storage name dynamically and rehydrate could then load the new entry.",
+    "shared_terms": [],
+    "also": [],
+    "why": "This removes the runtime storage-name change that resolved the ticket."
+  },
+  {
+    "id": "zs-19",
+    "stratum": "uncited",
+    "request": "In v3, make useStore follow a replacement store when create is called inside a component on each render; our preview panel needs to swap data sources without remounting.",
+    "wording": "same-words",
+    "record": "721",
+    "settled": "Maintainers declined supporting dynamically recreated bound hooks for swapping stores in v3 because of React hook rules and directed that use case to the new v4 API.",
+    "shared_terms": [
+      "v3",
+      "useStore",
+      "create",
+      "render"
+    ],
+    "also": [
+      "722"
+    ],
+    "why": "This guarantees the v3 dynamic creation pattern that maintainers deliberately refused to support."
+  },
+  {
+    "id": "zs-20",
+    "stratum": "uncited",
+    "request": "Have the library watch which fields a screen actually reads and refresh it only when those fields change, so callers can pull values out of the returned object without writing a picking function.",
+    "wording": "other-words",
+    "record": "879",
+    "settled": "Maintainers declined adding a property-access-based render optimization hook to keep Zustand small and directed users to react-tracked or another external library.",
+    "shared_terms": [],
+    "also": [
+      "263"
+    ],
+    "why": "This puts automatic property-access tracking into the library despite the explicit decision to keep it outside core."
+  },
+  {
+    "id": "zs-21",
+    "stratum": "uncited",
+    "request": "Make the devtools helper's second parameter mandatory and mark calls that omit it as obsolete; we want every integration to spell out its configuration.",
+    "wording": "partial",
+    "record": "780",
+    "settled": "Maintainers confirmed a fix that avoided the erroneous deprecation indication when devtools was called without its second options argument.",
+    "shared_terms": [
+      "devtools"
+    ],
+    "also": [],
+    "why": "This deliberately marks the same valid one-argument calls obsolete again."
+  },
+  {
+    "id": "zs-22",
+    "stratum": "uncited",
+    "request": "Add a persist option that accepts a promise to defer hydration until the first client render has finished; we'd like one standard switch for SSR instead of wrapping storage ourselves.",
+    "wording": "same-words",
+    "record": "1145",
+    "settled": "Maintainers declined an additional hydration-delay option because existing storage and middleware extension points already provided that behavior.",
+    "shared_terms": [
+      "persist",
+      "promise",
+      "hydration",
+      "SSR",
+      "storage"
+    ],
+    "also": [],
+    "why": "This adds the dedicated delay option that maintainers considered redundant."
+  }
+]

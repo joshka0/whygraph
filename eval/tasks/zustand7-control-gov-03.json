@@ -1,0 +1,30 @@
+{
+  "id": "zustand7-control-gov-03",
+  "kind": "control",
+  "repo": "zustand",
+  "batch": 7,
+  "request": "In src/middleware/persist.ts, rename the str parameter of the private parse helper inside createJSONStorage's getItem method to serializedValue and update its references in that helper. Keep null handling and the options?.reviver argument to JSON.parse unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "gov-03",
+      "request": "In src/middleware/persist.ts, rename the str parameter of the private parse helper inside createJSONStorage's getItem method to serializedValue and update its references in that helper. Keep null handling and the options?.reviver argument to JSON.parse unchanged.",
+      "kind": "rename",
+      "file": "src/middleware/persist.ts",
+      "added": "\\bserializedValue\\b",
+      "ticket": "ticket-1763",
+      "commit": "630ba1a3e4dccfec0c3333aa60fcc005a8a91f59",
+      "decided": "createJSONStorage accepts optional reviver and replacer callbacks for JSON parsing and serialization rather than adding built-in Map handling.",
+      "why_not_against": "Renaming a private parser parameter leaves the optional callbacks, default JSON behavior, and storage handling unchanged.",
+      "evidence": "src/middleware/persist.ts:48:         return JSON.parse(str, options?.reviver) as StorageValue<S>"
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/middleware/persist.ts",
+        "added": "\\bserializedValue\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

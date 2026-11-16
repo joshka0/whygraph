@@ -5,15 +5,16 @@
  * X2: value, missing value, repeated --at, and carry/why/impact reject with exact
  *     status/error/usage; file/store guards, model trace and tool traps prove no IO.
  * X3: removed modules/imports absent; embedding dependency and lock bytes preserved.
- * X4: help/README/bin/recipes omit removed instructions. X4 skills is TODO (known
- *     open conflict): ADR 0009 preserves bytes pinned by batch-6 B6-26 at c92205d.
+ * X4: help/README/bin/recipes and every current skill omit removed instructions.
+ *     ADR 0010 pins earlier batches' instructions in history, not the working tree.
  * X5: why/impact/symbol carry/range carry match baseline bytes; recipe bytes,
  *     logical stored nodes/edges (including vectors) and indexes match baseline.
  * X6: all former settings, an eight-candidate answer and a reachable HTTP listener;
  *     no request or notice, including empty and whitespace setting values.
  * X7: runner and mutation entry points lose deleted paths; remaining anchors and
  *     Q27 test/mutation remain usable (Q27 also runs in the normal suite).
- * X8: saved scorer output, all tracked eval inputs and both pinned skill bytes.
+ * X8: the removal diff changes no eval or skill byte; current saved scorer output,
+ *     batch 3-6 task/blind bytes and the old score prefix remain pinned.
  * Not claimed: agent trials S4/S6 (parent owns them); arbitrary external stores;
  *     physical database bytes (readers may change engine metadata). X5 compares
  *     all logical properties and index definitions instead.
@@ -122,16 +123,15 @@ contract('X3', 'removed modules have no imports or exclusive dependencies', 'emp
   assert.equal(read(join(h.subject, 'pnpm-lock.yaml')), base('pnpm-lock.yaml'), 'no lockfile churn');
 });
 
-contract('X4', 'current instructions omit removed options, except the pinned skills', 'empty', async (s, t) => {
+contract('X4', 'current instructions omit removed options and settings', 'empty', async (s, t) => {
   same(s.cli(['help']), { code: 0, stdout: usage, stderr: '' }, 'help');
   for (const file of [join(h.subject, 'README.md'), ...files(join(h.subject, 'bin')), ...files(join(h.subject, 'recipes'))]) {
     assert.doesNotMatch(read(file), /--at\b|WHYGRAPH_RERANK(?:_URL)?\b|rerank(?:\.pure)?\.ts/, file);
   }
-  await t.test('X4 skills: known open ADR 0009 / batch-6 B6-26 byte conflict', {
-    todo: 'Both skills must lose removed instructions, but B6-26 pins their c92205d bytes; parent decision required',
-  }, () => {
-    const stale = ['skills/whygraph/SKILL.md', 'skills/whygraph-rule.md'].filter(path => /--at\b|WHYGRAPH_RERANK(?:_URL)?\b/.test(read(join(h.subject, path))));
-    assert.deepEqual(stale, [], 'Current skill instructions must omit removed paths; B6-26 currently freezes both files');
+  await t.test('X4 skills omit the reranker, its settings and --at', () => {
+    for (const file of files(join(h.subject, 'skills'))) {
+      assert.doesNotMatch(read(file), /\brerank(?:er)?\b|WHYGRAPH_RERANK(?:_URL)?\b|--at\b/i, `current skill instructions: ${file}`);
+    }
   });
 });
 
@@ -209,11 +209,22 @@ contract('X7', 'suite and mutation entry points retain only live targets', 'empt
   assert.equal(read(join(h.subject, 'src/search.pure.ts')).split(anchor).length - 1, 1, 'Q27 mutation has a live unique anchor');
 });
 
-contract('X8', 'scoring history and all frozen eval input bytes stay unchanged', 'empty', s => {
+contract('X8', 'removal preserves eval history and frozen batch 3-6 inputs', 'empty', s => {
+  const removal = 'c243073707ac95df6d93b74ccf4417541dd7647e';
+  const changed = h.ok(s.run('git', ['diff', '--name-only', '--no-renames', gold.base, removal, '--', 'eval', 'skills'], h.subject));
+  assert.equal(changed, '', 'removal commit changes no eval or skill bytes');
   same(s.run(process.execPath, [join(h.subject, 'eval/score.mjs')], h.subject), { code: 0, stdout: read(join(h.subject, 'eval/score.txt')), stderr: '' }, 'saved scoring history');
-  const paths = h.ok(h.command('git', ['ls-tree', '-r', '--name-only', gold.base, 'eval'], h.root)).trim().split('\n');
-  const current = h.ok(h.command('git', ['ls-files', 'eval'], h.root)).trim().split('\n');
-  assert.deepEqual(current, paths, 'eval input inventory');
-  for (const path of paths) assert.equal(read(join(h.subject, path)), base(path), `frozen eval input ${path}`);
-  for (const path of ['eval/opencode.mjs', 'skills/whygraph/SKILL.md', 'skills/whygraph-rule.md']) assert.equal(read(join(h.subject, path)), base(path, 'c92205d'), `B6-26 pinned bytes: ${path}`);
+  assert.ok(read(join(h.subject, 'eval/score.txt')).startsWith(base('eval/score.txt')), 'frozen saved-score prefix');
+  const registry = JSON.parse(base('eval/registry.json'));
+  const batches = [3, 4, 5, 6];
+  const tasks = h.ok(s.run('git', ['ls-tree', '-r', '--name-only', gold.base, 'eval/tasks'], h.subject)).trim().split('\n');
+  for (const path of tasks) {
+    const original = base(path);
+    if (batches.includes(JSON.parse(original).batch)) assert.equal(read(join(h.subject, path)), original, `frozen task ${path}`);
+  }
+  const blind = new Set(batches.flatMap(number => {
+    const batch = registry.batches[number];
+    return Object.keys(batch.sha256).map(name => join('eval', registry.repos[batch.repo].blind, name));
+  }));
+  for (const path of blind) assert.equal(read(join(h.subject, path)), base(path), `frozen blind input ${path}`);
 });
