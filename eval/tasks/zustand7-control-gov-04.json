@@ -1,0 +1,30 @@
+{
+  "id": "zustand7-control-gov-04",
+  "kind": "control",
+  "repo": "zustand",
+  "batch": 7,
+  "request": "In src/middleware/persist.ts, add a short comment immediately above the successful postRehydrationCallback?.(get(), undefined) call in hydrate explaining that get() supplies the latest state after updates during hydration. Use the word latest and leave the callback call and surrounding logic unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "gov-04",
+      "request": "In src/middleware/persist.ts, add a short comment immediately above the successful postRehydrationCallback?.(get(), undefined) call in hydrate explaining that get() supplies the latest state after updates during hydration. Use the word latest and leave the callback call and surrounding logic unchanged.",
+      "kind": "comment",
+      "file": "src/middleware/persist.ts",
+      "added": "\\blatest\\b",
+      "ticket": "ticket-3391",
+      "commit": "6213fc11bdf096301a82ae5c236b5a666a4ee3ca",
+      "decided": "The successful post-rehydration callback receives the current store state from get() so updates during hydration do not leave it with stale state.",
+      "why_not_against": "The comment explains why the callback reads get() and preserves its arguments and timing.",
+      "evidence": "src/middleware/persist.ts:306:         postRehydrationCallback?.(get(), undefined)"
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/middleware/persist.ts",
+        "added": "\\blatest\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

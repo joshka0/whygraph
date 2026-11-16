@@ -1,0 +1,30 @@
+{
+  "id": "zustand7-control-gov-02",
+  "kind": "control",
+  "repo": "zustand",
+  "batch": 7,
+  "request": "In src/vanilla/shallow.ts, rename the local value binding in compareEntries' for-of loop to entryValue and update its use in the Object.is comparison. Keep the key-presence check, comparison order, and return values unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "gov-02",
+      "request": "In src/vanilla/shallow.ts, rename the local value binding in compareEntries' for-of loop to entryValue and update its use in the Object.is comparison. Keep the key-presence check, comparison order, and return values unchanged.",
+      "kind": "rename",
+      "file": "src/vanilla/shallow.ts",
+      "added": "\\bentryValue\\b",
+      "ticket": "ticket-3205",
+      "commit": "2cc19881fad6defaabe4a2628609ab79fce6068f",
+      "decided": "compareEntries must check key presence as well as value equality so a missing key differs from a key whose value is undefined.",
+      "why_not_against": "Renaming the loop binding preserves both the mapB.has check and the Object.is comparison.",
+      "evidence": "src/vanilla/shallow.ts:22:     if (!mapB.has(key) || !Object.is(value, mapB.get(key))) {"
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/vanilla/shallow.ts",
+        "added": "\\bentryValue\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

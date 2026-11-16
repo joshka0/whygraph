@@ -1,0 +1,41 @@
+{
+  "id": "zustand7-conflict-zs-15",
+  "kind": "conflict",
+  "repo": "zustand",
+  "batch": 7,
+  "stratum": "uncited",
+  "request": "Please suppress whole-store change notifications when an update repeats the current field values, so background polling doesn't wake every observer.",
+  "ground_truth": {
+    "source": {
+      "id": "zs-15",
+      "stratum": "uncited",
+      "request": "Please suppress whole-store change notifications when an update repeats the current field values, so background polling doesn't wake every observer.",
+      "wording": "other-words",
+      "record": "311",
+      "settled": "Maintainers confirmed that partial updates merge into a new object and notify subscribers without selectors even if the supplied field values are unchanged.",
+      "shared_terms": [],
+      "also": [],
+      "why": "This suppresses notifications that the ticket described as intentional for these partial updates."
+    },
+    "targets": [
+      {
+        "file": "src/vanilla.ts",
+        "symbol": "createStoreImpl: setState",
+        "start_line": 66,
+        "end_line": 81
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-311",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)311(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}

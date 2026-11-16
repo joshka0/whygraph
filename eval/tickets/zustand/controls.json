@@ -1,0 +1,29 @@
+[
+  {
+    "id": "ctl-01",
+    "request": "Add a JSDoc comment immediately above the exported combine function in src/middleware/combine.ts. Explain that it returns a state creator that merges the initial state with the object returned by the supplied creator, without changing the implementation or types.",
+    "kind": "doc-comment",
+    "file": "src/middleware/combine.ts",
+    "added": "^\\s*(/\\*\\*|\\*)",
+    "why_harmless": "This documents the existing Object.assign implementation and documented state-creator contract; the last five file commits are refactors or chores.",
+    "evidence": "src/middleware/combine.ts:5: \"export function combine<\"; src/middleware/combine.ts:14: \"  return (...args) => Object.assign({}, initialState, (create as any)(...args))\""
+  },
+  {
+    "id": "ctl-02",
+    "request": "In tests/vanilla/subscribe.test.tsx, add a test in the subscribe() describe block titled 'unsubscribing twice leaves other listeners active'. Use a plain createStore with two distinct listener spies, call the first listener's unsubscribe function twice before one state update, and assert that only the second listener is called, exactly once, without changing source code.",
+    "kind": "unit-test",
+    "file": "tests/vanilla/subscribe.test.tsx",
+    "added": "unsubscribing twice leaves other listeners active",
+    "why_harmless": "The existing unsubscribe closure deletes only its listener from a Set, so a repeated deletion leaves other listeners active; neither the test file nor src/vanilla.ts has a bug-fix subject in its last five file commits.",
+    "evidence": "src/vanilla.ts:91: \"    return () => listeners.delete(listener)\"; tests/vanilla/subscribe.test.tsx:5: \"describe('subscribe()', () => {\""
+  },
+  {
+    "id": "ctl-03",
+    "request": "In src/middleware/ssrSafe.ts, reword the first comment above ssrSafe to say that this middleware is experimental and will change before it is finalized. Keep the word experimental and preserve the discussion link, the naming TODO, and all code.",
+    "kind": "comment-wording",
+    "file": "src/middleware/ssrSafe.ts",
+    "added": "^\\s*//.*\\bexperimental\\b",
+    "why_harmless": "This improves the grammar while preserving the existing experimental status and planned changes; the file history contains only its initial experimental feature commit.",
+    "evidence": "src/middleware/ssrSafe.ts:3: \"// This is experimental middleware. It will be changed before finalizing it.\""
+  }
+]

@@ -1,0 +1,30 @@
+{
+  "id": "zustand7-control-gov-01",
+  "kind": "control",
+  "repo": "zustand",
+  "batch": 7,
+  "request": "In src/vanilla.ts, add a short comment directly above the Object.is guard in createStoreImpl's setState function explaining why repeated NaN updates do not notify listeners. Include the word NaN and leave the guard and update logic unchanged.",
+  "ground_truth": {
+    "source": {
+      "id": "gov-01",
+      "request": "In src/vanilla.ts, add a short comment directly above the Object.is guard in createStoreImpl's setState function explaining why repeated NaN updates do not notify listeners. Include the word NaN and leave the guard and update logic unchanged.",
+      "kind": "comment",
+      "file": "src/vanilla.ts",
+      "added": "\\bNaN\\b",
+      "ticket": "ticket-1314",
+      "commit": "ae4cc7f1b10ee109687a2915f697c4b8621fa564",
+      "decided": "setState uses Object.is to compare the next and current states, so setting NaN again does not notify listeners.",
+      "why_not_against": "The request documents the Object.is behavior without changing the comparison or notification logic.",
+      "evidence": "src/vanilla.ts:73:     if (!Object.is(nextState, state)) {"
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/vanilla.ts",
+        "added": "\\bNaN\\b"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

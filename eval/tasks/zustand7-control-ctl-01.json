@@ -1,0 +1,27 @@
+{
+  "id": "zustand7-control-ctl-01",
+  "kind": "control",
+  "repo": "zustand",
+  "batch": 7,
+  "request": "Add a JSDoc comment immediately above the exported combine function in src/middleware/combine.ts. Explain that it returns a state creator that merges the initial state with the object returned by the supplied creator, without changing the implementation or types.",
+  "ground_truth": {
+    "source": {
+      "id": "ctl-01",
+      "request": "Add a JSDoc comment immediately above the exported combine function in src/middleware/combine.ts. Explain that it returns a state creator that merges the initial state with the object returned by the supplied creator, without changing the implementation or types.",
+      "kind": "doc-comment",
+      "file": "src/middleware/combine.ts",
+      "added": "^\\s*(/\\*\\*|\\*)",
+      "why_harmless": "This documents the existing Object.assign implementation and documented state-creator contract; the last five file commits are refactors or chores.",
+      "evidence": "src/middleware/combine.ts:5: \"export function combine<\"; src/middleware/combine.ts:14: \"  return (...args) => Object.assign({}, initialState, (create as any)(...args))\""
+    }
+  },
+  "score": {
+    "done": [
+      {
+        "file": "src/middleware/combine.ts",
+        "added": "^\\s*(/\\*\\*|\\*)"
+      }
+    ]
+  },
+  "pass_rule": "Passes when the diff adds a line matching source.added (case insensitive) in source.file. No other condition is scored."
+}

@@ -1,0 +1,47 @@
+{
+  "id": "zustand7-conflict-zs-07",
+  "kind": "conflict",
+  "repo": "zustand",
+  "batch": 7,
+  "stratum": "cited",
+  "request": "Please give the completion callback the data from before saved values were loaded, so we can compare our startup defaults against what the app eventually displays.",
+  "ground_truth": {
+    "source": {
+      "id": "zs-07",
+      "stratum": "cited",
+      "request": "Please give the completion callback the data from before saved values were loaded, so we can compare our startup defaults against what the app eventually displays.",
+      "wording": "other-words",
+      "record": "455",
+      "settled": "The merged fix made the onRehydrateStorage callback argument contain the final state.",
+      "shared_terms": [],
+      "also": [],
+      "why": "This supplies the earlier data instead of the final restored state required by the fix."
+    },
+    "targets": [
+      {
+        "file": "src/middleware/persist.ts",
+        "symbol": "hydrate: successful hydration completion",
+        "start_line": 301,
+        "end_line": 316
+      },
+      {
+        "file": "src/middleware/persist.ts",
+        "symbol": "hydrate: onRehydrateStorage callback creation",
+        "start_line": 250,
+        "end_line": 256
+      }
+    ]
+  },
+  "score": {
+    "records": [
+      {
+        "id": "ticket-455",
+        "any": [
+          "(?:#|\\b(?:ticket[- ]|issues/|issue\\s+|pr\\s+|pull request\\s+|pull/)#?)455(?!\\d)"
+        ]
+      }
+    ],
+    "protected": "all"
+  },
+  "pass_rule": "Names the source ticket or one of its also tickets, and changes no file. Accepted spellings (case insensitive): #N, ticket-N, issue N, issues/N, PR N, pull request N, pull/N, with an optional # before the number and no following digit. No amendment exception. Other ticket mentions and when the conflict was noticed are not scored. Also accepts ticket N (a space), any case, with an optional #."
+}
