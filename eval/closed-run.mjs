@@ -250,7 +250,7 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
       ?closedAgentCause(run,prompt,[...(serviceFailure?['service or shell launcher unavailable']:[]),...causes]):undefined;
     const meta={id:`${task.id}__${condition}__r${repeat}`,task:task.id,condition,repeat,agent:'opencode',model:rehearsal?'rehearsal':OPENCODE_MODEL,...(rehearsal?{rehearsal:true}:{}),
       status:harness||breaches.length?'invalid':r.code===0&&session.success&&!r.timedOut?'done':'error',
-      ...(harness?{reason:`harness failure: ${harness}`} : breaches.length?{reason:'isolation breach',isolation:breaches}:{}),
+      ...(harness?{reason:`harness failure: ${harness}`} : breaches.length?{reason:'isolation breach',isolation:breaches}:r.timedOut?{reason:closedAgentCause(run,prompt)}:{}),
       timed_out:r.timedOut,exit:r.code,signal:r.signal,wall_ms:Date.now()-started,tokens:session.tokens,cost_usd:session.cost_usd,turns:session.turns,replies:session.replies,work,service:stats};
     writeFileSync(join(out,'tools.json'),JSON.stringify(tools,null,2));
     writeFileSync(join(out,'final.txt'),session.final);
