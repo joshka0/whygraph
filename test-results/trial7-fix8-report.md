@@ -397,3 +397,61 @@ Retained scratch and artifacts:
 
 The JSON reports, console log and fixture folders remain ignored scratch.
 Part 1's retained evidence remains available. No data was deleted.
+
+
+## B7-148 follow-up: reject unknown service-log events
+
+Date: 2026-11-16. Independent tests: `1890e91`.
+The parent authorized this focused fix after two independent cases failed.
+B7-148 and amended B7-63 already require unknown events to fail. ADR 0011's
+refusal and dispatched-failure contracts still govern the row types. This
+fix changes no contract, service producer, frozen batch or test.
+
+The root cause was the filter `row.event !== 'refused'`: an otherwise
+authentic reply with `event: "unexpected"` counted as a reply. Each log
+reader also parsed and filtered independently. The shared private
+`serviceRows` reader now validates every row before any consumer filters it.
+An untagged reply must have string arguments, an integer code and string
+stdout/stderr. A tagged row must be a known refusal with its defined reason,
+or a failure with a string message. Nulls, arrays, unknown event tags and
+malformed replies fail. A tagged row never counts as a reply. Known failure
+events fail condition answers and service accounting independently of the
+metadata's failure counter.
+
+All three log readers use this validation: condition answers, closed store
+and tool code, and service answered every call. The saved unknown-event CLI
+result shows all three reporting `invalid service log event`, with exit 1.
+The fix is in `eval/smoke-check.mjs`; the report is the only other changed
+file. No test was written or edited.
+
+The smallest independent case ran before the fix and failed as reported:
+`PASS service answered every call: 2 refused requests`. After the fix, both
+unknown-event cases passed. The other 13 B7-148 cases then passed with a
+separate filter. These are 15 unique focused cases, not a whole-suite run.
+The full CLI cases use the independent author's smoke fixture.
+
+Exact case commands, each with the required PATH/resource prefix:
+
+```sh
+node eval/selftest/batch7-refusals.mjs "^B7 B7-148 unknown event fails service accounting$"
+node eval/selftest/batch7-refusals.mjs "^B7 B7-148 unknown event"
+node eval/selftest/batch7-refusals.mjs "B7-148(?! unknown event)"
+```
+
+The first command is the pre-fix red reproduction. The second exits 0 with
+2/2 cases; the third exits 0 with 13/13. `node --check eval/smoke-check.mjs`,
+`pnpm check`, `node_modules/.bin/memod lint` and `git diff --check` pass.
+No other test selection, suite, stress run, preflight, rehearsal, trial cell,
+hosted model, install, delegation or push ran in this follow-up.
+
+Retained scratch:
+
+- `test-results/refusals-MmJPhX/focused-results.json`: pre-fix 0/1 result.
+- `test-results/refusals-j7og9I/focused-results.json`: post-fix 2/2 result.
+- `test-results/refusals-j7og9I/10-refusals-0/unknown-event-cli.json`: actual
+  CLI exit 1 and the three rejected log-reader checks.
+- `test-results/refusals-udoabV/focused-results.json`: remaining 13/13 result.
+
+Each named scratch root also retains its independent fixture, work paths
+and service evidence. Nothing was deleted. The existing independent
+`trial7-tests10-report.md` remains unchanged.

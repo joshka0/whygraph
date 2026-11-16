@@ -17,6 +17,18 @@ let failed=false;
 const check=(name,fn)=>{try{const detail=fn();console.log(`PASS ${name}${detail?`: ${detail}`:''}`);}catch(error){failed=true;console.log(`FAIL ${name}: ${error.message}`);}};
 const require=(condition,message)=>{if(!condition)throw new Error(message);};
 const read=(dir,file)=>JSON.parse(readFileSync(join(dir,file),'utf8'));
+const serviceRows=dir=>{
+ const rows=readFileSync(join(dir,'service.jsonl'),'utf8').trim().split('\n').filter(Boolean).map(JSON.parse);
+ for(const row of rows) {
+  require(row!==null&&typeof row==='object'&&!Array.isArray(row),'invalid service log row');
+  if(Object.hasOwn(row,'event')) {
+   require((row.event==='refused'&&['invalid argument count','argument too large','request too large'].includes(row.message))||(row.event==='failure'&&typeof row.message==='string'),'invalid service log event');
+  } else {
+   require(Array.isArray(row.args)&&row.args.every(arg=>typeof arg==='string')&&Number.isInteger(row.code)&&typeof row.stdout==='string'&&typeof row.stderr==='string','bad service reply');
+  }
+ }
+ return rows;
+};
 let plan=[];const attempts=[],finished=[];
 check('real agent preflight',()=>{
  if(existsSync(join(results,'rehearsal.json'))) {
@@ -49,7 +61,9 @@ check('condition answers',()=>{
  require(attempts.length>0,'no attempts');
  for(const {cell,dir} of attempts) {
   const health=read(dir,'health.json'),condition=cell.condition;
-  const answers=readFileSync(join(dir,'service.jsonl'),'utf8').trim().split('\n').filter(Boolean).map(JSON.parse).filter(row=>row.event!=='refused');
+  const events=serviceRows(dir);
+  require(!events.some(row=>row.event==='failure'),'service failure');
+  const answers=events.filter(row=>!Object.hasOwn(row,'event'));
   require(health.condition===condition,'wrong health condition');
   require(health.answers.length===4&&new Set(health.answers.map(a=>a.args[0])).size===4,'incomplete health calls');
   for(const a of answers) {
@@ -111,7 +125,7 @@ check('closed store and tool code',()=>{
   const proof=read(dir,'confinement.json');
   const names=['relate','store','tool code','service code','other service'];
   require(proof.length===names.length&&names.every(name=>proof.some(p=>p.name===name&&Number.isInteger(p.status)&&p.status!==0)),'a confinement probe succeeded or did not run');probes+=proof.length;
-  const refusals=readFileSync(join(dir,'service.jsonl'),'utf8').trim().split('\n').filter(Boolean).map(JSON.parse).filter(row=>row.event==='refused');
+  const refusals=serviceRows(dir).filter(row=>row.event==='refused');
   agentAttempts+=refusals.length;refused+=refusals.length;
   const paths=['/tools/whygraph','/tools/relate','relate','closed-client.c','closed-store.mjs',join(here,'../src'),...Object.values(read(dir,'health.json').stores)];
   for(const tool of read(dir,'tools.json')) {
@@ -125,9 +139,9 @@ check('service answered every call',()=>{
  require(attempts.length>0,'no attempts');
  let refused=0;
  for(const {dir,meta} of attempts) {
-  const events=readFileSync(join(dir,'service.jsonl'),'utf8').trim().split('\n').filter(Boolean).map(JSON.parse);
-  const refusals=events.filter(row=>row.event==='refused'),calls=events.filter(row=>row.event!=='refused');
-  require(refusals.every(row=>['invalid argument count','argument too large','request too large'].includes(row.message)), 'bad refused request');
+  const events=serviceRows(dir);
+  const refusals=events.filter(row=>row.event==='refused'),calls=events.filter(row=>!Object.hasOwn(row,'event'));
+  require(!events.some(row=>row.event==='failure'),'service failure');
   require(meta.service?.refused===refusals.length&&JSON.stringify(meta.service.refusalReasons)===JSON.stringify(refusals.map(row=>row.message)), 'refused requests differ from metadata');
   refused+=refusals.length;
   require(meta.service?.failures===0&&meta.service.calls===calls.length&&calls.length>=4,'missing service replies or failure');
