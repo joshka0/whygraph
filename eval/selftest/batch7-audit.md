@@ -1,12 +1,12 @@
 ---
 title: Batch 7 independent test audit
-status: blocked
+status: done
 tags: [whygraph, eval, independent-tests]
 ---
 
 > [!abstract] Answer
-> Both final suites complete 1553 cases. Results: 1551/1553, exit 1; 1551/1553, exit 1.
-> B7-93 remains red because live children can retain address spaces after owner reap. See the fifth-round audit below.
+> Under B7-93 second form, the final full suites report 1553/1553, exit 0; 1553/1553, exit 0.
+> The focused 50 repetitions and surviving-child plant also completed. See the second-ruling audit for observation counts and elapsed times.
 
 ## Historical third-round audit
 
@@ -382,7 +382,7 @@ TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=40
 
 [[whygraph-trial-design]]
 
-## Fifth-round memory and runner-death audit
+## Historical fifth-round memory and runner-death audit
 
 The test work is complete. B7-93 remains a production failure. No code outside `eval/selftest/` changed. The branch is `batch-7-memory`; nothing was pushed.
 
@@ -509,4 +509,80 @@ export PATH="$HOME/.opencode/bin:$HOME/.npm-global/bin:$HOME/.local/share/mise/i
 TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/check.mjs
 TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=2G -p CPUQuota=400% node eval/selftest/batch7-check.mjs memory
 TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=2G -p CPUQuota=400% node eval/selftest/batch7-check.mjs B7-93
+```
+
+## B7-93 second-ruling audit
+
+Parent ruling `4d186ad` replaces the first-observation requirement. The test now observes until all recorded children are gone or zombies, or ten seconds pass. The timeout and cleanup cases keep their existing rule. No production file changed.
+
+### Results
+
+| Run | Cases | Exit | Repetitions | Needed more than one observation | Longest time to gone or zombie, ms |
+| --- | --- | --- | --- | --- | --- |
+| [focused](../../test-results/trial7-tests5-ruling2-focused.txt) | 2/2 | 0 | 50 | 10 | 52.936 |
+| [full 1](../../test-results/trial7-tests5-ruling2-full-1.txt) | 1553/1553 | 0 | 50 | 15 | 145.553 |
+| [full 2](../../test-results/trial7-tests5-ruling2-full-2.txt) | 1553/1553 | 0 | 50 | 6 | 145.786 |
+
+Each repetition runs under four CPU-load processes. Its clock starts before the owner receives SIGKILL, so the recorded time includes owner reap. Every intermediate process state is retained. The case waits for neither the client nor cleanup before observing the children. A child write during this interval does not fail the case.
+
+### Surviving-child plant
+
+| Run | First failing assertion | Elapsed ms | Live address spaces at bound |
+| --- | --- | --- | --- |
+| focused | runner children must be gone or zombie within 10 seconds | 10000.482 | 3 |
+| full 1 | runner children must be gone or zombie within 10 seconds | 10001.181 | 3 |
+| full 2 | runner children must be gone or zombie within 10 seconds | 10000.184 | 3 |
+
+The plant removes the command PID namespace and parent-death enforcement from a disposable code copy. The case must wait for the full ten-second bound, then fail while a recorded child still has an address space. Fixture cleanup starts after the failing assertion and its evidence have been saved.
+
+### Memory checks repeated by the full suites
+
+| Run | Input | Peak bytes | Wall ms | Result |
+| --- | --- | --- | --- | --- |
+| 1 | small-stress | 87310336 | 417.59 | success |
+| 1 | synthetic-5000 | 541184000 | 155810.77 | success |
+| 1 | real-zustand | 437493760 | 62300.25 | success |
+| 1 | unbounded | 999997440 | 4251.08 | expected bounded OOM |
+| 2 | small-stress | 87138304 | 478.36 | success |
+| 2 | synthetic-5000 | 540704768 | 155743.83 | success |
+| 2 | real-zustand | 419844096 | 62128.95 | success |
+| 2 | unbounded | 999997440 | 4287.76 | expected bounded OOM |
+
+Each full suite also catches the other five memory and receipt plants. The JSON audit holds each assertion receipt. Memory tests still use their own bounded scopes. Each full suite runs inside the required 6G scope. Wall times are observations under shared load.
+
+### Other checks
+
+| Check | Exit | Evidence |
+| --- | --- | --- |
+| typecheck | 0 | [log](../../test-results/trial7-tests5-ruling2-typecheck.txt) |
+| memod | 0 | [log](../../test-results/trial7-tests5-ruling2-memod.txt) |
+| readme | 0 | [log](../../test-results/trial7-tests5-ruling2-readme.txt) |
+| score | 0 | [log](../../test-results/trial7-tests5-ruling2-score.txt) |
+
+No requested item lacks a case. No code/contract disagreement remains under the second ruling.
+
+### Evidence retained
+
+- `test-results/batch4-selftest-5G4CVw`.
+- `test-results/batch4-selftest-hqtG07`.
+- `test-results/batch5-selftest-Gw3Yrm`.
+- `test-results/batch5-selftest-znZ2a3`.
+- `test-results/batch6-selftest-EkbQxN`.
+- `test-results/batch6-selftest-WZPN6w`.
+- `test-results/batch7-selftest-69vbTi`.
+- `test-results/batch7-selftest-Hos7BF`.
+- `test-results/batch7-selftest-OHXuCL`.
+- `test-results/batch7-selftest-hycWpL`.
+- `test-results/ticket-selftest-INw4YV`.
+- `test-results/ticket-selftest-pZ6OQl`.
+- `test-results/trial7-tests5-ruling2-*` holds the focused and full logs, exact exit statuses, and check logs. Earlier evidence remains intact.
+
+The fifth-round section below its historical heading records the superseded first-form ruling. Its failures are historical evidence, not current failures.
+
+### Reproduce
+
+```sh
+export PATH="$HOME/.opencode/bin:$HOME/.npm-global/bin:$HOME/.local/share/mise/installs/pnpm/12.11.2:$HOME/.local/bin:$PATH"
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=2G -p CPUQuota=400% node eval/selftest/batch7-check.mjs B7-93
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node eval/selftest/check.mjs
 ```

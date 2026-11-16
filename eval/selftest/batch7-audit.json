@@ -5771,6 +5771,374 @@
       "path": "/var/tmp/whygraph-eval/_zustand/ablations",
       "inspection": "test-results/trial7-tests5-old-ablations.txt",
       "result": "empty; inspected read-only; no archive or removal needed"
-    }
+    },
+    "superseded_by": "4d186ad: B7-93 second form"
+  },
+  "runner_death_second_ruling": {
+    "contract_commit": "4d186ad",
+    "test_commit": "1e572f6",
+    "ruling": "B7-93 second form",
+    "status": "done",
+    "coverage": "The runner owner dies after both readiness messages. The case samples every recorded PID until all are gone or zombies, or the 10-second bound passes. A surviving child with an address space is refused at the actual bound. Child writes before termination are permitted. Cleanup and timeout cases keep their previous predicate.",
+    "clock": "Elapsed time starts immediately before SIGKILL is requested, so the 10-second bound includes owner reap. No client wait or cleanup precedes the observations.",
+    "runs": [
+      {
+        "kind": "focused",
+        "log": "test-results/trial7-tests5-ruling2-focused.txt",
+        "exit": 0,
+        "passed": 2,
+        "total": 2,
+        "scratch": "test-results/batch7-selftest-69vbTi",
+        "failures": [],
+        "runner": {
+          "path": "test-results/batch7-selftest-69vbTi/runner-death-repetitions.json",
+          "repetitions": 50,
+          "failed": 0,
+          "more_than_one_observation": 10,
+          "longest_time_to_gone_or_zombie_ms": 52.93641199998092,
+          "kernel_teardown_repetitions": 7
+        },
+        "surviving_child_plant": {
+          "path": "test-results/batch7-selftest-69vbTi/plant2-survives-runner.json",
+          "first_failing_assertion": "runner children must be gone or zombie within 10 seconds",
+          "wall_ms": 10000.481742999982,
+          "live_address_spaces_at_bound": 3
+        },
+        "measurements": [],
+        "other_plants": []
+      },
+      {
+        "kind": "full",
+        "log": "test-results/trial7-tests5-ruling2-full-1.txt",
+        "exit": 0,
+        "passed": 1553,
+        "total": 1553,
+        "scratch": "test-results/batch7-selftest-hycWpL",
+        "failures": [],
+        "runner": {
+          "path": "test-results/batch7-selftest-hycWpL/runner-death-repetitions.json",
+          "repetitions": 50,
+          "failed": 0,
+          "more_than_one_observation": 15,
+          "longest_time_to_gone_or_zombie_ms": 145.5531300000148,
+          "kernel_teardown_repetitions": 6
+        },
+        "surviving_child_plant": {
+          "path": "test-results/batch7-selftest-hycWpL/plant2-survives-runner.json",
+          "first_failing_assertion": "runner children must be gone or zombie within 10 seconds",
+          "wall_ms": 10001.181311000022,
+          "live_address_spaces_at_bound": 3
+        },
+        "measurements": [
+          {
+            "name": "small-stress",
+            "path": "test-results/batch7-selftest-hycWpL/measurement-small-stress.json",
+            "status": 0,
+            "wall_ms": 417.59340499999996,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p2309117-i781481169.scope",
+              "peak": 87310336,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "name": "synthetic-5000",
+            "path": "test-results/batch7-selftest-hycWpL/measurement-synthetic-5000.json",
+            "status": 0,
+            "wall_ms": 155810.774104,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p2319400-i781457793.scope",
+              "peak": 541184000,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "name": "real-zustand",
+            "path": "test-results/batch7-selftest-hycWpL/measurement-real-zustand.json",
+            "status": 0,
+            "wall_ms": 62300.254918,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p2423702-i781602985.scope",
+              "peak": 437493760,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "name": "unbounded",
+            "path": "test-results/batch7-selftest-hycWpL/measurement-unbounded.json",
+            "status": 1,
+            "wall_ms": 4251.078978,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p2524371-i781694199.scope",
+              "peak": 999997440,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 51,
+                "oom": 1,
+                "oom_kill": 1,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          }
+        ],
+        "other_plants": [
+          {
+            "name": "unbounded",
+            "path": "test-results/batch7-selftest-hycWpL/plant-memory-unbounded.json",
+            "assertion": "bounded preparation must succeed\n\n1 !== 0\n",
+            "actual": 1,
+            "expected": 0
+          },
+          {
+            "name": "per-cell",
+            "path": "test-results/batch7-selftest-hycWpL/plant-memory-per-cell.json",
+            "assertion": "restart must make zero copy and relate calls\n\n2 !== 0\n",
+            "actual": 2,
+            "expected": 0
+          },
+          {
+            "name": "receipt",
+            "path": "test-results/batch7-selftest-hycWpL/plant-memory-receipt.json",
+            "assertion": "changed or incomplete store must refuse",
+            "actual": 0,
+            "expected": 0
+          },
+          {
+            "name": "half-made",
+            "path": "test-results/batch7-selftest-hycWpL/plant-memory-half-made.json",
+            "assertion": "changed or incomplete store must refuse",
+            "actual": 0,
+            "expected": 0
+          },
+          {
+            "name": "vector",
+            "path": "test-results/batch7-selftest-hycWpL/plant-memory-vector.json",
+            "assertion": "vector must change nodes fingerprint",
+            "actual": "0ccd1f34cbe2ccb6b70a7e574fab782322087e7dfd19e1e667d36cc348443a08",
+            "expected": "0ccd1f34cbe2ccb6b70a7e574fab782322087e7dfd19e1e667d36cc348443a08"
+          }
+        ]
+      },
+      {
+        "kind": "full",
+        "log": "test-results/trial7-tests5-ruling2-full-2.txt",
+        "exit": 0,
+        "passed": 1553,
+        "total": 1553,
+        "scratch": "test-results/batch7-selftest-Hos7BF",
+        "failures": [],
+        "runner": {
+          "path": "test-results/batch7-selftest-Hos7BF/runner-death-repetitions.json",
+          "repetitions": 50,
+          "failed": 0,
+          "more_than_one_observation": 6,
+          "longest_time_to_gone_or_zombie_ms": 145.7860899999505,
+          "kernel_teardown_repetitions": 4
+        },
+        "surviving_child_plant": {
+          "path": "test-results/batch7-selftest-Hos7BF/plant2-survives-runner.json",
+          "first_failing_assertion": "runner children must be gone or zombie within 10 seconds",
+          "wall_ms": 10000.183986000018,
+          "live_address_spaces_at_bound": 3
+        },
+        "measurements": [
+          {
+            "name": "small-stress",
+            "path": "test-results/batch7-selftest-Hos7BF/measurement-small-stress.json",
+            "status": 0,
+            "wall_ms": 478.36321000000004,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p2311426-i781461652.scope",
+              "peak": 87138304,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "name": "synthetic-5000",
+            "path": "test-results/batch7-selftest-Hos7BF/measurement-synthetic-5000.json",
+            "status": 0,
+            "wall_ms": 155743.831665,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p2321554-i781450922.scope",
+              "peak": 540704768,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "name": "real-zustand",
+            "path": "test-results/batch7-selftest-Hos7BF/measurement-real-zustand.json",
+            "status": 0,
+            "wall_ms": 62128.951304999995,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p2425686-i781603071.scope",
+              "peak": 419844096,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 0,
+                "oom": 0,
+                "oom_kill": 0,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          },
+          {
+            "name": "unbounded",
+            "path": "test-results/batch7-selftest-Hos7BF/measurement-unbounded.json",
+            "status": 1,
+            "wall_ms": 4287.757017,
+            "memory": {
+              "group": "/user.slice/user-1001.slice/user@1001.service/app.slice/run-p2526175-i781682851.scope",
+              "peak": 999997440,
+              "limit": "999997440",
+              "events": {
+                "low": 0,
+                "high": 0,
+                "max": 59,
+                "oom": 1,
+                "oom_kill": 1,
+                "oom_group_kill": 0,
+                "sock_throttled": 0
+              }
+            }
+          }
+        ],
+        "other_plants": [
+          {
+            "name": "unbounded",
+            "path": "test-results/batch7-selftest-Hos7BF/plant-memory-unbounded.json",
+            "assertion": "bounded preparation must succeed\n\n1 !== 0\n",
+            "actual": 1,
+            "expected": 0
+          },
+          {
+            "name": "per-cell",
+            "path": "test-results/batch7-selftest-Hos7BF/plant-memory-per-cell.json",
+            "assertion": "restart must make zero copy and relate calls\n\n2 !== 0\n",
+            "actual": 2,
+            "expected": 0
+          },
+          {
+            "name": "receipt",
+            "path": "test-results/batch7-selftest-Hos7BF/plant-memory-receipt.json",
+            "assertion": "changed or incomplete store must refuse",
+            "actual": 0,
+            "expected": 0
+          },
+          {
+            "name": "half-made",
+            "path": "test-results/batch7-selftest-Hos7BF/plant-memory-half-made.json",
+            "assertion": "changed or incomplete store must refuse",
+            "actual": 0,
+            "expected": 0
+          },
+          {
+            "name": "vector",
+            "path": "test-results/batch7-selftest-Hos7BF/plant-memory-vector.json",
+            "assertion": "vector must change nodes fingerprint",
+            "actual": "0ccd1f34cbe2ccb6b70a7e574fab782322087e7dfd19e1e667d36cc348443a08",
+            "expected": "0ccd1f34cbe2ccb6b70a7e574fab782322087e7dfd19e1e667d36cc348443a08"
+          }
+        ]
+      }
+    ],
+    "checks": {
+      "typecheck": {
+        "log": "test-results/trial7-tests5-ruling2-typecheck.txt",
+        "exit": 0,
+        "output_bytes": 83
+      },
+      "memod": {
+        "log": "test-results/trial7-tests5-ruling2-memod.txt",
+        "exit": 0,
+        "output_bytes": 0
+      },
+      "readme": {
+        "log": "test-results/trial7-tests5-ruling2-readme.txt",
+        "exit": 0,
+        "output_bytes": 23
+      },
+      "score": {
+        "log": "test-results/trial7-tests5-ruling2-score.txt",
+        "exit": 0,
+        "output_bytes": 0
+      }
+    },
+    "omitted_items": [],
+    "contract_disagreements": [],
+    "scope": {
+      "branch": "batch-7-memory",
+      "tracked_edits": [
+        "eval/selftest/"
+      ],
+      "production_changes": 0,
+      "hosted_model_calls": 0,
+      "installs": 0,
+      "pushes": 0
+    },
+    "retained_scratch": [
+      "test-results/batch4-selftest-5G4CVw",
+      "test-results/batch4-selftest-hqtG07",
+      "test-results/batch5-selftest-Gw3Yrm",
+      "test-results/batch5-selftest-znZ2a3",
+      "test-results/batch6-selftest-EkbQxN",
+      "test-results/batch6-selftest-WZPN6w",
+      "test-results/batch7-selftest-69vbTi",
+      "test-results/batch7-selftest-Hos7BF",
+      "test-results/batch7-selftest-OHXuCL",
+      "test-results/batch7-selftest-hycWpL",
+      "test-results/ticket-selftest-INw4YV",
+      "test-results/ticket-selftest-pZ6OQl"
+    ]
   }
 }
