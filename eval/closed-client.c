@@ -19,6 +19,10 @@ static void transfer(int fd, void *buf, size_t n, int sending) {
   char *p = buf;
   while (n) { ssize_t k = sending ? write(fd,p,n) : read(fd,p,n); if(k<0 && errno==EINTR) continue; if(k<=0) {fputs(unavailable,stderr); exit(70);} p+=k; n-=(size_t)k; }
 }
+static int tool_usage(void) {
+  fputs("usage: whygraph <carry|why|impact|search> <target>\n",stderr);
+  return 2;
+}
 static int shell_client(int argc, char **argv) {
   unavailable = "whygraph shell launcher unavailable\n";
   int fd=socket(AF_UNIX,SOCK_STREAM,0);
@@ -107,6 +111,12 @@ int main(int argc, char **argv) {
   if (!strcmp(name,"shell-scope")) return shell_scope();
   if (!strcmp(name,"shell-client")) return shell_client(argc,argv);
   if (strcmp(name,"whygraph")) { fputs("tool unavailable\n",stderr); return 126; }
+  if (argc-1>64) return tool_usage();
+  size_t bytes=4;
+  for(int i=1;i<argc;i++) {
+    size_t size=strlen(argv[i]);bytes+=4+size;
+    if(size>60000 || bytes>65536) return tool_usage();
+  }
   int fd = socket(AF_UNIX,SOCK_STREAM,0);
   struct sockaddr_un addr = {.sun_family=AF_UNIX}; strcpy(addr.sun_path,"/whygraph/service.sock");
   if(fd<0 || connect(fd,(struct sockaddr*)&addr,sizeof(addr))) {fputs("whygraph service unavailable\n",stderr); return 70;}

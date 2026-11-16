@@ -270,26 +270,30 @@ export function closedConfinement({ work, repo, client, socket, network = false,
 export async function startClosedStore({ condition, repo, store, fullStore = store, socket, log }) {
   socketPath(socket);
   repo=realpathSync(repo);
-  let failures = 0, calls = 0;
-  const reasons=[];
+  let failures = 0, calls = 0, refused = 0;
+  const reasons=[], refusalReasons=[];
   const failure=message=>{failures++;reasons.push(message);appendFileSync(log,JSON.stringify({event:'failure',message})+'\n');};
   const abort=new AbortController(), connections=new Set();
   const server = createServer(connection => {
     connections.add(connection);connection.on('close',()=>connections.delete(connection));
     let input = Buffer.alloc(0), dispatched = false;
     connection.on('error', () => {});
+    const refuse=message=>{
+      dispatched=true;refused++;refusalReasons.push(message);
+      appendFileSync(log,JSON.stringify({event:'refused',message})+'\n');connection.destroy();
+    };
     connection.on('data', chunk => {
       if (dispatched) return;
       input = Buffer.concat([input,chunk]);
-      if (input.length > 65536) { connection.destroy(); failure('request too large'); return; }
+      if (input.length > 65536) { refuse('request too large'); return; }
       if (input.length < 4) return;
       const count = input.readUInt32BE();
-      if (count > 64) { connection.destroy(); failure('invalid argument count'); return; }
+      if (count > 64) { refuse('invalid argument count'); return; }
       let at=4; const args=[];
       for(let i=0;i<count;i++) {
         if(input.length < at+4) return;
         const size=input.readUInt32BE(at); at+=4;
-        if(size>60000) { connection.destroy(); failure('argument too large'); return; }
+        if(size>60000) { refuse('argument too large'); return; }
         if(input.length < at+size) return;
         args.push(input.subarray(at,at+size).toString()); at+=size;
       }
@@ -349,7 +353,7 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
     return result;
   }
   await new Promise((ok,fail) => {server.once('error',fail); server.listen(socket,ok);});
-  return { server, stats:()=>({calls,failures,reasons:[...reasons]}), stop:()=>new Promise((ok,fail)=>{abort.abort();for(const connection of connections)connection.destroy();server.close(error=>error?fail(error):ok());}) };
+  return { server, stats:()=>({calls,failures,reasons:[...reasons],refused,refusalReasons:[...refusalReasons]}), stop:()=>new Promise((ok,fail)=>{abort.abort();for(const connection of connections)connection.destroy();server.close(error=>error?fail(error):ok());}) };
 }
 
 /** Launch shell commands from the host, outside the agent's user namespace.
