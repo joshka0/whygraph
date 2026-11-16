@@ -89,6 +89,66 @@ Graph-nolink copies the store and removes CITES edges. No source or recipe
 changes implement an ablation. Receipts record copy and mutation time.
 Fingerprints check all other nodes, relationships, record text and vectors.
 
+### Store preparation, 2026-11-16
+
+The original fingerprint projects both endpoints' complete properties for
+every relationship. Relate materializes those rows. Node then buffers,
+parses and sorts the complete JSON output. On the real 1,934-record store,
+the original fingerprint reaches the 2 GB scope limit and the kernel kills
+it before it returns. Three concurrent preparations compound that cost.
+
+The fingerprint now binds each internal node ID to its labels and complete
+properties. Edge rows contain their internal ID, both endpoint IDs, type
+and complete relationship properties. A clone retains these IDs after a
+delete. Ordered SHA-256 streams retain multiplicity and endpoint identity.
+This covers every node property, including record text and search vectors.
+The unchanged components keep their old equality checks.
+
+Each query ranges IDs before projection: at most 256 nodes or 4,096
+relationships. One read-only database session runs the bounded statements.
+The reader canonicalizes and hashes one JSON row at a time. Counts from
+the bounds query must match the streamed row counts. A truncated stream
+refuses, including a successful child exit with missing rows. Relate still
+loads its graph. Memory grows with the stored node properties and edges,
+plus one bounded projection, rather than edge count times node size.
+The small statement list grows with the highest IDs divided by the range
+sizes. Large gaps in IDs add scans, without expanding endpoint properties.
+
+`ablatedStores(store, directory)` remains synchronous and exported from
+`eval/closed-store.mjs`. A `flock` subprocess owns the directory lock until
+preparation or validation ends. A first caller copies and proves each
+ablation once. Simultaneous callers wait on that same kernel lock.
+The first caller publishes `prepared.json` with one rename after all
+proofs pass. A killed caller leaves incomplete evidence; the next caller
+refuses it for inspection. Preparation never deletes that evidence.
+
+The version-1 receipt records the canonical source path, fingerprint
+algorithm, preparation time, all three fingerprints, both proofs and
+file identities for all three stores. Each file identity includes path,
+device, inode, byte length, nanosecond modification time and change time.
+Relate's advisory lock files are excluded because a read-only open changes
+them. They hold no graph data. The ready check compares every other file,
+including the snapshot manifest and WAL files. Missing, added, replaced or
+changed data files refuse the run. The per-ablation source and proof files
+must also match. Old receipts refuse; no compatibility path rebuilds them.
+
+Later cells and restarted runners check metadata under the same lock.
+They neither copy nor fingerprint a store. Their health records use the
+proved fingerprints from the receipt. The stores must stay immutable for
+the batch lifetime. Read-only service queries satisfy that requirement.
+The receipt detects local changes; it is not authentication against a host
+attacker who can rewrite both data and receipts.
+
+| State | Lives in | Owner | Lifetime | Boundary token | Outcome |
+| --- | --- | --- | --- | --- | --- |
+| Preparation lock | `.prepare.lock` | Kernel flock | Preparing or checking subprocess | Open lock file | Released on exit |
+| Incomplete stores | Ablation directory | Lock holder | Until publication or operator inspection | `preparing.json` | Prepared or inspection required |
+| Ready stores and proofs | Ablation directory | Batch | Immutable batch lifetime | `prepared.json` and file identities | Validated or harness failure |
+
+The brief forbids delegation and hosted models. No formal proof is claimed
+for this I/O change. The independent author owns new race, crash and
+memory checks from B7-83 onward. Existing ablation checks remain unchanged.
+
 `carrySections` and `termLines` omit a term candidate already shown through
 a link. Deleting CITES alone would change the term section. The eval service
 therefore renders the full carry answer, then replaces only its decision
