@@ -7,7 +7,7 @@
     "docs/adr/0011-eval-closed-store.md",
     "docs/adr/0012-ticket-record-outcomes.md"
   ],
-  "status": "Both final B7-94–B7-116 suites: 1617/1619, exit 1. Two contract mismatches remain red for parent ruling; eight requested plants caught in each run. Earlier sections retain historical counts.",
+  "status": "Both final B7-94\u2013B7-116 suites: 1617/1619, exit 1. Two contract mismatches remain red for parent ruling; eight requested plants caught in each run. Earlier sections retain historical counts.",
   "scope": {
     "edited": "eval/selftest/ only",
     "branch": "batch-7-integration",
@@ -1367,7 +1367,7 @@
       "name": "query-protocol",
       "owner": "B7-13",
       "assertion": "raw query must return no graph records",
-      "actual": "\u0000\u0000\u0000\u0000\u0000\u0000\u0004�\u0000\u0000\u0000\u0000Decision records that match \"tax\", best match first (candidates to pick from two lists, words and meaning; a candidate, not a link: read the record and judge whether it governs your change):\n  2026-01-02  ADR-0002  One flat tax rate\n      matched: words and meaning; source: docs/adr/0002-flat-tax.md\n  2026-01-03  ADR-0003  Tax rate by region\n      matched: words and meaning; source: docs/adr/0003-regional-tax.md\n  2026-01-02  note-1  Tax is computed once per order, not per line\n      matched: words and meaning; source: /home/dev/repos/personal/whygraph/test-results/batch7-selftest-CcfTiI/179-closed/fixture/decisions/notes.json\n  2026-01-04  note-2  Show thousands separators in totals\n      matched: meaning; source: /home/dev/repos/personal/whygraph/test-results/batch7-selftest-CcfTiI/179-closed/fixture/decisions/notes.json\n  2026-01-01  ADR-0001  Money in cents\n      matched: meaning; source: docs/adr/0001-money-in-cents.md\nSearched: the title and statement of every decision record in the store, for the words: tax, and for the meaning of the request.\nNot searched: the code, the commits and the tags (run whygraph why or carry on a symbol for the links the graph holds); a record's id, date, status and source (only its title and statement are indexed).\n",
+      "actual": "\u0000\u0000\u0000\u0000\u0000\u0000\u0004\ufffd\u0000\u0000\u0000\u0000Decision records that match \"tax\", best match first (candidates to pick from two lists, words and meaning; a candidate, not a link: read the record and judge whether it governs your change):\n  2026-01-02  ADR-0002  One flat tax rate\n      matched: words and meaning; source: docs/adr/0002-flat-tax.md\n  2026-01-03  ADR-0003  Tax rate by region\n      matched: words and meaning; source: docs/adr/0003-regional-tax.md\n  2026-01-02  note-1  Tax is computed once per order, not per line\n      matched: words and meaning; source: /home/dev/repos/personal/whygraph/test-results/batch7-selftest-CcfTiI/179-closed/fixture/decisions/notes.json\n  2026-01-04  note-2  Show thousands separators in totals\n      matched: meaning; source: /home/dev/repos/personal/whygraph/test-results/batch7-selftest-CcfTiI/179-closed/fixture/decisions/notes.json\n  2026-01-01  ADR-0001  Money in cents\n      matched: meaning; source: docs/adr/0001-money-in-cents.md\nSearched: the title and statement of every decision record in the store, for the words: tax, and for the meaning of the request.\nNot searched: the code, the commits and the tags (run whygraph why or carry on a symbol for the links the graph holds); a record's id, date, status and source (only its title and statement are indexed).\n",
       "expected": {},
       "state": "caught in normal 1476-case full run"
     },
@@ -1894,7 +1894,7 @@
       "test-results/trial7-tests3-score.txt"
     ],
     "deletions": 0,
-    "note": "Roots are identified by this run’s logs or explicit scratch prefix. Work aliases target those roots. Each independence root also retains its nested self-test folders and aliases."
+    "note": "Roots are identified by this run\u2019s logs or explicit scratch prefix. Work aliases target those roots. Each independence root also retains its nested self-test folders and aliases."
   },
   "duplicate_removals": [
     {
@@ -8422,5 +8422,247 @@
     "new_rehearsals": 0,
     "deletions": 0,
     "pushes": 0
+  },
+  "ninth_round": {
+    "date": "2026-11-16",
+    "base_commit": "ab7cc0c",
+    "branch": "batch-7-agent-network",
+    "status": "done",
+    "contract": [
+      "docs/adr/0011-eval-closed-store.md: resolver and real-agent preflight",
+      "docs/adr/0013-eval-rehearsal.md: explicit preflight exclusion",
+      "eval/tickets/batch7-failures.md: B7-125 through B7-128"
+    ],
+    "scope": {
+      "tracked_edits": "eval/selftest/ only",
+      "production_changes": 0,
+      "hosted_model_calls": 0,
+      "trial_cells": 0,
+      "new_rehearsals": 0,
+      "installs": 0,
+      "pushes": 0,
+      "full_suite_runs": 0,
+      "stress_runs": 0,
+      "load": "one command at a time; cases under MemoryMax=6G and CPUQuota=200%"
+    },
+    "baseline": {
+      "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-check.mjs 'plant third launch after timeout'",
+      "log": "test-results/trial7-tests9-baseline-plant.txt",
+      "result": "0/1, exit 1",
+      "cause": "Missing _preflight/latest.json keeps the planted checker exit at 1. The unplanted ledger output also reports invalid attempt budget."
+    },
+    "case_changes": [
+      {
+        "case": "B7-59 through B7-65 B7-128 all eight checks PASS",
+        "change": "Add one passing UUID preflight record in closedPreflight writer shape, a local latest.json pointer, the eighth label, and exact preflight usage output."
+      },
+      {
+        "case": "plant third launch after timeout and breach caught by B7-59 attempt budget",
+        "change": "Prove clean smoke green; require the exact invalid attempt budget failure with preflight passing; retain planted output and the red owner assertion."
+      },
+      {
+        "case": "B7-59 B7-60 B7-65 archived attempt retains receipts and contributes its own usage",
+        "change": "Require all eight labels. Count the 17 indented attempt usage lines separately from the preflight line."
+      },
+      {
+        "case": "B7-62 ordinary command discovery and native repo read do not count as store access",
+        "change": "Inherit the passing preflight fixture and assert the eighth label while keeping the zero denied logged attempts assertion."
+      }
+    ],
+    "other_fixtures_aligned": [
+      "Every real smoke clone in batch7-smoke.mjs receives the full preflight record; latest.json points inside that clone. All bad() fault cases require preflight PASS, so an unrelated preflight failure cannot satisfy a named failure.",
+      "B7-66 empty evidence now requires preflight FAIL as well as the seven existing failures.",
+      "B7-128 startup real-smoke case replaces shortened passed and failed records with records from the real closedPreflight writer through controlled fake agents. Missing evidence must also return nonzero.",
+      "batch7-rehearsal.mjs success() asserts the eighth output label. Rehearsal keeps its legitimate skipped-preflight marker and receives no passing record."
+    ],
+    "runs": [
+      {
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node test-results/trial7-tests9-focused.mjs 'all eight checks PASS'",
+        "log": "test-results/trial7-tests9-small.txt",
+        "scratch": "test-results/trial7-tests9-smoke-rWlPqT",
+        "cases": [
+          {
+            "name": "B7 smoke B7-59 through B7-65 B7-128 all eight checks PASS from actual service evidence, no task verdict",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node test-results/trial7-tests9-focused.mjs 'all eight checks PASS|plant third launch|archived attempt retains|ordinary command discovery|unfinished cell fails|empty evidence|plant smoke accepts missing cell'",
+        "log": "test-results/trial7-tests9-smoke.txt",
+        "scratch": "test-results/trial7-tests9-smoke-5tUXBZ",
+        "cases": [
+          {
+            "name": "B7 smoke B7-59 through B7-65 B7-128 all eight checks PASS from actual service evidence, no task verdict",
+            "status": "passed"
+          },
+          {
+            "name": "B7 smoke B7-59 unfinished cell fails planned cells alone",
+            "status": "passed"
+          },
+          {
+            "name": "B7 smoke plant third launch after timeout and breach caught by B7-59 attempt budget",
+            "status": "passed"
+          },
+          {
+            "name": "B7 smoke B7-59 B7-60 B7-65 archived attempt retains receipts and contributes its own usage",
+            "status": "passed"
+          },
+          {
+            "name": "B7 smoke B7-62 ordinary command discovery and native repo read do not count as store access",
+            "status": "passed"
+          },
+          {
+            "name": "B7 smoke B7-66 empty evidence makes every relevant check fail",
+            "status": "passed"
+          },
+          {
+            "name": "B7 smoke plant smoke accepts missing cell caught by B7-59 planned-cell owner",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7-128'",
+        "log": "test-results/trial7-tests9-startup.txt",
+        "scratch": "test-results/startup-focused-98n7GE",
+        "cases": [
+          {
+            "name": "B7 B7-128 plans stay 16 and 258 scorer ignores preflight-only evidence",
+            "status": "passed",
+            "wall_ms": 723
+          },
+          {
+            "name": "B7 B7-128 real smoke reports preflight separately missing or failed evidence refuses",
+            "status": "passed",
+            "wall_ms": 2311
+          },
+          {
+            "name": "B7 plant preflight counted as cell turns B7-128 red",
+            "status": "passed",
+            "wall_ms": 634
+          }
+        ]
+      },
+      {
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'reuse existing rehearsal'",
+        "log": "test-results/trial7-tests9-rehearsal.txt",
+        "scratch": "test-results/startup-focused-4Xoo99",
+        "cases": [
+          {
+            "name": "B7 B7-131 reuse existing rehearsal exclusion all sixteen cells and prior smoke checks pass",
+            "status": "passed",
+            "wall_ms": 362
+          }
+        ]
+      }
+    ],
+    "plant": {
+      "clean": "test-results/trial7-tests9-smoke-5tUXBZ/1-smoke-clean/plant-baseline.json",
+      "unplanted": "test-results/trial7-tests9-smoke-5tUXBZ/10-smoke-fault-1/smoke-output.json",
+      "planted": "test-results/trial7-tests9-smoke-5tUXBZ/10-smoke-fault-1/planted-smoke-output.json",
+      "assertion_receipt": "test-results/trial7-tests9-smoke-5tUXBZ/plant-third-attempt.json"
+    },
+    "syntax_checks": [
+      "node --check eval/selftest/batch7-smoke.mjs",
+      "node --check eval/selftest/batch7-startup.mjs",
+      "node --check eval/selftest/batch7-rehearsal.mjs"
+    ],
+    "retained_scratch": [
+      "test-results/batch7-selftest-VcNN9W",
+      "test-results/trial7-tests9-smoke-rWlPqT",
+      "test-results/trial7-tests9-smoke-5tUXBZ",
+      "test-results/startup-focused-98n7GE",
+      "test-results/startup-focused-4Xoo99"
+    ],
+    "retained_work_roots": [
+      "test-results/n0167c864",
+      "test-results/n25b8dc47",
+      "test-results/nc5663fdf",
+      "test-results/w1a37a7",
+      "test-results/w1f0408",
+      "test-results/w26c8d2",
+      "test-results/w428315",
+      "test-results/w57ec71",
+      "test-results/w57f038",
+      "test-results/w61ff50",
+      "test-results/wad772f",
+      "test-results/wb849bf",
+      "test-results/wd16c18",
+      "test-results/wd49ee9",
+      "test-results/wd72a55",
+      "test-results/we43eb4",
+      "test-results/we81d02",
+      "test-results/we8fb67",
+      "test-results/wef3793",
+      "test-results/wefcced",
+      "test-results/wff06de"
+    ],
+    "retained_files": [
+      "test-results/trial7-tests9-focused.mjs",
+      "test-results/trial7-tests9-baseline-plant.txt",
+      "test-results/trial7-tests9-small.txt",
+      "test-results/trial7-tests9-smoke.txt",
+      "test-results/trial7-tests9-startup.txt",
+      "test-results/trial7-tests9-rehearsal.txt",
+      "test-results/trial7-tests9-receipts.json",
+      "test-results/trial7-tests9-typecheck.txt"
+    ],
+    "limits": [
+      "Focused cases only; no full or stress suite.",
+      "The rehearsal assertion list was syntax-checked; retained real rehearsal evidence passed B7-131. The full B7-103/B7-104 rehearsal cases were not rerun.",
+      "Other shared smoke fault fixtures were aligned by the common fixture and label list. Only the seven named smoke cases ran.",
+      "Fleet memory is unavailable. aux stops because gondr is missing. No credentials are needed."
+    ],
+    "aligned_real_smoke_cases": [
+      "B7 smoke B7-59 through B7-65 B7-128 all eight checks PASS from actual service evidence, no task verdict",
+      "B7 smoke B7-59 unfinished cell fails planned cells alone",
+      "B7 smoke B7-60 disabled command leaking an answer fails condition answers alone",
+      "B7 smoke B7-60 raw CLI receipt absent fails condition answers alone",
+      "B7 smoke B7-61 different client bytes fails identical agent files alone",
+      "B7 smoke B7-61 norule rule text retained fails identical agent files alone",
+      "B7 smoke B7-62 successful probe fails closed store and tool code alone",
+      "B7 smoke B7-63 mismatched service call totals fails service answered every call alone",
+      "B7 smoke B7-64 missing scorer block fails scorer batch blocks alone",
+      "B7 smoke B7-65 missing wall time fails tokens and wall time per run alone",
+      "B7 smoke B7-59 running ledger entry fails planned cells alone",
+      "B7 smoke B7-59 third attempt after timeout and breach fails planned cells alone",
+      "B7 smoke B7-59 missing archive fails planned cells alone",
+      "B7 smoke B7-60 changed unrelated store node fails condition answers alone",
+      "B7 smoke B7-60 enabled health call returns no result fails condition answers alone",
+      "B7 smoke B7-60 health command fails fails condition answers alone",
+      "B7 smoke B7-62 missing probe fails closed store and tool code alone",
+      "B7 smoke B7-62 probe did not run fails closed store and tool code alone",
+      "B7 smoke B7-62 logged successful direct store access fails closed store and tool code alone",
+      "B7 smoke B7-63 malformed service reply fails service and answer checks",
+      "B7 smoke B7-65 negative tokens fails usage check alone",
+      "B7 smoke B7-65 negative wall_ms fails usage check alone",
+      "B7 smoke plant third launch after timeout and breach caught by B7-59 attempt budget",
+      "B7 smoke B7-59 B7-60 B7-65 archived attempt retains receipts and contributes its own usage",
+      "B7 smoke B7-60 archived receipt differs from its saved answer fails answer check alone",
+      "B7 smoke B7-65 archived attempt missing tokens fails usage check alone",
+      "B7 smoke B7-61 original norule text differs beyond omitted suffix fails file identity alone",
+      "B7 smoke B7-60 graph-nolink retains linkCount fails answer proof alone",
+      "B7 smoke B7-60 graph-noterms retains termCount fails answer proof alone",
+      "B7 smoke B7-60 graph-noterms retains mentionCount fails answer proof alone",
+      "B7 smoke B7-60 saved reply 2 differs from reference fails answers alone",
+      "B7 smoke B7-60 saved reply 3 differs from reference fails answers alone",
+      "B7 smoke B7-60 saved reply 4 differs from reference fails answers alone",
+      "B7 smoke B7-64 scorer lacks === Batch 7: stratum cited fails scorer blocks alone",
+      "B7 smoke B7-64 scorer lacks === Batch 7: stratum uncited fails scorer blocks alone",
+      "B7 smoke B7-64 scorer lacks graph - graph-nolink fails scorer blocks alone",
+      "B7 smoke B7-64 scorer lacks graph - graph-nosearch fails scorer blocks alone",
+      "B7 smoke B7-64 scorer lacks graph - graph-noterms fails scorer blocks alone",
+      "B7 smoke B7-64 scorer lacks graph - graph-norule fails scorer blocks alone",
+      "B7 smoke B7-62 ordinary command discovery and native repo read do not count as store access",
+      "B7 smoke plant smoke accepts missing cell caught by B7-59 planned-cell owner"
+    ],
+    "checks": {
+      "javascript_syntax": "three changed mjs files: exit 0",
+      "audit_json": "parsed successfully",
+      "pnpm_check": "exit 0; tsrs; test-results/trial7-tests9-typecheck.txt",
+      "memod_lint": "exit 0 in escalated resource scope",
+      "git_diff_check": "exit 0"
+    }
   }
 }

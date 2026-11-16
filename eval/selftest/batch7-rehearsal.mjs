@@ -11,7 +11,7 @@ import {pathToFileURL} from 'node:url';
 import {b7 as h} from './batch7-support.mjs';
 
 const conditions=['stub','graph','graph-nolink','graph-nosearch','graph-noterms','graph-norule'];
-const labels=['planned cells','condition answers','identical agent files','closed store and tool code','service answered every call','scorer batch blocks','tokens and wall time per run'];
+const labels=['real agent preflight','planned cells','condition answers','identical agent files','closed store and tool code','service answered every call','scorer batch blocks','tokens and wall time per run'];
 const uuid=/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/;
 const key=id=>/^[\w.-]+$/.test(id)&&!id.startsWith('id-')&&!['.','..'].includes(id)&&Buffer.byteLength(id)<=128?id:'id-'+h.hash(id);
 const replace=(file,from,to)=>{const text=h.read(file);assert.equal(text.split(from).length,2,`one mutation anchor: ${from}`);h.write(file,text.replace(from,to));};

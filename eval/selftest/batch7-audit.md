@@ -1061,3 +1061,132 @@ cause fix in `e1f4ae2`. This follow-up inspected the fix but did not rerun
 B7-122. The earlier two-red report is historical: B7-121 is settled by the
 amended contract and this passing check; B7-122 is settled by the parent's
 code fix and reported check. No new independent timeout pass is claimed.
+
+
+## Real smoke fixture preflight follow-up (tests 9, 2026-11-16)
+
+Base: `ab7cc0c`. Branch: `batch-7-agent-network`. Only `eval/selftest/`
+changed. ADRs 0011 and 0013 and B7-125 through B7-128 govern the change.
+The fixture record follows `closedPreflight` in `eval/closed-run.mjs`,
+including the UUID directory, model, status, exit, signal, timeout, full
+token totals, wall time and work path. Each copied fixture has a local
+`latest.json` pointer.
+
+| Case | Change |
+| --- | --- |
+| B7-59 through B7-65, B7-128 | Rename seven checks to eight. Require all eight PASS lines and the separate preflight usage line. |
+| B7-59 third-attempt plant | Prove a clean smoke passes. Require the three-attempt ledger to fail with `invalid attempt budget` while preflight passes. Save the planted checker output and the red owner assertion. |
+| B7-59, B7-60, B7-65 archived attempt | Require all eight checks. Count 17 indented attempt usage lines separately from preflight usage. |
+| B7-62 ordinary command discovery | Use the complete real-smoke fixture and require preflight PASS. Keep the zero denied logged attempts assertion. |
+
+All real-smoke clones in `batch7-smoke.mjs` now have the passing record.
+Every `bad()` case requires preflight PASS. These cases previously checked
+only the seven older labels, so an extra preflight failure was invisible.
+B7-66 empty evidence now requires all eight checks to fail.
+The missing-cell plant also inherits the complete fixture.
+
+The B7-128 startup smoke case used shortened passed and failed records.
+It now uses records that the real preflight writer produces through a
+controlled fake executable. Missing evidence must return nonzero.
+The rehearsal success assertion now includes the preflight label.
+Rehearsal retains its explicit exclusion marker and gets no passing record.
+No other real-smoke fixture without a preflight record was found in the
+self-test files that invoke `smoke-check.mjs`.
+
+The original focused plant run failed 0/1 with exit 1. Its planted checker
+still failed because `_preflight/latest.json` was absent. This confirms
+the reported plant cause. After fixture repair, the clean checker passes,
+the three-attempt ledger fails for the attempt budget, and the planted
+checker admits that ledger. The B7-59 assertion then turns red.
+
+| Focused run | Result |
+| --- | --- |
+| Smallest eight-check case | 1/1, exit 0 |
+| Four reported cases, unfinished cell, empty evidence and missing-cell plant | 7/7, exit 0 |
+| B7-128 startup cases, including count-as-cell plant | 3/3, exit 0 |
+| B7-131 retained rehearsal evidence | 1/1, exit 0 |
+
+`node --check` passed on the three changed JavaScript files.
+`pnpm check` passed with tsrs. `memod lint` passed in the resource scope.
+`git diff --check` passed. The JSON audit parsed successfully.
+The JSON audit contains the exact commands, case names and plant receipts.
+Every case command used `TMPDIR=/mnt/ssd/tmp`, a user systemd scope,
+`MemoryMax=6G` and `CPUQuota=200%`. Commands ran one at a time.
+
+```sh
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node test-results/trial7-tests9-focused.mjs 'all eight checks PASS'
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node test-results/trial7-tests9-focused.mjs 'all eight checks PASS|plant third launch|archived attempt retains|ordinary command discovery|unfinished cell fails|empty evidence|plant smoke accepts missing cell'
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'B7-128'
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-startup.mjs 'reuse existing rehearsal'
+```
+
+Plant receipts:
+
+- `clean`: `test-results/trial7-tests9-smoke-5tUXBZ/1-smoke-clean/plant-baseline.json`.
+- `unplanted`: `test-results/trial7-tests9-smoke-5tUXBZ/10-smoke-fault-1/smoke-output.json`.
+- `planted`: `test-results/trial7-tests9-smoke-5tUXBZ/10-smoke-fault-1/planted-smoke-output.json`.
+- `assertion_receipt`: `test-results/trial7-tests9-smoke-5tUXBZ/plant-third-attempt.json`.
+
+Scratch retained:
+
+- `test-results/batch7-selftest-VcNN9W`.
+- `test-results/trial7-tests9-smoke-rWlPqT`.
+- `test-results/trial7-tests9-smoke-5tUXBZ`.
+- `test-results/startup-focused-98n7GE`.
+- `test-results/startup-focused-4Xoo99`.
+
+Keep `test-results/trial7-tests9-focused.mjs`, the five named run logs,
+`trial7-tests9-rehearsal.txt`, and `trial7-tests9-receipts.json`.
+The JSON audit lists the retained work directories and symlinks.
+Nothing was deleted. No real `eval/results/` file was written.
+
+Only focused cases ran. Other smoke fault cases share the repaired fixture
+and label assertions but were not rerun. The full rehearsal cases were
+not rerun; B7-131 reused existing rehearsal evidence. No full suite, stress
+form, hosted model, trial cell, new rehearsal, install or push ran.
+Fleet memory is unavailable, and `aux` stops because `gondr` is missing.
+These checks need no credentials.
+
+### Real-smoke cases that use the aligned fixture
+
+- `B7 smoke B7-59 through B7-65 B7-128 all eight checks PASS from actual service evidence, no task verdict`.
+- `B7 smoke B7-59 unfinished cell fails planned cells alone`.
+- `B7 smoke B7-60 disabled command leaking an answer fails condition answers alone`.
+- `B7 smoke B7-60 raw CLI receipt absent fails condition answers alone`.
+- `B7 smoke B7-61 different client bytes fails identical agent files alone`.
+- `B7 smoke B7-61 norule rule text retained fails identical agent files alone`.
+- `B7 smoke B7-62 successful probe fails closed store and tool code alone`.
+- `B7 smoke B7-63 mismatched service call totals fails service answered every call alone`.
+- `B7 smoke B7-64 missing scorer block fails scorer batch blocks alone`.
+- `B7 smoke B7-65 missing wall time fails tokens and wall time per run alone`.
+- `B7 smoke B7-59 running ledger entry fails planned cells alone`.
+- `B7 smoke B7-59 third attempt after timeout and breach fails planned cells alone`.
+- `B7 smoke B7-59 missing archive fails planned cells alone`.
+- `B7 smoke B7-60 changed unrelated store node fails condition answers alone`.
+- `B7 smoke B7-60 enabled health call returns no result fails condition answers alone`.
+- `B7 smoke B7-60 health command fails fails condition answers alone`.
+- `B7 smoke B7-62 missing probe fails closed store and tool code alone`.
+- `B7 smoke B7-62 probe did not run fails closed store and tool code alone`.
+- `B7 smoke B7-62 logged successful direct store access fails closed store and tool code alone`.
+- `B7 smoke B7-63 malformed service reply fails service and answer checks`.
+- `B7 smoke B7-65 negative tokens fails usage check alone`.
+- `B7 smoke B7-65 negative wall_ms fails usage check alone`.
+- `B7 smoke plant third launch after timeout and breach caught by B7-59 attempt budget`.
+- `B7 smoke B7-59 B7-60 B7-65 archived attempt retains receipts and contributes its own usage`.
+- `B7 smoke B7-60 archived receipt differs from its saved answer fails answer check alone`.
+- `B7 smoke B7-65 archived attempt missing tokens fails usage check alone`.
+- `B7 smoke B7-61 original norule text differs beyond omitted suffix fails file identity alone`.
+- `B7 smoke B7-60 graph-nolink retains linkCount fails answer proof alone`.
+- `B7 smoke B7-60 graph-noterms retains termCount fails answer proof alone`.
+- `B7 smoke B7-60 graph-noterms retains mentionCount fails answer proof alone`.
+- `B7 smoke B7-60 saved reply 2 differs from reference fails answers alone`.
+- `B7 smoke B7-60 saved reply 3 differs from reference fails answers alone`.
+- `B7 smoke B7-60 saved reply 4 differs from reference fails answers alone`.
+- `B7 smoke B7-64 scorer lacks === Batch 7: stratum cited fails scorer blocks alone`.
+- `B7 smoke B7-64 scorer lacks === Batch 7: stratum uncited fails scorer blocks alone`.
+- `B7 smoke B7-64 scorer lacks graph - graph-nolink fails scorer blocks alone`.
+- `B7 smoke B7-64 scorer lacks graph - graph-nosearch fails scorer blocks alone`.
+- `B7 smoke B7-64 scorer lacks graph - graph-noterms fails scorer blocks alone`.
+- `B7 smoke B7-64 scorer lacks graph - graph-norule fails scorer blocks alone`.
+- `B7 smoke B7-62 ordinary command discovery and native repo read do not count as store access`.
+- `B7 smoke plant smoke accepts missing cell caught by B7-59 planned-cell owner`.
