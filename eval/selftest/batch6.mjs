@@ -36,7 +36,10 @@ function snapshot(dir) {
 }
 function copyHarness(at) {
   mkdirSync(at, { recursive: true }); copyRegistry(at);
-  for (const f of ['run.mjs', 'opencode.mjs', 'score.mjs', 'tasks']) cpSync(join(root,'eval',f),join(at,f),{recursive:true});
+  for (const f of ['run.mjs', 'opencode.mjs', 'score.mjs']) cpSync(join(root,'eval',f),join(at,f));
+  const designs=json(join(at,'registry.json')).batches,prefixes=Object.entries(designs).filter(([b])=>Number(b)<=6).flatMap(([,b])=>b.prefix);
+  mkdirSync(join(at,'tasks'));
+  for(const f of readdirSync(join(root,'eval/tasks')).filter(f=>prefixes.some(p=>f.startsWith(p+'-'))))cpSync(join(root,'eval/tasks',f),join(at,'tasks',f));
   mkdirSync(join(at,'tickets/hono'),{recursive:true});
   cpSync(join(root,'eval/tickets/make-tasks.mjs'),join(at,'tickets/make-tasks.mjs'));
   const registry=json(join(at,'registry.json'));

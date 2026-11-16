@@ -4,7 +4,7 @@
  * Run after the normal self-test: node eval/selftest/batch7-independence.mjs LOG
  */
 import assert from 'node:assert/strict';
-import {cpSync,existsSync,mkdirSync,mkdtempSync,openSync,closeSync,readFileSync,symlinkSync,writeFileSync} from 'node:fs';
+import {cpSync,existsSync,mkdirSync,mkdtempSync,openSync,closeSync,readFileSync,statSync,symlinkSync,writeFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {dirname,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -15,13 +15,19 @@ assert.ok(baseline,'usage: node eval/selftest/batch7-independence.mjs BASELINE-L
 const previous=readFileSync(baseline,'utf8');
 assert.ok(/\d+\/\d+ cases as expected/.test(previous),'baseline self-test must finish first');
 const scratch=mkdtempSync(join(root,'test-results/i-'));
+const clone=spawnSync('git',['clone','-q','--shared','--no-checkout',root,scratch],{encoding:'utf8'});
+assert.equal(clone.status,0,clone.stderr);
+assert.ok(statSync(join(scratch,'.git')).isDirectory(),'nested fixtures require a Git directory');
+for(const file of ['skills/whygraph/SKILL.md','skills/whygraph-rule.md']){
+  const history=spawnSync('git',['show',`c92205d:${file}`],{cwd:scratch,encoding:'utf8'});
+  assert.equal(history.status,0,`scratch history must hold ${file}: ${history.stderr}`);
+}
 const files=spawnSync('git',['ls-files','-z'],{cwd:root,encoding:'utf8'});
 assert.equal(files.status,0,files.stderr);
 for(const file of files.stdout.split('\0').filter(Boolean)){
   const target=join(scratch,file);mkdirSync(dirname(target),{recursive:true});cpSync(join(root,file),target);
 }
 symlinkSync(join(root,'node_modules'),join(scratch,'node_modules'),'dir');
-writeFileSync(join(scratch,'.git'),`gitdir: ${join(root,'.git')}\n`);
 if(existsSync(join(root,'eval/results')))cpSync(join(root,'eval/results'),join(scratch,'eval/results'),{recursive:true});
 mkdirSync(join(scratch,'test-results'),{recursive:true});
 const path=join(scratch,'eval/registry.json'),registry=JSON.parse(readFileSync(path,'utf8'));
