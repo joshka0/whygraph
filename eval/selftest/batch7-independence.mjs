@@ -13,7 +13,7 @@ const root=fileURLToPath(new URL('../../',import.meta.url));
 const baseline=process.argv[2];
 assert.ok(baseline,'usage: node eval/selftest/batch7-independence.mjs BASELINE-LOG');
 const previous=readFileSync(baseline,'utf8');
-assert.match(previous,/\d+\/\d+ cases as expected/,'baseline self-test must finish first');
+assert.ok(/\d+\/\d+ cases as expected/.test(previous),'baseline self-test must finish first');
 const scratch=mkdtempSync(join(root,'test-results/i-'));
 const files=spawnSync('git',['ls-files','-z'],{cwd:root,encoding:'utf8'});
 assert.equal(files.status,0,files.stderr);
