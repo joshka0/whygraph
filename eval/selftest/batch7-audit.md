@@ -784,9 +784,10 @@ these two owners have no separate long-only plants. The surviving-child
 plant stays in the default pass at its unchanged ten-second bound. All
 eight rehearsal plants also stay in the default pass. No plant ran here.
 
-Run stress before a merge that changes `eval/run.mjs`, `eval/closed-run.mjs`,
-`eval/closed-store.mjs`, `eval/rehearse.mjs`, the shell launcher or the client
-(currently `eval/closed-client.c`). Run serially at a quiet time:
+Run stress only on request (operator rule of 2026-11-16). Its subject is
+`eval/run.mjs`, `eval/closed-run.mjs`, `eval/closed-store.mjs`,
+`eval/rehearse.mjs`, the shell launcher and the client (currently
+`eval/closed-client.c`). Run serially, on a machine that nobody shares:
 
 ```sh
 TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/check.mjs
