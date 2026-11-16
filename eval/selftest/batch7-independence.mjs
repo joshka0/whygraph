@@ -17,6 +17,16 @@ assert.ok(/\d+\/\d+ cases as expected/.test(previous),'baseline self-test must f
 const scratch=mkdtempSync(join(root,'test-results/i-'));
 const clone=spawnSync('git',['clone','-q','--shared','--no-checkout',root,scratch],{encoding:'utf8'});
 assert.equal(clone.status,0,clone.stderr);
+const refs=spawnSync('git',['for-each-ref','--format=%(refname:short) %(objectname)','refs/heads'],{cwd:root,encoding:'utf8'});
+assert.equal(refs.status,0,refs.stderr);
+for(const row of refs.stdout.trim().split('\n')){
+  const [branch,commit]=row.split(' '),existing=spawnSync('git',['show-ref','--verify','--quiet',`refs/heads/${branch}`],{cwd:scratch});
+  if(existing.status===1){const added=spawnSync('git',['branch',branch,commit],{cwd:scratch,encoding:'utf8'});assert.equal(added.status,0,added.stderr);}
+  else assert.equal(existing.status,0,'read scratch branch');
+}
+const copiedRefs=spawnSync('git',['for-each-ref','--format=%(refname:short) %(objectname)','refs/heads'],{cwd:scratch,encoding:'utf8'});
+assert.equal(copiedRefs.status,0,copiedRefs.stderr);
+assert.equal(copiedRefs.stdout,refs.stdout,'scratch preserves source local branches');
 assert.ok(statSync(join(scratch,'.git')).isDirectory(),'nested fixtures require a Git directory');
 for(const file of ['skills/whygraph/SKILL.md','skills/whygraph-rule.md']){
   const history=spawnSync('git',['show',`c92205d:${file}`],{cwd:scratch,encoding:'utf8'});
@@ -37,6 +47,9 @@ registry.batches[7].sampleCounts={cited:37,uncited:41};
 assert.notEqual(before.requests,registry.batches[7].counts.requests);
 assert.notDeepEqual(before.sampleCounts,registry.batches[7].sampleCounts);
 writeFileSync(path,JSON.stringify(registry,null,2)+'\n');
+const preflight=spawnSync(process.execPath,['--input-type=module','-e',`import{batch4Checks}from './eval/selftest/batch4.mjs';import{readTasks,scoreRun}from './eval/score.mjs';const cases=await batch4Checks({tasks:readTasks(),scoreRun});const owner=cases.find(c=>c.name==='B4 default generator preserves main batch 3 bytes and original order');if(!owner)throw Error('missing historical preflight case');await owner.run();console.log('historical main-branch preflight passed');`],{cwd:scratch,env:{...process.env,TMPDIR:'/mnt/ssd/tmp'},encoding:'utf8'});
+writeFileSync(join(scratch,'test-results/independence-preflight.txt'),preflight.stdout+preflight.stderr);
+assert.equal(preflight.status,0,preflight.stderr);
 const log=join(scratch,'test-results/independence-selftest.txt'),fd=openSync(log,'w');
 console.log(`Independence scratch retained: ${scratch}`);
 let result;
