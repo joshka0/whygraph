@@ -18,6 +18,18 @@ const check=(name,fn)=>{try{const detail=fn();console.log(`PASS ${name}${detail?
 const require=(condition,message)=>{if(!condition)throw new Error(message);};
 const read=(dir,file)=>JSON.parse(readFileSync(join(dir,file),'utf8'));
 let plan=[];const attempts=[],finished=[];
+check('real agent preflight',()=>{
+ if(existsSync(join(results,'rehearsal.json'))) {
+  const marker=read(results,'rehearsal.json');
+  require(marker.rehearsal===true&&marker.preflight==='skipped: stand-in has no model connection or token usage','invalid rehearsal preflight exclusion');
+  return marker.preflight;
+ }
+ const pointer=read(join(results,'_preflight'),'latest.json');
+ const record=JSON.parse(readFileSync(pointer.record,'utf8'));
+ require(record.kind==='agent-preflight'&&record.status==='passed'&&record.exit===0&&record.tokens?.total>0&&Number.isFinite(record.wall_ms)&&record.wall_ms>=0,'missing or failed real agent preflight');
+ return `${record.tokens.total} tokens; ${record.wall_ms} ms`;
+});
+
 check('planned cells',()=>{
  plan=batchPlan(readTasks(),{batch,stage:'smoke'});
  for(const cell of plan) {

@@ -30,6 +30,11 @@ attempt as a rehearsal. The scorer reads the folder only with `--results`.
 The entry invokes the unchanged smoke checks after the plan, and propagates
 every failure. Full rehearsals include the same smoke cells and check them.
 
+ADR 0011's real-agent preflight is excluded from rehearsal. The stand-in
+has no model connection and no token usage, so it cannot satisfy that
+contract. `rehearsal.json` records the exclusion and smoke-check prints it
+explicitly. The real-agent preflight runs separately before real cells.
+
 The stand-in reads the task source, calls all four commands, and attempts
 forbidden store, relate, code and network access through `/tools/shell`.
 Every step checks its actual exit status. Controls use committed edit

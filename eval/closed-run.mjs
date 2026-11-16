@@ -58,6 +58,129 @@ export function prepareClosed({task,condition,work,source,stores,client}) {
   return {repo,base,socket,client,store:stores[condition]??stores.graph,files:agentFiles(repo)};
 }
 
+/** Build the launch shared by cells and the real-agent preflight.
+ * owns: [[whygraph-closed-runner]]
+ */
+export async function startClosedAgent({work,repo,client,socket,out,prompt,rehearsal}) {
+  const launcher=await startClosedShell({work,repo,client,socket,log:join(out,'shell.jsonl')});
+  try {
+    const shell=join(work,'shell');
+    writeFileSync(shell,'#!/bin/sh\nexec /tools/shell-client "$@"\n'); chmodSync(shell,0o555);
+    const command=rehearsal?.executable??sh('bash',['-c','command -v opencode']).trim();
+    if(!rehearsal&&sh(command,['--version']).trim()!=='1.18.29') throw new Error('requires opencode 1.18.29');
+    const confinement=closedConfinement({work,repo,client,socket,network:true,opencode:command});
+    confinement.push('--ro-bind',shell,'/tools/shell','--ro-bind',client,'/tools/shell-client','--ro-bind',join(work,'shell.sock'),'/whygraph/shell.sock');
+    const launch=opencodeLaunch(prompt,repo,'/tools','/tools/shell',work);
+    Object.assign(launch.env,{HOME:'/home/agent',PATH:'/tools:/usr/bin:/bin',XDG_CONFIG_HOME:'/config',XDG_CACHE_HOME:'/cache',XDG_STATE_HOME:'/state',XDG_DATA_HOME:'/identity',OPENCODE_CONFIG_DIR:'/config/opencode'});
+    const config=JSON.parse(launch.env.OPENCODE_CONFIG_CONTENT);
+    config.permission.external_directory['/identity/opencode/tool-output/*']='deny';
+    launch.env.OPENCODE_CONFIG_CONTENT=JSON.stringify(config);
+    execBudget('/tools/opencode',launch.args,launch.env);
+    writeFileSync(join(out,'command.json'),JSON.stringify({args:[...confinement,'--','/tools/opencode',...launch.args],env:launch.env},null,2));
+    return {launcher,shell,confinement,launch};
+  } catch(error) { await launcher.stop(); throw error; }
+}
+
+/** Capture native events without feeding transcripts into failure diagnostics.
+ * owns: [[whygraph-closed-runner]]
+ */
+export async function runClosedAgent({launcher,confinement,launch},out) {
+  const started=Date.now(), stdout=openSync(join(out,'output.jsonl'),'w'), stderr=openSync(join(out,'stderr.txt'),'w');
+  const r=await new Promise(resolve=>{
+    const invocation=[...confinement.slice(1),'--','/tools/opencode',...launch.args];execBudget(confinement[0],invocation,launch.env);
+    const child=spawn(confinement[0],invocation,{env:launch.env,stdio:['ignore',stdout,stderr]});
+    closeSync(stdout);closeSync(stderr);
+    let timedOut=false,spawnError,killTimer;
+    const timer=setTimeout(()=>{timedOut=true;launcher.cancel();child.kill('SIGTERM');killTimer=setTimeout(()=>child.kill('SIGKILL'),5000);},20*60*1000);
+    child.on('error',e=>{spawnError=e.message;});
+    child.on('close',(code,signal)=>{clearTimeout(timer);clearTimeout(killTimer);resolve({code,signal,timedOut,spawnError});});
+  });
+  const text=readFileSync(join(out,'output.jsonl'),'utf8'), events=[];let malformed=false;
+  for(const line of text.split('\n').filter(l=>l.trim())) {try{events.push(JSON.parse(line));}catch{malformed=true;}}
+  return {r,events,malformed,session:opencodeSession(events),wall_ms:Date.now()-started};
+}
+
+/** Keep the agent's named error and exit, without stdout, stderr or nested payloads.
+ * owns: [[whygraph-closed-runner]]
+ */
+export function closedAgentCause(run,prompt,details=[]) {
+  const clean=value=>{
+    let text=String(value??'');
+    for(const fragment of [prompt,...prompt.split('\n')].filter(s=>s.trim()))
+      text=text.replaceAll(fragment,'[prompt redacted]');
+    return text.split(/[\r\n]/,1)[0].replace(/[\x00-\x1f\x7f]/g,' ').slice(0,180);
+  };
+  const errors=(run?.events??[]).filter(e=>e.type==='error').slice(0,2).map(e=>{
+    const error=e.error??e.part??{};
+    return [clean(error.name),clean(error.data?.message??error.message)].filter(Boolean).join(': ')||'agent error event';
+  });
+  const r=run?.r??{};
+  const parts=[...details,r.spawnError,...errors,run?.malformed?'malformed JSONL':undefined,r.timedOut?'agent timed out':undefined].filter(Boolean).map(clean);
+  const body=(parts.join('; ')||'agent did not complete successfully').slice(0,360);
+  return `${body}; exit ${r.code??'none'}; signal ${r.signal??'none'}`;
+}
+
+// Record startup dependencies as hashes. Never open the identity directory's files.
+function recordStartup(agent,out) {
+  const paths=['/etc/resolv.conf','/etc/nsswitch.conf','/etc/hosts','/etc/host.conf','/etc/gai.conf','/etc/localtime'];
+  const certs='/etc/ssl/certs';
+  if(existsSync(certs))for(const name of readdirSync(certs).sort()) {
+    const path=join(certs,name);
+    const stat=lstatSync(path);
+    if(stat.isSymbolicLink()||stat.isFile())paths.push(path);
+  }
+  const program=`import {readFileSync,statSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+const files=JSON.parse(process.argv[1]).map(path=>{try{return {path,sha256:createHash('sha256').update(readFileSync(path)).digest('hex')}}catch(error){return {path,error:error.code}}});
+console.log(JSON.stringify({files,identity:statSync('/identity/opencode').isDirectory()}));`;
+  const {confinement,launch}=agent;
+  const args=[...confinement.slice(1),'--','/usr/bin/node','--input-type=module','-e',program,JSON.stringify(paths)];
+  execBudget(confinement[0],args,launch.env);
+  const result=spawnSync(confinement[0],args,{env:launch.env,encoding:'utf8'});
+  if(result.status!==0)throw new Error(`startup dependency inspection exited ${result.status}`);
+  const inside=JSON.parse(result.stdout);
+  const files=inside.files.map(file=>{
+    try { return {...file,host_sha256:createHash('sha256').update(readFileSync(file.path)).digest('hex')}; }
+    catch(error) { return {...file,host_error:error.code}; }
+  });
+  writeFileSync(join(out,'startup.json'),JSON.stringify({identity_directory:inside.identity,files},null,2));
+}
+
+/** Start the real agent once, without a task, ledger reservation or cell result.
+ * owns: [[whygraph-closed-runner]]
+ */
+export async function closedPreflight({workRoot,results}) {
+  closedWorkRoot(workRoot); filesystemPath(results);
+  const id=randomUUID(),out=join(results,'_preflight',id),work=join(workRoot,randomUUID());
+  mkdirSync(out,{recursive:true});mkdirSync(work,{recursive:true,mode:0o700});
+  for(const dir of ['repo','home','config','cache','state'])mkdirSync(join(work,dir));
+  const repo=join(work,'repo'),socket=join(work,'service.sock');
+  const prompt='Reply with the single word ok. Use no tool.';
+  const started=Date.now();let service,agent,run,reason;
+  try {
+    const client=closedClient(join(workRoot,'_closed-client'));
+    service=await startClosedStore({condition:'stub',repo,socket,log:join(out,'service.jsonl')});
+    agent=await startClosedAgent({work,repo,client,socket,out,prompt});
+    recordStartup(agent,out);
+    run=await runClosedAgent(agent,out);
+    const {r,session,malformed}=run;
+    if(r.code!==0||r.timedOut||r.spawnError||malformed||!session.success||!Number.isFinite(session.tokens.total)||session.tokens.total<=0||session.final.trim()!=='ok'||session.tools.length)
+      reason=closedAgentCause(run,prompt,['preflight requires successful completion, positive tokens, exactly ok and no tool use']);
+  } catch(error) { reason=closedAgentCause(run,prompt,[error.message]); }
+  finally {
+    try { await agent?.launcher.stop(); } catch(error) { reason=closedAgentCause(run,prompt,[reason,error.message].filter(Boolean)); }
+    try { await service?.stop(); } catch(error) { reason=closedAgentCause(run,prompt,[reason,error.message].filter(Boolean)); }
+  }
+  const record={kind:'agent-preflight',model:OPENCODE_MODEL,status:reason?'failed':'passed',...(reason?{reason}:{}),
+    exit:run?.r.code??null,signal:run?.r.signal??null,timed_out:run?.r.timedOut??false,
+    tokens:run?.session.tokens??{total:0},wall_ms:Date.now()-started,work};
+  writeFileSync(join(out,'record.json'),JSON.stringify(record,null,2));
+  writeFileSync(join(results,'_preflight','latest.json'),JSON.stringify({record:join(out,'record.json')},null,2));
+  console.log(`Agent preflight ${record.status}: ${record.tokens.total} tokens; ${record.wall_ms} ms; ${join(out,'record.json')}`);
+  if(reason)throw new Error(`agent preflight failed: ${reason}`);
+  return record;
+}
+
 /** One isolated attempt, retaining its work folder and full service answers as evidence.
  * owns: [[whygraph-closed-runner]]
  */
@@ -74,21 +197,9 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
   const service=await startClosedStore({condition,repo,store:prepared.store,fullStore:stores.graph,socket,log});
   let launcher;
   try {
-    launcher=await startClosedShell({work,repo,client,socket,log:join(out,'shell.jsonl')});
-    // The shell wrapper is identical in every condition and contains no service configuration.
-    const shell=join(work,'shell');
-    writeFileSync(shell,'#!/bin/sh\nexec /tools/shell-client "$@"\n'); chmodSync(shell,0o555);
-    const command=rehearsal?.executable??sh('bash',['-c','command -v opencode']).trim();
-    if(!rehearsal&&sh(command,['--version']).trim()!=='1.18.29') throw new Error('requires opencode 1.18.29');
-    const confinement=closedConfinement({work,repo,client,socket,network:true,opencode:command});
-    confinement.push('--ro-bind',shell,'/tools/shell','--ro-bind',client,'/tools/shell-client','--ro-bind',join(work,'shell.sock'),'/whygraph/shell.sock');
-    const launch=opencodeLaunch(prompt,repo,'/tools','/tools/shell',work);
-    Object.assign(launch.env,{HOME:'/home/agent',PATH:'/tools:/usr/bin:/bin',XDG_CONFIG_HOME:'/config',XDG_CACHE_HOME:'/cache',XDG_STATE_HOME:'/state',XDG_DATA_HOME:'/identity',OPENCODE_CONFIG_DIR:'/config/opencode'});
-    // The old exact external-directory exclusion remains, with the mounted identity path too.
-    const config=JSON.parse(launch.env.OPENCODE_CONFIG_CONTENT);
-    config.permission.external_directory['/identity/opencode/tool-output/*']='deny';
-    launch.env.OPENCODE_CONFIG_CONTENT=JSON.stringify(config);
-    execBudget('/tools/opencode',launch.args,launch.env);
+    const agent=await startClosedAgent({work,repo,client,socket,out,prompt,rehearsal});
+    launcher=agent.launcher;
+    const {shell,confinement}=agent;
     for(const name of ['whygraph','relate','memod','shell-client']) files[`/tools/${name}`]=readFileSync(`${client}.sha256`,'utf8');
     files['/tools/shell']=createHash('sha256').update(readFileSync(shell)).digest('hex');
     writeFileSync(join(out,'files.json'),JSON.stringify(files,null,2));
@@ -110,7 +221,6 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     }
     writeFileSync(join(out,'health.json'),JSON.stringify(health,null,2));
     if(rehearsal)writeFileSync(join(work,'config/rehearsal.json'),JSON.stringify({...rehearsal.config,impact:rehearsal.config.impact??String(decisions[0].id)}));
-    writeFileSync(join(out,'command.json'),JSON.stringify({args:[...confinement,'--','/tools/opencode',...launch.args],env:launch.env},null,2));
     const preflight=[];
     for(const [name,code] of [
       ['relate','relate query --database /store "MATCH (n) RETURN n"'],
@@ -124,19 +234,8 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     }
     writeFileSync(join(out,'confinement.json'),JSON.stringify(preflight,null,2));
     if(preflight.some(p=>p.status===0)) throw new Error('closed-store preflight succeeded in a forbidden read');
-    const started=Date.now(), stdout=openSync(join(out,'output.jsonl'),'w'), stderr=openSync(join(out,'stderr.txt'),'w');
-    const r=await new Promise(resolve=>{
-      const invocation=[...confinement.slice(1),'--','/tools/opencode',...launch.args];execBudget(confinement[0],invocation,launch.env);
-      const child=spawn(confinement[0],invocation,{env:launch.env,stdio:['ignore',stdout,stderr]});
-      closeSync(stdout);closeSync(stderr);
-      let timedOut=false,spawnError,killTimer;
-      const timer=setTimeout(()=>{timedOut=true;launcher.cancel();child.kill('SIGTERM');killTimer=setTimeout(()=>child.kill('SIGKILL'),5000);},20*60*1000);
-      child.on('error',e=>{spawnError=e.message;});
-      child.on('close',(code,signal)=>{clearTimeout(timer);clearTimeout(killTimer);resolve({code,signal,timedOut,spawnError});});
-    });
-    const text=readFileSync(join(out,'output.jsonl'),'utf8'), events=[];let malformed=false;
-    for(const line of text.split('\n').filter(l=>l.trim())) {try{events.push(JSON.parse(line));}catch{malformed=true;}}
-    const session=opencodeSession(events);
+    const started=Date.now(),run=await runClosedAgent(agent,out);
+    const {r,session,malformed}=run;
     // Normalize namespace paths for the unchanged isolation checker.
     const tools=session.tools.map(t=>({...t,input:t.input}));
     const identity=realpathSync(repo);
@@ -146,7 +245,9 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     const stats=service.stats();
     const serviceDown=tools.some(t=>/whygraph (?:service|shell launcher) unavailable/.test(String(t.result)));
     const causes=[...(stats.reasons??[]),...(launcher.stats().reasons??[])];
-    const harness=r.spawnError || (!r.timedOut&&malformed?'malformed JSONL':undefined) || (stats.failures||serviceDown||launcher.stats().failures?`service or shell launcher unavailable${causes.length?': '+causes.join('; '):''}`:undefined);
+    const serviceFailure=stats.failures||serviceDown||launcher.stats().failures;
+    const harness=r.spawnError||(!r.timedOut&&(malformed||r.code!==0||!session.success))||serviceFailure
+      ?closedAgentCause(run,prompt,[...(serviceFailure?['service or shell launcher unavailable']:[]),...causes]):undefined;
     const meta={id:`${task.id}__${condition}__r${repeat}`,task:task.id,condition,repeat,agent:'opencode',model:rehearsal?'rehearsal':OPENCODE_MODEL,...(rehearsal?{rehearsal:true}:{}),
       status:harness||breaches.length?'invalid':r.code===0&&session.success&&!r.timedOut?'done':'error',
       ...(harness?{reason:`harness failure: ${harness}`} : breaches.length?{reason:'isolation breach',isolation:breaches}:{}),
@@ -159,7 +260,7 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     return meta;
   } catch(error) {
     const causes=[...(service.stats().reasons??[]),...(launcher?.stats().reasons??[])];
-    const reason=`harness failure: ${error.message}${causes.length?': '+causes.join('; '):''}`;
+    const reason=`harness failure: ${closedAgentCause(undefined,prompt,[error.message,...causes])}`;
     const meta={id:`${task.id}__${condition}__r${repeat}`,task:task.id,condition,repeat,agent:'opencode',model:rehearsal?'rehearsal':OPENCODE_MODEL,...(rehearsal?{rehearsal:true}:{}),status:'invalid',reason,wall_ms:0,tokens:{total:0},work,service:service.stats()};
     writeFileSync(join(out,'meta.json'),JSON.stringify(meta,null,2));
     return meta;

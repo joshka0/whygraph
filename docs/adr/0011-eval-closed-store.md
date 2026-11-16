@@ -168,6 +168,60 @@ The range form applies the same operation to each overlapping symbol.
 Impact stays full in graph-nolink: that condition removes commit records
 from carry and why only. Search stays full too.
 
+### Resolver and real-agent preflight, 2026-11-16
+
+The fourth smoke start at ec76408 failed before any token was spent.
+`/etc/resolv.conf` linked outside the mounted system folders. The link was
+dangling in the agent namespace. The agent emitted `UnknownError` with
+`Unexpected server error` and exited 1. Its attempt metadata had no cause.
+A host probe with the missing resolver dependency mounted reached the model.
+
+The confinement derives dependencies from the host's standard resolver
+inputs at each launch: `/etc/resolv.conf`, `/etc/nsswitch.conf`, `/etc/hosts`,
+`/etc/host.conf` and `/etc/gai.conf`. It follows symlinks, recreates required
+external links and mounts each final external regular file read-only.
+It mounts no containing folder. This exposes only the referenced file's
+bytes, with no siblings, sockets or service directories. A plain resolver
+file already in `/etc` adds no mount. Every condition uses the same rule.
+Private work, tool checkout and identity-home targets refuse. Dynamic
+`/proc`, `/dev`, `/tmp` and tool/socket namespace targets refuse too.
+Non-regular targets, unreadable inputs, dangling links, link cycles and
+executable external targets refuse. Store proofs and agent file-identity
+checks keep their existing contracts.
+
+Before any pending closed-store cell starts, a real-agent preflight runs
+once through the same launch builder. The empty repo has no task content.
+The model, arguments, environment, mounts and live private socket layout
+are the cell's. The store service has no task store. A fixed prompt asks
+for `ok` without tools. Only exit 0, a successful stop, positive tokens,
+exactly that trimmed word and no tool use pass. The runner waits for this
+result before reserving a cell. A failed preflight starts no cell and
+writes no cell result, ledger entry or attempt archive. Plans and empty
+resumes start none. A standalone `eval/preflight.mjs --batch N` entry runs
+only this preflight for a registered closed-store batch from 7 onward.
+
+Preflight evidence lives under `results/_preflight/<UUID>/`, with
+`record.json` rather than cell metadata. It keeps the command, native
+events, stderr, exit, tokens, wall time and scratch path. A separate startup
+record compares resolver, time zone and system certificate hashes and
+checks the identity directory without reading its files. The scorer
+ignores these records. The smoke checker reports preflight usage and time
+on a separate line. No cell identity, plan count or score changes.
+Rehearsal explicitly skips this step because its stand-in has no model
+connection and no tokens. ADR 0013's executable substitution still governs
+all rehearsal cells. Batches 1 to 6 keep their setup and launcher bytes.
+
+A closed harness failure records the named agent error's first message
+line and its exit status. Bounded diagnostics redact prompt text before
+truncation and do not copy stderr, tools, file contents or nested response
+payloads. Attempt metadata and ledger records retain the cause. The final
+invalid marker and thrown error keep both retry causes. Missing native
+events still produce an explicit exit or completion cause.
+
+This change is launch and filesystem I/O. The independent author owns
+B7-119 through B7-133. It claims no new formal proof. Finished and archived
+closed-attempt work folders remain audit evidence; no cleanup rule changes.
+
 ## Consequences
 
 The four commands are the only route to store contents. Batches 1 to 6 keep
