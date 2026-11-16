@@ -2,6 +2,7 @@
 /** module: [[whygraph-trial-design]]
  * Repeat the complete offline self-test with changed working registry counts.
  * Run after the normal self-test: node eval/selftest/batch7-independence.mjs LOG
+ * Compare saved evidence: node eval/selftest/batch7-independence.mjs --compare RECEIPT
  */
 import assert from 'node:assert/strict';
 import {cpSync,existsSync,mkdirSync,mkdtempSync,openSync,closeSync,readFileSync,statSync,symlinkSync,writeFileSync} from 'node:fs';
@@ -10,6 +11,31 @@ import {dirname,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
+function compare(receiptPath){
+  const receipt=JSON.parse(readFileSync(receiptPath,'utf8')),previous=readFileSync(receipt.baseline,'utf8'),current=readFileSync(receipt.log,'utf8');
+  const raw=text=>text.split('\n').filter(line=>/^(?:ok  |WRONG)/.test(line));
+  const cases=text=>{
+    const roots=[...text.matchAll(/^(.+) self-test scratch retained: (.+)$/gm)].map(([,label,path])=>[path,`<${label} scratch>`]).sort((a,b)=>b[0].length-a[0].length);
+    return raw(text).map(line=>roots.reduce((s,[path,label])=>s.replaceAll(path,label),line));
+  };
+  const summary=text=>text.match(/\d+\/\d+ cases as expected[^\n]*/)?.[0];
+  receipt.baselineSummary=summary(previous);receipt.summary=summary(current);
+  receipt.comparedCases=cases(current).length;
+  receipt.rawNameDifferences=raw(current).filter((line,i)=>line!==raw(previous)[i]).length;
+  receipt.caseComparison='Ordered verdicts and names, replacing only the scratch roots announced by each log; all path suffixes remain exact.';
+  receipt.sameCases=JSON.stringify(cases(current))===JSON.stringify(cases(previous));
+  writeFileSync(receiptPath,JSON.stringify(receipt,null,2)+'\n');
+  assert.ok(summary(current),'independence self-test must finish');
+  assert.equal(summary(current),summary(previous),'same case counts and results');
+  assert.deepEqual(cases(current),cases(previous),'every case has the same verdict');
+  const [passed,total]=summary(previous).match(/^(\d+)\/(\d+)/).slice(1).map(Number);
+  assert.equal(receipt.exit,passed===total?0:1,'same exit status');
+  console.log(JSON.stringify(receipt,null,2));
+}
+if(process.argv[2]==='--compare'){
+  assert.ok(process.argv[3],'--compare requires a saved independence receipt');
+  compare(process.argv[3]);
+}else{
 const baseline=process.argv[2];
 assert.ok(baseline,'usage: node eval/selftest/batch7-independence.mjs BASELINE-LOG');
 const previous=readFileSync(baseline,'utf8');
@@ -55,13 +81,7 @@ console.log(`Independence scratch retained: ${scratch}`);
 let result;
 try{result=spawnSync('systemd-run',['--user','--scope','-q','-p','MemoryMax=6G','-p','CPUQuota=400%',process.execPath,'eval/selftest/check.mjs'],{cwd:scratch,env:{...process.env,TMPDIR:'/mnt/ssd/tmp'},stdio:['ignore',fd,fd]});}finally{closeSync(fd);}
 assert.ifError(result.error);
-const current=readFileSync(log,'utf8');
-const cases=text=>text.split('\n').filter(line=>/^(?:ok  |WRONG)/.test(line));
-const summary=text=>text.match(/\d+\/\d+ cases as expected[^\n]*/)?.[0];
-const receipt={baseline,source:root,scratch,before,after:{requests:36,sampleCounts:{cited:37,uncited:41}},log,exit:result.status,baselineSummary:summary(previous),summary:summary(current),sameCases:JSON.stringify(cases(current))===JSON.stringify(cases(previous))};
-writeFileSync(join(scratch,'independence.json'),JSON.stringify(receipt,null,2)+'\n');
-assert.match(current,/\d+\/\d+ cases as expected/,'independence self-test must finish');
-assert.equal(summary(current),summary(previous),'same case counts and results');
-assert.deepEqual(cases(current),cases(previous),'every case has the same verdict');
-assert.equal(result.status,Number(summary(previous).split('/')[0])===Number(summary(previous).split('/')[1].split(' ')[0])?0:1,'same exit status');
-console.log(JSON.stringify(receipt,null,2));
+const receiptPath=join(scratch,'independence.json');
+writeFileSync(receiptPath,JSON.stringify({baseline,source:root,scratch,before,after:{requests:36,sampleCounts:{cited:37,uncited:41}},log,exit:result.status},null,2)+'\n');
+compare(receiptPath);
+}
