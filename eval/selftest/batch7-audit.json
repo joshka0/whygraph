@@ -6389,7 +6389,7 @@
       "docs/adr/0013-eval-rehearsal.md"
     ],
     "branch": "batch-7-rehearsal",
-    "status": "One contract disagreement reproduced; final validation running",
+    "status": "Two contract disagreements reproduced; final validation running",
     "previous_top_status": "Complete: normal and altered-registry full suites pass 1476/1476; all ordered case verdicts match; no requested item is omitted and no code/contract disagreement remains.",
     "scope": {
       "edited": [
@@ -6403,8 +6403,8 @@
       "delegation": false,
       "worktrees_created": 0
     },
-    "cases_added": 64,
-    "expected_suite_cases": 1618,
+    "cases_added": 65,
+    "expected_suite_cases": 1619,
     "items": {
       "B7-94": {
         "cases": [
@@ -6424,6 +6424,7 @@
       "B7-96": {
         "cases": [
           "B7 B7-96 exact 107-byte absolute socket root succeeds and one extra byte refuses",
+          "B7 B7-96 valid absolute symlink work root keeps native source reads inside the attempt",
           "B7 plant late root guard caught by B7-96 no reservation before refusal"
         ]
       },
@@ -6601,6 +6602,25 @@
     ],
     "disagreements": [
       {
+        "item": "B7-96",
+        "case": "B7 B7-96 valid absolute symlink work root keeps native source reads inside the attempt",
+        "expected": {
+          "status": "done",
+          "exit": 0,
+          "service_calls": 8
+        },
+        "actual": {
+          "status": "invalid",
+          "exit": 0,
+          "service_calls": 8,
+          "reason": "isolation breach",
+          "isolation": "external file-tool path for the attempt own source file through its absolute work-root alias"
+        },
+        "cause": "closed-run.mjs normalizes namespace paths with the alias repo path. isolationBreaches uses a canonical repo root and rejects that lexical alias as external. Both the alias and canonical root pass closedWorkRoot.",
+        "evidence": "test-results/trial7-tests6-work-alias.txt",
+        "disposition": "Keep the valid-alias case red. The parent rules on this path-contract mismatch."
+      },
+      {
         "item": "B7-115",
         "case": "B7 B7-115 transport imports without registry and retains exact unavailable product-format guard",
         "expected": {
@@ -6638,14 +6658,121 @@
         "log": "test-results/trial7-tests6-readme.txt"
       }
     },
-    "plants": [],
+    "plants": [
+      {
+        "fault": "archive-prefix",
+        "owner": "B7-116",
+        "first_failing_assertion": "archive must retain its canonical result-key prefix",
+        "assertion": "archive must retain its canonical result-key prefix",
+        "receipt": "test-results/batch7-selftest-ZRXoJ5/rehearsal/plant-archive-prefix.json",
+        "case": "B7 plant archive prefix dropped caught by B7-116 archive identity"
+      },
+      {
+        "fault": "cell-socket",
+        "owner": "B7-94",
+        "first_failing_assertion": "long cells must start a live service using bounded UUID paths",
+        "assertion": "long cells must start a live service using bounded UUID paths\n+ actual - expected\n\n+ undefined\n- 'done'\n",
+        "receipt": "test-results/batch7-selftest-ZRXoJ5/rehearsal/plant-cell-socket.json",
+        "case": "B7 plant cell name in socket path caught by B7-94 real long-cell launch"
+      },
+      {
+        "fault": "late-root",
+        "owner": "B7-96",
+        "first_failing_assertion": "invalid root must refuse before any result marker or cell reservation",
+        "assertion": "invalid root must refuse before any result marker or cell reservation\n+ actual - expected\n\n+ '/home/dev/repos/personal/whygraph/test-results/batch7-selftest-ZRXoJ5/rehearsal/55-87-plant-root-order/rehearsals/1cb91fe3-fc79-4c7a-b677-c78b7019a948'\n- undefined\n",
+        "receipt": "test-results/batch7-selftest-ZRXoJ5/rehearsal/plant-late-root.json",
+        "case": "B7 plant late root guard caught by B7-96 no reservation before refusal"
+      },
+      {
+        "fault": "result-key",
+        "owner": "B7-95",
+        "first_failing_assertion": "runner and smoke checker must use the same result key",
+        "assertion": "runner and smoke checker must use the same result key",
+        "receipt": "test-results/batch7-selftest-ZRXoJ5/rehearsal/plant-result-key.json",
+        "case": "B7 plant runner smoke result-key mismatch caught by B7-95 smoke completion"
+      },
+      {
+        "fault": "smoke-pass",
+        "owner": "B7-107",
+        "first_failing_assertion": "a failed smoke check must fail rehearsal",
+        "assertion": "a failed smoke check must fail rehearsal",
+        "receipt": "test-results/batch7-selftest-ZRXoJ5/rehearsal/plant-smoke-pass.json",
+        "case": "B7 plant smoke failure ignored caught by B7-107 rehearsal process status"
+      },
+      {
+        "fault": "stand-in-agent",
+        "owner": "B7-102",
+        "first_failing_assertion": "stand-in is not a valid trial registry agent",
+        "assertion": "stand-in is not a valid trial registry agent",
+        "receipt": "test-results/batch7-selftest-ZRXoJ5/rehearsal/plant-stand-in-agent.json",
+        "case": "B7 plant stand-in registry agent accepted caught by B7-102 registry rejection"
+      },
+      {
+        "fault": "store-probe-pass",
+        "owner": "B7-106",
+        "first_failing_assertion": "a failed stand-in step must not finish successfully",
+        "assertion": "a failed stand-in step must not finish successfully",
+        "receipt": "test-results/batch7-selftest-ZRXoJ5/rehearsal/plant-store-probe-pass.json",
+        "case": "B7 plant successful store probe counted as pass caught by B7-106 stand-in result"
+      },
+      {
+        "fault": "trial-results",
+        "owner": "B7-100",
+        "first_failing_assertion": "rehearsal must write no marker or ledger into trial results",
+        "assertion": "rehearsal must write no marker or ledger into trial results\n+ actual - expected\n\n+ [\n+   [\n+     'ddd2d2cd-51a1-4045-a74f-92bfd8d39411',\n+     [\n+       [\n+         '_ledger',\n+         [\n+           [\n+             'id-7565684bc37386ab450ec07ee33a48a7b71269978f8c1af76a24557e1f7bccbc.json',\n+             '73f44d439b6e1baaa10271e0dbe9b950da5a942e192442f97801e37b29e01a0c'\n+           ]\n+         ]\n+       ],\n+       [\n+         'id-7565684bc37386ab450ec07ee33a48a7b71269978f8c1af76a24557e1f7bccbc',\n+         []\n+       ],\n+       [\n+         'rehearsal.json',\n+         '3119b41493724e6fa731e0d22362a6aa613184f5fa7e52b40048a7d0dcb7590c'\n+       ]\n+     ]\n+   ]\n+ ]\n- []\n",
+        "receipt": "test-results/batch7-selftest-ZRXoJ5/rehearsal/plant-trial-results.json",
+        "case": "B7 plant trial results accepted caught by B7-100 evidence preservation"
+      }
+    ],
     "evidence": {
       "focused": "test-results/trial7-tests6-focused-3.txt",
       "final_logs": [
-        "test-results/trial7-tests6-full-4.txt",
-        "test-results/trial7-tests6-full-5.txt"
+        "test-results/trial7-tests6-full-6.txt",
+        "test-results/trial7-tests6-full-7.txt"
       ],
-      "catalog": "test-results/trial7-tests6-catalog-final/cases.json"
-    }
+      "catalog": "test-results/trial7-tests6-catalog-complete/cases.json"
+    },
+    "diagnostic_runs": [
+      {
+        "log": "test-results/trial7-tests6-focused-1.txt",
+        "exit": 143,
+        "state": "stopped",
+        "reason": "The invented control fixture lacked score metadata; corrected before later runs."
+      },
+      {
+        "log": "test-results/trial7-tests6-focused-2.txt",
+        "exit": 1,
+        "passed": 49,
+        "total": 62,
+        "state": "diagnostic",
+        "reason": "Corrected fixture byte arithmetic, native event name expectations, and the mutation helper shebang."
+      },
+      {
+        "log": "test-results/trial7-tests6-focused-3.txt",
+        "exit": 1,
+        "passed": 62,
+        "total": 64,
+        "state": "diagnostic",
+        "reason": "Contained the corrected-later 115-byte name arithmetic and the retained exact B7-115 failure; all eight plants caught."
+      },
+      {
+        "logs": [
+          "test-results/trial7-tests6-full-2.txt",
+          "test-results/trial7-tests6-full-3.txt"
+        ],
+        "exit": 143,
+        "state": "stopped",
+        "reason": "Loaded the outdated 115-byte fixture before its measured correction."
+      },
+      {
+        "logs": [
+          "test-results/trial7-tests6-full-4.txt",
+          "test-results/trial7-tests6-full-5.txt"
+        ],
+        "exit": 143,
+        "state": "stopped",
+        "reason": "Loaded the old 64-case list before the absolute work-root alias finding became an explicit red regression."
+      }
+    ]
   }
 }

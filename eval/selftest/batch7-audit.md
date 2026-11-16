@@ -642,7 +642,7 @@ confinement and attempts. ADR 0013 governs path bounds and rehearsal results.
 The test author changes only `eval/selftest/`. No trial, hosted agent, install,
 push, delegation, or new worktree runs.
 
-The 64 new cases use invented tasks, source edits, and a small real store.
+The 65 new cases use invented tasks, source edits, and a small real store.
 They exercise the public runner, preparation, store service, shell launcher,
 agent confinement, stand-in, event reader, result writer, and smoke checker.
 The identity mount is an empty test directory. No credential file is read.
@@ -696,7 +696,32 @@ Final counts, plant receipts, disagreements, and scratch paths are recorded
 in the `bounded_paths_rehearsal` section of
 [the JSON audit](batch7-audit.json). Final validation is running.
 
-### Contract disagreement
+### Planted faults
+
+All eight faults change code copies. Each plant reaches the named contract
+assertion. The JSON audit retains each full assertion and raw receipt.
+
+| Fault | Case | First failing assertion |
+| --- | --- | --- |
+| archive-prefix | B7-116 | archive must retain its canonical result-key prefix |
+| cell-socket | B7-94 | long cells must start a live service using bounded UUID paths |
+| late-root | B7-96 | invalid root must refuse before any result marker or cell reservation |
+| result-key | B7-95 | runner and smoke checker must use the same result key |
+| smoke-pass | B7-107 | a failed smoke check must fail rehearsal |
+| stand-in-agent | B7-102 | stand-in is not a valid trial registry agent |
+| store-probe-pass | B7-106 | a failed stand-in step must not finish successfully |
+| trial-results | B7-100 | rehearsal must write no marker or ledger into trial results |
+
+### Contract disagreements
+
+B7-96 also remains red. A valid absolute symlink work root passes both path
+guards. The stand-in exits 0 after eight service calls. The runner then marks
+its own native source read as an isolation breach. The runner maps `/repo`
+to the alias path, but the isolation checker compares it with the canonical
+repo path. The focused reproduction is
+[the work-root alias log](../../test-results/trial7-tests6-work-alias.txt).
+The baseline uses physical work roots; the explicit alias case keeps this
+failure visible. The parent must rule on it.
 
 B7-115 remains red. The isolated transport returns status 70 and empty stdout,
 but stderr is `whygraph service unavailable: carry decision section changed; update the eval ablation\n`.
