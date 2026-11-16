@@ -1425,11 +1425,14 @@ only carry, why, impact and search, each with one target. It accepts no
 caller-selected store path or Cypher. Invalid invocations use the product
 parser and direct CLI diagnostics, including help. Valid unsupported commands,
 valid option-bearing invocations and embedded NUL receive exit 2 with empty
-stdout and `usage: whygraph <carry|why|impact|search> <target>\n` on stderr. A lost service prints `whygraph service unavailable`,
-exits 70, and makes the attempt a harness failure. A lost launcher prints
-`whygraph shell launcher unavailable` and has the same exit and classification.
-Full answers and file
-manifests remain outside the agent filesystem for the smoke audit.
+stdout and `usage: whygraph <carry|why|impact|search> <target>\n` on stderr.
+Every harness failure from the service, shell launcher or their clients prints
+exactly `whygraph service unavailable\n` on stderr and exits 70. Failure
+replies have empty stdout; shell output already streamed remains command
+output. Internal causes stay in host-only logs, attempt metadata, ledgers
+and rehearsal failure output. Disabled tool aliases print `tool unavailable\n` and
+retain exit 126 for command denial. Product diagnostics retain their direct
+CLI bytes. Full answers and file manifests remain outside the agent filesystem for the smoke audit.
 Batches 1 to 6 keep their earlier setup and limits.
 
 **Ablations.** Prepare both copies once per batch under a kernel `flock`.
@@ -1520,7 +1523,9 @@ The 20-minute timeout and five-second kill grace remain.
 
 **Path bounds.** Attempt work folders use UUIDs and mode 0700. The store
 socket is `service.sock`; the shell socket is `shell.sock`. Neither path
-contains a cell name. Before a cell starts, the absolute work root plus
+contains a cell name. Work, result and ready template roots use canonical
+absolute paths.
+Before a cell starts, the canonical work root plus
 a UUID and the longest socket leaf must fit the 107-byte Unix pathname
 limit. The default root gives a 72-byte service path. A longer root refuses
 with `work root too long for Unix sockets`. Namespace mount destinations

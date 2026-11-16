@@ -40,6 +40,10 @@ step emits an error event and exits nonzero. No token or cost is invented.
 Attempt work folders use UUIDs rather than cell names. Both socket names
 are constant. Before any attempt starts, the runner checks the absolute work
 root with a complete UUID and the longest socket leaf against 107 bytes.
+Resolve the work root to its canonical absolute path before this length
+check and before reservations. Derive mounts, sockets, native-read mappings,
+isolation checks and retained work paths from that value. Resolve result
+and ready template roots too; an alias must not become a second identity.
 Confinement mounts keep their constant namespace paths. Long or unsafe
 result and ledger components use a SHA-256 filename; archives add a UUID
 to the bounded result key. Earlier batches keep their readable prefixes.
