@@ -223,6 +223,8 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
   socketPath(socket);
   repo=realpathSync(repo);
   let failures = 0, calls = 0;
+  const reasons=[];
+  const failure=message=>{failures++;reasons.push(message);appendFileSync(log,JSON.stringify({event:'failure',message})+'\n');};
   const abort=new AbortController(), connections=new Set();
   const server = createServer(connection => {
     connections.add(connection);connection.on('close',()=>connections.delete(connection));
@@ -231,20 +233,25 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
     connection.on('data', chunk => {
       if (dispatched) return;
       input = Buffer.concat([input,chunk]);
-      if (input.length > 65536) { connection.destroy(); failures++; return; }
+      if (input.length > 65536) { connection.destroy(); failure('request too large'); return; }
       if (input.length < 4) return;
       const count = input.readUInt32BE();
-      if (count > 64) { connection.destroy(); failures++; return; }
+      if (count > 64) { connection.destroy(); failure('invalid argument count'); return; }
       let at=4; const args=[];
       for(let i=0;i<count;i++) {
         if(input.length < at+4) return;
         const size=input.readUInt32BE(at); at+=4;
-        if(size>60000) { connection.destroy(); failures++; return; }
+        if(size>60000) { connection.destroy(); failure('argument too large'); return; }
         if(input.length < at+size) return;
         args.push(input.subarray(at,at+size).toString()); at+=size;
       }
       dispatched=true;
-      void answer(args).then(respond, error => { failures++; respond({stdout:'',stderr:`whygraph service unavailable: ${error.message}\n`,code:70}); });
+      void answer(args).then(respond, error => {
+        failure(error.message);
+        const result={stdout:'',stderr:'whygraph service unavailable\n',code:70};
+        appendFileSync(log,JSON.stringify({args,...result,failure:error.message,sections:[]})+'\n');
+        respond(result);
+      });
     });
     function respond(result) {
       dispatched=true;
@@ -287,14 +294,14 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
         if (!Number.isInteger(error.code)) throw error;
         result={stdout:error.stdout??'',stderr:error.stderr??'',code:error.code};
         reference={...result};
-        if(error.code===1) failures++;
+        if(error.code===1) throw new Error(error.stderr || 'product command failed');
       }
     }
     appendFileSync(log,JSON.stringify({args,...result,reference:reference??{...result},referenceStore,sections})+'\n');
     return result;
   }
   await new Promise((ok,fail) => {server.once('error',fail); server.listen(socket,ok);});
-  return { server, stats:()=>({calls,failures}), stop:()=>new Promise((ok,fail)=>{abort.abort();for(const connection of connections)connection.destroy();server.close(error=>error?fail(error):ok());}) };
+  return { server, stats:()=>({calls,failures,reasons:[...reasons]}), stop:()=>new Promise((ok,fail)=>{abort.abort();for(const connection of connections)connection.destroy();server.close(error=>error?fail(error):ok());}) };
 }
 
 /** Launch shell commands from the host, outside the agent's user namespace.
@@ -302,6 +309,8 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
  */
 export async function startClosedShell({work,repo,client,socket,log}) {
   let failures=0, calls=0, stopped=false;
+  const reasons=[];
+  const failure=message=>{failures++;reasons.push(message);appendFileSync(log,JSON.stringify({event:'failure',message})+'\n');};
   const connections=new Set(), children=new Map(), completions=new Set(), scopeErrors=[];
   const kill=child=>{
     child.stdout.resume();child.stderr.resume();
@@ -326,8 +335,8 @@ export async function startClosedShell({work,repo,client,socket,log}) {
       appendFileSync(log,JSON.stringify({event:'end',code:code??null,signal:signal??null})+'\n');
     };
     const fail=message=>{
-      failures++;
-      frame(2,Buffer.from(`whygraph shell launcher unavailable: ${message}\n`));finish(70);
+      failure(message);
+      frame(2,Buffer.from('whygraph service unavailable\n'));finish(70);
     };
     connection.on('error',()=>{});
     connection.on('close',()=>{connections.delete(connection);if(child&&children.has(child))kill(child);});
@@ -407,8 +416,8 @@ export async function startClosedShell({work,repo,client,socket,log}) {
       }
     });
   });
-  server.on('close',()=>{if(!stopped)failures++;});
-  server.on('error',()=>{failures++;});
+  server.on('close',()=>{if(!stopped)failure('shell launcher closed unexpectedly');});
+  server.on('error',error=>{failure(error.message);});
   await new Promise((ok,fail)=>{server.once('error',fail);server.listen(socketPath(join(work,'shell.sock')),ok);});
   const cancel=()=>{
     stopped=true;
@@ -421,7 +430,7 @@ export async function startClosedShell({work,repo,client,socket,log}) {
     await Promise.all([closed,...completions]);
     if(scopeErrors.length)throw new AggregateError(scopeErrors,'shell command scope cleanup failed');
   };
-  return {server,stats:()=>({calls,failures}),cancel,stop};
+  return {server,stats:()=>({calls,failures,reasons:[...reasons]}),cancel,stop};
 }
 
 /** Check the pathname passed to the kernel, in bytes.
@@ -436,10 +445,21 @@ export function socketPath(path) {
  * owns: [[whygraph-closed-store]]
  */
 export function closedWorkRoot(root) {
-  if (Buffer.byteLength(join(resolve(root), '0'.repeat(36), 'service.sock')) > 107)
+  root=canonicalPath(root);
+  if (Buffer.byteLength(join(root, '0'.repeat(36), 'service.sock')) > 107)
     throw new Error(`work root too long for Unix sockets (107-byte limit): ${resolve(root)}`);
   filesystemPath(root);
   return root;
+}
+
+/** Resolve existing ancestors once, including roots not yet created.
+ * owns: [[whygraph-closed-store]]
+ */
+export function canonicalPath(path) {
+  const absolute=resolve(path);
+  let ancestor=absolute;
+  while (!existsSync(ancestor) && dirname(ancestor)!==ancestor) ancestor=dirname(ancestor);
+  return realpathSync(ancestor)+absolute.slice(ancestor.length);
 }
 
 /** Check mount paths and canonical existing ancestors before exec.
@@ -452,9 +472,7 @@ export function filesystemPath(path) {
       throw new Error(`filesystem path limit exceeded: ${path}`);
   };
   check(absolute);
-  let ancestor = absolute;
-  while (!existsSync(ancestor) && dirname(ancestor) !== ancestor) ancestor = dirname(ancestor);
-  const canonical = realpathSync(ancestor) + absolute.slice(ancestor.length);
+  const canonical = canonicalPath(absolute);
   check(canonical);
   return path;
 }

@@ -4,19 +4,18 @@ import { spawnSync } from 'node:child_process';
 import { createServer } from 'node:net';
 import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, realpathSync, writeFileSync } from 'node:fs';
 import { randomUUID, createHash } from 'node:crypto';
-import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { batchPlan, evalBatch } from './registry.mjs';
 import { readTasks, scoreRun } from './score.mjs';
 import { ticketTemplate, settleCell, wrap } from './run.mjs';
 import { closedAttempt } from './closed-run.mjs';
 import { fileKey } from './registry.mjs';
-import { closedWorkRoot, execBudget, filesystemPath } from './closed-store.mjs';
+import { canonicalPath, closedWorkRoot, execBudget, filesystemPath } from './closed-store.mjs';
 
 const here=fileURLToPath(new URL('.',import.meta.url));
 const quiet={...process.env,RELATE_TELEMETRY:'0',DO_NOT_TRACK:'1'};
 const within=(parent,path)=>{const rel=relative(parent,path);return rel===''||(!isAbsolute(rel)&&rel!=='..'&&!rel.startsWith('..'+sep));};
-const canonical=path=>existsSync(path)?realpathSync(path):join(canonical(dirname(path)),path.split(sep).at(-1));
 
 async function main(args) {
   const started=performance.now();
@@ -30,8 +29,8 @@ async function main(args) {
   if(!Number.isInteger(batch)||evalBatch(batch).storeAccess!=='closed')throw new Error('rehearsal requires a registered closed-store batch');
   const plan=batchPlan(readTasks(),{batch,stage});
   const work=closedWorkRoot(process.env.WHYGRAPH_EVAL_WORK??'/var/tmp/whygraph-eval');
-  const resultRoot=canonical(resolve(options['--results']??join(here,'../test-results/rehearsals')));
-  const trial=canonical(join(here,'results'));
+  const resultRoot=canonicalPath(resolve(options['--results']??join(here,'../test-results/rehearsals')));
+  const trial=canonicalPath(join(here,'results'));
   if(within(trial,resultRoot)||within(resultRoot,trial))throw new Error('rehearsal results must be outside eval/results and its ancestors');
   const inspect=dir=>{
     if(!existsSync(dir))return;

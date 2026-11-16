@@ -62,7 +62,7 @@ export function prepareClosed({task,condition,work,source,stores,client}) {
  * owns: [[whygraph-closed-runner]]
  */
 export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,source,store,rehearsal}) {
-  closedWorkRoot(workRoot);
+  workRoot=closedWorkRoot(workRoot);
   for(const path of [source,store,out])filesystemPath(path);
   execBudget('/tools/opencode',[prompt],quiet);
   const work=join(workRoot,randomUUID());
@@ -144,7 +144,8 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     await launcher.stop();
     const stats=service.stats();
     const serviceDown=tools.some(t=>/whygraph (?:service|shell launcher) unavailable/.test(String(t.result)));
-    const harness=r.spawnError || (!r.timedOut&&malformed?'malformed JSONL':undefined) || (stats.failures||serviceDown||launcher.stats().failures?'service or shell launcher unavailable':undefined);
+    const causes=[...(stats.reasons??[]),...(launcher.stats().reasons??[])];
+    const harness=r.spawnError || (!r.timedOut&&malformed?'malformed JSONL':undefined) || (stats.failures||serviceDown||launcher.stats().failures?`service or shell launcher unavailable${causes.length?': '+causes.join('; '):''}`:undefined);
     const meta={id:`${task.id}__${condition}__r${repeat}`,task:task.id,condition,repeat,agent:'opencode',model:rehearsal?'rehearsal':OPENCODE_MODEL,...(rehearsal?{rehearsal:true}:{}),
       status:harness||breaches.length?'invalid':r.code===0&&session.success&&!r.timedOut?'done':'error',
       ...(harness?{reason:`harness failure: ${harness}`} : breaches.length?{reason:'isolation breach',isolation:breaches}:{}),
@@ -156,7 +157,9 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     writeFileSync(join(out,'meta.json'),JSON.stringify(meta,null,2));
     return meta;
   } catch(error) {
-    const meta={id:`${task.id}__${condition}__r${repeat}`,task:task.id,condition,repeat,agent:'opencode',model:rehearsal?'rehearsal':OPENCODE_MODEL,...(rehearsal?{rehearsal:true}:{}),status:'invalid',reason:`harness failure: ${error.message}`,wall_ms:0,tokens:{total:0},work,service:service.stats()};
+    const causes=[...(service.stats().reasons??[]),...(launcher?.stats().reasons??[])];
+    const reason=`harness failure: ${error.message}${causes.length?': '+causes.join('; '):''}`;
+    const meta={id:`${task.id}__${condition}__r${repeat}`,task:task.id,condition,repeat,agent:'opencode',model:rehearsal?'rehearsal':OPENCODE_MODEL,...(rehearsal?{rehearsal:true}:{}),status:'invalid',reason,wall_ms:0,tokens:{total:0},work,service:service.stats()};
     writeFileSync(join(out,'meta.json'),JSON.stringify(meta,null,2));
     return meta;
   } finally { try { await launcher?.stop(); } finally { await service.stop(); } }
