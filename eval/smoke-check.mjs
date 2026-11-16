@@ -8,6 +8,7 @@ import { readTasks } from './score.mjs';
 import { batchPlan } from './registry.mjs';
 import { batchInstructions } from './registry.mjs';
 import { readArgs } from '../src/args.pure.ts';
+import { fileKey } from './registry.mjs';
 const here=fileURLToPath(new URL('.',import.meta.url));
 const args=process.argv.slice(2),batch=Number(args[args.indexOf('--batch')+1]);
 if(!args.includes('--batch')||batch<7) throw new Error('usage: smoke-check.mjs --batch N (N >= 7)');
@@ -20,10 +21,10 @@ let plan=[];const attempts=[],finished=[];
 check('planned cells',()=>{
  plan=batchPlan(readTasks(),{batch,stage:'smoke'});
  for(const cell of plan) {
-  const dir=join(results,cell.id),meta=read(dir,'meta.json');
+  const dir=join(results,fileKey(cell.id)),meta=read(dir,'meta.json');
   require(meta.task===cell.task.id&&meta.condition===cell.condition&&meta.repeat===1,`${cell.id}: mismatched metadata`);
   require(meta.status==='done'||(meta.status==='error'&&meta.unscored===true&&meta.attempts?.length===2),`${cell.id}: unfinished`);
-  const ledger=read(join(results,'_ledger'),`${cell.id}.json`);
+  const ledger=read(join(results,'_ledger'),`${fileKey(cell.id)}.json`);
   require(ledger.length>=1&&ledger.length<=2&&!ledger.some(a=>a.kind==='running'),`${cell.id}: invalid attempt budget`);
   if(meta.unscored)require(ledger.length===2&&ledger.every(a=>a.kind==='agent'),`${cell.id}: invalid unscored rule`);
   const dirs=ledger.map(a=>a.archived??dir);

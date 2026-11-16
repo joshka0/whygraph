@@ -16,6 +16,7 @@ import { recipe } from '../src/ask.ts';
 import { whyAnswer } from '../src/answers.pure.ts';
 import { readSymbolTarget } from '../src/target.pure.ts';
 import { readArgs } from '../src/args.pure.ts';
+import { socketPath, filesystemPath, execBudget } from './registry.mjs';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const execute = promisify(execFile);
 const quiet = { ...process.env, RELATE_TELEMETRY: '0', DO_NOT_TRACK: '1' };
@@ -197,6 +198,7 @@ export function closedClient(directory) {
  * owns: [[whygraph-closed-store]]
  */
 export function closedConfinement({ work, repo, client, socket, network = false, opencode }) {
+  for (const path of [work, repo, client, socket, ...(opencode ? [opencode] : [])]) filesystemPath(path);
   const args = ['bwrap','--die-with-parent','--new-session','--unshare-user','--unshare-pid','--unshare-ipc','--unshare-uts','--cap-drop','ALL'];
   if (!network) args.push('--unshare-net');
   for (const path of ['/usr','/bin','/lib','/lib64','/etc']) if (existsSync(path)) args.push('--ro-bind',path,path);
@@ -209,6 +211,7 @@ export function closedConfinement({ work, repo, client, socket, network = false,
   if (network && opencode) {
     args.push('--ro-bind',opencode,'/tools/opencode');
     const data = process.env.XDG_DATA_HOME ?? join(process.env.HOME,'.local/share');
+    filesystemPath(join(data,'opencode'));
     args.push('--bind',join(data,'opencode'),'/identity/opencode');
   }
   return args;
@@ -218,6 +221,7 @@ export function closedConfinement({ work, repo, client, socket, network = false,
  * owns: [[whygraph-closed-store]]
  */
 export async function startClosedStore({ condition, repo, store, fullStore = store, socket, log }) {
+  socketPath(socket);
   repo=realpathSync(repo);
   let failures = 0, calls = 0;
   const abort=new AbortController(), connections=new Set();
@@ -350,8 +354,14 @@ export async function startClosedShell({work,repo,client,socket,log}) {
         if(args.some(a=>a.includes('\0')) || cwd.includes('\0') || !(cwd==='/repo'||cwd.startsWith('/repo/')) || cwd.split('/').includes('..')){fail('invalid working directory or argument');return;}
         if(stopped){fail('run ended');return;}
         calls++;
-        const confinement=closedConfinement({work,repo,client,socket});
-        const atCwd=confinement.indexOf('--chdir');confinement[atCwd+1]=cwd;
+        let confinement;
+        try {
+          filesystemPath(join(repo,cwd.slice(6)));
+          confinement=closedConfinement({work,repo,client,socket});
+          const atCwd=confinement.indexOf('--chdir');confinement[atCwd+1]=cwd;
+          execBudget(confinement[0],[...confinement.slice(1),'--info-fd','3','--block-fd','4','--','/bin/bash',...args],{PATH:'/tools:/usr/bin:/bin',HOME:'/home/agent',LANG:'C.UTF-8',RELATE_TELEMETRY:'0',DO_NOT_TRACK:'1'});
+        }
+        catch(error) { fail(error.message); return; }
         appendFileSync(log,JSON.stringify({event:'start',args,cwd})+'\n');
         child=spawn(confinement[0],[...confinement.slice(1),'--info-fd','3','--block-fd','4','--','/bin/bash',...args],{
           detached:true,env:{PATH:'/tools:/usr/bin:/bin',HOME:'/home/agent',LANG:'C.UTF-8',RELATE_TELEMETRY:'0',DO_NOT_TRACK:'1'},stdio:['pipe','pipe','pipe','pipe','pipe'],
@@ -400,7 +410,7 @@ export async function startClosedShell({work,repo,client,socket,log}) {
   });
   server.on('close',()=>{if(!stopped)failures++;});
   server.on('error',()=>{failures++;});
-  await new Promise((ok,fail)=>{server.once('error',fail);server.listen(join(work,'shell.sock'),ok);});
+  await new Promise((ok,fail)=>{server.once('error',fail);server.listen(socketPath(join(work,'shell.sock')),ok);});
   const cancel=()=>{
     stopped=true;
     for(const child of children.keys())kill(child);

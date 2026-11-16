@@ -1,6 +1,8 @@
 /** module: [[whygraph-trial-design]] */
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync, realpathSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { dirname, join, resolve } from 'node:path';
 
 const registry = JSON.parse(readFileSync(new URL('./registry.json', import.meta.url), 'utf8'));
 if (!registry.repos || !registry.batches || Array.isArray(registry.repos) || Array.isArray(registry.batches)) throw new Error('registry: missing repos or batches');
@@ -98,4 +100,67 @@ export function batchPlan(tasks, { batch, stage = 'full', only, conditions, repe
     for(let repeat=1;repeat<=(stage==='smoke'?1:repeats??design.repeats??5);repeat++) for(const condition of modes) plan.push({task,condition,repeat,id:`${task.id}__${condition}__r${repeat}`});
   }
   return plan;
+}
+
+/** Bound every generated filename, including ledger suffixes.
+ * owns: [[whygraph-trial-design]]
+ */
+export function fileKey(identity) {
+  return /^[\w.-]+$/.test(identity) && !identity.startsWith('id-') && identity !== '.' && identity !== '..' && Buffer.byteLength(identity) <= 128
+    ? identity : `id-${createHash('sha256').update(identity).digest('hex')}`;
+}
+
+/** Check the pathname passed to the kernel, in bytes.
+ * owns: [[whygraph-trial-design]]
+ */
+export function socketPath(path) {
+  if (Buffer.byteLength(path) > 107) throw new Error(`Unix socket path exceeds 107 bytes: ${path}`);
+  return path;
+}
+
+/** Reject an unusable root before preparation or a ledger reservation.
+ * owns: [[whygraph-trial-design]]
+ */
+export function closedWorkRoot(root) {
+  if (Buffer.byteLength(join(resolve(root), '0'.repeat(36), 'service.sock')) > 107)
+    throw new Error(`work root too long for Unix sockets (107-byte limit): ${resolve(root)}`);
+  filesystemPath(root);
+  return root;
+}
+
+/** Check mount paths and canonical existing ancestors before exec.
+ * owns: [[whygraph-trial-design]]
+ */
+export function filesystemPath(path) {
+  const absolute = resolve(path);
+  let ancestor = absolute;
+  while (!existsSync(ancestor) && dirname(ancestor) !== ancestor) ancestor = dirname(ancestor);
+  const canonical = realpathSync(ancestor) + absolute.slice(ancestor.length);
+  for (const value of [absolute, canonical]) {
+    if (Buffer.byteLength(value) >= 4096 || value.split('/').some(part => Buffer.byteLength(part) > 255))
+      throw new Error(`filesystem path limit exceeded: ${path}`);
+  }
+  return path;
+}
+
+let limits;
+/** Validate the host exec budget, including environment bytes and pointers.
+ * owns: [[whygraph-trial-design]]
+ */
+export function execBudget(command, args, env = process.env) {
+  limits ??= {
+    argument: Number(execFileSync('getconf', ['PAGESIZE'], { encoding: 'utf8' }).trim()) * 32,
+    total: Number(execFileSync('getconf', ['ARG_MAX'], { encoding: 'utf8' }).trim()),
+  };
+  const fields = [command, ...args, ...Object.entries(env).filter(([,v]) => v !== undefined).map(([k,v]) => `${k}=${v}`)];
+  let bytes = (fields.length + 2) * 8;
+  for (const [index, field] of fields.entries()) {
+    const size = Buffer.byteLength(field) + 1;
+    if (field.includes('\0') || size > limits.argument)
+      throw new Error(`exec argument or environment entry ${index} exceeds host limit (${limits.argument - 1} bytes) or contains NUL`);
+    bytes += size;
+  }
+  // Linux also stores the executable pathname and alignment in this budget.
+  if (bytes + Buffer.byteLength(command) + 4096 > limits.total)
+    throw new Error(`exec arguments and environment exceed host ARG_MAX (${limits.total} bytes)`);
 }

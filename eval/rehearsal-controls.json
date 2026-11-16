@@ -1,0 +1,72 @@
+{
+  "zustand7-control-ctl-01": {
+    "taskHash": "e24d7d621ee22f282051e967a7ba9d2904b2efcd8a12c4363e8fc8060db7aad1",
+    "edits": [
+      {
+        "file": "src/middleware/combine.ts",
+        "before": "export function combine<",
+        "after": "/** Merge initial state with the object returned by the supplied state creator. */\nexport function combine<"
+      }
+    ]
+  },
+  "zustand7-control-ctl-02": {
+    "taskHash": "a0f94fc0e3fe7e9d55a7f8c38b90b39afcd4c30355e0d03b35d7e022c88d4b1a",
+    "edits": [
+      {
+        "file": "tests/vanilla/subscribe.test.tsx",
+        "before": "describe('subscribe()', () => {",
+        "after": "describe('subscribe()', () => {\n  it('unsubscribing twice leaves other listeners active', () => {\n    const first = vi.fn()\n    const second = vi.fn()\n    const store = createStore(() => ({ value: 0 }))\n    const unsubscribe = store.subscribe(first)\n    store.subscribe(second)\n    unsubscribe()\n    unsubscribe()\n    store.setState({ value: 1 })\n    expect(first).not.toHaveBeenCalled()\n    expect(second).toHaveBeenCalledTimes(1)\n  })\n"
+      }
+    ]
+  },
+  "zustand7-control-ctl-03": {
+    "taskHash": "b751a6dff958e51e179f2d802f39b2df91f962739a2af2748f03ba01cc309a21",
+    "edits": [
+      {
+        "file": "src/middleware/ssrSafe.ts",
+        "before": "// This is experimental middleware. It will be changed before finalizing it.",
+        "after": "// This middleware is experimental and will change before it is finalized."
+      }
+    ]
+  },
+  "zustand7-control-gov-01": {
+    "taskHash": "dc965aeb8a931d333584cf8c303e2d2ff498ae96f9433cc28fcc33f241f35715",
+    "edits": [
+      {
+        "file": "src/vanilla.ts",
+        "before": "    if (!Object.is(nextState, state)) {",
+        "after": "    // Object.is treats repeated NaN values as equal, so listeners are not notified.\n    if (!Object.is(nextState, state)) {"
+      }
+    ]
+  },
+  "zustand7-control-gov-02": {
+    "taskHash": "894c3ac23845aa4fe9558b10bb40f28bc8c83ccbf4afe6da2a337ac747a22ba8",
+    "edits": [
+      {
+        "file": "src/vanilla/shallow.ts",
+        "before": "  for (const [key, value] of mapA) {\n    if (!mapB.has(key) || !Object.is(value, mapB.get(key))) {",
+        "after": "  for (const [key, entryValue] of mapA) {\n    if (!mapB.has(key) || !Object.is(entryValue, mapB.get(key))) {"
+      }
+    ]
+  },
+  "zustand7-control-gov-03": {
+    "taskHash": "66525281eafa16c71933de077c005c51100a441332cb5fa2307c1855dbbcbb99",
+    "edits": [
+      {
+        "file": "src/middleware/persist.ts",
+        "before": "      const parse = (str: string | null) => {\n        if (str === null) {\n          return null\n        }\n        return JSON.parse(str, options?.reviver) as StorageValue<S>\n      }",
+        "after": "      const parse = (serializedValue: string | null) => {\n        if (serializedValue === null) {\n          return null\n        }\n        return JSON.parse(serializedValue, options?.reviver) as StorageValue<S>\n      }"
+      }
+    ]
+  },
+  "zustand7-control-gov-04": {
+    "taskHash": "c6b3099c556c9f8d41027884086f726e42fd68fca829faa97cc76e1ebbd11c12",
+    "edits": [
+      {
+        "file": "src/middleware/persist.ts",
+        "before": "        postRehydrationCallback?.(get(), undefined)",
+        "after": "        // get() supplies the latest state after updates during hydration.\n        postRehydrationCallback?.(get(), undefined)"
+      }
+    ]
+  }
+}
