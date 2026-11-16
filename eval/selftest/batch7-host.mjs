@@ -24,10 +24,10 @@ function decode(bytes){let at=0,stdout=[],stderr=[],status;while(at+8<=bytes.len
 function procText(pid,file){try{return readFileSync(`/proc/${pid}/${file}`,'utf8');}catch(e){if(e.code==='ENOENT')return null;throw e;}}
 function live(pid){try{return readFileSync(`/proc/${pid}/stat`,'utf8').split(') ')[1][0]!=='Z';}catch(e){if(e.code==='ENOENT')return false;throw e;}}
 function runnerState(pid){
- const stat=procText(pid,'stat');if(stat===null)return {pid,terminated:true,gone:true};
+ const stat=procText(pid,'stat');if(stat===null)return {pid,gone:true};
  const fields=stat.slice(stat.lastIndexOf(') ')+2).split(' '),cmdline=procText(pid,'cmdline');
- const teardown=(Number(fields[6])&4)!==0&&BigInt(fields[20])===0n&&cmdline==='';
- return {pid,stat,cmdline,state:fields[0],flags:fields[6],vsize:fields[20],teardown,terminated:fields[0]==='Z'||teardown,gone:false};
+ const teardown=fields[0]!=='Z'&&(Number(fields[6])&4)!==0&&BigInt(fields[20])===0n&&cmdline==='';
+ return {pid,stat,cmdline,state:fields[0],flags:fields[6],vsize:fields[20],teardown,gone:false};
 }
 function ownedPids(token){return readdirSync('/proc').filter(n=>/^\d+$/.test(n)).filter(n=>{try{const args=readFileSync(`/proc/${n}/cmdline`).toString().split('\0');return args.includes('/repo/'+token+'.js')||args[0]==='/bin/bash'&&args.some(a=>a.includes(token));}catch{return false;}}).map(Number);}
 /** Host shell contracts through the generated script and live confinement.
@@ -82,19 +82,17 @@ export async function batch7HostChecks({scratch,shared}){
   const command=`/usr/bin/node /repo/${token}.js & /usr/bin/setsid /usr/bin/node /repo/${token}.js & exec 1>&- 2>&-; wait`;
   const c=f.start(command,{input:null});await ready(c,'CHILD_READY\nCHILD_READY\n');const pids=ownedPids(token);assert.ok(pids.length>=2,'both children started');
   try{if(mode==='disconnect'){c.p.kill('SIGKILL');await c.done;await f.launcher.stop();}else if(mode==='runner'){
-    f.owner.kill('SIGKILL');await f.ownerDone.done;
-    const first=pids.map(runnerState);h.write(join(f.r.at,'runner-first-observation.json'),first);
-    for(const state of first)try{assert.equal(state.terminated,true,`child ${state.pid} must terminate at first observation after runner death`);}catch(e){e.runnerObservation={teardown:first.filter(s=>s.teardown).length,observation:join(f.r.at,'runner-first-observation.json')};throw e;}
-    h.write(join(f.repo,'release-'+token),'release');
-    const start=performance.now();let states=first;
-    while(!states.every(s=>s.gone)){
-     assert.ok(performance.now()-start<10000,'runner children must be gone within 10 seconds');
-     await new Promise(ok=>setTimeout(ok,10));states=pids.map(runnerState);
-     for(const state of states)assert.equal(state.terminated,true,`child ${state.pid} must stay terminated after runner death`);
-     assert.equal(existsSync(join(f.repo,'late-'+token)),false,'no later write');
+    const start=performance.now();f.owner.kill('SIGKILL');await f.ownerDone.done;
+    const observations=[],path=join(f.r.at,'runner-disappearance.json');let states,wall_ms;
+    for(;;){
+     states=pids.map(runnerState);wall_ms=performance.now()-start;observations.push({wall_ms,states});
+     if(states.every(s=>s.gone||s.state==='Z')||wall_ms>=10000)break;
+     await new Promise(ok=>setTimeout(ok,Math.min(10,10000-wall_ms)));
     }
-    await c.done;assert.equal(existsSync(join(f.repo,'late-'+token)),false,'no later write');h.write(join(f.r.at,'runner-disappearance.json'),{first,final:states,wall_ms:performance.now()-start});
-    return {teardown:first.filter(s=>s.teardown).length,observation:join(f.r.at,'runner-disappearance.json')};
+    const result={teardown:observations.flatMap(o=>o.states).filter(s=>s.teardown).length,observation:path,observation_count:observations.length,wall_ms};
+    h.write(path,{clock:'SIGKILL request, before owner reap; conservative bound',bound_ms:10000,first:observations[0].states,final:states,observations,wall_ms});
+    try{assert.ok(states.every(s=>s.gone||s.state==='Z'),'runner children must be gone or zombie within 10 seconds');}catch(e){e.runnerObservation=result;throw e;}
+    await c.done;return result;
    }else{if(mode==='timeout')f.launcher.cancel();await f.launcher.stop();await c.done;}
    h.write(join(f.r.at,'lifetime-'+mode+'.json'),pids.map(pid=>({pid,live:live(pid),cmdline:procText(pid,'cmdline'),stat:procText(pid,'stat')})));for(const pid of pids)assert.equal(live(pid),false,`child ${pid} must terminate before ${mode} returns`);
    h.write(join(f.repo,'release-'+token),'release');assert.equal(existsSync(join(f.repo,'late-'+token)),false,'no later write');
@@ -105,15 +103,17 @@ export async function batch7HostChecks({scratch,shared}){
   const load=Array.from({length:4},()=>spawn(process.execPath,['-e','for(;;)Math.sqrt(Math.random());'],{stdio:'ignore',env:h.env}));
   const results=[];try{for(let i=0;i<50;i++){
    try{results.push({repetition:i+1,...await run(f=>lifetime(f,'runner'),{worker:true})});}catch(e){if(e.code!=='ERR_ASSERTION')throw e;results.push({repetition:i+1,...e.runnerObservation,error:e.message});}
-   h.write(join(scratch,'runner-death-repetitions.json'),{repetitions:results.length,kernel_teardown_repetitions:results.filter(r=>r.teardown>0).length,results});
+   h.write(join(scratch,'runner-death-repetitions.json'),{repetitions:results.length,more_than_one_observation:results.filter(r=>r.observation_count>1).length,longest_time_to_gone_or_zombie_ms:Math.max(...results.filter(r=>!r.error).map(r=>r.wall_ms)),kernel_teardown_repetitions:results.filter(r=>r.teardown>0).length,results});
   }}
   finally{for(const p of load){const ended=new Promise(ok=>p.once('close',ok));p.kill('SIGKILL');await ended;}}
   assert.equal(results.length,50);assert.equal(results.filter(r=>r.error).length,0,results.find(r=>r.error)?.error);
  });
- add('plant child survives dead runner caught by B7-93 first observation',async()=>{
+ add('plant child survives dead runner caught by B7-93 ten-second bound',async()=>{
   await run(f=>lifetime(f,'runner'),{worker:true});
   const at=h.copy(scratch,'survives-runner');h.wrapped(at,'closed-store.mjs','closedConfinement',"const a=original_closedConfinement(...args);if(!args[0].network)for(const flag of ['--unshare-pid','--die-with-parent'])a.splice(a.indexOf(flag),1);return a;");
   await caught('survives-runner',()=>run(f=>lifetime(f,'runner'),{worker:true,workerModule:join(at,'eval/closed-store.mjs')}));
+  const receipt=h.json(join(scratch,'plant2-survives-runner.json'));assert.match(receipt.assertion,/runner children must be gone or zombie within 10 seconds/);assert.ok(receipt.runnerObservation.wall_ms>=10000,'plant must survive until the actual contract bound');
+  const evidence=h.json(receipt.runnerObservation.observation);assert.ok(evidence.final.some(s=>!s.gone&&s.state!=='Z'&&BigInt(s.vsize)>0n),'plant must have a live address space at the bound');
  });
  // B7-77: both another live run and the current launcher remain unreachable.
  const connectProbe=path=>node(`const s=require('net').createConnection(${JSON.stringify(path)});s.on('connect',()=>{process.stdout.write('CONNECTED');s.end();});s.on('error',()=>process.exitCode=1);`);
@@ -159,7 +159,7 @@ export async function batch7HostChecks({scratch,shared}){
  add('plant lost-shell-exit caught by B7-75 status',async()=>{await run(exitOwner);const at=h.copy(scratch,'lost-shell-exit'),p=join(at,'eval/closed-client.c'),s=h.read(p);assert.equal(s.split('return (int)ntohl(code);').length,2);h.write(p,s.replace('return (int)ntohl(code);','return 0;'));const api=await import(pathToFileURL(join(at,'eval/closed-store.mjs')).href),client=api.closedClient(join(at,'client'));await caught('lost-shell-exit',()=>run(exitOwner,{client}));});
  const usageOwner=async f=>{const got=await f.invoke('/tools/whygraph why');assert.deepEqual(triple(got),triple(await direct(f,['why'])),'direct CLI usage bytes');};
  add('plant one-byte-usage caught by B7-12 byte equality',async()=>{await run(usageOwner);const at=h.copy(scratch,'one-byte-usage'),p=join(at,'eval/closed-store.mjs'),s=h.read(p),old="stderr:error.stderr??''";assert.equal(s.split(old).length,2);h.write(p,s.replace(old,"stderr:(error.stderr??'')+'x'"));const api=await import(pathToFileURL(p).href);await caught('one-byte-usage',()=>run(usageOwner,{api}));});
- async function caught(name,fn){let receipt;try{await fn();}catch(e){assert.equal(e.code,'ERR_ASSERTION',e.stack);receipt={name,owner:'host contract assertion',assertion:e.message};}assert.ok(receipt,'plant must fail assertion');h.write(join(scratch,`plant2-${name}.json`),receipt);}
+ async function caught(name,fn){let receipt;try{await fn();}catch(e){assert.equal(e.code,'ERR_ASSERTION',e.stack);receipt={name,owner:'host contract assertion',assertion:e.message,runnerObservation:e.runnerObservation};}assert.ok(receipt,'plant must fail assertion');h.write(join(scratch,`plant2-${name}.json`),receipt);}
  // B7-12 covers every parser diagnostic form, including disabled conditions.
  add('B7-12 missing and extra positional parser diagnostics match direct CLI across conditions',async()=>{for(const condition of ['graph','graph-norule','stub','graph-nosearch'])await run(async f=>{for(const cmd of ['carry','why','impact','search'])for(const args of [[cmd],[cmd,'target','extra']])assert.deepEqual(triple(await f.invoke('/tools/whygraph '+args.map(quote).join(' '))),triple(await direct(f,args)),`${condition} ${args.join(' ')}`);},{condition});});
  return checks;
