@@ -1,5 +1,84 @@
 # Reranker removal test audit
 
+## History correction (2026-11-16)
+
+The X4 and X8 checks now follow ADR 0009, ADR 0010 and the task brief.
+The baseline at `1b674f3` reproduced X8's `eval input inventory` failure.
+X4's skill subtest passed but still carried a TODO.
+
+| Item | Current check |
+| --- | --- |
+| X4 skills | Every file under `skills/` omits the reranker, `WHYGRAPH_RERANK` (including `_URL`) and `--at`. The skill subtest has no TODO. |
+| X8 removal | `git diff --name-only --no-renames 42ab13f c243073 -- eval skills` is empty. This includes tasks, tickets, self-tests, launcher and pinned skill bytes. The check reads history in the subject repo. |
+| X8 saved scores | The current scorer exits 0, prints the current `eval/score.txt` exactly and emits no stderr. The saved report retains the base report as its prefix. |
+| X8 frozen inputs | The 99 batch 3-6 tasks and 10 blind files match their base bytes. The task list, batch membership and blind paths come from the base tree and registry, so editing current metadata cannot remove an input from the check. |
+| X8 later work | Later eval files, launchers, self-tests and skill edits may change. The current batch 7 additions and cleaned skill text pass. |
+
+### Plants
+
+All 19 plants were caught at their named assertion. The 11 added plants
+cover each changed assertion; the original eight also pass their detection
+checks. Each planted test exits 1. The plant runner exits 0.
+
+| Added plant | Caught by |
+| --- | --- |
+| `current-skill-restores-reranker` | X4 skills: `current skill instructions` |
+| `current-rule-restores-setting` | X4 skills: `current skill instructions` |
+| `new-skill-restores-at` | X4 skills: `current skill instructions`, including a new nested skill |
+| `removal-changes-eval-byte` | X8: `removal commit changes no eval or skill bytes`, naming `eval/opencode.mjs` |
+| `removal-changes-skill-byte` | X8: the same assertion, naming `skills/whygraph/SKILL.md` |
+| `frozen-batch-3-task-changes` | X8: `frozen task eval/tasks/ripgrep-conflict-rg-01.json` |
+| `frozen-batch-4-task-changes` | X8: `frozen task eval/tasks/ripgrep4-conflict-rg-04.json` |
+| `frozen-batch-5-task-changes` | X8: `frozen task eval/tasks/ripgrep5-conflict-rg-04.json` |
+| `frozen-batch-6-task-changes` | X8: `frozen task eval/tasks/hono6-conflict-hn-01.json` |
+| `frozen-blind-requests.json-changes` | X8: `frozen blind input eval/tickets/requests.json` |
+| `frozen-blind-hono-controls2.json-changes` | X8: `frozen blind input eval/tickets/hono/controls2.json` |
+
+The history plants use scratch clones with shared objects and no checkout.
+Each creates a commit with the removal tree, one changed blob and the original
+base parent. Only the copied test receives that planted commit ID.
+`history.json` records the base, removal, planted commit and changed path.
+Frozen-input plants append one newline, so the scorer still passes before
+the byte assertion fails. The real source, history and saved results stay intact.
+
+The first history plant ran alone before the complete plant batch.
+Evidence stays under `test-results/`:
+
+- Baseline: `2026-11-16T01-25-06-653Z-71616.tap`.
+- Corrected X4/X8 checks: `2026-11-16T01-26-55-864Z-148175.tap` (14 pass, 0 fail, 0 TODO, including the unmatched test-file entries).
+- One-plant smoke check: `cut-plants-VDG1ws/summary.json`.
+- Complete plant batch: `cut-plants-y7cWh9/summary.json`, with one `result.tap` per plant.
+- Required suite: `2026-11-16T01-28-21-001Z-211008.tap`.
+
+### Checks and scope
+
+```sh
+export PATH="$HOME/.opencode/bin:$HOME/.npm-global/bin:$HOME/.local/share/mise/installs/pnpm/12.11.2:$HOME/.local/bin:$PATH"
+pnpm check
+node_modules/.bin/memod lint
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% pnpm test --test-skip-pattern='^S[46] '
+TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=400% node test/cut-reranker-plants.mjs
+```
+
+- `pnpm check` exits 0. `memod lint` exits 0 outside the sandbox, with no diagnostic.
+- The required suite exits 0: 235 tests, 235 pass, 0 fail, 0 TODO and 0 reported skips. S4 and S6 are excluded by the name pattern and are not counted as skips.
+- S4 and S6 belong to the parent and are excluded. No trial or hosted model ran.
+- Only the removal test, its plant runner and this audit changed. Nothing was installed or deleted. Scratch stays for inspection. No task worktree was created and nothing was pushed.
+- Source evidence: the original test commit `74d1246`, removal commit `c243073`, skill cleanup `c1ae17c`, ADR 0009 and ADR 0010. The brief forbids delegation. Fleet memory is unavailable. No connected issue or chat source is needed for this history correction; runtime error tracking does not govern these byte contracts.
+- The static checks guard explicit instruction and byte contracts. A normal CLI run cannot prove that all skill files omit removed instructions or that an old commit left inputs unchanged.
+
+### Contract disagreement
+
+The executable assertions agree with the brief and ADR 0010.
+`docs/failures.md` X4 still says that the skill files conflict with the
+batch-6 byte check. ADR 0010 and `c1ae17c` have resolved that clause.
+The clause is stale; this test-only task leaves it unchanged.
+
+## Original removal audit (2026-11-15)
+
+The sections below retain the original evidence. Their TODO and suite counts
+describe that earlier tree, not the current result above.
+
 > [!abstract] Answer
 > The independent checks cover X1–X8 against `42ab13f982542cdce3d9eaa4396480430c4ecd1d`.
 > All eight plants fail at the intended assertion.
