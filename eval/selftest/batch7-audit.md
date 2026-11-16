@@ -1,8 +1,125 @@
 ---
 title: Batch 7 independent test audit
-status: blocked
+status: done
 tags: [whygraph, eval, independent-tests]
 ---
+
+> [!abstract] Answer
+> The normal suite passes 1,476/1,476 cases, exit 0. It previously passed 1,222/1,449.
+> The altered-registry suite also passes 1,476/1,476. All 1,476 ordered case verdicts match.
+
+**What changed**
+
+- Invented inputs declare their own request and sample counts. Historical fixtures copy only earlier task families. [verified]
+- Added subset, committed-data, sampler and missing-program checks. The suite has 27 more cases. [verified]
+- Four requested code plants and eight preservation plants fail their owner assertions. [verified]
+- Only `eval/selftest/` changed. All commits stay on `batch-7-integration`; no push occurred. [verified]
+
+**Why it matters**
+
+- Requests may cover a subset of the sample. B7-42, the README and ADR 0012 define that rule. [verified]
+- Data checks read committed inputs separately from invented fixtures. Changed real registry counts cannot change fixture expectations. [verified]
+
+**The catch**
+
+- Three B5 case names embed random scratch paths. The comparator replaces only announced roots and preserves every suffix. [verified]
+- No requested item lacks a check. Hosted agents, trial results and real credential contents remain outside this task. [verified]
+
+**Next**
+
+- The parent can review the committed test cases and evidence. No requested test work or decision remains. [verified]
+
+## Third-round contract coverage
+
+| Brief item | Executable check |
+| --- | --- |
+| Invented inputs own their registry | Shared input fixtures declare 120 requests and 60/60 samples. Sampler fixtures do the same. |
+| Request subset | A reversed 22-of-120 fixture has 12 cited and 10 uncited requests. Selection skips unranged ids. |
+| Subset refusals | Counts 21/23 against registry 22, duplicate tickets, outside tickets, wrong strata and wrong samples write no tasks. |
+| Ranged shortages | Five ranged requests in either subset stratum name that stratum and write no tasks. |
+| Registry sample sizes | Generator and sampler accept asymmetric 17/19 counts. A literal-count plant fails. |
+| Earlier preservation | Tasks and five blind files in batches 3–6 match committed bytes. Eight byte-change plants fail. |
+| Committed task data | Fresh generation equals all 19 committed tasks byte for byte. |
+| Committed blind data | All five recorded hashes match committed bytes. A changed request-file byte refuses. |
+| Committed plans | The smoke plan has 16 distinct cells. The full plan has 258. Neither writes files. |
+| Recorded instructions | The recorded commit contains both the skill and rule files. |
+| Missing program | An empty PATH makes the real closed-store fixture name `opencode` before other setup. |
+| Independence repeat | `batch7-independence.mjs` copies the source, changes working counts, and compares every case verdict. |
+
+## Third-round plants
+
+| Copied-code fault | Owner | Observed failure |
+| --- | --- | --- |
+| Accept two requests for one ticket | B7-42 subset duplicate-ticket refusal | Generation succeeds; `invalid inputs must refuse` fails. |
+| Accept a ticket outside the sample | B7-42 subset outside-sample refusal | Generation succeeds; `invalid inputs must refuse` fails. |
+| Use literal sample sizes | B7-42 registry-sized valid sample | A valid 17/19 sample refuses; expected generation status 0 fails. |
+| Accept a changed committed blind byte | B7-41 committed-byte refusal | Generation succeeds; `invalid inputs must refuse` fails. |
+
+- Each plant first runs its owner against clean code. JSON receipts retain the exact failing assertions. [verified]
+- Eight preservation plants change a task or blind byte in each batch from 3 through 6. All fail. [verified]
+- The normal batch 7 scratch folder holds all 27 current batch 7 plant receipts. [verified]
+
+## Governing records and expected values
+
+- B7-42, README “Records and strata”, and ADR 0012 permit unique requests for a same-stratum subset. [verified]
+- The registry owns `counts.requests` and `sampleCounts`. No one-request-per-sampled-ticket rule remains. [verified]
+- Request-count 119/121 cases still refuse because their own fixture declares 120 requests. [verified]
+- B7-04 and B6-23 govern earlier preservation. Batch 7 files are outside the older preservation comparison. [verified]
+- Batch 3–5 bytes use `c92205d`. Batch 6 files did not exist there and use committed `HEAD`. [verified]
+- ADR 0010 governs recorded instruction bytes. The current instruction commit is checked through Git. [verified]
+- No `decided:` or `premise:` tag governs the edited fixture helpers. No production or decision record changed. [verified]
+- Fleet memory is unavailable. The brief forbids delegation; source history and decision records were read locally. [verified]
+
+## Checks and evidence
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Original full suite | 1,222/1,449, exit 1 | `test-results/trial7-tests3-baseline.txt` |
+| Normal full suite | 1,476/1,476, exit 0 | `test-results/trial7-tests3-full.txt` |
+| Focused inputs and preservation | 153/153, exit 0 | `test-results/trial7-tests3-focused-passing.txt` |
+| Missing program | 1/1, exit 0 | `test-results/trial7-tests3-message-passing.txt` |
+| Longer relative socket paths | 2/2, exit 0 | `test-results/trial7-tests3-relative-sockets.txt` |
+| Earlier-task fixture isolation | 3/3, exit 0 | `test-results/trial7-tests3-earlier-tasks.txt` |
+| Type check | Exit 0 | `test-results/trial7-tests3-check.txt` |
+| memod lint | Exit 0 | `test-results/trial7-tests3-memod-final.txt` |
+| README check | 14 commands, zero drift, exit 0 | `test-results/trial7-tests3-readme-passing.txt` |
+| Saved-score comparison | Zero output bytes, exit 0 | `test-results/trial7-tests3-score.txt` |
+| Altered-registry full suite | 1,476/1,476, exit 0 | `test-results/i-uhHSX1/test-results/independence-selftest.txt` |
+| Ordered verdict comparison | 1,476 identical cases, exit 0 | `test-results/trial7-tests3-independence-comparison.txt` |
+| Comparator plants | Changed verdict and path suffix both fail | `test-results/trial7-tests3-comparator-plants.txt` |
+
+- The normal full suite precedes the final fixture-location refinements. The focused checks above cover those refinements. [verified]
+- The final independence repeat runs all current cases from commit `3bc1722`. Its self-test exits 0. [verified]
+- Working registry counts change from 22 requests and 60/60 samples to 36 requests and 37/41 samples. [verified]
+- Comparator commit `18d56a0` checks the same saved logs. All ordered verdicts match after announced-root normalization. [verified]
+- Both comparator plants fail with unchanged total-count summaries. No verdict, case or path suffix is ignored. [verified]
+- No code/contract disagreement remains in the completed normal run, including B7-76 and B7-80. [verified]
+
+## Copy-setup corrections
+
+- The first focused preservation copy used an absent folder. Registry blind paths now define each copied folder. [verified]
+- `c92205d` predates batch 6 files. The batch 6 preservation baseline now reads committed bytes. [verified]
+- Sandboxed subprocess checks returned `EPERM`. All affected checks passed in the authorized external scope. [verified]
+- A long absolute Unix-socket path reproduces `listen EINVAL`. Relative paths keep the same files and pass the longer-path cases. [verified]
+- The first independence copy supplied a `.git` file. Nested fixture Git paths require a Git directory. [verified]
+- A shared clone supplies the directory and instruction objects. It initially omitted the local `main` branch. [verified]
+- Ref comparison measured three source local branches and one copied branch. The final copy preserves all three. [verified]
+- The final repeat checks ref equality and runs the historical `main`-branch case before the full suite. [verified]
+- An early repeat command refused before starting because the normal baseline was unfinished. [verified]
+- The final repeat wrapper initially exits 1 after its successful self-test because three case names contain different scratch roots. [verified]
+- The corrected comparator passes on those complete logs. Its separate comparison command exits 0. [verified]
+
+## Retained work
+
+- Normal scratch: `test-results/batch7-selftest-CcfTiI`. Final independence scratch: `test-results/i-uhHSX1`. [verified]
+- The JSON records all new root folders, work aliases, logs, and exact plant receipts. [verified]
+- No file was deleted. The brief requires retained scratch and forbids cleanup deletion. [verified]
+- No trial, hosted model, real agent, install, push, delegation, or worktree was started. [verified]
+- The audit is the handoff summary. Fleet memory is unavailable; the brief limits all report writes to the test scope. [verified]
+
+## Second-round record (historical)
+
+The material below records the earlier test run. The third-round results above supersede its current-state claims.
 
 > [!abstract] Answer
 > The suite passes 1447/1449 cases, exit 1. All 1347 existing cases pass; 100/102 added cases pass.
