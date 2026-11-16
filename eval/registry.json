@@ -303,6 +303,10 @@
       "instructionsCommit": null,
       "repeats": 3,
       "sampleSeed": "whygraph-batch-7",
+      "sampleCounts": {
+        "cited": 60,
+        "uncited": 60
+      },
       "storeAccess": "closed",
       "controlConditions": [
         "stub",

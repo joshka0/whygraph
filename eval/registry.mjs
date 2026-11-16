@@ -25,7 +25,10 @@ for (const [number, batch] of Object.entries(registry.batches)) {
     required(batch, ['prefix'], `batch ${number}`);
     if (!Number.isInteger(batch.counts.requests) || batch.counts.requests <= 0) throw new Error(`batch ${number}: invalid requests count`);
     if (batch.selection.mode === 'strata') {
-      for (const stratum of ['cited', 'uncited']) if (!Number.isInteger(batch.selection.strata?.[stratum]) || batch.selection.strata[stratum] < 1) throw new Error(`batch ${number}: invalid ${stratum} selection`);
+      for (const stratum of ['cited', 'uncited']) {
+        if (!Number.isInteger(batch.sampleCounts?.[stratum]) || batch.sampleCounts[stratum] < 1) throw new Error(`batch ${number}: invalid ${stratum} sample count`);
+        if (!Number.isInteger(batch.selection.strata?.[stratum]) || batch.selection.strata[stratum] < 1 || batch.selection.strata[stratum] > batch.sampleCounts[stratum]) throw new Error(`batch ${number}: invalid ${stratum} selection`);
+      }
     } else for (const wording of ['same-words', 'partial', 'other-words']) if (!Number.isInteger(batch.selection.wording?.[wording]) || batch.selection.wording[wording] < 0) throw new Error(`batch ${number}: invalid ${wording} selection`);
   }
 }

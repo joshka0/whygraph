@@ -55,11 +55,11 @@ list. This implementation edits no file under `eval/selftest/`, `test/` or
 
 ## Sampler and generator
 
-- B7-38: Reverse tickets and commit order, then sample twice. Expected: exactly 60 cited and 60 uncited unique ids with strata, identical bytes for the committed seed. Source extension rules live in registry data.
+- B7-38: Reverse tickets and commit order, then sample twice. Expected: the registry sample count of unique ticket ids in each stratum, identical bytes for the committed seed. Source extension rules live in registry data.
 - B7-39: A ticket is cited only by a non-source commit. Expected: it enters neither stratum. A closed ticket cited by no commit is eligible uncited; an open uncited ticket is not. A source-cited ticket is eligible cited regardless of state.
-- B7-40: Either stratum has fewer than 60 candidates. Expected: sampler names stratum and actual count and writes no sample. Invalid repo, missing source extensions/seed, duplicate ticket keys, malformed ticket/state or missing input also refuse before writing.
+- B7-40: Either stratum has fewer candidates than its registry sample count. Expected: sampler names stratum and actual count and writes no sample. Invalid repo, missing source extensions/seed, duplicate ticket keys, malformed ticket/state or missing input also refuse before writing.
 - B7-41: A blind file is absent, invalid JSON, has a missing hash or differs by one byte. Expected: generation refuses before every task write, including conflict files. Test all five files.
-- B7-42: Requests are not exactly 120, sample ids are not unique ticket ids, sample strata are invalid or not 60 each, request ticket/stratum differs from its sample, a sample has no unique request, or an id can escape the task folder. Expected: refusal and no task write. Missing request fields retain B6-11's validation.
+- B7-42: The request count differs from counts.requests, sample ids are not unique ticket ids, sample strata are invalid or their counts differ from sampleCounts, a request names a ticket outside the sample or with a different stratum, two requests name the same ticket, or an id can escape the task folder. Expected: refusal and no task write. Requests may cover a subset of the sample. Missing request fields retain B6-11's validation.
 - B7-43: Targets lack a unique entry per request, have unknown ids, or miss file/symbol fields. Expected: refusal before writing. An empty target list or invalid range makes that request ineligible; one valid range keeps the complete target list.
 - B7-44: Either stratum has fewer than six eligible ranged requests. Expected: error names the stratum, required six and actual count; no task file is written.
 - B7-45: Input requests arrive in reverse order. Expected: first six eligible ids per stratum, twelve conflicts, three plain and four governed controls, with preserved source entries and explicit conflict strata. Repeated generation is byte-identical.

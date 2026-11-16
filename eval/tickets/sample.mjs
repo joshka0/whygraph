@@ -24,11 +24,12 @@ for (const chunk of log.split('\x1e').slice(1)) {
 }
 const sample = [];
 for (const stratum of ['cited', 'uncited']) {
+  const count = design.sampleCounts[stratum];
   const candidates = tickets.filter(t => stratum === 'cited' ? sourceCited.has(t.key) : !cited.has(t.key) && t.state === 'closed');
   const rank = t => createHash('sha256').update(`${design.sampleSeed}\0${stratum}\0${t.key}`).digest('hex');
   candidates.sort((a, b) => rank(a).localeCompare(rank(b)) || Number(a.key) - Number(b.key));
-  if (candidates.length < 60) throw new Error(`${stratum}: need 60 tickets, got ${candidates.length}; no sample written`);
-  sample.push(...candidates.slice(0, 60).map(t => ({ id: `ticket-${t.key}`, stratum })));
+  if (candidates.length < count) throw new Error(`${stratum}: need ${count} tickets, got ${candidates.length}; no sample written`);
+  sample.push(...candidates.slice(0, count).map(t => ({ id: `ticket-${t.key}`, stratum })));
 }
 writeFileSync(opt('--out'), JSON.stringify(sample, null, 2) + '\n');
-console.log(`sampled 60 cited and 60 uncited tickets; seed ${design.sampleSeed}`);
+console.log(`sampled ${design.sampleCounts.cited} cited and ${design.sampleCounts.uncited} uncited tickets; seed ${design.sampleSeed}`);

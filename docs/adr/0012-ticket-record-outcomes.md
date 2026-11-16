@@ -38,7 +38,12 @@ then the opening body. Cut the body first, then older comments. A partial
 comment ends on a Unicode character boundary. Retained comments print in
 time order with their author, association, date and source.
 
-The seeded sampler selects 60 tickets in each stratum. Cited means a commit
+The seeded sampler selects the registry's `sampleCounts` in each stratum.
+The generator reads the same counts and derives the total from their sum.
+The blind author writes requests for a subset of sampled tickets that state
+a decision. Each request names one sampled ticket of the same stratum.
+No two requests name the same ticket. The request count must equal the
+registry's `counts.requests`. Cited means a commit
 that changes a configured source extension cites the ticket. Merge changes
 use the first parent. Uncited means
 no commit cites it and it is closed. Hash the seed, stratum and ticket id

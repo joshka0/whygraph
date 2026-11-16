@@ -1370,13 +1370,17 @@ older comments; retain whole Unicode characters. Metadata and commit ids
 are outside that content budget. Earlier decisions files and stores stay
 unchanged. See [ADR 0012](../docs/adr/0012-ticket-record-outcomes.md).
 
-`sample.mjs --batch 7 --tickets <export> --out <sample>` draws 60 tickets
-per stratum with the registry's committed seed. Cited means a commit that
+`sample.mjs --batch 7 --tickets <export> --out <sample>` draws the registry's
+`sampleCounts` per stratum with its committed seed (currently 60 each).
+The total sample size is the sum of those counts. Cited means a commit that
 changes a configured source extension cites the ticket. Uncited means no
 commit cites it and the ticket is closed. A shortage writes no sample.
 The blind author supplies requests, targets, two control files and sample
 ids in the same layout as `tickets/hono/`, with a stratum on each request
-and each sampled id. The parent records their exact SHA-256 values.
+and each sampled id. Requests cover a subset of the sample: each names one
+sampled ticket of the same stratum, and no two name the same ticket.
+The request count must equal the registry's `counts.requests` (currently 22).
+The parent records their exact SHA-256 values.
 
 `make-tasks.mjs --batch 7` refuses until those inputs and hashes exist.
 It validates all inputs before writing any task. For each stratum, sort

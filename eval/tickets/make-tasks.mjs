@@ -41,8 +41,10 @@ if (design.verifyInputs) {
   if (!Array.isArray(requests) || requests.length !== design.counts.requests) throw new Error(`need ${design.counts.requests} requests`);
   if (!Array.isArray(locations) || locations.length !== requests.length) throw new Error('need one target entry per request');
   if (design.selection.mode === 'strata') {
-    if (!Array.isArray(sample) || sample.length !== 120 || sample.some(x => !/^ticket-\d+$/.test(x?.id) || !['cited','uncited'].includes(x.stratum)) || new Set(sample.map(x => x.id)).size !== 120 || ['cited','uncited'].some(s => sample.filter(x => x.stratum === s).length !== 60)) throw new Error('invalid stratified sample ids: need 60 per stratum');
-    if (new Set(requests.map(entry=>String(entry.record))).size !== sample.length) throw new Error('need one request per sampled ticket');
+    const strata = ['cited', 'uncited'];
+    const sampleSize = strata.reduce((total, stratum) => total + design.sampleCounts[stratum], 0);
+    if (!Array.isArray(sample) || sample.length !== sampleSize || sample.some(x => !/^ticket-\d+$/.test(x?.id) || !strata.includes(x.stratum)) || new Set(sample.map(x => x.id)).size !== sampleSize || strata.some(s => sample.filter(x => x.stratum === s).length !== design.sampleCounts[s])) throw new Error('invalid stratified sample ids: need registry sample counts per stratum');
+    if (new Set(requests.map(entry=>String(entry.record))).size !== requests.length) throw new Error('two requests name the same sampled ticket');
     for (const entry of requests) if (!sample.some(x => x.id === `ticket-${entry.record}` && x.stratum === entry.stratum)) throw new Error(`${entry.id}: request stratum does not match sample`);
   } else if (!Array.isArray(sample) || !sample.length || sample.some(id => typeof id !== 'string' || !/^ticket-\d+$/.test(id)) || new Set(sample).size !== sample.length) throw new Error('invalid sample ids');
   const allIds = new Set();
