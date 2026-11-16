@@ -5,8 +5,10 @@ tags: [whygraph, eval, independent-tests]
 ---
 
 > [!abstract] Answer
-> The short runner-death case, 16-cell rehearsal and burner parent-death case each pass 1/1. Syntax, type and memod checks pass.
-> The full default pass and stress form were not run. See the short and stress forms audit below. Earlier sections retain historical results.
+> Tests 10 covers B7-134 through B7-167 and five amended cases.
+> Focused observations: 77 passing cases; two red cases expose one B7-148 fault.
+> Unknown service events still pass the real smoke CLI. No product code changed.
+> Syntax, tsrs and memod checks pass. Earlier results below are historical.
 
 ## Historical third-round audit
 
@@ -1190,3 +1192,78 @@ These checks need no credentials.
 - `B7 smoke B7-64 scorer lacks graph - graph-norule fails scorer blocks alone`.
 - `B7 smoke B7-62 ordinary command discovery and native repo read do not count as store access`.
 - `B7 smoke plant smoke accepts missing cell caught by B7-59 planned-cell owner`.
+
+
+## Refused-request and closed-access tests 10 (2026-11-16)
+
+Base: `a72ba08`. Branch: `batch-7-refused-requests`.
+Contract: `/home/dev/scratch/whygraph-eval/trial7-tests10-brief.md`.
+Governing records: amended B7-13, B7-62, B7-63, B7-80 and B7-150;
+ADRs 0010, 0011 and 0013. No governing record or product code changed.
+
+`batch7-refusals.mjs` adds 74 named cases. Five expanded existing cases
+now follow the amended contract. All 34 new failure-list items have named
+coverage. Thirteen distinct planted faults turn their owners red. The
+new cases join the existing batch 7 entry and have a focused regex runner.
+The standalone runner also exposes only the five amended existing cases.
+
+The latest focused observations are 77 passing cases and two red cases.
+Both reds are B7-148: an authentic reply with `event: "unexpected"` is
+accepted as a dispatched answer. The callback prints PASS and the real
+smoke CLI exits 0 with all eight PASS lines. The required result is FAIL
+and nonzero exit. Those assertions remain red.
+
+The scripted native-event agent uses the real shell launcher, client,
+store socket, health probes and metadata writer. It executes the archived
+command shapes without a model, with zero tokens. Nine dispatched answers
+and two raw refusals leave the attempt done. The local over-count client
+call returns exact usage without a connection. All four local smoke
+callbacks pass. Real settlement records one done attempt with no retry
+or invalid archive. Every required command tool was available.
+
+Actual namespace exposures cover full/selected manifests, readable client,
+service source alone, product source alone and real relate --version.
+Each leak makes the access check fail. Denied and absent relate probes
+retain statuses 126 and 127. The four archived graph-family attempts pass
+condition, access, accounting and usage callbacks after in-memory refusal
+conversion. The identical-files callback still fails its four-task
+coverage check. Its later peer/instruction assertions also pass when four
+synthetic task identities use the unchanged archived peer evidence.
+
+The old-contract search found three source locations: the B7-80 overflow
+table, the fabricated tool-success case and the discovery PASS assertion.
+The table expands to three cases. Discovery now counts its literal relate
+mention once. Existing B7-13 rejection cases and named denial probes have
+no contradictory executable expectation. Historical audit text stays intact.
+
+The first broad selection ran only new cases. A planted search was still
+running when cleanup aborted it, so that process ended on AbortError before
+writing its final receipt. A corrected fixture selection also ended on that
+cleanup error after four passing cases. The final helper awaits the planted
+query. That edit has syntax verification; the plant was not run a third
+time. Both executed plant runs caught and saved the red owner assertion.
+The report does not claim a clean exit for the final cleanup edit.
+
+All later remaining plants passed 9/9. The amended discovery assertion
+passed 1/1 after its literal count was corrected. Missing identity setup,
+a nonunique mutation anchor and an extra archive record were test-fixture
+errors; their corrected focused cases passed. Timeout-flag classification
+is injected at the result boundary. The unavailable-service worker also
+exercises the actual timer path. Its public invalid result keeps the right
+client bytes but has a less useful `Server is not running.` cleanup reason.
+That separate observation is left for the parent.
+
+`node --check`, `pnpm check` with tsrs and memod lint pass. Commands ran one
+at a time in the required 6 GiB, 200% CPU user scope with `/mnt/ssd/tmp`.
+No full suite, stress, hosted model, real preflight, trial cell, new full
+rehearsal, install, delegation, worktree, delete or push occurred. Batches
+5/6 plans and frozen files match both 6fc48a3 and d1f41cf. The archive
+remained read-only. No single clean aggregate run is claimed.
+
+Read `test-results/trial7-tests10-report.md` for all 34 coverage rows,
+exact commands, red cases, plant evidence and limits. The JSON audit's
+`refused_requests_tests10` field contains all case names, outcomes,
+coverage, 14 plant receipts (13 distinct plants), eight scratch roots,
+37 retained work roots/aliases and actual CLI artifact paths.
+`test-results/trial7-tests10-receipts.json` holds the same evidence index.
+Keep the inventory script and all named scratch. Nothing was deleted.

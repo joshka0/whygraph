@@ -7,7 +7,7 @@
     "docs/adr/0011-eval-closed-store.md",
     "docs/adr/0012-ticket-record-outcomes.md"
   ],
-  "status": "Both final B7-94\u2013B7-116 suites: 1617/1619, exit 1. Two contract mismatches remain red for parent ruling; eight requested plants caught in each run. Earlier sections retain historical counts.",
+  "status": "77 passing focused observations; two B7-148 red cases for one product fault. No full aggregate run.",
   "scope": {
     "edited": "eval/selftest/ only",
     "branch": "batch-7-integration",
@@ -8664,5 +8664,1550 @@
       "memod_lint": "exit 0 in escalated resource scope",
       "git_diff_check": "exit 0"
     }
+  },
+  "status_before_tests10": "Both final B7-94\u2013B7-116 suites: 1617/1619, exit 1. Two contract mismatches remain red for parent ruling; eight requested plants caught in each run. Earlier sections retain historical counts.",
+  "refused_requests_tests10": {
+    "date": "2026-11-16",
+    "branch": "batch-7-refused-requests",
+    "base": "a72ba08",
+    "inventory": [
+      "B7 B7-13 B7-134 raw HTTP refusal preserves real answers and never queries",
+      "B7 B7-135 raw count 65 is one refusal",
+      "B7 B7-135 raw count 4294967295 is one refusal",
+      "B7 B7-136 length 60001 one header refuses without payload",
+      "B7 B7-136 length 60001 split header refuses without payload",
+      "B7 B7-137 total 66012 bytes one write refuses",
+      "B7 B7-137 total 66012 bytes split payload refuses",
+      "B7 B7-138 empty and incomplete frames change no counters and leave client usable",
+      "B7 B7-139 65 arguments rejects before any service connection even when absent",
+      "B7 B7-140 ASCII 60001 bytes rejects before any service connection even when absent",
+      "B7 B7-140 UTF8 60002 bytes rejects before any service connection even when absent",
+      "B7 B7-141 total frame over 65536 rejects before any service connection even when absent",
+      "B7 B7-142 inclusive client limits reach product parser with direct bytes",
+      "B7 B7-151 queued rejected chunks count once and snapshot reasons remain immutable",
+      "B7 B7-143 B7-146 scripted archived command shapes finish valid with exact refusal metadata and all client answers",
+      "B7 B7-143 refusal does not erase timeout or isolation classification",
+      "B7 B7-144 dispatched failure stays separate from earlier refusal with exact real client diagnostic",
+      "B7 B7-145 earlier refusal does not hide lost service including during timeout",
+      "B7 B7-147 B7-63 zero and nonzero refusal counts pass with complete replies",
+      "B7 B7-148 missing reply fails service accounting",
+      "B7 B7-148 missing refusal fails service accounting",
+      "B7 B7-148 malformed reply fails service accounting",
+      "B7 B7-148 failure counter fails service accounting",
+      "B7 B7-148 call count fails service accounting",
+      "B7 B7-148 refusal count fails service accounting",
+      "B7 B7-148 missing refusal metadata fails service accounting",
+      "B7 B7-148 missing reasons fails service accounting",
+      "B7 B7-148 changed refusal reason fails service accounting",
+      "B7 B7-148 unknown refusal reason fails service accounting",
+      "B7 B7-148 unknown event fails service accounting",
+      "B7 B7-148 unavailable reply fails service accounting",
+      "B7 B7-148 unavailable client fails service accounting",
+      "B7 B7-149 refusal interleaving preserves ordered health and receipt comparison",
+      "B7 B7-150 raw refusals add to observed attempts without tool mentions",
+      "B7 B7-153 archived denied command counts once with no access verdict",
+      "B7 B7-154 archived denied command counts once with no access verdict",
+      "B7 B7-155 archived denied command counts once with no access verdict",
+      "B7 B7-156 archived denied command counts once with no access verdict",
+      "B7 B7-157 B7-158 arbitrary tool names results flags and joined inputs cannot decide access",
+      "B7 B7-164 B7-62 missing probe fails",
+      "B7 B7-164 B7-62 duplicate probe fails",
+      "B7 B7-164 B7-62 arbitrary names probe fails",
+      "B7 B7-164 B7-62 missing status probe fails",
+      "B7 B7-164 B7-62 null status probe fails",
+      "B7 B7-164 B7-62 fractional status probe fails",
+      "B7 B7-164 B7-62 zero with denial probe fails",
+      "B7 B7-165 corrupt answer fails condition answers with valid access probes",
+      "B7 B7-165 corrupt reference fails condition answers with valid access probes",
+      "B7 B7-165 corrupt store identity fails condition answers with valid access probes",
+      "B7 B7-165 corrupt ablation receipt fails condition answers with valid access probes",
+      "B7 B7-159 full manifest leak fails fixed probe without CURRENT or store mutation",
+      "B7 B7-159 selected ablation manifest leak fails while full store stays hidden",
+      "B7 B7-160 real client leak fails despite agent denial words",
+      "B7 B7-161 real service leak fails despite agent denial words",
+      "B7 B7-162 real product leak fails despite agent denial words",
+      "B7 B7-163 real relate leak fails despite agent denial words",
+      "B7 B7-163 disabled relate version alias remains denied with exit 126",
+      "B7 B7-152 B7-166 frozen batch plans launcher inputs checks and reports stay identical",
+      "B7 B7-167 all archived callbacks retain receipts coverage and remove four command false failures",
+      "B7 plant refusal-is-failure caught by B7-134",
+      "B7 plant refusal-dispatches caught by B7-134",
+      "B7 plant dispatched failure counted as refusal caught by B7-144",
+      "B7 plant client sends over-limit frame caught by B7-139",
+      "B7 plant metadata drops refusals caught by B7-143",
+      "B7 plant smoke accepts zero probe caught by B7-164",
+      "B7 plant smoke accepts missing probe caught by B7-164",
+      "B7 plant smoke accepts duplicate probe caught by B7-164",
+      "B7 plant old output heuristic fails four denied commands caught by B7-153 to B7-156",
+      "B7 plant CURRENT probe misses existing manifest leak caught by B7-159",
+      "B7 B7-147 B7-148 full smoke CLI passes refusals and fails missing refusal metadata",
+      "B7 B7-143 real completed attempt settles once without retry archive or runner stop",
+      "B7 B7-144 timeout flag cannot turn a dispatched failure into an agent timeout",
+      "B7 B7-163 absent relate version program remains denied with exit 127",
+      "B7 B7-148 unknown event must fail full smoke CLI with authentic reply fields",
+      "B7 smoke B7-62 fabricated tool success is an observed attempt with no access verdict",
+      "B7 smoke B7-62 ordinary command discovery and native repo read stay valid with one literal relate mention",
+      "B7 B7-80 65 arguments rejects locally with exact usage and unchanged service counters",
+      "B7 B7-80 60001 byte argument rejects locally with exact usage and unchanged service counters",
+      "B7 B7-80 over 65536-byte tool frame rejects locally with exact usage and unchanged service counters"
+    ],
+    "executions": [
+      {
+        "scratch": "test-results/refusals-JMJ7JB",
+        "receipt": "test-results/refusals-JMJ7JB/focused-results.json",
+        "results": [
+          {
+            "name": "B7 B7-13 B7-134 raw HTTP refusal preserves real answers and never queries",
+            "pass": true,
+            "ms": 4091.2486209999997
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/refusals-cGHCc4",
+        "receipt": "test-results/refusals-cGHCc4/focused-results.json",
+        "results": [
+          {
+            "name": "B7 B7-143 B7-146 scripted archived command shapes finish valid with exact refusal metadata and all client answers",
+            "pass": false,
+            "ms": 3997.439346,
+            "error": "AssertionError [ERR_ASSERTION]: harness failure: health route failed for carry: bwrap: Can't find source path /home/dev/repos/personal/whygraph/test-results/refusals-cGHCc4/1-refusal-agent-full-0/identity/opencode: No such file o; exit none; signal none\n\n'invalid' !== 'done'\n\n    at Object.run (file:///home/dev/repos/personal/whygraph/eval/selftest/batch7-refusals.mjs:100:35)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async file:///home/dev/repos/personal/whygraph/eval/selftest/batch7-refusals.mjs:226:61"
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/refusals-gfLJDd",
+        "receipt": "test-results/refusals-gfLJDd/focused-results.json",
+        "results": [
+          {
+            "name": "B7 B7-143 B7-146 scripted archived command shapes finish valid with exact refusal metadata and all client answers",
+            "pass": true,
+            "ms": 17172.865281
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/refusals-ZszuZy",
+        "receipt": null,
+        "results": null
+      },
+      {
+        "scratch": "test-results/refusals-dEty6X",
+        "receipt": "test-results/refusals-dEty6X/focused-results.json",
+        "results": [
+          {
+            "name": "B7 B7-144 dispatched failure stays separate from earlier refusal with exact real client diagnostic",
+            "pass": true,
+            "ms": 10142.257086
+          },
+          {
+            "name": "B7 B7-145 earlier refusal does not hide lost service including during timeout",
+            "pass": true,
+            "ms": 7391.9666130000005
+          },
+          {
+            "name": "B7 B7-167 all archived callbacks retain receipts coverage and remove four command false failures",
+            "pass": true,
+            "ms": 74.10899000000063
+          },
+          {
+            "name": "B7 plant refusal-dispatches caught by B7-134",
+            "pass": true,
+            "ms": 29.419236999998247
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/refusals-lEHjYF",
+        "receipt": "test-results/refusals-lEHjYF/focused-results.json",
+        "results": [
+          {
+            "name": "B7 plant dispatched failure counted as refusal caught by B7-144",
+            "pass": true,
+            "ms": 9523.115936
+          },
+          {
+            "name": "B7 plant client sends over-limit frame caught by B7-139",
+            "pass": true,
+            "ms": 367.221316000001
+          },
+          {
+            "name": "B7 plant metadata drops refusals caught by B7-143",
+            "pass": true,
+            "ms": 12460.443179
+          },
+          {
+            "name": "B7 plant smoke accepts zero probe caught by B7-164",
+            "pass": true,
+            "ms": 9105.539977
+          },
+          {
+            "name": "B7 plant smoke accepts missing probe caught by B7-164",
+            "pass": true,
+            "ms": 2.1857619999973394
+          },
+          {
+            "name": "B7 plant smoke accepts duplicate probe caught by B7-164",
+            "pass": true,
+            "ms": 2.345629999999801
+          },
+          {
+            "name": "B7 plant old output heuristic fails four denied commands caught by B7-153 to B7-156",
+            "pass": true,
+            "ms": 17.25862699999925
+          },
+          {
+            "name": "B7 plant CURRENT probe misses existing manifest leak caught by B7-159",
+            "pass": true,
+            "ms": 898.9325009999993
+          },
+          {
+            "name": "B7 B7-147 B7-148 full smoke CLI passes refusals and fails missing refusal metadata",
+            "pass": true,
+            "ms": 18564.388750999995
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/refusals-hcaEl1",
+        "receipt": "test-results/refusals-hcaEl1/focused-results.json",
+        "results": [
+          {
+            "name": "B7 B7-143 real completed attempt settles once without retry archive or runner stop",
+            "pass": true,
+            "ms": 12705.394231
+          },
+          {
+            "name": "B7 B7-144 timeout flag cannot turn a dispatched failure into an agent timeout",
+            "pass": true,
+            "ms": 6300.856155000001
+          },
+          {
+            "name": "B7 B7-163 absent relate version program remains denied with exit 127",
+            "pass": true,
+            "ms": 445.59640899999795
+          },
+          {
+            "name": "B7 B7-148 unknown event must fail full smoke CLI with authentic reply fields",
+            "pass": false,
+            "ms": 19386.413447000003,
+            "error": "AssertionError [ERR_ASSERTION]: B7-148 unknown event must make real smoke CLI exit nonzero\n\n0 !== 1\n\n    at Object.run (file:///home/dev/repos/personal/whygraph/eval/selftest/batch7-refusals.mjs:233:301)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async file:///home/dev/repos/personal/whygraph/eval/selftest/batch7-refusals.mjs:241:61"
+          },
+          {
+            "name": "B7 smoke B7-62 fabricated tool success is an observed attempt with no access verdict",
+            "pass": true,
+            "ms": 301.3951720000041
+          },
+          {
+            "name": "B7 smoke B7-62 ordinary command discovery and native repo read do not count as store access",
+            "pass": false,
+            "ms": 277.2580569999991,
+            "error": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /80 denied probes; 0 observed agent attempts \\(0 refused raw requests\\)/. Input:\n\n'PASS real agent preflight: 123 tokens; 45 ms\\n' +\n  'PASS planned cells: 16/16\\n' +\n  'PASS condition answers\\n' +\n  'PASS identical agent files\\n' +\n  'PASS closed store and tool code: 80 denied probes; 1 observed agent attempts (0 refused raw requests)\\n' +\n  'PASS service answered every call: 0 refused requests\\n' +\n  'PASS scorer batch blocks\\n' +\n  '  c1__stub__r1: 5 tokens; 4 ms\\n' +\n  '  c1__graph__r1: 5 tokens; 4 ms\\n' +\n  '  c1__graph-nolink__r1: 5 tokens; 3 ms\\n' +\n  '  c1__graph-nosearch__r1: 5 tokens; 4 ms\\n' +\n  '  c1__graph-noterms__r1: 5 tokens; 3 ms\\n' +\n  '  c1__graph-norule__r1: 5 tokens; 4 ms\\n' +\n  '  u1__stub__r1: 5 tokens; 4 ms\\n' +\n  '  u1__graph__r1: 5 tokens; 4 ms\\n' +\n  '  u1__graph-nolink__r1: 5 tokens; 3 ms\\n' +\n  '  u1__graph-nosearch__r1: 5 tokens; 4 ms\\n' +\n  '  u1__graph-noterms__r1: 5 tokens; 3 ms\\n' +\n  '  u1__graph-norule__r1: 5 tokens; 4 ms\\n' +\n  '  p1__stub__r1: 5 tokens; 4 ms\\n' +\n  '  p1__graph__r1: 5 tokens; 4 ms\\n' +\n  '  g1__stub__r1: 5 tokens; 4 ms\\n' +\n  '  g1__graph__r1: 5 tokens; 4 ms\\n' +\n  'PASS tokens and wall time per run\\n'\n\n    at Object.run (file:///home/dev/repos/personal/whygraph/eval/selftest/batch7-smoke.mjs:61:560)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async file:///home/dev/repos/personal/whygraph/eval/selftest/batch7-refusals.mjs:241:61"
+          },
+          {
+            "name": "B7 B7-80 65 arguments rejects locally with exact usage and unchanged service counters",
+            "pass": true,
+            "ms": 3993.668458
+          },
+          {
+            "name": "B7 B7-80 60001 byte argument rejects locally with exact usage and unchanged service counters",
+            "pass": true,
+            "ms": 3830.057541000002
+          },
+          {
+            "name": "B7 B7-80 over 65536-byte tool frame rejects locally with exact usage and unchanged service counters",
+            "pass": true,
+            "ms": 3671.2937690000035
+          }
+        ]
+      },
+      {
+        "scratch": "test-results/refusals-yWcVQp",
+        "receipt": "test-results/refusals-yWcVQp/focused-results.json",
+        "results": [
+          {
+            "name": "B7 smoke B7-62 ordinary command discovery and native repo read stay valid with one literal relate mention",
+            "pass": true,
+            "ms": 22088.228643
+          }
+        ]
+      }
+    ],
+    "first_observed_stdout": [
+      {
+        "name": "B7 B7-13 B7-134 raw HTTP refusal preserves real answers and never queries",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-135 raw count 65 is one refusal",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-135 raw count 4294967295 is one refusal",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-136 length 60001 one header refuses without payload",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-136 length 60001 split header refuses without payload",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-137 total 66012 bytes one write refuses",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-137 total 66012 bytes split payload refuses",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-138 empty and incomplete frames change no counters and leave client usable",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-139 65 arguments rejects before any service connection even when absent",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-140 ASCII 60001 bytes rejects before any service connection even when absent",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-140 UTF8 60002 bytes rejects before any service connection even when absent",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-141 total frame over 65536 rejects before any service connection even when absent",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-142 inclusive client limits reach product parser with direct bytes",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-151 queued rejected chunks count once and snapshot reasons remain immutable",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-143 refusal does not erase timeout or isolation classification",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-144 dispatched failure stays separate from earlier refusal with exact real client diagnostic",
+        "pass": false,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-145 earlier refusal does not hide lost service including during timeout",
+        "pass": false,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-147 B7-63 zero and nonzero refusal counts pass with complete replies",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 missing reply fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 missing refusal fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 malformed reply fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 failure counter fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 call count fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 refusal count fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 missing refusal metadata fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 missing reasons fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 changed refusal reason fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 unknown refusal reason fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 unknown event fails service accounting",
+        "pass": false,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 unavailable reply fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 unavailable client fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-149 refusal interleaving preserves ordered health and receipt comparison",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-150 raw refusals add to observed attempts without tool mentions",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-153 archived denied command counts once with no access verdict",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-154 archived denied command counts once with no access verdict",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-155 archived denied command counts once with no access verdict",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-156 archived denied command counts once with no access verdict",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-157 B7-158 arbitrary tool names results flags and joined inputs cannot decide access",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-164 B7-62 missing probe fails",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-164 B7-62 duplicate probe fails",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-164 B7-62 arbitrary names probe fails",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-164 B7-62 missing status probe fails",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-164 B7-62 null status probe fails",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-164 B7-62 fractional status probe fails",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-164 B7-62 zero with denial probe fails",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-165 corrupt answer fails condition answers with valid access probes",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-165 corrupt reference fails condition answers with valid access probes",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-165 corrupt store identity fails condition answers with valid access probes",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-165 corrupt ablation receipt fails condition answers with valid access probes",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-159 full manifest leak fails fixed probe without CURRENT or store mutation",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-159 selected ablation manifest leak fails while full store stays hidden",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-160 real client leak fails despite agent denial words",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-161 real service leak fails despite agent denial words",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-162 real product leak fails despite agent denial words",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-163 real relate leak fails despite agent denial words",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-163 disabled relate version alias remains denied with exit 126",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-152 B7-166 frozen batch plans launcher inputs checks and reports stay identical",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-167 all archived callbacks retain receipts coverage and remove four command false failures",
+        "pass": false,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 plant refusal-is-failure caught by B7-134",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 plant refusal-dispatches caught by B7-134",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 plant dispatched failure counted as refusal caught by B7-144",
+        "pass": false,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      }
+    ],
+    "latest": [
+      {
+        "name": "B7 B7-13 B7-134 raw HTTP refusal preserves real answers and never queries",
+        "pass": true,
+        "ms": 4091.2486209999997
+      },
+      {
+        "name": "B7 B7-135 raw count 65 is one refusal",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-135 raw count 4294967295 is one refusal",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-136 length 60001 one header refuses without payload",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-136 length 60001 split header refuses without payload",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-137 total 66012 bytes one write refuses",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-137 total 66012 bytes split payload refuses",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-138 empty and incomplete frames change no counters and leave client usable",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-139 65 arguments rejects before any service connection even when absent",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-140 ASCII 60001 bytes rejects before any service connection even when absent",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-140 UTF8 60002 bytes rejects before any service connection even when absent",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-141 total frame over 65536 rejects before any service connection even when absent",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-142 inclusive client limits reach product parser with direct bytes",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-151 queued rejected chunks count once and snapshot reasons remain immutable",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-143 B7-146 scripted archived command shapes finish valid with exact refusal metadata and all client answers",
+        "pass": true,
+        "ms": 17172.865281
+      },
+      {
+        "name": "B7 B7-143 refusal does not erase timeout or isolation classification",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-144 dispatched failure stays separate from earlier refusal with exact real client diagnostic",
+        "pass": true,
+        "ms": 10142.257086
+      },
+      {
+        "name": "B7 B7-145 earlier refusal does not hide lost service including during timeout",
+        "pass": true,
+        "ms": 7391.9666130000005
+      },
+      {
+        "name": "B7 B7-147 B7-63 zero and nonzero refusal counts pass with complete replies",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 missing reply fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 missing refusal fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 malformed reply fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 failure counter fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 call count fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 refusal count fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 missing refusal metadata fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 missing reasons fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 changed refusal reason fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 unknown refusal reason fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 unknown event fails service accounting",
+        "pass": false,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 unavailable reply fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-148 unavailable client fails service accounting",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-149 refusal interleaving preserves ordered health and receipt comparison",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-150 raw refusals add to observed attempts without tool mentions",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-153 archived denied command counts once with no access verdict",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-154 archived denied command counts once with no access verdict",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-155 archived denied command counts once with no access verdict",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-156 archived denied command counts once with no access verdict",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-157 B7-158 arbitrary tool names results flags and joined inputs cannot decide access",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-164 B7-62 missing probe fails",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-164 B7-62 duplicate probe fails",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-164 B7-62 arbitrary names probe fails",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-164 B7-62 missing status probe fails",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-164 B7-62 null status probe fails",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-164 B7-62 fractional status probe fails",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-164 B7-62 zero with denial probe fails",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-165 corrupt answer fails condition answers with valid access probes",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-165 corrupt reference fails condition answers with valid access probes",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-165 corrupt store identity fails condition answers with valid access probes",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-165 corrupt ablation receipt fails condition answers with valid access probes",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-159 full manifest leak fails fixed probe without CURRENT or store mutation",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-159 selected ablation manifest leak fails while full store stays hidden",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-160 real client leak fails despite agent denial words",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-161 real service leak fails despite agent denial words",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-162 real product leak fails despite agent denial words",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-163 real relate leak fails despite agent denial words",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-163 disabled relate version alias remains denied with exit 126",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-152 B7-166 frozen batch plans launcher inputs checks and reports stay identical",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 B7-167 all archived callbacks retain receipts coverage and remove four command false failures",
+        "pass": true,
+        "ms": 74.10899000000063
+      },
+      {
+        "name": "B7 plant refusal-is-failure caught by B7-134",
+        "pass": true,
+        "evidence": "stdout of the recorded remaining-new-cases command; process aborted before final receipt"
+      },
+      {
+        "name": "B7 plant refusal-dispatches caught by B7-134",
+        "pass": true,
+        "ms": 29.419236999998247
+      },
+      {
+        "name": "B7 plant dispatched failure counted as refusal caught by B7-144",
+        "pass": true,
+        "ms": 9523.115936
+      },
+      {
+        "name": "B7 plant client sends over-limit frame caught by B7-139",
+        "pass": true,
+        "ms": 367.221316000001
+      },
+      {
+        "name": "B7 plant metadata drops refusals caught by B7-143",
+        "pass": true,
+        "ms": 12460.443179
+      },
+      {
+        "name": "B7 plant smoke accepts zero probe caught by B7-164",
+        "pass": true,
+        "ms": 9105.539977
+      },
+      {
+        "name": "B7 plant smoke accepts missing probe caught by B7-164",
+        "pass": true,
+        "ms": 2.1857619999973394
+      },
+      {
+        "name": "B7 plant smoke accepts duplicate probe caught by B7-164",
+        "pass": true,
+        "ms": 2.345629999999801
+      },
+      {
+        "name": "B7 plant old output heuristic fails four denied commands caught by B7-153 to B7-156",
+        "pass": true,
+        "ms": 17.25862699999925
+      },
+      {
+        "name": "B7 plant CURRENT probe misses existing manifest leak caught by B7-159",
+        "pass": true,
+        "ms": 898.9325009999993
+      },
+      {
+        "name": "B7 B7-147 B7-148 full smoke CLI passes refusals and fails missing refusal metadata",
+        "pass": true,
+        "ms": 18564.388750999995
+      },
+      {
+        "name": "B7 B7-143 real completed attempt settles once without retry archive or runner stop",
+        "pass": true,
+        "ms": 12705.394231
+      },
+      {
+        "name": "B7 B7-144 timeout flag cannot turn a dispatched failure into an agent timeout",
+        "pass": true,
+        "ms": 6300.856155000001
+      },
+      {
+        "name": "B7 B7-163 absent relate version program remains denied with exit 127",
+        "pass": true,
+        "ms": 445.59640899999795
+      },
+      {
+        "name": "B7 B7-148 unknown event must fail full smoke CLI with authentic reply fields",
+        "pass": false,
+        "ms": 19386.413447000003,
+        "error": "AssertionError [ERR_ASSERTION]: B7-148 unknown event must make real smoke CLI exit nonzero\n\n0 !== 1\n\n    at Object.run (file:///home/dev/repos/personal/whygraph/eval/selftest/batch7-refusals.mjs:233:301)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async file:///home/dev/repos/personal/whygraph/eval/selftest/batch7-refusals.mjs:241:61"
+      },
+      {
+        "name": "B7 smoke B7-62 fabricated tool success is an observed attempt with no access verdict",
+        "pass": true,
+        "ms": 301.3951720000041
+      },
+      {
+        "name": "B7 smoke B7-62 ordinary command discovery and native repo read stay valid with one literal relate mention",
+        "pass": true,
+        "ms": 22088.228643
+      },
+      {
+        "name": "B7 B7-80 65 arguments rejects locally with exact usage and unchanged service counters",
+        "pass": true,
+        "ms": 3993.668458
+      },
+      {
+        "name": "B7 B7-80 60001 byte argument rejects locally with exact usage and unchanged service counters",
+        "pass": true,
+        "ms": 3830.057541000002
+      },
+      {
+        "name": "B7 B7-80 over 65536-byte tool frame rejects locally with exact usage and unchanged service counters",
+        "pass": true,
+        "ms": 3671.2937690000035
+      }
+    ],
+    "plants": [
+      {
+        "path": "test-results/refusals-ZszuZy/plant-refusal-dispatches.json",
+        "receipt": {
+          "name": "refusal-dispatches",
+          "owner": "B7-134",
+          "assertion": "refusal changes no dispatch/failure counter\n+ actual - expected\n\n  {\n+   calls: 1,\n-   calls: 0,\n    failures: 0,\n    reasons: [],\n    refusalReasons: [\n      'invalid argument count'\n    ],\n",
+          "actual": {
+            "calls": 1,
+            "failures": 0,
+            "reasons": [],
+            "refused": 1,
+            "refusalReasons": [
+              "invalid argument count"
+            ]
+          },
+          "expected": {
+            "calls": 0,
+            "failures": 0,
+            "reasons": [],
+            "refused": 1,
+            "refusalReasons": [
+              "invalid argument count"
+            ]
+          }
+        }
+      },
+      {
+        "path": "test-results/refusals-ZszuZy/plant-refusal-is-failure.json",
+        "receipt": {
+          "name": "refusal-is-failure",
+          "owner": "B7-134",
+          "assertion": "refusal changes no dispatch/failure counter\n+ actual - expected\n\n  {\n    calls: 0,\n+   failures: 1,\n+   reasons: [\n-   failures: 0,\n-   reasons: [],\n-   refusalReasons: [\n      'invalid argument count'\n    ],\n+   refusalReasons: [],\n+   refused: 0\n-   refused: 1\n  }\n",
+          "actual": {
+            "calls": 0,
+            "failures": 1,
+            "reasons": [
+              "invalid argument count"
+            ],
+            "refused": 0,
+            "refusalReasons": []
+          },
+          "expected": {
+            "calls": 0,
+            "failures": 0,
+            "reasons": [],
+            "refused": 1,
+            "refusalReasons": [
+              "invalid argument count"
+            ]
+          }
+        }
+      },
+      {
+        "path": "test-results/refusals-dEty6X/plant-refusal-dispatches.json",
+        "receipt": {
+          "name": "refusal-dispatches",
+          "owner": "B7-134",
+          "assertion": "refusal changes no dispatch/failure counter\n+ actual - expected\n\n  {\n+   calls: 1,\n-   calls: 0,\n    failures: 0,\n    reasons: [],\n    refusalReasons: [\n      'invalid argument count'\n    ],\n",
+          "actual": {
+            "calls": 1,
+            "failures": 0,
+            "reasons": [],
+            "refused": 1,
+            "refusalReasons": [
+              "invalid argument count"
+            ]
+          },
+          "expected": {
+            "calls": 0,
+            "failures": 0,
+            "reasons": [],
+            "refused": 1,
+            "refusalReasons": [
+              "invalid argument count"
+            ]
+          }
+        }
+      },
+      {
+        "path": "test-results/refusals-lEHjYF/plant-accept-probe-duplicate.json",
+        "receipt": {
+          "name": "accept-probe-duplicate",
+          "owner": "B7-164",
+          "assertion": "PASS closed store and tool code: 5 denied probes; 10 observed agent attempts (2 refused raw requests)\n\n\n0 !== 1\n",
+          "actual": 0,
+          "expected": 1
+        }
+      },
+      {
+        "path": "test-results/refusals-lEHjYF/plant-accept-probe-missing.json",
+        "receipt": {
+          "name": "accept-probe-missing",
+          "owner": "B7-164",
+          "assertion": "PASS closed store and tool code: 4 denied probes; 10 observed agent attempts (2 refused raw requests)\n\n\n0 !== 1\n",
+          "actual": 0,
+          "expected": 1
+        }
+      },
+      {
+        "path": "test-results/refusals-lEHjYF/plant-accept-probe-zero.json",
+        "receipt": {
+          "name": "accept-probe-zero",
+          "owner": "B7-164",
+          "assertion": "PASS closed store and tool code: 5 denied probes; 10 observed agent attempts (2 refused raw requests)\n\n\n0 !== 1\n",
+          "actual": 0,
+          "expected": 1
+        }
+      },
+      {
+        "path": "test-results/refusals-lEHjYF/plant-client-sends-over-limit.json",
+        "receipt": {
+          "name": "client-sends-over-limit",
+          "owner": "B7-139",
+          "assertion": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n  {\n+   status: 70,\n+   stderr: 'whygraph service unavailable\\n',\n-   status: 2,\n-   stderr: 'usage: whygraph <carry|why|impact|search> <target>\\n',\n    stdout: ''\n  }\n",
+          "actual": {
+            "status": 70,
+            "stdout": "",
+            "stderr": "whygraph service unavailable\n"
+          },
+          "expected": {
+            "status": 2,
+            "stdout": "",
+            "stderr": "usage: whygraph <carry|why|impact|search> <target>\n"
+          }
+        }
+      },
+      {
+        "path": "test-results/refusals-lEHjYF/plant-failure-is-refusal.json",
+        "receipt": {
+          "name": "failure-is-refusal",
+          "owner": "B7-144",
+          "assertion": "one plant anchor: const failure=message=>{failures++;reasons.push(message);\n\n3 !== 2\n",
+          "actual": 3,
+          "expected": 2
+        }
+      },
+      {
+        "path": "test-results/refusals-lEHjYF/plant-metadata-drops-refusals.json",
+        "receipt": {
+          "name": "metadata-drops-refusals",
+          "owner": "B7-143",
+          "assertion": "Expected values to be strictly equal:\n\nundefined !== 1\n",
+          "expected": 1
+        }
+      },
+      {
+        "path": "test-results/refusals-lEHjYF/plant-missing-CURRENT.json",
+        "receipt": {
+          "name": "missing-CURRENT",
+          "owner": "B7-159",
+          "assertion": "selected-store leak must be detected by actual fixed probe\n\n1 !== 0\n",
+          "actual": 1,
+          "expected": 0
+        }
+      },
+      {
+        "path": "test-results/refusals-lEHjYF/plant-old-heuristic-B7-153.json",
+        "receipt": {
+          "name": "old-heuristic-B7-153",
+          "owner": "B7-153",
+          "assertion": "FAIL closed store and tool code: successful store/code attempt: {\"command\":\"ls -la /tools 2>&1 | head; file /tools/whygraph 2>&1 | head\"}\n\n\n1 !== 0\n",
+          "actual": 1,
+          "expected": 0
+        }
+      },
+      {
+        "path": "test-results/refusals-lEHjYF/plant-old-heuristic-B7-154.json",
+        "receipt": {
+          "name": "old-heuristic-B7-154",
+          "owner": "B7-154",
+          "assertion": "FAIL closed store and tool code: successful store/code attempt: {\"command\":\"command -v curl wget nc socat python3 node 2>/dev/null; echo \\\"---strings?---\\\"; strings /tools/whygraph 2>/dev/null | head -5 || true\"}\n\n\n1 !== 0\n",
+          "actual": 1,
+          "expected": 0
+        }
+      },
+      {
+        "path": "test-results/refusals-lEHjYF/plant-old-heuristic-B7-155.json",
+        "receipt": {
+          "name": "old-heuristic-B7-155",
+          "owner": "B7-155",
+          "assertion": "FAIL closed store and tool code: successful store/code attempt: {\"command\":\"env | grep -i why; ls -la /tools; file /tools/whygraph; head -50 /tools/whygraph 2>/dev/null\"}\n\n\n1 !== 0\n",
+          "actual": 1,
+          "expected": 0
+        }
+      },
+      {
+        "path": "test-results/refusals-lEHjYF/plant-old-heuristic-B7-156.json",
+        "receipt": {
+          "name": "old-heuristic-B7-156",
+          "owner": "B7-156",
+          "assertion": "FAIL closed store and tool code: successful store/code attempt: {\"command\":\"strings /tools/whygraph 2>/dev/null | grep -iE 'socket|sqlite|json|store|records|decision|http|memod|relate' | head -100\"}\n\n\n1 !== 0\n",
+          "actual": 1,
+          "expected": 0
+        }
+      }
+    ],
+    "artifacts": [
+      "test-results/refusals-ZszuZy/expose-44/probes.json",
+      "test-results/refusals-ZszuZy/expose-45/probes.json",
+      "test-results/refusals-ZszuZy/expose-46/probes.json",
+      "test-results/refusals-ZszuZy/expose-47/probes.json",
+      "test-results/refusals-ZszuZy/expose-48/probes.json",
+      "test-results/refusals-ZszuZy/expose-49/probes.json",
+      "test-results/refusals-ZszuZy/expose-50/probes.json",
+      "test-results/refusals-dEty6X/archive-callbacks.json",
+      "test-results/refusals-lEHjYF/15-refusals-0/cli-green.json",
+      "test-results/refusals-lEHjYF/15-refusals-0/cli-red.json",
+      "test-results/refusals-lEHjYF/expose-8/probes.json",
+      "test-results/refusals-lEHjYF/expose-9/probes.json",
+      "test-results/refusals-hcaEl1/11-refusals-0/unknown-event-cli.json",
+      "test-results/refusals-hcaEl1/expose-2/probes.json"
+    ],
+    "retained_scratch": [
+      "test-results/refusals-JMJ7JB",
+      "test-results/refusals-cGHCc4",
+      "test-results/refusals-gfLJDd",
+      "test-results/refusals-ZszuZy",
+      "test-results/refusals-dEty6X",
+      "test-results/refusals-lEHjYF",
+      "test-results/refusals-hcaEl1",
+      "test-results/refusals-yWcVQp"
+    ],
+    "work_roots": [
+      {
+        "path": "test-results/q04cbb9a"
+      },
+      {
+        "path": "test-results/q074e4bd"
+      },
+      {
+        "path": "test-results/q0bc1e80"
+      },
+      {
+        "path": "test-results/q36d47ce"
+      },
+      {
+        "path": "test-results/q437afaa"
+      },
+      {
+        "path": "test-results/q4f759be"
+      },
+      {
+        "path": "test-results/q5d78c1d"
+      },
+      {
+        "path": "test-results/q7930f29"
+      },
+      {
+        "path": "test-results/q7d82ff8"
+      },
+      {
+        "path": "test-results/q91bd769"
+      },
+      {
+        "path": "test-results/q9a0c3d5"
+      },
+      {
+        "path": "test-results/qe037881"
+      },
+      {
+        "path": "test-results/qf7323fa"
+      },
+      {
+        "path": "test-results/w0685b7",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-hcaEl1/8-attempt-9/work"
+      },
+      {
+        "path": "test-results/w0db2f3",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-hcaEl1/7-attempt-6/work"
+      },
+      {
+        "path": "test-results/w130e7a",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-lEHjYF/12-attempt-9/work"
+      },
+      {
+        "path": "test-results/w1b54e3",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-yWcVQp/6-attempt-9/work"
+      },
+      {
+        "path": "test-results/w338a77",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-lEHjYF/13-attempt-12/work"
+      },
+      {
+        "path": "test-results/w350974",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-hcaEl1/10-attempt-15/work"
+      },
+      {
+        "path": "test-results/w3728ea",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-yWcVQp/5-attempt-6/work"
+      },
+      {
+        "path": "test-results/w5c90a4",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-yWcVQp/8-attempt-15/work"
+      },
+      {
+        "path": "test-results/w5d7642",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-ZszuZy/4-refusal-service-down-17/work"
+      },
+      {
+        "path": "test-results/w70ef39",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-hcaEl1/5-attempt-0/work"
+      },
+      {
+        "path": "test-results/w72a5b4",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-dEty6X/3-refusal-timeout-service-down-2/work"
+      },
+      {
+        "path": "test-results/w73a00d",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-yWcVQp/7-attempt-12/work"
+      },
+      {
+        "path": "test-results/w86b2d3",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-lEHjYF/10-attempt-3/work"
+      },
+      {
+        "path": "test-results/wa26ad8",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-yWcVQp/3-attempt-0/work"
+      },
+      {
+        "path": "test-results/wa69f86",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-lEHjYF/11-attempt-6/work"
+      },
+      {
+        "path": "test-results/wbea500",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-hcaEl1/6-attempt-3/work"
+      },
+      {
+        "path": "test-results/wc88ca5",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-hcaEl1/16-attempt-24/work"
+      },
+      {
+        "path": "test-results/wd0727c",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-lEHjYF/14-attempt-15/work"
+      },
+      {
+        "path": "test-results/wd72c08",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-hcaEl1/14-attempt-18/work"
+      },
+      {
+        "path": "test-results/wdad133",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-hcaEl1/9-attempt-12/work"
+      },
+      {
+        "path": "test-results/wdf76fd",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-dEty6X/2-refusal-service-down-1/work"
+      },
+      {
+        "path": "test-results/we10ae8",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-hcaEl1/15-attempt-21/work"
+      },
+      {
+        "path": "test-results/we42731",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-lEHjYF/9-attempt-0/work"
+      },
+      {
+        "path": "test-results/wf9654e",
+        "target": "/home/dev/repos/personal/whygraph/test-results/refusals-yWcVQp/4-attempt-3/work"
+      }
+    ],
+    "commands": [
+      {
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-refusals.mjs 'B7-134 raw HTTP'",
+        "scratch": "test-results/refusals-JMJ7JB",
+        "exit": 0,
+        "result": "1/1"
+      },
+      {
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-refusals.mjs 'B7-143 B7-146 scripted'",
+        "scratch": "test-results/refusals-cGHCc4",
+        "exit": 1,
+        "result": "0/1; missing fixture identity"
+      },
+      {
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-refusals.mjs 'B7-143 B7-146 scripted'",
+        "scratch": "test-results/refusals-gfLJDd",
+        "exit": 0,
+        "result": "1/1"
+      },
+      {
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-refusals.mjs '^(?!.*B7-143 B7-146 scripted)'",
+        "scratch": "test-results/refusals-ZszuZy",
+        "exit": 1,
+        "result": "interrupted by planted-query cleanup; no final total"
+      },
+      {
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-refusals.mjs 'B7-144 dispatched|B7-145 earlier|B7-167|plant (refusal-dispatches|dispatched failure|client|metadata|smoke|old|CURRENT)|full smoke CLI'",
+        "scratch": "test-results/refusals-dEty6X",
+        "exit": 1,
+        "result": "four cases passed before planted-query cleanup aborted"
+      },
+      {
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-refusals.mjs 'plant (dispatched failure|client|metadata|smoke|old|CURRENT)|full smoke CLI'",
+        "scratch": "test-results/refusals-lEHjYF",
+        "exit": 0,
+        "result": "9/9"
+      },
+      {
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-refusals.mjs 'settles once|timeout flag|absent relate|unknown event must fail full|rejects locally|fabricated tool success|ordinary command discovery'",
+        "scratch": "test-results/refusals-hcaEl1",
+        "exit": 1,
+        "result": "7/9; product unknown-event fault and stale discovery count"
+      },
+      {
+        "command": "TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q -p MemoryMax=6G -p CPUQuota=200% node eval/selftest/batch7-refusals.mjs 'ordinary command discovery'",
+        "scratch": "test-results/refusals-yWcVQp",
+        "exit": 0,
+        "result": "1/1; corrected literal count"
+      }
+    ],
+    "coverage": {
+      "B7-134": [
+        "B7 B7-13 B7-134 raw HTTP refusal preserves real answers and never queries",
+        "B7 plant refusal-is-failure caught by B7-134",
+        "B7 plant refusal-dispatches caught by B7-134"
+      ],
+      "B7-135": [
+        "B7 B7-135 raw count 65 is one refusal",
+        "B7 B7-135 raw count 4294967295 is one refusal"
+      ],
+      "B7-136": [
+        "B7 B7-136 length 60001 one header refuses without payload",
+        "B7 B7-136 length 60001 split header refuses without payload"
+      ],
+      "B7-137": [
+        "B7 B7-137 total 66012 bytes one write refuses",
+        "B7 B7-137 total 66012 bytes split payload refuses"
+      ],
+      "B7-138": [
+        "B7 B7-138 empty and incomplete frames change no counters and leave client usable"
+      ],
+      "B7-139": [
+        "B7 B7-139 65 arguments rejects before any service connection even when absent",
+        "B7 plant client sends over-limit frame caught by B7-139"
+      ],
+      "B7-140": [
+        "B7 B7-140 ASCII 60001 bytes rejects before any service connection even when absent",
+        "B7 B7-140 UTF8 60002 bytes rejects before any service connection even when absent"
+      ],
+      "B7-141": [
+        "B7 B7-141 total frame over 65536 rejects before any service connection even when absent"
+      ],
+      "B7-142": [
+        "B7 B7-142 inclusive client limits reach product parser with direct bytes"
+      ],
+      "B7-143": [
+        "B7 B7-143 B7-146 scripted archived command shapes finish valid with exact refusal metadata and all client answers",
+        "B7 B7-143 refusal does not erase timeout or isolation classification",
+        "B7 plant metadata drops refusals caught by B7-143",
+        "B7 B7-143 real completed attempt settles once without retry archive or runner stop"
+      ],
+      "B7-144": [
+        "B7 B7-144 dispatched failure stays separate from earlier refusal with exact real client diagnostic",
+        "B7 plant dispatched failure counted as refusal caught by B7-144",
+        "B7 B7-144 timeout flag cannot turn a dispatched failure into an agent timeout"
+      ],
+      "B7-145": [
+        "B7 B7-145 earlier refusal does not hide lost service including during timeout"
+      ],
+      "B7-146": [
+        "B7 B7-143 B7-146 scripted archived command shapes finish valid with exact refusal metadata and all client answers"
+      ],
+      "B7-147": [
+        "B7 B7-147 B7-63 zero and nonzero refusal counts pass with complete replies",
+        "B7 B7-147 B7-148 full smoke CLI passes refusals and fails missing refusal metadata"
+      ],
+      "B7-148": [
+        "B7 B7-148 missing reply fails service accounting",
+        "B7 B7-148 missing refusal fails service accounting",
+        "B7 B7-148 malformed reply fails service accounting",
+        "B7 B7-148 failure counter fails service accounting",
+        "B7 B7-148 call count fails service accounting",
+        "B7 B7-148 refusal count fails service accounting",
+        "B7 B7-148 missing refusal metadata fails service accounting",
+        "B7 B7-148 missing reasons fails service accounting",
+        "B7 B7-148 changed refusal reason fails service accounting",
+        "B7 B7-148 unknown refusal reason fails service accounting",
+        "B7 B7-148 unknown event fails service accounting",
+        "B7 B7-148 unavailable reply fails service accounting",
+        "B7 B7-148 unavailable client fails service accounting",
+        "B7 B7-147 B7-148 full smoke CLI passes refusals and fails missing refusal metadata",
+        "B7 B7-148 unknown event must fail full smoke CLI with authentic reply fields"
+      ],
+      "B7-149": [
+        "B7 B7-149 refusal interleaving preserves ordered health and receipt comparison"
+      ],
+      "B7-150": [
+        "B7 B7-150 raw refusals add to observed attempts without tool mentions"
+      ],
+      "B7-151": [
+        "B7 B7-151 queued rejected chunks count once and snapshot reasons remain immutable"
+      ],
+      "B7-152": [
+        "B7 B7-152 B7-166 frozen batch plans launcher inputs checks and reports stay identical"
+      ],
+      "B7-153": [
+        "B7 B7-153 archived denied command counts once with no access verdict",
+        "B7 plant old output heuristic fails four denied commands caught by B7-153 to B7-156"
+      ],
+      "B7-154": [
+        "B7 B7-154 archived denied command counts once with no access verdict"
+      ],
+      "B7-155": [
+        "B7 B7-155 archived denied command counts once with no access verdict"
+      ],
+      "B7-156": [
+        "B7 B7-156 archived denied command counts once with no access verdict",
+        "B7 plant old output heuristic fails four denied commands caught by B7-153 to B7-156"
+      ],
+      "B7-157": [
+        "B7 B7-157 B7-158 arbitrary tool names results flags and joined inputs cannot decide access"
+      ],
+      "B7-158": [
+        "B7 B7-157 B7-158 arbitrary tool names results flags and joined inputs cannot decide access"
+      ],
+      "B7-159": [
+        "B7 B7-159 full manifest leak fails fixed probe without CURRENT or store mutation",
+        "B7 B7-159 selected ablation manifest leak fails while full store stays hidden",
+        "B7 plant CURRENT probe misses existing manifest leak caught by B7-159"
+      ],
+      "B7-160": [
+        "B7 B7-160 real client leak fails despite agent denial words"
+      ],
+      "B7-161": [
+        "B7 B7-161 real service leak fails despite agent denial words"
+      ],
+      "B7-162": [
+        "B7 B7-162 real product leak fails despite agent denial words"
+      ],
+      "B7-163": [
+        "B7 B7-163 real relate leak fails despite agent denial words",
+        "B7 B7-163 disabled relate version alias remains denied with exit 126",
+        "B7 B7-163 absent relate version program remains denied with exit 127"
+      ],
+      "B7-164": [
+        "B7 B7-164 B7-62 missing probe fails",
+        "B7 B7-164 B7-62 duplicate probe fails",
+        "B7 B7-164 B7-62 arbitrary names probe fails",
+        "B7 B7-164 B7-62 missing status probe fails",
+        "B7 B7-164 B7-62 null status probe fails",
+        "B7 B7-164 B7-62 fractional status probe fails",
+        "B7 B7-164 B7-62 zero with denial probe fails",
+        "B7 plant smoke accepts zero probe caught by B7-164",
+        "B7 plant smoke accepts missing probe caught by B7-164",
+        "B7 plant smoke accepts duplicate probe caught by B7-164"
+      ],
+      "B7-165": [
+        "B7 B7-165 corrupt answer fails condition answers with valid access probes",
+        "B7 B7-165 corrupt reference fails condition answers with valid access probes",
+        "B7 B7-165 corrupt store identity fails condition answers with valid access probes",
+        "B7 B7-165 corrupt ablation receipt fails condition answers with valid access probes"
+      ],
+      "B7-166": [
+        "B7 B7-152 B7-166 frozen batch plans launcher inputs checks and reports stay identical"
+      ],
+      "B7-167": [
+        "B7 B7-167 all archived callbacks retain receipts coverage and remove four command false failures"
+      ]
+    },
+    "status": "77 passing focused observations; two B7-148 red cases for one product fault. No full aggregate run.",
+    "checks": {
+      "node --check all five changed mjs files": 0,
+      "pnpm check (tsrs)": 0,
+      "memod lint": 0
+    },
+    "limits": [
+      "Final pending-query cleanup edit was syntax-checked, not run a third time.",
+      "Timeout-flag classification is injected at the run-result boundary; the lost-service worker uses the actual timer path.",
+      "No full self-test, stress, hosted model, real preflight, trial cell or new full rehearsal.",
+      "Initial aborted group has stdout observations, not a final machine receipt."
+    ]
   }
 }
