@@ -7,7 +7,7 @@
     "docs/adr/0011-eval-closed-store.md",
     "docs/adr/0012-ticket-record-outcomes.md"
   ],
-  "status": "B7-94–B7-116 independent cases added; final validation running. Earlier result sections retain historical counts.",
+  "status": "Both final B7-94–B7-116 suites: 1617/1619, exit 1. Two contract mismatches remain red for parent ruling; eight requested plants caught in each run. Earlier sections retain historical counts.",
   "scope": {
     "edited": "eval/selftest/ only",
     "branch": "batch-7-integration",
@@ -6389,7 +6389,7 @@
       "docs/adr/0013-eval-rehearsal.md"
     ],
     "branch": "batch-7-rehearsal",
-    "status": "Two contract disagreements reproduced; final validation running",
+    "status": "Complete independent test author work: both final suites report 1617/1619, exit 1. B7-96 and B7-115 remain red for the parent. All eight plants are caught in both runs.",
     "previous_top_status": "Complete: normal and altered-registry full suites pass 1476/1476; all ordered case verdicts match; no requested item is omitted and no code/contract disagreement remains.",
     "scope": {
       "edited": [
@@ -6618,7 +6618,11 @@
         },
         "cause": "closed-run.mjs normalizes namespace paths with the alias repo path. isolationBreaches uses a canonical repo root and rejects that lexical alias as external. Both the alias and canonical root pass closedWorkRoot.",
         "evidence": "test-results/trial7-tests6-work-alias.txt",
-        "disposition": "Keep the valid-alias case red. The parent rules on this path-contract mismatch."
+        "disposition": "Keep the valid-alias case red. The parent rules on this path-contract mismatch.",
+        "final_logs": [
+          "test-results/trial7-tests6-full-6.txt",
+          "test-results/trial7-tests6-full-7.txt"
+        ]
       },
       {
         "item": "B7-115",
@@ -6635,27 +6639,161 @@
         },
         "cause": "eval/closed-store.mjs:247 appends error.message to the service-unavailable diagnostic.",
         "evidence": "test-results/trial7-tests6-focused-3.txt",
-        "disposition": "Leave the exact contract case red. Production edits are outside the independent author scope; the parent rules on the mismatch."
+        "disposition": "Leave the exact contract case red. Production edits are outside the independent author scope; the parent rules on the mismatch.",
+        "final_logs": [
+          "test-results/trial7-tests6-full-6.txt",
+          "test-results/trial7-tests6-full-7.txt"
+        ]
       }
     ],
-    "final_runs": [],
+    "final_runs": [
+      {
+        "log": "test-results/trial7-tests6-full-6.txt",
+        "source_test_commit": "2770798",
+        "passed": 1617,
+        "total": 1619,
+        "exit": 1,
+        "red_cases": [
+          "B7 B7-96 valid absolute symlink work root keeps native source reads inside the attempt",
+          "B7 B7-115 transport imports without registry and retains exact unavailable product-format guard"
+        ],
+        "scratch": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j",
+        "rehearsals": [
+          {
+            "results": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/416-4-full/rehearsals/f95ab571-c1df-41f6-ac1f-2f43a8824bb1",
+            "stage": "full",
+            "completed_cells": 258,
+            "planned_cells": 258,
+            "smoke_checks_passed": 7,
+            "service_replies": 2064,
+            "measurement": {
+              "success": true,
+              "cells": 258,
+              "wall_ms": 1748100.899573,
+              "scope_peak_bytes": 1175502848,
+              "smoke_exit": 0
+            }
+          },
+          {
+            "results": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/415-0-invented-plan/rehearsals/d78eccb5-94ce-4be4-a77b-34c06498cef0",
+            "stage": "smoke",
+            "completed_cells": 16,
+            "planned_cells": 16,
+            "smoke_checks_passed": 7,
+            "service_replies": 128,
+            "measurement": {
+              "success": true,
+              "cells": 16,
+              "wall_ms": 100034.417655,
+              "scope_peak_bytes": 1150820352,
+              "smoke_exit": 0
+            }
+          },
+          {
+            "results": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/415-0-invented-plan/rehearsals/435514d3-f83f-47b5-88b9-a92e6b3e2965",
+            "stage": "smoke",
+            "completed_cells": 16,
+            "planned_cells": 16,
+            "smoke_checks_passed": 7,
+            "service_replies": 128,
+            "measurement": {
+              "success": true,
+              "cells": 16,
+              "wall_ms": 95584.42230399999,
+              "scope_peak_bytes": 1150820352,
+              "smoke_exit": 0
+            }
+          }
+        ],
+        "plants_caught": 8
+      },
+      {
+        "log": "test-results/trial7-tests6-full-7.txt",
+        "source_test_commit": "2770798",
+        "passed": 1617,
+        "total": 1619,
+        "exit": 1,
+        "red_cases": [
+          "B7 B7-96 valid absolute symlink work root keeps native source reads inside the attempt",
+          "B7 B7-115 transport imports without registry and retains exact unavailable product-format guard"
+        ],
+        "scratch": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2",
+        "rehearsals": [
+          {
+            "results": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/416-4-full/rehearsals/db331209-22ce-4f50-834f-0bf647e1cc0e",
+            "stage": "full",
+            "completed_cells": 258,
+            "planned_cells": 258,
+            "smoke_checks_passed": 7,
+            "service_replies": 2064,
+            "measurement": {
+              "success": true,
+              "cells": 258,
+              "wall_ms": 1747025.8824679998,
+              "scope_peak_bytes": 1206984704,
+              "smoke_exit": 0
+            }
+          },
+          {
+            "results": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/415-0-invented-plan/rehearsals/3fe02621-5e7a-463d-b02b-2e81c8142060",
+            "stage": "smoke",
+            "completed_cells": 16,
+            "planned_cells": 16,
+            "smoke_checks_passed": 7,
+            "service_replies": 128,
+            "measurement": {
+              "success": true,
+              "cells": 16,
+              "wall_ms": 98835.729326,
+              "scope_peak_bytes": 1177047040,
+              "smoke_exit": 0
+            }
+          },
+          {
+            "results": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/415-0-invented-plan/rehearsals/8f7a9bd3-3867-4511-82d6-1e64ae1a4077",
+            "stage": "smoke",
+            "completed_cells": 16,
+            "planned_cells": 16,
+            "smoke_checks_passed": 7,
+            "service_replies": 128,
+            "measurement": {
+              "success": true,
+              "cells": 16,
+              "wall_ms": 95994.94388,
+              "scope_peak_bytes": 1177047040,
+              "smoke_exit": 0
+            }
+          }
+        ],
+        "plants_caught": 8
+      }
+    ],
     "required_checks": {
       "score": {
         "exit": 0,
         "output_bytes": 0,
-        "log": "test-results/trial7-tests6-score.txt"
+        "log": "test-results/trial7-tests6-score.txt",
+        "final_log": "test-results/trial7-tests6-final-score.txt",
+        "final_exit": 0,
+        "final_output_bytes": 0
       },
       "typecheck": {
         "exit": 0,
-        "log": "test-results/trial7-tests6-typecheck.txt"
+        "log": "test-results/trial7-tests6-typecheck.txt",
+        "final_log": "test-results/trial7-tests6-final-typecheck.txt",
+        "final_exit": 0
       },
       "memod": {
         "exit": 0,
-        "log": "test-results/trial7-tests6-memod.txt"
+        "log": "test-results/trial7-tests6-memod.txt",
+        "final_log": "test-results/trial7-tests6-final-memod.txt",
+        "final_exit": 0
       },
       "readme": {
         "exit": 0,
-        "log": "test-results/trial7-tests6-readme.txt"
+        "log": "test-results/trial7-tests6-readme.txt",
+        "final_log": "test-results/trial7-tests6-final-readme.txt",
+        "final_exit": 0
       }
     },
     "plants": [
@@ -6664,64 +6802,96 @@
         "owner": "B7-116",
         "first_failing_assertion": "archive must retain its canonical result-key prefix",
         "assertion": "archive must retain its canonical result-key prefix",
-        "receipt": "test-results/batch7-selftest-ZRXoJ5/rehearsal/plant-archive-prefix.json",
-        "case": "B7 plant archive prefix dropped caught by B7-116 archive identity"
+        "receipt": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-archive-prefix.json",
+        "case": "B7 plant archive prefix dropped caught by B7-116 archive identity",
+        "final_receipts": [
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-archive-prefix.json",
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/plant-archive-prefix.json"
+        ]
       },
       {
         "fault": "cell-socket",
         "owner": "B7-94",
         "first_failing_assertion": "long cells must start a live service using bounded UUID paths",
         "assertion": "long cells must start a live service using bounded UUID paths\n+ actual - expected\n\n+ undefined\n- 'done'\n",
-        "receipt": "test-results/batch7-selftest-ZRXoJ5/rehearsal/plant-cell-socket.json",
-        "case": "B7 plant cell name in socket path caught by B7-94 real long-cell launch"
+        "receipt": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-cell-socket.json",
+        "case": "B7 plant cell name in socket path caught by B7-94 real long-cell launch",
+        "final_receipts": [
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-cell-socket.json",
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/plant-cell-socket.json"
+        ]
       },
       {
         "fault": "late-root",
         "owner": "B7-96",
         "first_failing_assertion": "invalid root must refuse before any result marker or cell reservation",
-        "assertion": "invalid root must refuse before any result marker or cell reservation\n+ actual - expected\n\n+ '/home/dev/repos/personal/whygraph/test-results/batch7-selftest-ZRXoJ5/rehearsal/55-87-plant-root-order/rehearsals/1cb91fe3-fc79-4c7a-b677-c78b7019a948'\n- undefined\n",
-        "receipt": "test-results/batch7-selftest-ZRXoJ5/rehearsal/plant-late-root.json",
-        "case": "B7 plant late root guard caught by B7-96 no reservation before refusal"
+        "assertion": "invalid root must refuse before any result marker or cell reservation\n+ actual - expected\n\n+ '/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/470-89-plant-root-order/rehearsals/a69795a5-4426-42e7-81a4-057c45cf5896'\n- undefined\n",
+        "receipt": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-late-root.json",
+        "case": "B7 plant late root guard caught by B7-96 no reservation before refusal",
+        "final_receipts": [
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-late-root.json",
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/plant-late-root.json"
+        ]
       },
       {
         "fault": "result-key",
         "owner": "B7-95",
         "first_failing_assertion": "runner and smoke checker must use the same result key",
         "assertion": "runner and smoke checker must use the same result key",
-        "receipt": "test-results/batch7-selftest-ZRXoJ5/rehearsal/plant-result-key.json",
-        "case": "B7 plant runner smoke result-key mismatch caught by B7-95 smoke completion"
+        "receipt": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-result-key.json",
+        "case": "B7 plant runner smoke result-key mismatch caught by B7-95 smoke completion",
+        "final_receipts": [
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-result-key.json",
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/plant-result-key.json"
+        ]
       },
       {
         "fault": "smoke-pass",
         "owner": "B7-107",
         "first_failing_assertion": "a failed smoke check must fail rehearsal",
         "assertion": "a failed smoke check must fail rehearsal",
-        "receipt": "test-results/batch7-selftest-ZRXoJ5/rehearsal/plant-smoke-pass.json",
-        "case": "B7 plant smoke failure ignored caught by B7-107 rehearsal process status"
+        "receipt": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-smoke-pass.json",
+        "case": "B7 plant smoke failure ignored caught by B7-107 rehearsal process status",
+        "final_receipts": [
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-smoke-pass.json",
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/plant-smoke-pass.json"
+        ]
       },
       {
         "fault": "stand-in-agent",
         "owner": "B7-102",
         "first_failing_assertion": "stand-in is not a valid trial registry agent",
         "assertion": "stand-in is not a valid trial registry agent",
-        "receipt": "test-results/batch7-selftest-ZRXoJ5/rehearsal/plant-stand-in-agent.json",
-        "case": "B7 plant stand-in registry agent accepted caught by B7-102 registry rejection"
+        "receipt": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-stand-in-agent.json",
+        "case": "B7 plant stand-in registry agent accepted caught by B7-102 registry rejection",
+        "final_receipts": [
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-stand-in-agent.json",
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/plant-stand-in-agent.json"
+        ]
       },
       {
         "fault": "store-probe-pass",
         "owner": "B7-106",
         "first_failing_assertion": "a failed stand-in step must not finish successfully",
         "assertion": "a failed stand-in step must not finish successfully",
-        "receipt": "test-results/batch7-selftest-ZRXoJ5/rehearsal/plant-store-probe-pass.json",
-        "case": "B7 plant successful store probe counted as pass caught by B7-106 stand-in result"
+        "receipt": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-store-probe-pass.json",
+        "case": "B7 plant successful store probe counted as pass caught by B7-106 stand-in result",
+        "final_receipts": [
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-store-probe-pass.json",
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/plant-store-probe-pass.json"
+        ]
       },
       {
         "fault": "trial-results",
         "owner": "B7-100",
         "first_failing_assertion": "rehearsal must write no marker or ledger into trial results",
-        "assertion": "rehearsal must write no marker or ledger into trial results\n+ actual - expected\n\n+ [\n+   [\n+     'ddd2d2cd-51a1-4045-a74f-92bfd8d39411',\n+     [\n+       [\n+         '_ledger',\n+         [\n+           [\n+             'id-7565684bc37386ab450ec07ee33a48a7b71269978f8c1af76a24557e1f7bccbc.json',\n+             '73f44d439b6e1baaa10271e0dbe9b950da5a942e192442f97801e37b29e01a0c'\n+           ]\n+         ]\n+       ],\n+       [\n+         'id-7565684bc37386ab450ec07ee33a48a7b71269978f8c1af76a24557e1f7bccbc',\n+         []\n+       ],\n+       [\n+         'rehearsal.json',\n+         '3119b41493724e6fa731e0d22362a6aa613184f5fa7e52b40048a7d0dcb7590c'\n+       ]\n+     ]\n+   ]\n+ ]\n- []\n",
-        "receipt": "test-results/batch7-selftest-ZRXoJ5/rehearsal/plant-trial-results.json",
-        "case": "B7 plant trial results accepted caught by B7-100 evidence preservation"
+        "assertion": "rehearsal must write no marker or ledger into trial results\n+ actual - expected\n\n+ [\n+   [\n+     'df44eb9d-bd4c-4ccc-a75f-eef2a642ccb8',\n+     [\n+       [\n+         '_ledger',\n+         [\n+           [\n+             'id-7565684bc37386ab450ec07ee33a48a7b71269978f8c1af76a24557e1f7bccbc.json',\n+             '73f44d439b6e1baaa10271e0dbe9b950da5a942e192442f97801e37b29e01a0c'\n+           ]\n+         ]\n+       ],\n+       [\n+         'id-7565684bc37386ab450ec07ee33a48a7b71269978f8c1af76a24557e1f7bccbc',\n+         []\n+       ],\n+       [\n+         'rehearsal.json',\n+         '3119b41493724e6fa731e0d22362a6aa613184f5fa7e52b40048a7d0dcb7590c'\n+       ]\n+     ]\n+   ]\n+ ]\n- []\n",
+        "receipt": "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-trial-results.json",
+        "case": "B7 plant trial results accepted caught by B7-100 evidence preservation",
+        "final_receipts": [
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j/rehearsal/plant-trial-results.json",
+          "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2/rehearsal/plant-trial-results.json"
+        ]
       }
     ],
     "evidence": {
@@ -6730,7 +6900,8 @@
         "test-results/trial7-tests6-full-6.txt",
         "test-results/trial7-tests6-full-7.txt"
       ],
-      "catalog": "test-results/trial7-tests6-catalog-complete/cases.json"
+      "catalog": "test-results/trial7-tests6-catalog-complete/cases.json",
+      "scratch_index": "test-results/trial7-tests6-scratch.json"
     },
     "diagnostic_runs": [
       {
@@ -6772,7 +6943,33 @@
         "exit": 143,
         "state": "stopped",
         "reason": "Loaded the old 64-case list before the absolute work-root alias finding became an explicit red regression."
+      },
+      {
+        "log": "test-results/trial7-tests6-full-1.txt",
+        "exit": 1,
+        "passed": 1616,
+        "total": 1618,
+        "state": "complete diagnostic, not a final run",
+        "reason": "All 1554 pre-existing checks passed. This earlier snapshot has the old 115-byte fixture arithmetic and the exact B7-115 red case; its full-stage invented fixture has 16 cells, not the final 258-cell case."
       }
-    ]
+    ],
+    "completion": {
+      "tracked_edits": "eval/selftest/ only",
+      "branch": "batch-7-rehearsal",
+      "branch_state": "Local, unmerged; no push. No worktree created.",
+      "production_changes": false,
+      "scratch_retained": true
+    },
+    "scratch": {
+      "index": "test-results/trial7-tests6-scratch.json",
+      "log_derived_scratch_roots": 45,
+      "work_roots": 41,
+      "catalog_roots": 3,
+      "final_roots": [
+        "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-7b1z7j",
+        "/home/dev/repos/personal/whygraph/test-results/batch7-selftest-MhLTr2"
+      ],
+      "cleanup": "All final suite processes exited. Scratch retained; no deletion, push, or new worktree."
+    }
   }
 }

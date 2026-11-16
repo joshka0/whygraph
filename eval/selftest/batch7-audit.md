@@ -694,7 +694,31 @@ smoke runs and the full 258-cell case execute every cell through the real path.
 
 Final counts, plant receipts, disagreements, and scratch paths are recorded
 in the `bounded_paths_rehearsal` section of
-[the JSON audit](batch7-audit.json). Final validation is running.
+[the JSON audit](batch7-audit.json). Both final runs completed with two red contract cases.
+
+| Final run | Cases | Exit | Smoke rehearsals | Full rehearsal | Plants caught |
+| --- | --- | --- | --- | --- | --- |
+| [Run 6](../../test-results/trial7-tests6-full-6.txt) | 1617/1619 | 1 | 16/16 twice | 258/258 | 8/8 |
+| [Run 7](../../test-results/trial7-tests6-full-7.txt) | 1617/1619 | 1 | 16/16 twice | 258/258 | 8/8 |
+
+Each genuine rehearsal has seven smoke-check PASS results. Each final full
+rehearsal retains 258 done results, 258 distinct work copies, and 2,064 real
+service replies. Both final runs use test code at `2770798`. B7-96's accepted
+absolute work-root alias and B7-115's exact error diagnostic are the only red
+cases. The cases stay red for the parent; no production fix is attempted.
+
+The final type-check, memod lint, and README check exit 0. The default score
+comparison exits 0 and prints zero bytes. The JSON audit links all four logs.
+The earlier full diagnostic also verifies all 1,554 pre-existing checks.
+Its obsolete fixture failure is recorded separately from the final runs.
+
+The final scratch roots are `test-results/batch7-selftest-7b1z7j` and
+`test-results/batch7-selftest-MhLTr2`. The
+[scratch index](../../test-results/trial7-tests6-scratch.json) lists all
+log-derived scratch roots, short work roots, catalog folders, and logs.
+All scratch stays as the brief requires. Both final suite processes have
+exited. No push or new worktree ran; `batch-7-rehearsal` stays local and
+unmerged.
 
 ### Planted faults
 
