@@ -127,6 +127,37 @@ counts and reasons against metadata. It also counts raw refusals as observed
 agent attempts. Direct-answer receipts still gate every dispatched reply.
 This ruling amends B7-13, B7-63 and B7-80. Batches 5 and 6 stay frozen.
 
+### Stopped calls, 2026-11-17
+
+Ruling of the code author `sandpiper-whygraph`, confirmed by the coordinator
+`rowan-joshka-main` on 2026-11-17: a call that the run's own stop cuts is a
+stopped call, not a service failure. A call that fails while the run lives
+stays a harness failure.
+
+The sixth batch 7 smoke finished 16 of 16 cells and failed two smoke-check
+lines. One attempt timed out while a socket program of the agent held eight
+`search` calls open. The runner read `failures: 0` into the metadata and
+then stopped the service. The stop aborted the eight product commands, and
+the service logged eight failures that the metadata did not hold.
+
+On stop, the service aborts the calls in flight and waits until each has
+settled and its product command has exited. It logs each as `{"event":"stopped","args":[...]}` and records
+`stopped` apart from `failures` and `refused`. A second stop does nothing.
+The runner stops the launcher, then the service, and then reads the stats,
+so no row follows the metadata. Stopped calls leave an attempt's
+classification unchanged.
+
+The smoke checker counts reply rows plus stopped rows against
+`service.calls`, verifies the stopped count against metadata and reports
+it. It still requires zero failures and four health replies per attempt.
+Earlier evidence is not read again under this rule: the sixth smoke stays
+failed in `_smoke-archive/6-stop-logged-as-failure`. Not covered: a product
+command that hangs until the 20-minute limit ends as a stopped call in an
+attempt classed as an agent timeout. The stop does not wait for a `relate`
+query that a product command started; that query only reads and ends on
+its own. Failure items B7-168 to B7-177.
+Batches 5 and 6 stay frozen.
+
 ### Evidence for closed access, 2026-11-16
 
 The parent's ruling removes read-success guesses from agent tool logs.

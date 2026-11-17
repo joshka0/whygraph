@@ -273,7 +273,7 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
   let failures = 0, calls = 0, refused = 0, stopped = 0, stopping;
   const reasons=[], refusalReasons=[];
   const failure=message=>{failures++;reasons.push(message);appendFileSync(log,JSON.stringify({event:'failure',message})+'\n');};
-  const abort=new AbortController(), connections=new Set(), pending=new Set();
+  const abort=new AbortController(), connections=new Set(), pending=new Set(), commands=new Set();
   const server = createServer(connection => {
     connections.add(connection);connection.on('close',()=>connections.delete(connection));
     let input = Buffer.alloc(0), dispatched = false;
@@ -330,7 +330,11 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
       const mapped = !diagnostic && command !== 'search' && target.startsWith('/repo/') ? join(repo,target.slice(6)) : target;
       try {
         const selectedStore=condition==='graph-nolink'&&['carry','impact'].includes(command)?fullStore:store;
-        const r = await execute(join(root,'bin/whygraph'), diagnostic ? args : [command,mapped,'--repo',repo,'--store',selectedStore], { env:quiet, maxBuffer:1<<26, signal:abort.signal });
+        const running = execute(join(root,'bin/whygraph'), diagnostic ? args : [command,mapped,'--repo',repo,'--store',selectedStore], { env:quiet, maxBuffer:1<<26, signal:abort.signal });
+        // An abort rejects the call before its command has exited; stop() waits for the exit itself.
+        const exited=new Promise(ok=>{running.child.once('close',ok);running.child.once('error',()=>{if(running.child.pid===undefined)ok();});}).then(()=>commands.delete(exited));
+        commands.add(exited);
+        const r = await running;
         result={stdout:r.stdout,stderr:r.stderr,code:0};
         reference={...result};referenceStore=realpathSync(selectedStore);
         if(condition==='graph-nolink' && command==='carry') {
@@ -359,6 +363,7 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
   const stop=async()=>{
     abort.abort();
     await Promise.allSettled(pending);
+    await Promise.all(commands);
     for(const connection of connections)connection.destroy();
     await new Promise((ok,fail)=>server.close(error=>error?fail(error):ok()));
   };

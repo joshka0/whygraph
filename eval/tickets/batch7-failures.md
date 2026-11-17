@@ -283,8 +283,9 @@ exposed executable. No store bytes or fingerprints change.
 
 ## Calls stopped with their run, 2026-11-17
 
-Ruling of the code author (`sandpiper-whygraph`): a call that the run's own
-stop cuts is a stopped call, not a service failure. In the sixth smoke, the
+Ruling of the code author (`sandpiper-whygraph`), confirmed by the
+coordinator `rowan-joshka-main` on 2026-11-17 and recorded in ADR 0011: a
+call that the run's own stop cuts is a stopped call, not a service failure. In the sixth smoke, the
 first attempt of `zustand7-conflict-zs-13__graph-nolink__r1` timed out while
 the agent's own socket program held eight `search` calls open. The runner
 killed the command, read `failures: 0` into `meta.json`, and then stopped the
@@ -299,7 +300,9 @@ still lives is a service failure.
 
 Not covered: a product command that hangs until the 20-minute limit ends as a
 stopped call in an attempt that timed out. The runner classed that attempt as
-an agent timeout before this ruling too.
+an agent timeout before this ruling too. Also not covered: the stop waits for
+the exit of the product command, not of a `relate` query that this command
+started; such a query only reads and ends on its own.
 
 - B7-168: Stop the service while one or more dispatched calls wait for the product command. Expected: `stop()` resolves only after each of them settled; each writes exactly one `{"event":"stopped","args":[...]}` row with its own arguments, and no `failure` event, no reply row and no `whygraph service unavailable` row. `stats()` after the stop gives `stopped` equal to the row count, `failures` 0, empty `reasons`, and `calls` that still includes the stopped calls. No product command of a stopped call survives the stop.
 - B7-169: Call `stop()` twice, also at the same time, with and without calls in flight. Expected: both calls resolve, neither rejects, each stopped call is logged and counted once, and the socket no longer accepts a connection.
