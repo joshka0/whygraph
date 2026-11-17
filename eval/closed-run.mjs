@@ -69,8 +69,8 @@ export async function startClosedAgent({work,repo,client,socket,out,prompt,rehea
     writeFileSync(shell,'#!/bin/sh\nexec /tools/shell-client "$@"\n'); chmodSync(shell,0o555);
     const command=rehearsal?.executable??sh('bash',['-c','command -v opencode']).trim();
     if(!rehearsal&&sh(command,['--version']).trim()!=='1.18.29') throw new Error('requires opencode 1.18.29');
-    const confinement=closedConfinement({work,repo,client,socket,network:true,opencode:command});
-    confinement.push('--ro-bind',shell,'/tools/shell','--ro-bind',client,'/tools/shell-client','--ro-bind',join(work,'shell.sock'),'/whygraph/shell.sock');
+    const confinement=closedConfinement({work,repo,client,socket,network:true,opencode:command,
+      mounts:['--ro-bind',shell,'/tools/shell','--ro-bind',client,'/tools/shell-client','--ro-bind',join(work,'shell.sock'),'/whygraph/shell.sock']});
     const launch=opencodeLaunch(prompt,repo,'/tools','/tools/shell',work);
     Object.assign(launch.env,{HOME:'/home/agent',PATH:'/tools:/usr/bin:/bin',XDG_CONFIG_HOME:'/config',XDG_CACHE_HOME:'/cache',XDG_STATE_HOME:'/state',XDG_DATA_HOME:'/identity',OPENCODE_CONFIG_DIR:'/config/opencode'});
     const config=JSON.parse(launch.env.OPENCODE_CONFIG_CONTENT);

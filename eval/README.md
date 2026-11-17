@@ -1569,6 +1569,10 @@ An agent's 16 parallel calls had piled up product commands until the kernel
 killed the first pilot at the scope's 6 GB limit (ADR 0011, "Command
 limit"; the 27 cells finished before it stay).
 
+**Read-only root.** Since 2026-11-18, the root of the agent namespace and
+of each shell-command namespace is read-only, so no command can put its own
+socket in place of `/whygraph/service.sock` (ADR 0011, "Review findings").
+
 After an unscored cell, the runner
 continues and resume skips that cell. A harness failure gets one retry;
 if the cell still fails, the runner stops with both archives. An interrupted

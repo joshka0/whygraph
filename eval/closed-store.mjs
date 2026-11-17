@@ -186,18 +186,23 @@ export function closedClient(directory) {
   const source = join(root, 'eval/closed-client.c');
   const dest = join(directory, `client-${hash(readFileSync(source))}`);
   mkdirSync(directory, { recursive: true });
-  if (!existsSync(dest)) {
-    const built = `${dest}.${process.pid}.building`;
-    execFileSync('cc', ['-O2','-Wall','-Wextra','-Werror','-static',source,'-o',built]);
-    const bytes = readFileSync(built);
+  // Checked on every use, so a cached file gets the same check as a new build.
+  const check = file => {
+    const bytes = readFileSync(file);
     // A dynamic client would load LD_PRELOAD hooks; the loader never runs for a static one.
     const headers = bytes.readUInt16LE(0x38), size = bytes.readUInt16LE(0x36), at = Number(bytes.readBigUInt64LE(0x20));
     for (let i = 0; i < headers; i++) if ([2,3].includes(bytes.readUInt32LE(at + i * size))) throw new Error('closed client is not a static binary');
     if (bytes.indexOf(tokenPlaceholder) < 0 || bytes.indexOf(tokenPlaceholder) !== bytes.lastIndexOf(tokenPlaceholder)) throw new Error('closed client needs exactly one token field');
-    writeFileSync(`${dest}.sha256`,hash(bytes));
+    return bytes;
+  };
+  if (!existsSync(dest)) {
+    const built = `${dest}.${process.pid}.building`;
+    execFileSync('cc', ['-O2','-Wall','-Wextra','-Werror','-static',source,'-o',built]);
+    writeFileSync(`${dest}.sha256`,hash(check(built)));
     renameSync(built, dest);
   }
   chmodSync(dest, 0o500);
+  if (hash(check(dest)) !== readFileSync(`${dest}.sha256`,'utf8')) throw new Error('closed client differs from its recorded hash');
   return dest;
 }
 
@@ -342,7 +347,7 @@ export function resolverMounts({ work, repo, client }) {
 /** A minimal filesystem shared by the whole agent process and all its file tools.
  * owns: [[whygraph-closed-store]]
  */
-export function closedConfinement({ work, repo, client, socket, network = false, opencode, shell = false }) {
+export function closedConfinement({ work, repo, client, socket, network = false, opencode, shell = false, mounts = [] }) {
   for (const path of [work, repo, client, socket, ...(opencode ? [opencode] : [])]) filesystemPath(path);
   const args = ['bwrap','--die-with-parent','--new-session','--unshare-user','--unshare-pid','--unshare-ipc','--unshare-uts','--cap-drop','ALL'];
   if (!network) args.push('--unshare-net');
@@ -361,6 +366,8 @@ export function closedConfinement({ work, repo, client, socket, network = false,
     filesystemPath(join(data,'opencode'));
     args.push('--bind',join(data,'opencode'),'/identity/opencode');
   }
+  // Last, after every mount point exists: on a writable root a command could rename /whygraph and put its own socket there.
+  args.push(...mounts,'--remount-ro','/');
   return args;
 }
 
@@ -489,7 +496,10 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
     abort.abort();
     await Promise.allSettled(pending);
     await Promise.all(commands);
+    // A connection counts its refusal in its close handler: wait for each, so the stats hold every row.
+    const closed=[...connections].map(connection=>new Promise(ok=>connection.once('close',ok)));
     for(const connection of connections)connection.destroy();
+    await Promise.all(closed);
     await new Promise((ok,fail)=>server.close(error=>error?fail(error):ok()));
   };
   return { server, stats:()=>({calls,failures,reasons:[...reasons],refused,refusalReasons:[...refusalReasons],stopped}), stop:()=>stopping??=stop() };
