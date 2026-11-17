@@ -80,7 +80,8 @@ export async function batch7HostChecks({scratch,shared,stress=false}){
   h.write(join(scratch,'proc-disappearance-check.json'),{results});
   assert.deepEqual(results.filter(r=>!r.passed),[],'process observations must accept only disappearance errors');
  });
- add('B7-93 burner scope ends after self-test SIGKILL and SIGTERM',async()=>{
+ // Intentional CPU load runs only in the explicit stress collection (AGENTS.md, Testing).
+ if(stress)add('B7-93 burner scope ends after self-test SIGKILL and SIGTERM',async()=>{
   const results=[];
   for(const signal of ['SIGKILL','SIGTERM']){
    const token=`burner-lifetime-${process.pid}-${signal}`;
@@ -98,6 +99,7 @@ export async function batch7HostChecks({scratch,shared,stress=false}){
   }
   h.write(join(scratch,'burner-parent-death.json'),results);
  });
+ if(stress)checks.at(-1).stress=true;
  // B7-72: usable source operations and all commands, including nested cwd.
  add('B7-72 generated shell reads edits and commands in every condition and nested cwd',async()=>{
   for(const condition of ['stub','graph','graph-nolink','graph-nosearch','graph-noterms','graph-norule'])await run(async f=>{
@@ -123,8 +125,10 @@ export async function batch7HostChecks({scratch,shared,stress=false}){
  async function lifetime(f,mode){
   const token='host-child-'+h.hash(f.r.at).slice(0,12),script=join(f.repo,token+'.js');
   h.write(script,"const fs=require('fs');process.stdout.write('CHILD_READY\\n',()=>{fs.closeSync(1);fs.closeSync(2);});fs.watch('/repo',()=>{if(fs.existsSync('/repo/release-"+token+"'))fs.writeFileSync('/repo/late-"+token+"','survived');});setInterval(()=>{},100000);\n");
-  const command=`/usr/bin/node /repo/${token}.js & /usr/bin/setsid /usr/bin/node /repo/${token}.js & exec 1>&- 2>&-; wait`;
-  const c=f.start(command,{input:null});await ready(c,'CHILD_READY\nCHILD_READY\n');const pids=ownedPids(token);assert.ok(pids.length>=2,'both children started');
+  // ADR 0011 B7-187: node replaces unlisted setsid while retaining a real new session.
+  const detached=node(`require('child_process').spawn('/usr/bin/node',['/repo/${token}.js'],{detached:true,stdio:'inherit'}).unref()`);
+  const command=`/usr/bin/node /repo/${token}.js & ${detached} & exec 1>&- 2>&-; wait`;
+  const c=f.start(command,{input:null});await ready(c,'CHILD_READY\nCHILD_READY\n');const pids=ownedPids(token);assert.ok(pids.length>=2,'both children started');assert.equal(new Set(pids.map(pid=>procText(pid,'stat').slice(procText(pid,'stat').lastIndexOf(') ')+2).split(' ')[3])).size,2,'the fixture includes a separate session');
   try{if(mode==='disconnect'){c.p.kill('SIGKILL');await c.done;await f.launcher.stop();}else if(mode==='runner'){
     const start=performance.now();f.owner.kill('SIGKILL');await f.ownerDone.done;
     const observations=[],path=join(f.r.at,'runner-disappearance.json');let states,wall_ms;
@@ -143,15 +147,14 @@ export async function batch7HostChecks({scratch,shared,stress=false}){
   }finally{for(const pid of pids)if(live(pid))try{process.kill(pid,'SIGKILL');}catch(e){if(e.code!=='ESRCH')throw e;}if(c.p.exitCode===null&&c.p.signalCode===null)c.p.kill('SIGKILL');}
  }
  for(const mode of ['cleanup','timeout','disconnect','runner'])add(`B7-76 ${mode} ends background and new-session children before returning`,()=>run(f=>lifetime(f,mode),{worker:mode==='runner'}));
- add(`B7-93 runner death passes ${stress?50:5} consecutive repetitions under CPU load`,async()=>{
-  if(!stress)console.log('SHORT B7-93: 5 repetitions with four burners; long form: node eval/selftest/check.mjs --stress');
-  const load=await startBurners('runner-'+process.pid);
+ add(`B7-93 runner death passes ${stress?50:5} consecutive repetitions${stress?' under CPU load':''}`,async()=>{
+  const load=stress?await startBurners('runner-'+process.pid):undefined;
   const repetitions=stress?50:5;
   const results=[];try{for(let i=0;i<repetitions;i++){
    try{results.push({repetition:i+1,...await run(f=>lifetime(f,'runner'),{worker:true})});}catch(e){if(e.code!=='ERR_ASSERTION')throw e;results.push({repetition:i+1,...e.runnerObservation,error:e.message});}
    h.write(join(scratch,'runner-death-repetitions.json'),{repetitions:results.length,more_than_one_observation:results.filter(r=>r.observation_count>1).length,longest_time_to_gone_or_zombie_ms:Math.max(...results.filter(r=>!r.error).map(r=>r.wall_ms)),kernel_teardown_repetitions:results.filter(r=>r.teardown>0).length,results});
   }}
-  finally{await load.stop();}
+  finally{await load?.stop();}
   assert.equal(results.length,repetitions);assert.equal(results.filter(r=>r.error).length,0,results.find(r=>r.error)?.error);
  });
  checks.at(-1).stress=true;

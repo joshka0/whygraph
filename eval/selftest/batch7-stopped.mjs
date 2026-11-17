@@ -79,7 +79,8 @@ export async function batch7StoppedChecks({scratch,shared}){
    const dispatched=async n=>{await until(`${n} held product commands`,()=>pidsOf(pids).length>=n);return pidsOf(pids);};
    return {service,socket,log,held,dispatched};};
   try{return await fn({start,pids,f,at,api});}
-  finally{for(const s of started)if(s.server.listening)await s.stop();for(const key of fixtureTokens.keys())if(key.startsWith(scratch))fixtureTokens.delete(key);for(const pid of pidsOf(pids))if(alive(pid))process.kill(pid,'SIGKILL');}
+  // Fixture teardown must also release held products when a planted stop is broken.
+  finally{for(const pid of pidsOf(pids))if(alive(pid))process.kill(pid,'SIGKILL');for(const s of started)if(s.server.listening)await s.stop();for(const key of fixtureTokens.keys())if(key.startsWith(scratch))fixtureTokens.delete(key);}
  }
  const stoppedRows=log=>rows(log).filter(r=>r.event==='stopped');
  const own168=edit=>rig(async({start,pids})=>{
@@ -199,7 +200,8 @@ export async function batch7StoppedChecks({scratch,shared}){
   ['stopped count changed alone',/stopped calls differ from metadata/,d=>d.meta.service.stopped++],
   ['stopped count lowered alone',/stopped calls differ from metadata/,d=>d.meta.service.stopped--],
   ['stopped field removed',/stopped calls differ from metadata/,d=>delete d.meta.service.stopped],
-  ['stopped row without args',/invalid service log event/,d=>delete d.events.find(r=>r.event==='stopped').args],
+  // ADR 0011 B7-197: exact event fields reject this row before argument-type validation.
+  ['stopped row without args',/service log event with extra fields/,d=>delete d.events.find(r=>r.event==='stopped').args],
   ['stopped args not an array',/invalid service log event/,d=>d.events.find(r=>r.event==='stopped').args='search'],
   ['stopped arg not a string',/invalid service log event/,d=>d.events.find(r=>r.event==='stopped').args=['search',7]],
   ['failure event beside stopped rows',/service failure/,d=>d.events.push({event:'failure',message:'late'})],
