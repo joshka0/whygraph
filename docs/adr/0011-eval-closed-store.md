@@ -183,6 +183,54 @@ its bytes. The seventh smoke stays as it ended in
 `_smoke-archive/7-private-tmp-classed-as-breach`. Failure items B7-178 to
 B7-186.
 
+### No tool against the whygraph client, 2026-11-17
+
+Ruling of the operator on 2026-11-17, relayed by the coordinator
+`rowan-joshka-main`, before any batch 7 result exists: the sandbox blocks
+spying on the whygraph client and its traffic. The operator chose the
+design below over removing `node` too and over keeping every program.
+
+Context: in the sixth and seventh batch 7 smoke, agents that got only a
+ticket's title and link hunted for its text. In 36 attempts they ran
+`strace` in 19, `curl` in 19, `socat`, `nc`, `ltrace` and `strings` in 14
+each, `gdb` in 12, a C compiler in 12 and `LD_PRELOAD` in 11, and sent raw
+frames to the service socket. No attempt read a record's text. The socket
+carries only the answers of the run's own condition, so a spy tool could
+gain nothing. The block removes the question and the cost of these hunts:
+several ran to the 20-minute limit.
+
+Choice, for batch 7 and later:
+
+1. Program list. A shell command's namespace holds only the programs and
+   folders that the batch lists under `shell` in `eval/registry.json`, and
+   the libraries that those programs load. It holds no compiler, no
+   interpreter except `bash`, `awk`, `sed` and `node`, no tracer, no network
+   client and no binary reader. `node` and the host's TypeScript stay: 7 of
+   36 attempts type-checked their change with them. A listed name that the
+   host lacks stops the run before the agent starts.
+2. Seccomp filter. The agent namespace and every shell-command namespace
+   deny `ptrace`, `process_vm_readv` and `process_vm_writev` with `EPERM`.
+   The filter is built for x86-64; another machine stops the run.
+3. Static client. The client is linked statically, so the loader variables
+   (`LD_PRELOAD`) have no effect on it. A dynamic build stops the run.
+4. Client token. Each run draws 256 random bits and writes them into its
+   own copy of the client, which stays execute-only. The client sends the
+   token before its frame. The service compares the first 64 bytes in
+   constant time, only after all 64 arrived or the connection closed. A
+   connection that sent bytes and no valid token is a refused request with
+   reason `missing client token`; it gets no reply and no query, and the
+   attempt stays valid. The token is in no log, metadata file or
+   environment variable. `files.json` records the hash of the token-free
+   client, so the comparison of agent files across conditions holds.
+
+Consequences: a raw probe of the socket is now refused for its missing
+token before the frame limits apply; this amends B7-134 to B7-138. Runs lose
+`python3`, `perl`, `curl` and the other unlisted programs in every
+condition. `node` stays, so a command can still write and run its own
+program; that program has no token and cannot trace or preload the client.
+The seventh smoke and its results stay archived; an eighth smoke runs with
+the block. Failure items B7-187 to B7-199. Batches 5 and 6 stay frozen.
+
 ### Evidence for closed access, 2026-11-16
 
 The parent's ruling removes read-success guesses from agent tool logs.

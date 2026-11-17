@@ -344,3 +344,57 @@ one of the five archived attempts as the fixture.
 - B7-184: Build the agent confinement and the shell-command confinement (`closedConfinement`, with and without network). Expected: each has exactly one `--tmpfs /tmp` and no bind, ro-bind, symlink or dir destination at or under `/tmp`. Write a file under `/tmp` inside the real confinement. Expected: no such file exists on the host's `/tmp` or under the work folder; a second confinement start does not see it. If a mount under `/tmp` is ever added, this case fails, and the rule loses its premise.
 - B7-185: Classify a `/tmp` file-tool path with the open-store rule of batches 5 and 6 (`eval/run.mjs`, `eval/opencode.mjs:isolationBreaches`). Expected: `external file-tool path: /tmp/...` as before; `eval/opencode.mjs` is byte-identical to `0af356e`; batch 5 and 6 plans, frozen inputs and reports are unchanged (B7-132).
 - B7-186: Replay smoke-check on the archived seventh smoke. Expected: the same 8 PASS lines and the two unscored cells; old evidence is not classified again. Run smoke-check on a smoke whose cells hold private `/tmp` paths and status `done`. Expected: `planned cells` passes with no unscored cell.
+
+## No tool against the whygraph client, 2026-11-17
+
+Ruling of the operator (2026-11-17, relayed by the coordinator
+`rowan-joshka-main`), made before any batch 7 result exists: the sandbox
+blocks spying, so the question whether a spy tool gave a condition answers
+it should not have cannot arise. The agent must not be able to build or run
+a tool against the whygraph client or its traffic. The `/tmp` ruling stays.
+
+Measured in the sixth and seventh smoke (36 attempts): `strace` in 19
+attempts, `curl` 19, `socat` 14, `nc` 14, `ltrace` 14, `strings` 14, `gdb`
+12, `gcc` or `cc` 12, `LD_PRELOAD` 11, and raw frames to the service socket
+from `curl` and Python. `python3` had 60 spy calls and no other use. `node`
+had 18 type-check calls in 7 attempts, with the host's TypeScript; that is
+work on the request and stays possible. No spy tool read a record's text:
+none of nine phrases that occur only in ticket 1977's body is in any tool
+result. Evidence: `eval/results/_smoke-archive/6-stop-logged-as-failure/`
+and `7-private-tmp-classed-as-breach/` (`tools.json`, `shell.jsonl`,
+`service.jsonl` of every attempt).
+
+Four mechanisms, for batch 7 and later; batches 5 and 6 stay frozen:
+
+1. Shell commands run in a namespace that holds only the programs and
+   folders that the batch lists in `eval/registry.json`, with the libraries
+   those programs load.
+2. A seccomp filter in the agent namespace and in every shell-command
+   namespace denies `ptrace`, `process_vm_readv` and `process_vm_writev`.
+3. The client is a static binary.
+4. Each run's client holds a secret token of that run. The service answers
+   only a frame that starts with the token.
+
+The following cases belong to an independent test author from Codex or agy.
+The code author writes no tests. Each spy technique of the archived attempts
+needs a case that takes its command from an archived `tools.json` or
+`shell.jsonl` and shows that the sandbox refuses it.
+
+- B7-187: In a shell command, look up and run each of `gcc`, `cc`, `g++`, `make`, `as`, `ld`, `python3`, `python`, `perl`, `ruby`, `strace`, `ltrace`, `gdb`, `socat`, `nc`, `curl`, `wget`, `strings`, `objdump`, `readelf`, `xxd`, `file`, `ps`, `ss`, `lsof`, `tcpdump`, `unshare`, `bwrap`, `mount`. Expected: `command -v` finds none; running one gives bash's `command not found`, exit 127; no file of these programs exists anywhere in the namespace, including compiler parts under `/usr/lib` and `/usr/libexec`. Replay the archived compile commands (`cc -shared -fPIC ... logio.so`, `gcc /tmp/opencode/x.c`) and the archived `strace`, `ltrace`, `gdb`, `socat` and `curl --unix-socket` commands. Expected: each ends without a built file, a trace or a reply from the service.
+- B7-188: In a shell command, run every program that the batch's registry entry lists, and the ordinary work of the archived valid attempts: `git status`, `git log`, `git diff`, `git show`, `grep -rn`, `sed -n`, `find`, `ls`, `cat`, `head`, `tail`, `wc`, `sort`, `awk`, `diff`, `xargs`, `mkdir`, `cp`, `rm` inside `/repo`. Expected: each works as on the host. A listed program or folder that is missing on the host, or a program whose library cannot be resolved, refuses the run before the agent starts, with the missing name; it never starts a run with a shorter list.
+- B7-189: In a shell command, write a small TypeScript file in `/repo` and type-check it with `node` and the listed TypeScript (`tsc --noEmit --strict`), once with a type error and once without. Expected: the error is reported with its line and exit 2; the clean file exits 0. The type check of an archived stub attempt (`.tmp-variance`, `.tmp-tscheck`) runs to its verdict.
+- B7-190: Call `ptrace` (`PTRACE_TRACEME`, `PTRACE_ATTACH`, `PTRACE_SEIZE`), `process_vm_readv` and `process_vm_writev` from a test program that the case places in `/repo`, in a shell-command namespace and in the agent namespace. Expected: each call fails with `EPERM`; the program is not killed, and ordinary system calls still work. The filter is present in both namespaces of a real launch (read `Seccomp: 2` and one filter from `/proc/self/status`). On a machine that is not x86-64 the run refuses to start. A call with the x32 bit set is denied.
+- B7-191: Build the client. Expected: it has no program interpreter and no dynamic section; `LD_PRELOAD`, `LD_AUDIT` and `LD_LIBRARY_PATH` with a hook library that the case supplies change nothing: the hook's marker file is never written and the answer bytes equal the answer without them. A client build that is dynamic refuses the run before the agent starts.
+- B7-192: From a shell command, connect to `/whygraph/service.sock` with `node` and send: a valid frame with no token, a valid frame after 64 wrong bytes, a valid frame after another run's token, the archived raw probes (`GET / HTTP/1.0`, the archived Python client's frames rebuilt in node), fewer than 64 bytes followed by a close, and nothing followed by a close. Expected: no reply bytes and no query; each connection that sent at least one byte is one refused request with reason `missing client token`, counted in `refused` and `refusalReasons`, never a failure; the attempt stays valid (B7-143). A connection that sent nothing stays neither refusal nor failure (B7-138). The frame limits of B7-134 to B7-137 apply after a valid token and keep their reasons.
+- B7-193: Try to learn the token byte by byte: send 1 to 63 bytes that match the token's start and wait, then the same with one wrong byte. Expected: the service gives no signal before the 64th byte or the close: no reply, no early close, the same refusal reason for every wrong value. The comparison takes the same time for a token that differs in the first or the last byte (constant-time compare; checked in the code path, not by a timing measurement).
+- B7-194: Try to read the token from a shell command and with the agent's file tool: read `/tools/whygraph`, `/tools/relate`, `/tools/memod` and `/tools/shell-client`; copy them; read `/proc/<pid>/exe`, `/proc/<pid>/mem`, `/proc/<pid>/maps`, `/proc/<pid>/environ` and `/proc/<pid>/cmdline` of a running client from `node`; read the environment, `/proc/self/environ` and the work folders. Expected: no read returns client bytes; the token occurs in no file, environment variable, argument, log row (`service.jsonl`, `shell.jsonl`), `meta.json`, `health.json`, `files.json`, `command.json` or agent output of the attempt. The fixed probes of B7-62 still deny.
+- B7-195: Start two runs. Expected: their tokens differ and have 256 random bits; each service refuses the other run's client; each run's client equals the token-free client in every byte outside the 64 token bytes, and `files.json` records the token-free client's hash, so `identical agent files` (B7-17) still compares equal across conditions. A client whose token field is missing, occurs twice, or still holds the placeholder refuses the run before the agent starts.
+- B7-196: Run the real client through every valid and invalid call of B7-12, B7-80 and B7-139 to B7-142. Expected: the same stdout, stderr and exit status as before the token; health calls, direct-answer receipts and ablation bytes are unchanged (B7-60, B7-149).
+- B7-197: Replay smoke-check on attempts with `missing client token` refusals that match their metadata. Expected: PASS with the refusal total; the reason is a known refusal reason; an unknown reason, a count that differs from the metadata, or a token-free frame that got a reply fails the check (B7-147, B7-148, B7-150).
+- B7-198: Replay each of the five archived attempts of the seventh smoke and the archived attempt of the sixth through a scripted agent that runs the attempt's own spy commands in order (`wrap.c`, `hook.c`, `logio.c`, `proxy.py`, `.tmp_proxy.py`, the `strace` runs, the Python thread-pool client). Expected: no command builds or runs a tool against the client; the service log holds only real-client replies and `missing client token` refusals; the attempt ends valid unless another rule applies.
+- B7-199: Compare the agent namespace's mounts, the opencode launch, and batches 5 and 6 with `1d5c55b`. Expected: the agent namespace changes only by the seccomp filter and the per-run client; `eval/opencode.mjs`, batch 5 and 6 plans, frozen inputs and reports are byte-identical (B7-132). The shell launcher socket stays unreachable from a shell command (B7-146).
+
+Not covered: `node` stays, so a shell command can still write and run its
+own program in `/repo`. Such a program gets no token, cannot trace the
+client and cannot preload into it. A run's own valid calls through the real
+client are not limited in number.
