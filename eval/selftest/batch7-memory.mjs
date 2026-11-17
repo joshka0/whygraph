@@ -24,7 +24,7 @@ export async function batch7MemoryChecks({scratch}){
  function launch(options){
   const at=dir('scope'),config={...options,relate,log:join(at,'calls.jsonl'),release:join(at,'release'),result:join(at,'result.json')};h.write(join(at,'config.json'),config);
   const env={...h.env,TMPDIR:'/mnt/ssd/tmp',B7_MEMORY_OBSERVER:join(at,'config.json'),NODE_OPTIONS:`${process.env.NODE_OPTIONS??''} --import=${pathToFileURL(observer).href}`};
-  const p=spawn('systemd-run',['--user','--scope','-q','-p',`MemoryMax=${options.limit??'2G'}`,'-p','CPUQuota=400%','-p','OOMPolicy=continue',process.execPath,worker,join(at,'config.json')],{cwd:h.root,env,stdio:['ignore','pipe','pipe']});
+  const p=spawn('systemd-run',['--user','--scope','-q','-p',`MemoryMax=${options.limit??'2G'}`,'-p','MemorySwapMax=0','-p','CPUQuota=400%','-p','OOMPolicy=continue',process.execPath,worker,join(at,'config.json')],{cwd:h.root,env,stdio:['ignore','pipe','pipe']});
   const out=[],err=[];p.stdout.on('data',b=>out.push(b));p.stderr.on('data',b=>err.push(b));
   const done=new Promise((ok,fail)=>{p.once('error',fail);p.once('close',(status,signal)=>{h.write(join(at,'stdout.txt'),Buffer.concat(out));h.write(join(at,'stderr.txt'),Buffer.concat(err));ok({status,signal,config,at,...(existsSync(config.result)?h.json(config.result):{}),stderr:Buffer.concat(err).toString()});});});
   return {p,done,config,at};
