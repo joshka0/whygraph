@@ -158,6 +158,31 @@ query that a product command started; that query only reads and ends on
 its own. Failure items B7-168 to B7-177.
 Batches 5 and 6 stay frozen.
 
+### File-tool paths in the private /tmp, 2026-11-17
+
+Ruling of the coordinator `rowan-joshka-main` on 2026-11-17, before any
+batch 7 result exists: for batch 7 and later, a file-tool path inside the
+confinement's private `/tmp` is not an isolation breach. Batches 5 and 6
+stay frozen.
+
+Reason: the breach rule of `eval/opencode.mjs` dates from batch 5, where
+the agent's file tool could follow a path out of the repo copy. It classes
+every absolute file-tool path outside the repo as a breach. The closed
+confinement mounts a fresh tmpfs on `/tmp`, and the agent's opencode config
+allows `/tmp/opencode/*`. A file there cannot reach the host, the store or
+another run. In the seventh batch 7 smoke the old rule classed 5 of 21
+attempts as breaches and left 2 of 16 cells unscored, all on one hard task
+and in conditions without help. That exclusion would bias the comparison.
+
+The closed runner drops a file-tool or patch path that resolves inside
+`/tmp` from the breach list, read or write. `..` segments are resolved
+first, so `/tmp/../etc/passwd` stays a breach. Every other outside path, a
+symlink that leaves the repo and a shell command that creates a symlink
+stay breaches. The attempt budget is unchanged. `eval/opencode.mjs` keeps
+its bytes. The seventh smoke stays as it ended in
+`_smoke-archive/7-private-tmp-classed-as-breach`. Failure items B7-178 to
+B7-186.
+
 ### Evidence for closed access, 2026-11-16
 
 The parent's ruling removes read-success guesses from agent tool logs.
