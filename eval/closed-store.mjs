@@ -484,6 +484,8 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
  * owns: [[whygraph-closed-store]]
  */
 export async function startClosedShell({work,repo,client,socket,log}) {
+  // A missing listed program stops the run here, before the agent starts.
+  shellProgramMounts();
   let failures=0, calls=0, stopped=false;
   const reasons=[];
   const failure=message=>{failures++;reasons.push(message);appendFileSync(log,JSON.stringify({event:'failure',message})+'\n');};

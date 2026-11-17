@@ -8,7 +8,6 @@
   ],
   "trees": [
     "/usr/lib/git-core",
-    "/usr/share/git-core",
     "/usr/lib/node_modules/eas-cli/node_modules/typescript",
     "/usr/lib/locale/C.utf8"
   ]
