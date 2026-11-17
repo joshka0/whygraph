@@ -3,7 +3,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { closeSync, cpSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, writeFileSync, chmodSync, lstatSync, readlinkSync, realpathSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomUUID, createHash } from 'node:crypto';
-import { closedClient, closedConfinement, ablatedStores, startClosedStore, startClosedShell } from './closed-store.mjs';
+import { closedClient, closedConfinement, ablatedStores, startClosedStore, startClosedShell, runClient, seccompFilter } from './closed-store.mjs';
 import { batchInstructions } from './registry.mjs';
 import { readQuery } from '../src/tools.ts';
 import { opencodeLaunch, opencodeSession, escapingSymlinks, isolationBreaches, OPENCODE_MODEL } from './opencode.mjs';
@@ -77,20 +77,21 @@ export async function startClosedAgent({work,repo,client,socket,out,prompt,rehea
     config.permission.external_directory['/identity/opencode/tool-output/*']='deny';
     launch.env.OPENCODE_CONFIG_CONTENT=JSON.stringify(config);
     execBudget('/tools/opencode',launch.args,launch.env);
-    writeFileSync(join(out,'command.json'),JSON.stringify({args:[...confinement,'--','/tools/opencode',...launch.args],env:launch.env},null,2));
-    return {launcher,shell,confinement,launch};
+    writeFileSync(join(out,'command.json'),JSON.stringify({args:[...confinement,'--seccomp','3','--','/tools/opencode',...launch.args],env:launch.env},null,2));
+    return {launcher,shell,confinement,launch,work};
   } catch(error) { await launcher.stop(); throw error; }
 }
 
 /** Capture native events without feeding transcripts into failure diagnostics.
  * owns: [[whygraph-closed-runner]]
  */
-export async function runClosedAgent({launcher,confinement,launch},out) {
+export async function runClosedAgent({launcher,confinement,launch,work},out) {
   const started=Date.now(), stdout=openSync(join(out,'output.jsonl'),'w'), stderr=openSync(join(out,'stderr.txt'),'w');
   const r=await new Promise(resolve=>{
-    const invocation=[...confinement.slice(1),'--','/tools/opencode',...launch.args];execBudget(confinement[0],invocation,launch.env);
-    const child=spawn(confinement[0],invocation,{env:launch.env,stdio:['ignore',stdout,stderr]});
-    closeSync(stdout);closeSync(stderr);
+    const invocation=[...confinement.slice(1),'--seccomp','3','--','/tools/opencode',...launch.args];execBudget(confinement[0],invocation,launch.env);
+    const filter=seccompFilter(work);
+    const child=spawn(confinement[0],invocation,{env:launch.env,stdio:['ignore',stdout,stderr,filter]});
+    closeSync(stdout);closeSync(stderr);closeSync(filter);
     let timedOut=false,spawnError,killTimer;
     const timer=setTimeout(()=>{timedOut=true;launcher.cancel();child.kill('SIGTERM');killTimer=setTimeout(()=>child.kill('SIGKILL'),5000);},20*60*1000);
     child.on('error',e=>{spawnError=e.message;});
@@ -159,8 +160,8 @@ export async function closedPreflight({workRoot,results}) {
   const prompt='Reply with the single word ok. Use no tool.';
   const started=Date.now();let service,agent,run,reason;
   try {
-    const client=closedClient(join(workRoot,'_closed-client'));
-    service=await startClosedStore({condition:'stub',repo,socket,log:join(out,'service.jsonl')});
+    const {client,token}=runClient(closedClient(join(workRoot,'_closed-client')),work);
+    service=await startClosedStore({condition:'stub',repo,socket,log:join(out,'service.jsonl'),token});
     agent=await startClosedAgent({work,repo,client,socket,out,prompt});
     recordStartup(agent,out);
     run=await runClosedAgent(agent,out);
@@ -190,18 +191,19 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
   for(const path of [source,store,out])filesystemPath(path);
   execBudget('/tools/opencode',[prompt],quiet);
   const work=join(workRoot,randomUUID());
-  const client=closedClient(join(workRoot,'_closed-client'));
+  const shared=closedClient(join(workRoot,'_closed-client'));
   const stores=ablatedStores(store,join(workRoot,`_${fileKey(task.repo)}`,'ablations'));
-  const prepared=prepareClosed({task,condition,work,source,stores,client});
+  const prepared=prepareClosed({task,condition,work,source,stores,client:shared});
   const {repo,base,socket,files}=prepared;
+  const {client,token}=runClient(shared,work);
   const log=join(out,'service.jsonl');
-  const service=await startClosedStore({condition,repo,store:prepared.store,fullStore:stores.graph,socket,log});
+  const service=await startClosedStore({condition,repo,store:prepared.store,fullStore:stores.graph,socket,log,token});
   let launcher;
   try {
     const agent=await startClosedAgent({work,repo,client,socket,out,prompt,rehearsal});
     launcher=agent.launcher;
     const {shell,confinement}=agent;
-    for(const name of ['whygraph','relate','memod','shell-client']) files[`/tools/${name}`]=readFileSync(`${client}.sha256`,'utf8');
+    for(const name of ['whygraph','relate','memod','shell-client']) files[`/tools/${name}`]=readFileSync(`${shared}.sha256`,'utf8');
     files['/tools/shell']=createHash('sha256').update(readFileSync(shell)).digest('hex');
     writeFileSync(join(out,'files.json'),JSON.stringify(files,null,2));
     writeFileSync(join(out,'instructions.txt'),readFileSync(join(repo,'AGENTS.md')));

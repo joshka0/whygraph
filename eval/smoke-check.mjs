@@ -22,7 +22,7 @@ const serviceRows=dir=>{
  for(const row of rows) {
   require(row!==null&&typeof row==='object'&&!Array.isArray(row),'invalid service log row');
   if(Object.hasOwn(row,'event')) {
-   require((row.event==='refused'&&['invalid argument count','argument too large','request too large'].includes(row.message))||(row.event==='failure'&&typeof row.message==='string')||(row.event==='stopped'&&Array.isArray(row.args)&&row.args.every(arg=>typeof arg==='string')),'invalid service log event');
+   require((row.event==='refused'&&['missing client token','invalid argument count','argument too large','request too large'].includes(row.message))||(row.event==='failure'&&typeof row.message==='string')||(row.event==='stopped'&&Array.isArray(row.args)&&row.args.every(arg=>typeof arg==='string')),'invalid service log event');
   } else {
    require(Array.isArray(row.args)&&row.args.every(arg=>typeof arg==='string')&&Number.isInteger(row.code)&&typeof row.stdout==='string'&&typeof row.stderr==='string','bad service reply');
   }

@@ -1558,8 +1558,7 @@ is no isolation breach: it cannot reach the host (ADR 0011, "File-tool
 paths in the private /tmp"; decided before any batch 7 result existed).
 
 **No tool against the client.** Since 2026-11-17, for batch 7 and later, a
-shell command sees only the programs that the batch lists in
-`registry.json`, a seccomp filter denies `ptrace`, the client is static, and
+shell command sees only the programs that `closed-shell.json` lists, a seccomp filter denies `ptrace`, the client is static, and
 the service answers only the run's own client, which holds a secret token
 (ADR 0011, "No tool against the whygraph client"; decided before any batch
 7 result existed). The runner

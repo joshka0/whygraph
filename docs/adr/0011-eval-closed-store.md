@@ -202,7 +202,7 @@ several ran to the 20-minute limit.
 Choice, for batch 7 and later:
 
 1. Program list. A shell command's namespace holds only the programs and
-   folders that the batch lists under `shell` in `eval/registry.json`, and
+   folders that `eval/closed-shell.json` lists, and
    the libraries that those programs load. It holds no compiler, no
    interpreter except `bash`, `awk`, `sed` and `node`, no tracer, no network
    client and no binary reader. `node` and the host's TypeScript stay: 7 of

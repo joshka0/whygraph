@@ -1,0 +1,15 @@
+{
+  "programs": [
+    "bash", "sh", "[", "awk", "basename", "cat", "cmp", "comm", "cp", "cut", "date", "diff", "dirname", "du",
+    "echo", "egrep", "env", "expr", "false", "fgrep", "find", "git", "grep", "head", "id", "ls", "md5sum",
+    "mkdir", "mv", "nl", "node", "paste", "patch", "printf", "pwd", "readlink", "realpath", "rg", "rm", "sed",
+    "seq", "sha256sum", "sleep", "sort", "stat", "tac", "tail", "tee", "test", "timeout", "touch", "tr",
+    "true", "uniq", "wc", "which", "xargs"
+  ],
+  "trees": [
+    "/usr/lib/git-core",
+    "/usr/share/git-core",
+    "/usr/lib/node_modules/eas-cli/node_modules/typescript",
+    "/usr/lib/locale/C.utf8"
+  ]
+}
