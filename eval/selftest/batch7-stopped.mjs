@@ -63,7 +63,7 @@ export async function batch7StoppedChecks({scratch,shared}){
  /** A copy of the eval code whose product command is a script: it hangs on `search HOLD*`, fails on a `FAIL*` target and runs the real product otherwise. */
  function fakeProduct(at,{carry=false,missing=false}={}){
   const pids=join(at,'pids');rmSync(join(at,'bin'));mkdirSync(join(at,'bin'));
-  if(!missing){const script=`#!/bin/sh\ncase "$1:$2" in\n search:HOLD*) echo $$ >> ${shq(pids)}; exec sleep 120;;\n *:FAIL*) echo "planted product failure" >&2; exit 1;;\n${carry?' carry:*) echo unrelated; exit 0;;\n':''}esac\nexec ${shq(join(h.root,'src/main.ts'))} "$@"\n`;h.write(join(at,'bin/whygraph'),script);chmodSync(join(at,'bin/whygraph'),0o755);}
+  if(!missing){const script=`#!/bin/sh\nif [ -f ${shq(join(at,'release-held'))} ]; then exit 0; fi\ncase "$1:$2" in\n search:HOLD*) echo $$ >> ${shq(pids)}; exec sleep 120;;\n *:FAIL*) echo "planted product failure" >&2; exit 1;;\n${carry?' carry:*) echo unrelated; exit 0;;\n':''}esac\nexec ${shq(join(h.root,'src/main.ts'))} "$@"\n`;h.write(join(at,'bin/whygraph'),script);chmodSync(join(at,'bin/whygraph'),0o755);}
   return pids;
  }
  /** Run `fn` with a started service from a copy of closed-store.mjs. `edit` plants a bug in that copy. */
@@ -80,13 +80,13 @@ export async function batch7StoppedChecks({scratch,shared}){
    return {service,socket,log,held,dispatched};};
   try{return await fn({start,pids,f,at,api});}
   // Fixture teardown must also release held products when a planted stop is broken.
-  finally{for(const pid of pidsOf(pids))if(alive(pid))process.kill(pid,'SIGKILL');for(const s of started)if(s.server.listening)await s.stop();for(const key of fixtureTokens.keys())if(key.startsWith(scratch))fixtureTokens.delete(key);}
+  finally{h.write(join(at,'release-held'),'release');for(const pid of pidsOf(pids))if(alive(pid))process.kill(pid,'SIGKILL');for(const s of started)if(s.server.listening)await s.stop();for(const key of fixtureTokens.keys())if(key.startsWith(scratch))fixtureTokens.delete(key);}
  }
  const stoppedRows=log=>rows(log).filter(r=>r.event==='stopped');
  const own168=edit=>rig(async({start,pids})=>{
   const s=await start(),ok=await call(s.socket,['why','src/tax.ts:taxRate']);assert.equal(ok.code,0);
-  const clients=await s.held(3);const running=await s.dispatched(3);assert.equal(running.length,3);for(const pid of running)assert.ok(alive(pid),'held command runs before the stop');
-  const odd=await client(s.socket,frame(['search','HOLD-odd é "q"']));await until('fourth held command',()=>pidsOf(pids).length>=4);
+  const clients=await s.held(3);const running=await s.dispatched(2);assert.equal(running.length,2);for(const pid of running)assert.ok(alive(pid),'held command runs before the stop');
+  const odd=await client(s.socket,frame(['search','HOLD-odd é "q"']));await until('fourth call received',()=>s.service.stats().calls===5);assert.equal(pidsOf(pids).length,2,'B7-203: later calls wait');
   assert.deepEqual(s.service.stats(),{calls:5,failures:0,reasons:[],refused:0,refusalReasons:[],stopped:0},'held calls count as calls, not as stopped, before the stop');
   await within(s.service.stop(),'stop()');
   const stops=stoppedRows(s.log);assert.deepEqual(stops.map(r=>r.args).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b))),[['search','HOLD-0'],['search','HOLD-1'],['search','HOLD-2'],['search','HOLD-odd é "q"']],'one stopped row per call with its own args');
@@ -107,7 +107,7 @@ export async function batch7StoppedChecks({scratch,shared}){
  // Strict reading of B7-168: the commands are gone when stop() resolves, not merely signalled.
  // The service resolves on the abort error, which Node raises before the child exits (measured: alive at resolve, gone about 10 ms later).
  add('B7-168 no product command of a stopped call is still alive when stop resolves',()=>rig(async({start,pids})=>{
-  const s=await start(),clients=await s.held(3);const running=await s.dispatched(3);assert.equal(running.length,3);
+  const s=await start(),clients=await s.held(3);const running=await s.dispatched(2);assert.equal(running.length,2);
   await s.service.stop();for(const pid of pidsOf(pids))assert.equal(alive(pid),false,`product command ${pid} survives stop()`);for(const c of clients)await c.closed;
  }));
  add('B7-169 stop twice, sequentially and concurrently, with and without held calls',()=>own169());
@@ -138,10 +138,12 @@ export async function batch7StoppedChecks({scratch,shared}){
  add('B7-171 stop with no call in flight, or with every reply delivered, changes nothing',()=>own171());
  // Attempts: the real runner with a scripted agent that leaves search calls open.
  async function attemptWith({mode='done',count=3,edit,wrapTimeout=mode==='timeout'}={}){
-  const f=await shared.getClosed(),at=fresh('attempt-'+mode),work=join(h.root,'test-results','q'+h.hash(at).slice(0,7));mkdirSync(work);mkdirSync(join(at,'identity/opencode'),{recursive:true});
+  const f=await shared.getClosed(),at=fresh('attempt-'+mode);let work;
+  for(let i=0;i<1296;i++){const candidate=join(h.root,'test-results/scratch',i.toString(36).padStart(2,'0'));try{mkdirSync(candidate);work=candidate;break;}catch(e){if(e.code!=='EEXIST')throw e;}}
+  assert.ok(work,'a free short socket root is required');h.write(join(at,'work-root.json'),{work});mkdirSync(join(at,'identity/opencode'),{recursive:true});
   const pids=fakeProduct(at),executable=join(at,'agent.mjs');cpSync(join(h.root,'eval/selftest/batch7-stopped-agent.mjs'),executable);chmodSync(executable,0o555);
   if(edit)edit(at);
-  const settle=count>0?`const fs=await import('node:fs');const P=${JSON.stringify(pids)};const end=Date.now()+30000;const n=()=>fs.existsSync(P)?fs.readFileSync(P,'utf8').trim().split('\\n').filter(Boolean).length:0;while(n()<${count}&&Date.now()<end)await new Promise(r=>setTimeout(r,25));if(n()<${count})throw new Error('held calls were never dispatched');`:'';
+  const settle=count>0?`const fs=await import('node:fs');const P=${JSON.stringify(pids)};const end=Date.now()+30000;const n=()=>fs.existsSync(P)?fs.readFileSync(P,'utf8').trim().split('\\n').filter(Boolean).length:0;while(n()<${Math.min(count,2)}&&Date.now()<end)await new Promise(r=>setTimeout(r,25));if(n()<${Math.min(count,2)})throw new Error('held calls were never dispatched');`:'';
   h.wrapped(at,'closed-run.mjs','runClosedAgent',`const v=await original_runClosedAgent(...args);${settle}return ${wrapTimeout?'{...v,r:{...v.r,timedOut:true}}':'v'};`);
   const task={id:'stopped-agent',batch:7,repo:'zustand'},out=join(at,'attempt');mkdirSync(out);
   const config=h.write(join(at,'config.json'),{module:join(at,'eval/closed-run.mjs'),entry:'closedAttempt',options:{task,condition:'graph',repeat:1,workRoot:work,out,prompt:'Leave calls open.',source:f.source,store:f.store,rehearsal:{executable,config:{mode:mode==='timeout'?'done':mode,count}}}});
@@ -156,7 +158,7 @@ export async function batch7StoppedChecks({scratch,shared}){
   const rowsStopped=a.records.filter(r=>r.event==='stopped');assert.equal(a.meta.status,status,a.meta.reason);
   assert.equal(rowsStopped.length,3,'three calls were held');assert.equal(a.meta.service.stopped,rowsStopped.length,'metadata holds exactly the stopped rows');assert.equal(a.meta.service.failures,0);assert.deepEqual(a.meta.service.reasons,[]);
   assert.equal(a.records.filter(r=>r.event==='failure').length,0);assert.equal(a.meta.service.calls,a.records.filter(r=>!r.event).length+rowsStopped.length);
-  assert.equal(a.pids.length,3);for(const pid of a.pids)assert.equal(alive(pid),false,'no product command survives the attempt');
+  assert.equal(a.pids.length,2,'B7-203: two run and the third waits');for(const pid of a.pids)assert.equal(alive(pid),false,'no product command survives the attempt');
   const metaTime=statSync(join(a.out,'meta.json')).mtimeMs,logTime=statSync(join(a.out,'service.jsonl')).mtimeMs,size=statSync(join(a.out,'service.jsonl')).size;
   assert.ok(logTime<=metaTime,'service.jsonl is complete before meta.json is written');await sleep(400);assert.equal(statSync(join(a.out,'service.jsonl')).size,size,'no row is written after meta.json');assert.equal(rows(join(a.out,'service.jsonl')).length,a.records.length);
   assert.deepEqual(sockets(a.work),[],'both service sockets closed');
@@ -268,7 +270,7 @@ export async function batch7StoppedChecks({scratch,shared}){
  return checks;
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
- mkdirSync(join(h.root,'test-results'),{recursive:true});const scratch=h.mkdtempSync(join(h.root,'test-results/stopped-')),shared={};
+ mkdirSync(join(h.root,'test-results/scratch'),{recursive:true});const scratch=h.mkdtempSync(join(h.root,'test-results/scratch/stopped-')),shared={};
  await batch7ClosedChecks({scratch,shared});await batch7AttemptChecks({scratch,shared});await batch7SmokeChecks({scratch,shared});
  const checks=await batch7StoppedChecks({scratch,shared}),filter=new RegExp(process.argv[2]??'B7'),selected=checks.filter(c=>filter.test(c.name));assert.ok(selected.length,'filter must select at least one case');console.log(`Scratch retained: ${scratch}`);let wrong=0;
  for(const c of selected){try{await c.run();console.log('ok '+c.name);}catch(e){wrong++;console.log('WRONG '+c.name+'\n'+e.stack);}}
