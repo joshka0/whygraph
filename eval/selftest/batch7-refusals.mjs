@@ -1,4 +1,5 @@
 /** module: [[whygraph-trial-design]]
+ * ADR 0011 (2026-11-17), B7-187/192: authenticate frame fixtures; raw agent probes use node and keep missing-token refusals.
  * Independent contracts from B7-134 through B7-167 and amended B7-13/62/63/80.
  */
 import assert from 'node:assert/strict';
@@ -49,14 +50,15 @@ function verdict(r,label,pass=true){assert.equal(r.status,pass?0:1,r.stdout+r.st
 export async function batch7RefusalChecks({scratch,shared}){
  const checks=[],add=(name,run)=>checks.push({name:'B7 '+name,group:'refusals',run});let serial=0,completed;
  const fresh=label=>h.inputs(h.copy(scratch,'refusal-'+label+'-'+serial++),undefined,r=>r.batches[7].instructionsCommit='c92205d');
- async function service(fn,{module,store}={}){
+ async function service(fn,{module,store,client}={}){
   const f=await shared.getClosed(),at=join(scratch,'wire-'+serial++);mkdirSync(at);const socket=join(at,'s'),log=join(at,'service.jsonl'),api=module??f.api;
-  const instance=await api.startClosedStore({condition:'graph',repo:f.repo,store:store??f.store,socket,log});
-  const confinement=f.api.closedConfinement({work:f.prepared.graph.work,repo:f.prepared.graph.repo,client:f.client,socket,network:false,opencode:f.opencode});
+  const assigned=client?api.runClient(client,at):{client:f.client,token:f.token};
+  const instance=await api.startClosedStore({condition:'graph',repo:f.repo,store:store??f.store,socket,log,token:assigned.token});
+  const confinement=f.api.closedConfinement({work:f.prepared.graph.work,repo:f.prepared.graph.repo,client:assigned.client,socket,network:false,opencode:f.opencode});
   const invoke=args=>collect(spawn(confinement[0],[...confinement.slice(1),'--','/tools/whygraph',...args],{env:h.env}));
-  try{return await fn({...f,at,socket,log,service:instance,invoke,confinement});}finally{if(globalThis.refusalPlantQuery){await globalThis.refusalPlantQuery;delete globalThis.refusalPlantQuery;}if(instance.server.listening)await instance.stop();}
+  try{return await fn({...f,token:assigned.token,at,socket,log,service:instance,invoke,confinement});}finally{if(globalThis.refusalPlantQuery){await globalThis.refusalPlantQuery;delete globalThis.refusalPlantQuery;}if(instance.server.listening)await instance.stop();}
  }
- async function refusal(f,chunks,reason){const before=f.service.stats(),reply=await raw(f.socket,chunks);assert.equal(reply.length,0,'frame refusal closes without reply');const after=f.service.stats();assert.deepEqual(after,{...before,refused:before.refused+1,refusalReasons:[...before.refusalReasons,reason]},'refusal changes no dispatch/failure counter');assert.deepEqual(rows(f.log).at(-1),{event:'refused',message:reason});}
+ async function refusal(f,chunks,reason){const before=f.service.stats(),reply=await raw(f.socket,reason==='missing client token'?chunks:[Buffer.from(f.token),...chunks]);assert.equal(reply.length,0,'frame refusal closes without reply');const after=f.service.stats();assert.deepEqual(after,{...before,refused:before.refused+1,refusalReasons:[...before.refusalReasons,reason]},'refusal changes no dispatch/failure counter');assert.deepEqual(rows(f.log).at(-1),{event:'refused',message:reason});}
  async function scripted(mode='full',mutate=()=>{}){
   const f=await shared.getClosed(),at=fresh('agent-'+mode),work=join(h.root,'test-results','q'+h.hash(at).slice(0,7));mkdirSync(work);
   mkdirSync(join(at,'identity/opencode'),{recursive:true});
@@ -79,13 +81,13 @@ export async function batch7RefusalChecks({scratch,shared}){
  }
  add('B7-13 B7-134 raw HTTP refusal preserves real answers and never queries',()=>service(async f=>{
   const before=await f.invoke(['why','src/tax.ts:taxRate']);assert.equal(before.status,0,before.stderr);
-  await refusal(f,[Buffer.from('GET / HTTP/1.0\r\n\r\n')],'invalid argument count');
+  await refusal(f,[Buffer.from('GET / HTTP/1.0\r\n\r\n')],'missing client token');
   assert.deepEqual(triple(await f.invoke(['why','src/tax.ts:taxRate'])),triple(before));assert.equal(f.service.stats().calls,2);assert.equal(rows(f.log).filter(r=>!r.event).length,2);
  }));
  for(const n of [65,0xffffffff])add(`B7-135 raw count ${n} is one refusal`,()=>service(f=>refusal(f,[u(n)],'invalid argument count')));
  for(const chunked of [false,true])add(`B7-136 length 60001 ${chunked?'split header':'one header'} refuses without payload`,()=>service(f=>refusal(f,chunked?[u(1),u(60001).subarray(0,2),u(60001).subarray(2)]:[Buffer.concat([u(1),u(60001)])],'argument too large')));
  for(const chunked of [false,true])add(`B7-137 total 66012 bytes ${chunked?'split payload':'one write'} refuses`,()=>service(f=>{const bytes=frame(['x'.repeat(33000),'y'.repeat(33000)]);assert.equal(bytes.length,66012);return refusal(f,chunked?[bytes.subarray(0,40000),bytes.subarray(40000)]:[bytes],'request too large');}));
- add('B7-138 empty and incomplete frames change no counters and leave client usable',()=>service(async f=>{for(const bytes of [Buffer.alloc(0),u(1).subarray(0,3),Buffer.concat([u(1),u(10).subarray(0,2)]),Buffer.concat([u(1),u(10),Buffer.from('part')])]){const before=f.service.stats();assert.equal((await raw(f.socket,[bytes])).length,0);assert.deepEqual(f.service.stats(),before);}assert.deepEqual(rows(f.log),[]);assert.equal((await f.invoke(['why','src/tax.ts:taxRate'])).status,0);}));
+ add('B7-138 empty and incomplete frames change no counters and leave client usable',()=>service(async f=>{for(const bytes of [Buffer.alloc(0),u(1).subarray(0,3),Buffer.concat([u(1),u(10).subarray(0,2)]),Buffer.concat([u(1),u(10),Buffer.from('part')])]){const before=f.service.stats();assert.equal((await raw(f.socket,[Buffer.from(f.token),bytes])).length,0);assert.deepEqual(f.service.stats(),before);}assert.deepEqual(rows(f.log),[]);assert.equal((await f.invoke(['why','src/tax.ts:taxRate'])).status,0);}));
  const limits=[['B7-139 65 arguments',Array(65).fill('x')],['B7-140 ASCII 60001 bytes',['x'.repeat(60001)]],['B7-140 UTF8 60002 bytes',['é'.repeat(30001)]],['B7-141 total frame over 65536',['x'.repeat(33000),'y'.repeat(33000)]]];
  for(const [label,args]of limits)add(`${label} rejects before any service connection even when absent`,()=>service(async f=>{
   const before=f.service.stats();let connections=0;f.service.server.on('connection',()=>connections++);assert.deepEqual(triple(await f.invoke(args)),usage);assert.deepEqual(f.service.stats(),before);assert.equal(connections,0);assert.deepEqual(rows(f.log),[]);
@@ -149,7 +151,7 @@ export async function batch7RefusalChecks({scratch,shared}){
  }
  async function exposed(kind,source=h.read(join(h.root,'eval/closed-run.mjs'))){
   const f=await shared.getClosed(),at=join(scratch,'expose-'+serial++);mkdirSync(at);const current=f.stores['graph-nolink'];assert.ok(existsSync(join(f.store,'manifest.json')));assert.ok(existsSync(join(current,'manifest.json')));assert.equal(existsSync(join(current,'CURRENT')),false,'real layout has no CURRENT');
-  const service=await f.api.startClosedStore({condition:'stub',repo:f.repo,socket:join(at,'s'),log:join(at,'service.jsonl')});
+  const service=await f.api.startClosedStore({condition:'stub',repo:f.repo,socket:join(at,'s'),log:join(at,'service.jsonl'),token:f.token});
   let mount=[],probe='store',content;
   if(kind==='full-store'||kind==='selected-store'){const p=join(kind==='full-store'?f.store:current,'manifest.json');mount=[p,p];content=readFileSync(p);}
   if(kind==='client'){const readable=join(at,'readable-client');h.ok(h.command('cc',['-O2','-Wall','-Wextra','-Werror',join(h.root,'eval/closed-client.c'),'-o',readable]));chmodSync(readable,0o555);mount=[readable,'/tools/whygraph'];probe='tool code';content=readFileSync(readable);}
@@ -190,18 +192,18 @@ export async function batch7RefusalChecks({scratch,shared}){
   ['refusal-is-failure','dispatched=true;refused++;refusalReasons.push(message);','dispatched=true;failures++;reasons.push(message);'],
   ['refusal-dispatches',"appendFileSync(log,JSON.stringify({event:'refused',message})+'\\n');connection.destroy();","appendFileSync(log,JSON.stringify({event:'refused',message})+'\\n');globalThis.refusalPlantQuery=answer(['search','tax']).then(()=>connection.destroy());"]
  ])add(`plant ${name} caught by B7-134`,async()=>{
-  const owner=module=>service(f=>refusal(f,[Buffer.from('GET / HTTP/1.0')],'invalid argument count'),{module});await owner();const at=fresh(name);replace(join(at,'eval/closed-store.mjs'),from,to);const module=await import(pathToFileURL(join(at,'eval/closed-store.mjs')).href);await caught(name,'B7-134',()=>owner(module));
+  const owner=module=>service(f=>refusal(f,[Buffer.from('GET / HTTP/1.0')],'missing client token'),{module});await owner();const at=fresh(name);replace(join(at,'eval/closed-store.mjs'),from,to);const module=await import(pathToFileURL(join(at,'eval/closed-store.mjs')).href);await caught(name,'B7-134',()=>owner(module));
  });
  add('plant dispatched failure counted as refusal caught by B7-144',async()=>{
   const owner=async mutate=>{const f=await scripted('failure',mutate);assert.equal(f.meta.service.failures,1,'dispatched failure counter');assert.equal(f.meta.service.refused,1,'raw refusal counter');};await owner(()=>{});
   await caught('failure-is-refusal','B7-144',()=>owner(at=>replace(join(at,'eval/closed-store.mjs'),"const failure=message=>{failures++;reasons.push(message);","const failure=message=>{refused++;refusalReasons.push(message);")));
  });
  add('plant client sends over-limit frame caught by B7-139',async()=>{
-  const owner=async client=>service(async f=>{const c=[...f.confinement],index=c.indexOf('/tools/whygraph');if(client)c[index-1]=client;const r=await collect(spawn(c[0],[...c.slice(1),'--','/tools/whygraph',...Array(65).fill('x')],{env:h.env}));assert.deepEqual(triple(r),usage);assert.equal(f.service.stats().refused,0);});await owner();const at=fresh('bad-client');
+  const owner=async client=>service(async f=>{const c=[...f.confinement];const r=await collect(spawn(c[0],[...c.slice(1),'--','/tools/whygraph',...Array(65).fill('x')],{env:h.env}));assert.deepEqual(triple(r),usage);assert.equal(f.service.stats().refused,0);},{client});await owner();const at=fresh('bad-client');
   replace(join(at,'eval/closed-client.c'),'argc-1>64','argc-1>640');const module=await import(pathToFileURL(join(at,'eval/closed-store.mjs')).href),client=module.closedClient(join(at,'clients'));await caught('client-sends-over-limit','B7-139',()=>owner(client));
  });
  add('plant metadata drops refusals caught by B7-143',async()=>{
-  const owner=async mutate=>{const f=await scripted('basic',mutate);assert.equal(f.meta.status,'done',f.meta.reason);assert.equal(f.meta.service.refused,1);assert.deepEqual(f.meta.service.refusalReasons,['invalid argument count']);};await owner(()=>{});
+  const owner=async mutate=>{const f=await scripted('basic',mutate);assert.equal(f.meta.status,'done',f.meta.reason);assert.equal(f.meta.service.refused,1);assert.deepEqual(f.meta.service.refusalReasons,['missing client token']);};await owner(()=>{});
   await caught('metadata-drops-refusals','B7-143',()=>owner(at=>replace(join(at,'eval/closed-run.mjs'),'work,service:stats};','work,service:{calls:stats.calls,failures:stats.failures,reasons:stats.reasons}};')));
  });
  for(const [name,mutate]of [['zero',p=>p[0].status=0],['missing',p=>p.pop()],['duplicate',p=>p[0]={...p[1]}]])add(`plant smoke accepts ${name} probe caught by B7-164`,async()=>{

@@ -26,7 +26,10 @@ const alive=pid=>{try{process.kill(pid,0);return true;}catch{return false;}};
 async function until(what,predicate,ms=30000){const end=Date.now()+ms;while(Date.now()<end){if(predicate())return;await sleep(25);}throw new Error('timed out waiting for '+what);}
 const pidsOf=p=>existsSync(p)?h.read(p).trim().split('\n').filter(Boolean).map(Number):[];
 /** Open one raw client. It writes its bytes and then only listens. */
+// ADR 0011 (2026-11-17), B7-192: these fixture frames exercise calls after authentication.
+const fixtureTokens=new Map();
 function client(socket,bytes){
+ if(bytes.length)bytes=Buffer.concat([Buffer.from(fixtureTokens.get(socket)),bytes]);
  return new Promise((ok,fail)=>{const s=createConnection(socket),chunks=[];s.once('error',fail);
   const closed=new Promise(done=>s.on('close',()=>done(Buffer.concat(chunks))));
   s.on('data',b=>chunks.push(b));
@@ -70,13 +73,13 @@ export async function batch7StoppedChecks({scratch,shared}){
   const api=await import(pathToFileURL(join(at,'eval/closed-store.mjs')).href);
   const started=[];
   const start=async()=>{const dir=join(scratch,'stopped-wire-'+serial++);mkdirSync(dir);const socket=join(dir,'s'),log=join(dir,'service.jsonl');
-   const service=await api.startClosedStore({condition,repo:f.repo,store:f.store,fullStore:f.store,socket,log});started.push(service);
+   const service=await api.startClosedStore({condition,repo:f.repo,store:f.store,fullStore:f.store,socket,log,token:f.token});started.push(service);fixtureTokens.set(socket,f.token);
    const held=async n=>{const out=[];for(let i=0;i<n;i++)out.push(await client(socket,frame(['search','HOLD-'+i])));return out;};
    // Wait for the product commands themselves: a call is dispatched once its command ran.
    const dispatched=async n=>{await until(`${n} held product commands`,()=>pidsOf(pids).length>=n);return pidsOf(pids);};
    return {service,socket,log,held,dispatched};};
   try{return await fn({start,pids,f,at,api});}
-  finally{for(const s of started)if(s.server.listening)await s.stop();for(const pid of pidsOf(pids))if(alive(pid))process.kill(pid,'SIGKILL');}
+  finally{for(const s of started)if(s.server.listening)await s.stop();for(const key of fixtureTokens.keys())if(key.startsWith(scratch))fixtureTokens.delete(key);for(const pid of pidsOf(pids))if(alive(pid))process.kill(pid,'SIGKILL');}
  }
  const stoppedRows=log=>rows(log).filter(r=>r.event==='stopped');
  const own168=edit=>rig(async({start,pids})=>{

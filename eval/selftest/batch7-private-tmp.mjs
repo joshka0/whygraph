@@ -1,4 +1,5 @@
 /** module: [[whygraph-trial-design]]
+ * ADR 0011 (2026-11-17), B7-192: the mount fixture service uses its client token.
  * Independent contracts B7-178 through B7-186: private tmpfs paths.
  */
 import assert from 'node:assert/strict';
@@ -76,6 +77,8 @@ export async function batch7PrivateTmpChecks({scratch,shared}){
  add('B7-178 all five archived tools.json files have no closed breach',()=>archived());
  add('B7-178 archived fixture is red with the old runner rule at 0af356e',async()=>{
   const at=fresh('old-rule'),path=join(at,'eval/closed-run.mjs');h.write(path,h.ok(h.command('git',['show','0af356e:eval/closed-run.mjs'])));
+  // ADR 0011 B7-191/192: a historical runner needs its historical transport, before tokens.
+  for(const name of ['closed-store.mjs','closed-client.c'])h.write(join(at,'eval',name),h.ok(h.command('git',['show','0af356e:eval/'+name])));
   // Exercise the old runner itself with an archived native tool stream, below.
   const n=evidence()[0],tools=h.json(join(archive,'_attempts',n,'tools.json'));
   const result=await attempt({at,extra:tools});
@@ -164,7 +167,7 @@ export async function batch7PrivateTmpChecks({scratch,shared}){
   const f=await shared.getClosed(),at=fresh('mounts');if(edit)edit(at);const api=await import(pathToFileURL(join(at,'eval/closed-store.mjs')).href),runner=await import(pathToFileURL(join(at,'eval/closed-run.mjs')).href);
   const work=shortRoot();for(const d of ['repo','home','config','cache','state','identity/opencode','out'])mkdirSync(join(work,d),{recursive:true});
   // A bound socket must exist; use a real service, without invoking a model.
-  const socket=join(work,'s'),service=await api.startClosedStore({condition:'stub',repo:f.repo,store:f.store,fullStore:f.store,socket,log:join(at,'service.jsonl')});
+  const socket=join(work,'s'),service=await api.startClosedStore({condition:'stub',repo:f.repo,store:f.store,fullStore:f.store,socket,log:join(at,'service.jsonl'),token:f.token});
   const executable=h.write(join(at,'stand-in'),nativeAgent);chmodSync(executable,0o555);const previous=process.env.XDG_DATA_HOME;process.env.XDG_DATA_HOME=join(work,'identity');let agent;
   try{
    const options={work,repo:join(work,'repo'),client:f.client,socket,opencode:executable};

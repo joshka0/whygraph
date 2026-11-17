@@ -16,17 +16,19 @@ const command=(text,accept=[0])=>{
 try{
  const observations=[];
  for(const args of [['carry','src/tax.ts:taxRate'],['why','src/tax.ts:taxRate'],['impact',config.impact],['search','tax'],['build']])observations.push(command('/tools/whygraph '+args.map(quote).join(' '),args[0]==='build'?[2]:[0]));
- const python="import socket; s=socket.socket(socket.AF_UNIX); s.connect('/whygraph/service.sock'); s.sendall(b'GET / HTTP/1.0\\r\\n\\r\\n'); assert s.recv(1)==b''; s.close()";
- observations.push(command('/usr/bin/python3 -c '+quote(python)));
+  // ADR 0011 (2026-11-17), B7-187/192: node replaces unlisted Python/curl as the raw-frame test vehicle.
+ const probe="const s=require('net').createConnection('/whygraph/service.sock');s.on('connect',()=>s.end('GET / HTTP/1.0\\r\\n\\r\\n'));s.on('data',()=>process.exit(1));s.on('error',()=>{});";
+ observations.push(command('node -e '+quote(probe)));
  if(config.mode==='full'){
-  observations.push(command('curl --max-time 2 --unix-socket /whygraph/service.sock http://localhost/',[52,56]));
-  for(const text of ['strings /tools/whygraph 2>/dev/null','ls -la /tools; file /tools/whygraph; head -50 /tools/whygraph 2>/dev/null'])observations.push(command(text,[1]));
-  observations.push(command('curl --max-time 2 --noproxy "*" http://192.0.2.1/',[7,28]));
+  observations.push(command('node -e '+quote(probe)));
+  observations.push(command('strings /tools/whygraph 2>/dev/null',[127]));
+  observations.push(command('ls -la /tools; file /tools/whygraph; head -50 /tools/whygraph 2>/dev/null',[1]));
+  observations.push(command('node -e '+quote("const s=require('net').createConnection({host:'192.0.2.1',port:80});s.setTimeout(2000,()=>{s.destroy();process.exit(28)});s.on('error',()=>process.exit(7));s.on('connect',()=>process.exit(0));"),[7,28]));
   observations.push(command('find / -name manifest.json -o -name CURRENT 2>/dev/null',[0,1]));
  }
  if(config.mode==='failure')observations.push(command('/tools/whygraph why src/tax.ts:taxRate',[70]));
  observations.push(command('/tools/whygraph '+Array(65).fill('x').join(' '),[2]));
- observations.push(command('/usr/bin/python3 -c '+quote("import os,socket; assert not os.path.exists('/whygraph/shell.sock'); s=socket.socket(socket.AF_UNIX);\ntry: s.connect('/whygraph/shell.sock')\nexcept FileNotFoundError: pass\nelse: raise AssertionError('launcher socket exposed')")));
+ observations.push(command('node -e '+quote("const fs=require('fs');if(fs.existsSync('/whygraph/shell.sock'))process.exit(1);const s=require('net').createConnection('/whygraph/shell.sock');s.on('connect',()=>process.exit(1));s.on('error',e=>process.exit(e.code==='ENOENT'?0:1));")));
  writeFileSync('/repo/refusal-observations.json',JSON.stringify({outerLauncher:existsSync('/whygraph/shell.sock'),observations}));
  if(config.mode==='breach')symlinkSync('/etc/hostname','/repo/refusal-escape');
  emit('text',{text:'Scripted requests complete.'});
