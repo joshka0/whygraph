@@ -231,6 +231,39 @@ program; that program has no token and cannot trace or preload the client.
 The seventh smoke and its results stay archived; an eighth smoke runs with
 the block. Failure items B7-187 to B7-199. Batches 5 and 6 stay frozen.
 
+### Command limit, 2026-11-17
+
+Ruling of the code author `sandpiper-whygraph` on 2026-11-17, sent to the
+coordinator `rowan-joshka-main` before any result under it: one run's
+service runs at most two product commands at the same time. Later calls
+wait in arrival order.
+
+The first batch 7 pilot ended after 27 of 258 cells: the kernel killed the
+run scope at its 6 GB memory limit (2026-11-17 21:41). In
+`zustand7-conflict-zs-03__graph-nosearch__r3` the agent ran
+`xargs -P 16` over about 120 guessed record ids, each as
+`timeout 15 whygraph impact <id>`. The service started one product command
+for each call and kept each command after its client had timed out, so the
+commands piled up. The kernel's report lists 40 `node` product commands
+(2.0 GB), 32 `relate` queries (2.9 GB) and three agents (1.8 GB). One
+product command with its query holds about 180 MB.
+
+With the limit, three runs hold at most six product commands, about
+1.1 GB. The limit changes no answer and no log row: a waiting call gets the
+same reply later. A call whose client went away still runs when its turn
+comes and logs its reply row, as before. Direct answers, usage errors and
+refusals start no product command and do not wait. On stop, each waiting
+call ends as a stopped call and starts no command. The limit is per
+service, so one run's calls do not delay another run.
+
+The three cells in flight at the kill had a reserved attempt and no
+result. Their files are in `eval/results/_pilot-archive/1-scope-oom-kill`.
+Their reservations were removed by hand, so each cell keeps its two
+attempts: the runner never judged these attempts. The 27 finished cells
+stay. Not covered: a run can still make an unlimited number of calls one
+after the other, and a shell command can still start many `node` programs
+of its own. Failure items B7-200 to B7-208.
+
 ### Evidence for closed access, 2026-11-16
 
 The parent's ruling removes read-success guesses from agent tool logs.

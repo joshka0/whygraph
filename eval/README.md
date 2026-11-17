@@ -1561,7 +1561,15 @@ paths in the private /tmp"; decided before any batch 7 result existed).
 shell command sees only the programs that `closed-shell.json` lists, a seccomp filter denies `ptrace`, the client is static, and
 the service answers only the run's own client, which holds a secret token
 (ADR 0011, "No tool against the whygraph client"; decided before any batch
-7 result existed). The runner
+7 result existed).
+
+**Command limit.** Since 2026-11-17, one run's service runs at most two
+product commands at the same time, and later calls wait in arrival order.
+An agent's 16 parallel calls had piled up product commands until the kernel
+killed the first pilot at the scope's 6 GB limit (ADR 0011, "Command
+limit"; the 27 cells finished before it stay).
+
+After an unscored cell, the runner
 continues and resume skips that cell. A harness failure gets one retry;
 if the cell still fails, the runner stops with both archives. An interrupted
 reserved attempt stops visibly for inspection. The registry records each design's store access and control conditions.

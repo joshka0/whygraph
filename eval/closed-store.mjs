@@ -364,6 +364,11 @@ export function closedConfinement({ work, repo, client, socket, network = false,
   return args;
 }
 
+/** Product commands that one run's service runs at the same time.
+ * decided: Two, because an agent's 16 parallel calls piled 40 product commands of about 180 MB each into the 6 GB run scope and the kernel killed the pilot on 2026-11-17 (ADR 0011, "Command limit").
+ */
+const commandLimit = 2;
+
 /** Start one run's service. Only its socket is mounted inside that run's namespace.
  * owns: [[whygraph-closed-store]]
  */
@@ -376,6 +381,15 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
   const reasons=[], refusalReasons=[];
   const failure=message=>{failures++;reasons.push(message);appendFileSync(log,JSON.stringify({event:'failure',message})+'\n');};
   const abort=new AbortController(), connections=new Set(), pending=new Set(), commands=new Set();
+  // Calls past the command limit wait here in arrival order; the run's stop ends each wait.
+  const waiting=[]; let live=0;
+  const turn=()=>new Promise((ok,fail)=>{
+    if(abort.signal.aborted) fail(abort.signal.reason);
+    else if(live<commandLimit) { live++; ok(); }
+    else waiting.push({ok,fail});
+  });
+  const release=()=>{ const next=waiting.shift(); if(next) next.ok(); else live--; };
+  abort.signal.addEventListener('abort',()=>{ for(const call of waiting.splice(0)) call.fail(abort.signal.reason); });
   const server = createServer(connection => {
     connections.add(connection);
     let input = Buffer.alloc(0), dispatched = false;
@@ -438,6 +452,7 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
     if(!diagnostic && (condition==='stub' || (condition==='graph-nosearch' && command==='search'))) result={stdout:'no result\n',stderr:'',code:0};
     else {
       const mapped = !diagnostic && command !== 'search' && target.startsWith('/repo/') ? join(repo,target.slice(6)) : target;
+      await turn();
       try {
         const selectedStore=condition==='graph-nolink'&&['carry','impact'].includes(command)?fullStore:store;
         const running = execute(join(root,'bin/whygraph'), diagnostic ? args : [command,mapped,'--repo',repo,'--store',selectedStore], { env:quiet, maxBuffer:1<<26, signal:abort.signal });
@@ -464,7 +479,7 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
         result={stdout:error.stdout??'',stderr:error.stderr??'',code:error.code};
         reference={...result};
         if(error.code===1) throw new Error(error.stderr || 'product command failed');
-      }
+      } finally { release(); }
     }
     appendFileSync(log,JSON.stringify({args,...result,reference:reference??{...result},referenceStore,sections})+'\n');
     return result;
