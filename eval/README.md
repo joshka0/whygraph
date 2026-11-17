@@ -1552,7 +1552,10 @@ full. See [ADR 0011](../docs/adr/0011-eval-closed-store.md).
 **Attempts.** Each cell has at most two attempts, across restarts too.
 The ledger reserves an attempt before launch. A failed attempt is archived
 before retry. Two agent-caused ends, whether timeout or isolation breach
-in either order, leave an unscored marker and both archives. The runner
+in either order, leave an unscored marker and both archives. Since 2026-11-17, for
+batch 7 and later, a file-tool path inside the confinement's private `/tmp`
+is no isolation breach: it cannot reach the host (ADR 0011, "File-tool
+paths in the private /tmp"; decided before any batch 7 result existed). The runner
 continues and resume skips that cell. A harness failure gets one retry;
 if the cell still fails, the runner stops with both archives. An interrupted
 reserved attempt stops visibly for inspection. The registry records each design's store access and control conditions.

@@ -314,3 +314,33 @@ started; such a query only reads and ends on its own.
 - B7-175: Remove or add a `stopped` row, change `meta.json.service.stopped`, remove that field, give a `stopped` row no `args` or a non-string argument, or keep a `failure` event beside valid stopped rows. Expected: nonzero smoke-check exit; four reply rows are still required per attempt, so stopped calls never stand in for the health replies.
 - B7-176: Replay smoke-check on the archived sixth-smoke attempt (eight `failure` events, `failures: 0` in its metadata). Expected: it still fails `service failure`; old evidence is not reinterpreted.
 - B7-177: Compare batch 5 and 6 plans, shared launcher, frozen inputs and reports with `94f31bf`. Expected: no change (B7-132).
+
+## File-tool paths in the private /tmp, 2026-11-17
+
+Ruling of the coordinator `rowan-joshka-main` (2026-11-17), made before any
+batch 7 result exists: for batch 7 and later, a file-tool path inside the
+confinement's private `/tmp` is not an isolation breach, because it cannot
+reach the host. Batches 5 and 6 stay frozen. The seventh smoke passed its
+check with 8 of 8 lines, but 5 of 21 attempts were classed
+`isolation breach`, and 2 of 16 cells ended unscored
+(`zustand7-conflict-zs-13` in `stub` and `graph-norule`). Every hit was a
+file-tool write under `/tmp/opencode/`. The closed confinement mounts a
+fresh tmpfs on `/tmp`, and the agent's opencode config allows
+`/tmp/opencode/*`. The breach rule of `eval/opencode.mjs` dates from the
+unconfined batch 5 and classes every absolute file-tool path outside the
+repo as a breach. Evidence:
+`eval/results/_smoke-archive/7-private-tmp-classed-as-breach/`. The rule
+covers every file-tool path field and patch path, read or write. The
+following cases belong to an independent test author from Codex or agy. The
+code author writes no tests. The tests must fail on `0af356e` with at least
+one of the five archived attempts as the fixture.
+
+- B7-178: Classify each of the five archived attempts of the seventh smoke from its `tools.json` (`_attempts/*/tools.json`) with the closed runner's rule. Expected: no breach for any of the five; on `0af356e` each gives `external file-tool path: /tmp/opencode/...`. Run a closed attempt whose agent writes `/tmp/opencode/wrap.c` with its file tool and then finishes. Expected: status `done`, no `reason`, no `isolation` field, one ledger entry of kind `done`, no retry, no archive under `_attempts`; the cell is scored.
+- B7-179: Give the rule file-tool paths `/tmp`, `/tmp/x`, `/tmp/opencode/a/b.c`, `/tmp/a/../b`, `/tmp/./a`, `/tmp//a` and `/tmp/a/`. Expected: none is a breach. Give it `/tmp/../etc/passwd`, `/tmp/../../x`, `/tmp/a/../../home/agent/x`, `/tmpx/a`, `/var/tmp/x`, `/home/agent/x`, `/tools/whygraph`, `/identity/opencode/x`, `/whygraph/service.sock`, `/etc/hosts`, `/config/x` and the host path of the work folder. Expected: each stays `external file-tool path: <path as given>`.
+- B7-180: Give a patch (`patch`, `patchText`, `patch_text`, `diff`) with `*** Add File:`, `*** Update File:`, `*** Delete File:`, `*** Move to:`, `--- ` and `+++ ` lines. Expected: a path inside the private `/tmp` is no breach; a path outside it stays `external patch path: <path>` under the B7-179 forms.
+- B7-181: Mix private `/tmp` paths and other outside paths in one attempt, in one tool call and across calls. Expected: status `invalid`, reason `isolation breach`, and `isolation` lists exactly the outside paths in their order; no `/tmp` path appears in it.
+- B7-182: Leave a symlink in the repo that points outside it, including one that points into `/tmp`; run a shell command that creates a symlink, including `ln -s /tmp/x y`. Expected: `external symlink: ...` and `shell command creates a symlink` stay breaches. The rule drops only file-tool and patch paths.
+- B7-183: Run the timeout and breach pairs of B7-48 to B7-51 with a private `/tmp` path as the only hit of one attempt. Expected: that attempt counts as if it had no hit: a timeout stays a timeout, a finished attempt is `done`. Two attempts with real outside paths still end unscored.
+- B7-184: Build the agent confinement and the shell-command confinement (`closedConfinement`, with and without network). Expected: each has exactly one `--tmpfs /tmp` and no bind, ro-bind, symlink or dir destination at or under `/tmp`. Write a file under `/tmp` inside the real confinement. Expected: no such file exists on the host's `/tmp` or under the work folder; a second confinement start does not see it. If a mount under `/tmp` is ever added, this case fails, and the rule loses its premise.
+- B7-185: Classify a `/tmp` file-tool path with the open-store rule of batches 5 and 6 (`eval/run.mjs`, `eval/opencode.mjs:isolationBreaches`). Expected: `external file-tool path: /tmp/...` as before; `eval/opencode.mjs` is byte-identical to `0af356e`; batch 5 and 6 plans, frozen inputs and reports are unchanged (B7-132).
+- B7-186: Replay smoke-check on the archived seventh smoke. Expected: the same 8 PASS lines and the two unscored cells; old evidence is not classified again. Run smoke-check on a smoke whose cells hold private `/tmp` paths and status `done`. Expected: `planned cells` passes with no unscored cell.

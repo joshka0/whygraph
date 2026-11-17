@@ -8,6 +8,7 @@ import { batchInstructions } from './registry.mjs';
 import { readQuery } from '../src/tools.ts';
 import { opencodeLaunch, opencodeSession, escapingSymlinks, isolationBreaches, OPENCODE_MODEL } from './opencode.mjs';
 import { fileKey } from './registry.mjs';
+import { closedBreaches } from '../scripts/attempts.pure.ts';
 import { closedWorkRoot, execBudget, filesystemPath } from './closed-store.mjs';
 const quiet = { ...process.env, RELATE_TELEMETRY:'0', DO_NOT_TRACK:'1' };
 const gitEnv = { ...quiet, GIT_CONFIG_GLOBAL:'/dev/null',GIT_CONFIG_NOSYSTEM:'1',GIT_AUTHOR_NAME:'eval',GIT_AUTHOR_EMAIL:'eval@example.invalid',GIT_COMMITTER_NAME:'eval',GIT_COMMITTER_EMAIL:'eval@example.invalid' };
@@ -240,7 +241,7 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     const tools=session.tools.map(t=>({...t,input:t.input}));
     const identity=realpathSync(repo);
     const normalized=JSON.parse(JSON.stringify(tools).replaceAll('/repo/',`${identity}/`).replaceAll('"/repo"',JSON.stringify(identity)));
-    const breaches=isolationBreaches(repo,normalized);
+    const breaches=closedBreaches(isolationBreaches(repo,normalized));
     await launcher.stop();
     await service.stop();
     const stats=service.stats();
