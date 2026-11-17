@@ -46,3 +46,27 @@ export function attemptDecision(rule: AttemptRule, ledger: readonly Entry[]): At
   if (retried.status === "invalid") return { kind: "stop", reason: "harness" };
   return { kind: retried.timed_out ? "unscored" : "settled" };
 }
+
+/** The breaches of a closed attempt: the open-store hits without the paths in the confinement's private /tmp.
+ * owns: [[whygraph-closed-breach-rule]]
+ * decided: A file-tool or patch path inside the closed confinement's private /tmp is no isolation breach because that fresh tmpfs has no bind under it and cannot reach the host (ADR 0011, ruling of 2026-11-17 before any batch 7 result; B7-184 checks the mount).
+ */
+export function closedBreaches(hits: readonly string[]): string[] {
+  return hits.filter(hit => {
+    const path = /^external (?:file-tool|patch) path: ([\s\S]*)$/.exec(hit)?.[1];
+    if (path === undefined || !path.startsWith("/")) return true;
+    const at = resolved(path);
+    return at !== "/tmp" && !at.startsWith("/tmp/");
+  });
+}
+
+/** Resolve `.`, `..` and repeated slashes of an absolute path without touching a file system. */
+function resolved(path: string): string {
+  const parts: string[] = [];
+  for (const part of path.split("/")) {
+    if (part === "" || part === ".") continue;
+    if (part === "..") parts.pop();
+    else parts.push(part);
+  }
+  return "/" + parts.join("/");
+}
