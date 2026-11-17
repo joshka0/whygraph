@@ -15,6 +15,10 @@
 #include <poll.h>
 #include <sys/syscall.h>
 static const char *unavailable = "whygraph service unavailable\n";
+/* Each run writes its own secret over these 64 bytes in its copy of this binary.
+ * The service answers only a connection that starts with them. */
+#define TOKEN_BYTES 64
+__attribute__((used)) static volatile char client_token[TOKEN_BYTES+1] = "whygraph-client-token-placeholder-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 static void transfer(int fd, void *buf, size_t n, int sending) {
   char *p = buf;
   while (n) { ssize_t k = sending ? write(fd,p,n) : read(fd,p,n); if(k<0 && errno==EINTR) continue; if(k<=0) {fputs(unavailable,stderr); exit(70);} p+=k; n-=(size_t)k; }
@@ -120,6 +124,8 @@ int main(int argc, char **argv) {
   int fd = socket(AF_UNIX,SOCK_STREAM,0);
   struct sockaddr_un addr = {.sun_family=AF_UNIX}; strcpy(addr.sun_path,"/whygraph/service.sock");
   if(fd<0 || connect(fd,(struct sockaddr*)&addr,sizeof(addr))) {fputs("whygraph service unavailable\n",stderr); return 70;}
+  char token[TOKEN_BYTES]; for(int i=0;i<TOKEN_BYTES;i++) token[i]=client_token[i];
+  transfer(fd,token,TOKEN_BYTES,1);
   uint32_t n = htonl((uint32_t)(argc-1)); transfer(fd,&n,4,1);
   for(int i=1;i<argc;i++) { n=htonl((uint32_t)strlen(argv[i])); transfer(fd,&n,4,1); transfer(fd,argv[i],strlen(argv[i]),1); }
   uint32_t header[3]; transfer(fd,header,sizeof(header),0);

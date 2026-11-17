@@ -17,7 +17,8 @@ function ok(r){assert.equal(r.status,0,r.stderr||r.stdout);return r.stdout;}
 function tree(p){if(!existsSync(p))return null;return readdirSync(p).sort().map(n=>{const f=join(p,n),s=lstatSync(f);return[n,s.isSymbolicLink()?readlinkSync(f):s.isDirectory()?tree(f):hash(readFileSync(f))];});}
 let serial=0;
 function copy(scratch,label){const at=join(scratch,`${serial++}-${label}`);mkdirSync(join(at,'eval/tickets'),{recursive:true});
- for(const f of ['run.mjs','opencode.mjs','score.mjs','registry.mjs','registry.json','closed-run.mjs','closed-store.mjs','closed-client.c','smoke-check.mjs'])cpSync(join(root,'eval',f),join(at,'eval',f));
+ // ADR 0011, 2026-11-17, B7-188: transport copies need the closed program list.
+ for(const f of ['run.mjs','opencode.mjs','score.mjs','registry.mjs','registry.json','closed-run.mjs','closed-store.mjs','closed-client.c','closed-shell.json','smoke-check.mjs'])cpSync(join(root,'eval',f),join(at,'eval',f));
  for(const f of ['make-tasks.mjs','sample.mjs','fetch-github.py','tickets-to-decisions.mjs'])cpSync(join(root,'eval/tickets',f),join(at,'eval/tickets',f));
  const registry=json(join(at,'eval/registry.json'));for(const [key,repo]of Object.entries(registry.repos)){repo.source=join(at,'unused-sources',key);repo.decisions=join(at,'unused-decisions',key+'.json');}write(join(at,'eval/registry.json'),registry);
  for(const f of ['src','recipes','node_modules','scripts','bin'])symlinkSync(join(root,f),join(at,f),'dir');

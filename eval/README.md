@@ -139,9 +139,9 @@ node eval/score.mjs                     # the verdicts and the rates
 node eval/score.mjs --json              # one verdict per run, as JSON
 ```
 
-The default self-test runs B7-93 with five repetitions and four CPU burners and
+The default self-test runs B7-93 with five repetitions and no CPU burner, and
 B7-104 with the 16-cell smoke plan. `node eval/selftest/check.mjs --stress` runs
-only their 50-repetition and 258-cell forms; it loads a machine on purpose, so
+only their 50-repetition and 258-cell forms, the first with four CPU burners; it loads a machine on purpose, so
 run it only on request, alone, on a machine that nobody shares (see
 `eval/tickets/batch7-failures.md`).
 
@@ -1555,7 +1555,13 @@ before retry. Two agent-caused ends, whether timeout or isolation breach
 in either order, leave an unscored marker and both archives. Since 2026-11-17, for
 batch 7 and later, a file-tool path inside the confinement's private `/tmp`
 is no isolation breach: it cannot reach the host (ADR 0011, "File-tool
-paths in the private /tmp"; decided before any batch 7 result existed). The runner
+paths in the private /tmp"; decided before any batch 7 result existed).
+
+**No tool against the client.** Since 2026-11-17, for batch 7 and later, a
+shell command sees only the programs that `closed-shell.json` lists, a seccomp filter denies `ptrace`, the client is static, and
+the service answers only the run's own client, which holds a secret token
+(ADR 0011, "No tool against the whygraph client"; decided before any batch
+7 result existed). The runner
 continues and resume skips that cell. A harness failure gets one retry;
 if the cell still fails, the runner stops with both archives. An interrupted
 reserved attempt stops visibly for inspection. The registry records each design's store access and control conditions.

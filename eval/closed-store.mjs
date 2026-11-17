@@ -5,10 +5,10 @@
 import { createServer } from 'node:net';
 import { spawn, execFile, execFileSync } from 'node:child_process';
 import { promisify } from 'node:util';
-import { appendFileSync, chmodSync, cpSync, existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync, readdirSync, statSync, renameSync, lstatSync, readlinkSync } from 'node:fs';
+import { appendFileSync, chmodSync, closeSync, cpSync, existsSync, mkdirSync, openSync, readFileSync, readSync, realpathSync, writeFileSync, readdirSync, statSync, renameSync, lstatSync, readlinkSync } from 'node:fs';
 import { dirname, join, resolve, parse } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { constants } from 'node:os';
 import { createInterface } from 'node:readline';
 import { readQuery } from '../src/tools.ts';
@@ -16,6 +16,7 @@ import { recipe } from '../src/ask.ts';
 import { whyAnswer } from '../src/answers.pure.ts';
 import { readSymbolTarget } from '../src/target.pure.ts';
 import { readArgs } from '../src/args.pure.ts';
+import { ptraceDenyFilter } from '../scripts/seccomp.pure.ts';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const execute = promisify(execFile);
 const quiet = { ...process.env, RELATE_TELEMETRY: '0', DO_NOT_TRACK: '1' };
@@ -186,11 +187,109 @@ export function closedClient(directory) {
   const dest = join(directory, `client-${hash(readFileSync(source))}`);
   mkdirSync(directory, { recursive: true });
   if (!existsSync(dest)) {
-    execFileSync('cc', ['-O2','-Wall','-Wextra','-Werror',source,'-o',dest]);
-    writeFileSync(`${dest}.sha256`,hash(readFileSync(dest)));
+    const built = `${dest}.${process.pid}.building`;
+    execFileSync('cc', ['-O2','-Wall','-Wextra','-Werror','-static',source,'-o',built]);
+    const bytes = readFileSync(built);
+    // A dynamic client would load LD_PRELOAD hooks; the loader never runs for a static one.
+    const headers = bytes.readUInt16LE(0x38), size = bytes.readUInt16LE(0x36), at = Number(bytes.readBigUInt64LE(0x20));
+    for (let i = 0; i < headers; i++) if ([2,3].includes(bytes.readUInt32LE(at + i * size))) throw new Error('closed client is not a static binary');
+    if (bytes.indexOf(tokenPlaceholder) < 0 || bytes.indexOf(tokenPlaceholder) !== bytes.lastIndexOf(tokenPlaceholder)) throw new Error('closed client needs exactly one token field');
+    writeFileSync(`${dest}.sha256`,hash(bytes));
+    renameSync(built, dest);
   }
-  chmodSync(dest, 0o111);
+  chmodSync(dest, 0o500);
   return dest;
+}
+
+const tokenPlaceholder = Buffer.from('whygraph-client-token-placeholder-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+
+/** Give one run its own client: the shared client with the run's secret in its token field.
+ * owns: [[whygraph-closed-client-token]]
+ * decided: The service answers only the run's own execute-only client because the operator ruled on 2026-11-17 that no tool may talk to the service in the client's place (ADR 0011).
+ */
+export function runClient(shared, work) {
+  const bytes = Buffer.from(readFileSync(shared)), at = bytes.indexOf(tokenPlaceholder);
+  if (at < 0 || at !== bytes.lastIndexOf(tokenPlaceholder)) throw new Error('closed client needs exactly one token field');
+  const token = randomBytes(32).toString('hex');
+  bytes.write(token, at, 'latin1');
+  const client = join(work, 'client');
+  writeFileSync(client, bytes, { mode: 0o700 });
+  chmodSync(client, 0o111);
+  return { client, token };
+}
+
+/** Open the filter that bwrap loads with --seccomp; the caller passes the descriptor to one spawn and closes it.
+ * owns: [[whygraph-closed-seccomp-file]]
+ */
+export function seccompFilter(work) {
+  if (process.arch !== 'x64') throw new Error('closed runs need x86-64: the seccomp filter is built for it');
+  const file = join(work, 'seccomp.bpf');
+  if (!existsSync(file)) writeFileSync(file, ptraceDenyFilter());
+  return openSync(file, 'r');
+}
+
+const shellList = JSON.parse(readFileSync(new URL('./closed-shell.json', import.meta.url), 'utf8'));
+let shellMounts;
+/** The whole /usr of a shell command: the listed programs, the libraries they load and the listed folders.
+ * owns: [[whygraph-closed-shell-programs]]
+ * decided: A shell command gets no compiler, tracer, network client or other interpreter than the listed ones because the operator ruled on 2026-11-17 that the agent must not build or run a tool against the whygraph client (ADR 0011).
+ * decided: A listed name that the host lacks stops the run because a shorter list would change what the agent can do without a record.
+ */
+export function shellProgramMounts() {
+  if (shellMounts) return [...shellMounts];
+  const { programs, trees } = shellList;
+  if (!Array.isArray(programs) || !Array.isArray(trees) || new Set(programs).size !== programs.length) throw new Error('closed shell: invalid program list');
+  const underUsr = path => /^\/(?:lib|lib64|bin)\//.test(path) ? `/usr${path}` : path;
+  const libraries = new Map(), seen = new Set();
+  const load = file => {
+    const stat = statSync(file);
+    if (seen.has(stat.ino)) return;
+    seen.add(stat.ino);
+    const head = Buffer.alloc(256), fd = openSync(file, 'r');
+    const length = readSync(fd, head, 0, 256, 0); closeSync(fd);
+    if (head.subarray(0, 2).toString() === '#!') {
+      const interpreter = head.subarray(2, length).toString().split('\n')[0].trim().split(/\s+/)[0].split('/').pop();
+      if (!programs.includes(interpreter)) throw new Error(`closed shell: ${file} needs the unlisted interpreter ${interpreter}`);
+      return;
+    }
+    if (head.subarray(0, 4).toString('latin1') !== '\x7fELF') return;
+    let out;
+    try { out = execFileSync('ldd', [file], { encoding: 'utf8', stdio: ['ignore','pipe','pipe'] }); }
+    catch (error) {
+      if (/not a dynamic executable|statically linked/.test(`${error.stdout}${error.stderr}`)) return;
+      throw new Error(`closed shell: cannot resolve the libraries of ${file}`);
+    }
+    for (const line of out.split('\n')) {
+      if (line.includes('not found')) throw new Error(`closed shell: ${file} lacks a library: ${line.trim()}`);
+      const path = /(\/\S+) \(0x/.exec(line)?.[1];
+      if (path) libraries.set(underUsr(path), realpathSync(path));
+    }
+  };
+  const args = ['--tmpfs','/usr','--dir','/usr/bin','--dir','/usr/lib','--dir','/usr/lib64',
+    '--symlink','usr/bin','/bin','--symlink','usr/lib','/lib','--symlink','usr/lib64','/lib64','--ro-bind','/etc','/etc'];
+  for (const name of programs) {
+    if (typeof name !== 'string' || !/^[\w.+[-]+$/.test(name)) throw new Error(`closed shell: invalid program name ${name}`);
+    const path = `/usr/bin/${name}`;
+    if (!statSync(path, { throwIfNoEntry: false })?.isFile()) throw new Error(`closed shell: program ${name} is missing on this host`);
+    const real = realpathSync(path);
+    load(real);
+    args.push('--ro-bind', real, path);
+  }
+  const walk = folder => {
+    for (const entry of readdirSync(folder, { withFileTypes: true })) {
+      const path = join(folder, entry.name);
+      if (entry.isDirectory()) walk(path);
+      else if (entry.isFile() && statSync(path).mode & 0o111) load(path);
+    }
+  };
+  for (const tree of trees) {
+    if (typeof tree !== 'string' || !tree.startsWith('/usr/') || resolve(tree) !== tree || !statSync(tree, { throwIfNoEntry: false })?.isDirectory()) throw new Error(`closed shell: folder ${tree} is missing on this host`);
+    walk(tree);
+  }
+  for (const [path, real] of [...libraries].sort()) args.push('--ro-bind', real, path);
+  for (const tree of trees) args.push('--ro-bind', tree, tree);
+  shellMounts = args;
+  return [...args];
 }
 
 const systemFolders = ['/usr','/bin','/lib','/lib64','/etc'];
@@ -243,11 +342,12 @@ export function resolverMounts({ work, repo, client }) {
 /** A minimal filesystem shared by the whole agent process and all its file tools.
  * owns: [[whygraph-closed-store]]
  */
-export function closedConfinement({ work, repo, client, socket, network = false, opencode }) {
+export function closedConfinement({ work, repo, client, socket, network = false, opencode, shell = false }) {
   for (const path of [work, repo, client, socket, ...(opencode ? [opencode] : [])]) filesystemPath(path);
   const args = ['bwrap','--die-with-parent','--new-session','--unshare-user','--unshare-pid','--unshare-ipc','--unshare-uts','--cap-drop','ALL'];
   if (!network) args.push('--unshare-net');
-  for (const path of systemFolders) if (existsSync(path)) args.push('--ro-bind',path,path);
+  if (shell) args.push(...shellProgramMounts());
+  else for (const path of systemFolders) if (existsSync(path)) args.push('--ro-bind',path,path);
   args.push(...resolverMounts({work,repo,client}));
   args.push('--proc','/proc','--dev','/dev','--tmpfs','/tmp','--tmpfs','/home','--dir','/whygraph','--dir','/tools',
     '--bind',repo,'/repo','--bind',join(work,'home'),'/home/agent','--bind',join(work,'config'),'/config',
@@ -267,16 +367,23 @@ export function closedConfinement({ work, repo, client, socket, network = false,
 /** Start one run's service. Only its socket is mounted inside that run's namespace.
  * owns: [[whygraph-closed-store]]
  */
-export async function startClosedStore({ condition, repo, store, fullStore = store, socket, log }) {
+export async function startClosedStore({ condition, repo, store, fullStore = store, socket, log, token }) {
   socketPath(socket);
+  if (!/^[0-9a-f]{64}$/.test(token ?? '')) throw new Error('closed store needs the token of the run\'s client');
+  const secret = Buffer.from(token, 'latin1');
   repo=realpathSync(repo);
   let failures = 0, calls = 0, refused = 0, stopped = 0, stopping;
   const reasons=[], refusalReasons=[];
   const failure=message=>{failures++;reasons.push(message);appendFileSync(log,JSON.stringify({event:'failure',message})+'\n');};
   const abort=new AbortController(), connections=new Set(), pending=new Set(), commands=new Set();
   const server = createServer(connection => {
-    connections.add(connection);connection.on('close',()=>connections.delete(connection));
+    connections.add(connection);
     let input = Buffer.alloc(0), dispatched = false;
+    connection.on('close',()=>{
+      connections.delete(connection);
+      // Bytes without a whole token: counted only now, so a sender learns nothing byte by byte.
+      if (!dispatched && input.length > 0 && input.length < secret.length) refuse('missing client token');
+    });
     connection.on('error', () => {});
     const refuse=message=>{
       dispatched=true;refused++;refusalReasons.push(message);
@@ -285,17 +392,20 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
     connection.on('data', chunk => {
       if (dispatched) return;
       input = Buffer.concat([input,chunk]);
-      if (input.length > 65536) { refuse('request too large'); return; }
-      if (input.length < 4) return;
-      const count = input.readUInt32BE();
+      if (input.length < secret.length) return;
+      if (!timingSafeEqual(input.subarray(0, secret.length), secret)) { refuse('missing client token'); return; }
+      const frame = input.subarray(secret.length);
+      if (frame.length > 65536) { refuse('request too large'); return; }
+      if (frame.length < 4) return;
+      const count = frame.readUInt32BE();
       if (count > 64) { refuse('invalid argument count'); return; }
       let at=4; const args=[];
       for(let i=0;i<count;i++) {
-        if(input.length < at+4) return;
-        const size=input.readUInt32BE(at); at+=4;
+        if(frame.length < at+4) return;
+        const size=frame.readUInt32BE(at); at+=4;
         if(size>60000) { refuse('argument too large'); return; }
-        if(input.length < at+size) return;
-        args.push(input.subarray(at,at+size).toString()); at+=size;
+        if(frame.length < at+size) return;
+        args.push(frame.subarray(at,at+size).toString()); at+=size;
       }
       dispatched=true;
       const settled=answer(args).then(respond, error => {
@@ -374,6 +484,8 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
  * owns: [[whygraph-closed-store]]
  */
 export async function startClosedShell({work,repo,client,socket,log}) {
+  // A missing listed program stops the run here, before the agent starts.
+  shellProgramMounts();
   let failures=0, calls=0, stopped=false;
   const reasons=[];
   const failure=message=>{failures++;reasons.push(message);appendFileSync(log,JSON.stringify({event:'failure',message})+'\n');};
@@ -431,15 +543,18 @@ export async function startClosedShell({work,repo,client,socket,log}) {
         let confinement;
         try {
           filesystemPath(join(repo,cwd.slice(6)));
-          confinement=closedConfinement({work,repo,client,socket});
+          confinement=closedConfinement({work,repo,client,socket,shell:true});
           const atCwd=confinement.indexOf('--chdir');confinement[atCwd+1]=cwd;
-          execBudget(confinement[0],[...confinement.slice(1),'--info-fd','3','--block-fd','4','--','/bin/bash',...args],{PATH:'/tools:/usr/bin:/bin',HOME:'/home/agent',LANG:'C.UTF-8',RELATE_TELEMETRY:'0',DO_NOT_TRACK:'1'});
+          execBudget(confinement[0],[...confinement.slice(1),'--info-fd','3','--block-fd','4','--seccomp','5','--','/bin/bash',...args],{PATH:'/tools:/usr/bin:/bin',HOME:'/home/agent',LANG:'C.UTF-8',RELATE_TELEMETRY:'0',DO_NOT_TRACK:'1'});
         }
         catch(error) { fail(error.message); return; }
         appendFileSync(log,JSON.stringify({event:'start',args,cwd})+'\n');
-        child=spawn(confinement[0],[...confinement.slice(1),'--info-fd','3','--block-fd','4','--','/bin/bash',...args],{
-          detached:true,env:{PATH:'/tools:/usr/bin:/bin',HOME:'/home/agent',LANG:'C.UTF-8',RELATE_TELEMETRY:'0',DO_NOT_TRACK:'1'},stdio:['pipe','pipe','pipe','pipe','pipe'],
-        });
+        const filter=seccompFilter(work);
+        try {
+          child=spawn(confinement[0],[...confinement.slice(1),'--info-fd','3','--block-fd','4','--seccomp','5','--','/bin/bash',...args],{
+            detached:true,env:{PATH:'/tools:/usr/bin:/bin',HOME:'/home/agent',LANG:'C.UTF-8',RELATE_TELEMETRY:'0',DO_NOT_TRACK:'1'},stdio:['pipe','pipe','pipe','pipe','pipe',filter],
+          });
+        } finally { closeSync(filter); }
         const scope={ready:false,cancelled:false,timer:undefined,kill:()=>{
           witness?.kill('SIGTERM');
           if(!child.pid || child.exitCode!==null || child.signalCode!==null)return;

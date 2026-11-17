@@ -35,6 +35,7 @@ function runnerState(pid){
 function burnerPids(token){return readdirSync('/proc').filter(n=>/^\d+$/.test(n)).filter(n=>{const args=procText(n,'cmdline')?.split('\0')??[];return args[0]==='/usr/bin/node'&&args.includes(token)&&args.some(a=>a.includes('Math.sqrt'));}).map(Number);}
 function ownedPids(token){return readdirSync('/proc').filter(n=>/^\d+$/.test(n)).filter(n=>{const cmdline=procText(n,'cmdline');if(cmdline===null)return false;const args=cmdline.split('\0');return args.includes('/repo/'+token+'.js')||args[0]==='/bin/bash'&&args.some(a=>a.includes(token));}).map(Number);}
 /** Host shell contracts through the generated script and live confinement.
+ * ADR 0011 (2026-11-17), B7-192: fixture service and raw NUL frame use the same run token.
  * owns: [[whygraph-batch7-host-selftest]]
  */
 export async function batch7HostChecks({scratch,shared,stress=false}){
@@ -42,15 +43,16 @@ export async function batch7HostChecks({scratch,shared,stress=false}){
  async function run(fn,{condition='graph',api,client,symlinkRepo=false,worker=false,spawnFailure=false,workerModule}={}){
   const f=await shared.getClosed(),r=await shared.attempt({condition});assert.equal(r.error,undefined,`host fixture attempt failed: ${r.error}; evidence: ${r.at}`);const work=r.value.work,repo=resolve(h.root,work,'repo'),config=h.json(join(r.out,'command.json'));
   const args=config.args.slice(1,config.args.lastIndexOf('--')+1),opencode=args.indexOf('/tools/opencode');args[opencode-1]=f.opencode;
-  if(client)for(let i=0;i<args.length;i++)if(['/tools/whygraph','/tools/relate','/tools/memod','/tools/shell-client'].includes(args[i]))args[i-1]=client;
+  api??=f.api;let assigned={client:f.client,token:f.token};if(client){const at=join(r.at,'custom-run-client');mkdirSync(at);assigned=api.runClient(client,at);}
+  for(let i=0;i<args.length;i++)if(['/tools/whygraph','/tools/relate','/tools/memod','/tools/shell-client'].includes(args[i]))args[i-1]=assigned.client;
   h.ok(h.command('git',['init','-q',repo]));
   let storeRepo=repo;if(symlinkRepo){storeRepo=join(scratch,'linked-repo-'+serial++);symlinkSync(repo,storeRepo,'dir');}
-  api??=f.api;const socket=join(work,'service.sock'),service=await api.startClosedStore({condition,repo:storeRepo,store:f.prepared[condition].store,fullStore:f.store,socket,log:join(r.at,'host-service.jsonl')});
-  const opts={work,repo,client:client??f.client,socket,log:join(r.at,'host-shell.jsonl')};let launcher,owner,ownerDone;
+  api??=f.api;const socket=join(work,'service.sock'),service=await api.startClosedStore({condition,repo:storeRepo,store:f.prepared[condition].store,fullStore:f.store,socket,log:join(r.at,'host-service.jsonl'),token:assigned.token});
+  const opts={work,repo,client:assigned.client,socket,log:join(r.at,'host-shell.jsonl')};let launcher,owner,ownerDone;
   try{
    if(worker){const path=h.write(join(r.at,'host-worker.json'),{module:workerModule??join(f.at,'eval/closed-store.mjs'),options:opts,spawnFailure});owner=spawn(process.execPath,[join(h.root,'eval/selftest/batch7-host-worker.mjs'),path],{cwd:h.root,env:h.env});ownerDone=collect(owner,null);await ready(ownerDone,'READY\n');launcher={stop:async()=>{if(owner.exitCode!==null||owner.signalCode!==null)return;owner.stdin.end('stop');assert.equal((await ownerDone.done).status,0);},stats:()=>({})};}
    else launcher=await api.startClosedShell(opts);
-   const start=(command,{input=Buffer.alloc(0),cwd='/repo',native=false,onData}={})=>{const a=[...args];a[a.indexOf('--chdir')+1]=cwd;const p=spawn('bwrap',[...a,...(native?command:['/tools/shell','-c',command])],{cwd:h.root,env:config.env});return collect(p,input,onData);};
+   const start=(command,{input=Buffer.alloc(0),cwd='/repo',native=false,onData}={})=>{const a=[...args];a[a.indexOf('--chdir')+1]=cwd;const fd=api.seccompFilter(work);let p;try{p=spawn('bwrap',[...a,...(native?command:['/tools/shell','-c',command])],{cwd:h.root,env:config.env,stdio:['pipe','pipe','pipe',fd]});}finally{fs.closeSync(fd);}return collect(p,input,onData);};
    const invoke=async(command,options)=>start(command,options).done;
    return await fn({...f,r,work,repo,storeRepo,args,service,launcher,owner,ownerDone,start,invoke,opts,api});
   }finally{await launcher?.stop();await service.stop();}
@@ -78,7 +80,8 @@ export async function batch7HostChecks({scratch,shared,stress=false}){
   h.write(join(scratch,'proc-disappearance-check.json'),{results});
   assert.deepEqual(results.filter(r=>!r.passed),[],'process observations must accept only disappearance errors');
  });
- add('B7-93 burner scope ends after self-test SIGKILL and SIGTERM',async()=>{
+ // Intentional CPU load runs only in the explicit stress collection (AGENTS.md, Testing).
+ if(stress)add('B7-93 burner scope ends after self-test SIGKILL and SIGTERM',async()=>{
   const results=[];
   for(const signal of ['SIGKILL','SIGTERM']){
    const token=`burner-lifetime-${process.pid}-${signal}`;
@@ -96,6 +99,7 @@ export async function batch7HostChecks({scratch,shared,stress=false}){
   }
   h.write(join(scratch,'burner-parent-death.json'),results);
  });
+ if(stress)checks.at(-1).stress=true;
  // B7-72: usable source operations and all commands, including nested cwd.
  add('B7-72 generated shell reads edits and commands in every condition and nested cwd',async()=>{
   for(const condition of ['stub','graph','graph-nolink','graph-nosearch','graph-noterms','graph-norule'])await run(async f=>{
@@ -121,8 +125,10 @@ export async function batch7HostChecks({scratch,shared,stress=false}){
  async function lifetime(f,mode){
   const token='host-child-'+h.hash(f.r.at).slice(0,12),script=join(f.repo,token+'.js');
   h.write(script,"const fs=require('fs');process.stdout.write('CHILD_READY\\n',()=>{fs.closeSync(1);fs.closeSync(2);});fs.watch('/repo',()=>{if(fs.existsSync('/repo/release-"+token+"'))fs.writeFileSync('/repo/late-"+token+"','survived');});setInterval(()=>{},100000);\n");
-  const command=`/usr/bin/node /repo/${token}.js & /usr/bin/setsid /usr/bin/node /repo/${token}.js & exec 1>&- 2>&-; wait`;
-  const c=f.start(command,{input:null});await ready(c,'CHILD_READY\nCHILD_READY\n');const pids=ownedPids(token);assert.ok(pids.length>=2,'both children started');
+  // ADR 0011 B7-187: node replaces unlisted setsid while retaining a real new session.
+  const detached=node(`require('child_process').spawn('/usr/bin/node',['/repo/${token}.js'],{detached:true,stdio:'inherit'}).unref()`);
+  const command=`/usr/bin/node /repo/${token}.js & ${detached} & exec 1>&- 2>&-; wait`;
+  const c=f.start(command,{input:null});await ready(c,'CHILD_READY\nCHILD_READY\n');const pids=ownedPids(token);assert.ok(pids.length>=2,'both children started');assert.equal(new Set(pids.map(pid=>procText(pid,'stat').slice(procText(pid,'stat').lastIndexOf(') ')+2).split(' ')[3])).size,2,'the fixture includes a separate session');
   try{if(mode==='disconnect'){c.p.kill('SIGKILL');await c.done;await f.launcher.stop();}else if(mode==='runner'){
     const start=performance.now();f.owner.kill('SIGKILL');await f.ownerDone.done;
     const observations=[],path=join(f.r.at,'runner-disappearance.json');let states,wall_ms;
@@ -141,15 +147,14 @@ export async function batch7HostChecks({scratch,shared,stress=false}){
   }finally{for(const pid of pids)if(live(pid))try{process.kill(pid,'SIGKILL');}catch(e){if(e.code!=='ESRCH')throw e;}if(c.p.exitCode===null&&c.p.signalCode===null)c.p.kill('SIGKILL');}
  }
  for(const mode of ['cleanup','timeout','disconnect','runner'])add(`B7-76 ${mode} ends background and new-session children before returning`,()=>run(f=>lifetime(f,mode),{worker:mode==='runner'}));
- add(`B7-93 runner death passes ${stress?50:5} consecutive repetitions under CPU load`,async()=>{
-  if(!stress)console.log('SHORT B7-93: 5 repetitions with four burners; long form: node eval/selftest/check.mjs --stress');
-  const load=await startBurners('runner-'+process.pid);
+ add(`B7-93 runner death passes ${stress?50:5} consecutive repetitions${stress?' under CPU load':''}`,async()=>{
+  const load=stress?await startBurners('runner-'+process.pid):undefined;
   const repetitions=stress?50:5;
   const results=[];try{for(let i=0;i<repetitions;i++){
    try{results.push({repetition:i+1,...await run(f=>lifetime(f,'runner'),{worker:true})});}catch(e){if(e.code!=='ERR_ASSERTION')throw e;results.push({repetition:i+1,...e.runnerObservation,error:e.message});}
    h.write(join(scratch,'runner-death-repetitions.json'),{repetitions:results.length,more_than_one_observation:results.filter(r=>r.observation_count>1).length,longest_time_to_gone_or_zombie_ms:Math.max(...results.filter(r=>!r.error).map(r=>r.wall_ms)),kernel_teardown_repetitions:results.filter(r=>r.teardown>0).length,results});
   }}
-  finally{await load.stop();}
+  finally{await load?.stop();}
   assert.equal(results.length,repetitions);assert.equal(results.filter(r=>r.error).length,0,results.find(r=>r.error)?.error);
  });
  checks.at(-1).stress=true;
@@ -186,7 +191,7 @@ export async function batch7HostChecks({scratch,shared,stress=false}){
  add('B7-80 shell protocol accepts 1024 fields and 8192-byte stdin frame',()=>run(async f=>{const input=Buffer.alloc(8192,241),payload=Buffer.concat([fields(['/repo','-c','cat',...Array(1021).fill('x')]),frame(0,input),frame(1)]);assert.deepEqual(decode(await wire(join(f.work,'shell.sock'),payload)),{status:0,stdout:input,stderr:Buffer.alloc(0)});}));
  add('B7-80 exact 1 MiB shell request reaches Bash with bounded individual argv',()=>run(async f=>{const args=['/repo','-c','printf accepted',...Array(16).fill('x'.repeat(60000)),''];args[args.length-1]='x'.repeat(1048576-fields(args).length);const payload=fields(args);assert.equal(payload.length,1048576);const bare=decode(await wire(join(f.work,'shell.sock'),payload));assert.deepEqual(bare,expected(0,'accepted'),'1 MiB request without stdin frame is accepted');const withEof=decode(await wire(join(f.work,'shell.sock'),Buffer.concat([payload,frame(1)])));h.write(join(f.r.at,'request-limit.json'),{requestBytes:payload.length,eofBytes:8,bare:{status:bare.status,stdout:bare.stdout.toString(),stderr:bare.stderr.toString()},withEof:{status:withEof.status,stdout:withEof.stdout.toString(),stderr:withEof.stderr.toString()}});assert.equal(withEof.status,0,withEof.stderr.toString());assert.deepEqual(withEof,expected(0,'accepted'));}));
  // B7-80: tool argv rejections and the separate tool transport limits.
- add('B7-80 valid unsupported option-bearing and NUL invocations have exact usage',()=>run(async f=>{const usage=expected(2,'','usage: whygraph <carry|why|impact|search> <target>\n');for(const args of [['build'],['search','tax','--repo','/repo']])assert.deepEqual(triple(await f.invoke('/tools/whygraph '+args.map(quote).join(' '))),usage);const raw=await wire(join(f.work,'service.sock'),fields(['why','x\0y']));assert.equal(raw.readUInt32BE(),2);assert.equal(raw.readUInt32BE(4),0);assert.equal(raw.subarray(12).toString(),usage.stderr.toString());}));
+ add('B7-80 valid unsupported option-bearing and NUL invocations have exact usage',()=>run(async f=>{const usage=expected(2,'','usage: whygraph <carry|why|impact|search> <target>\n');for(const args of [['build'],['search','tax','--repo','/repo']])assert.deepEqual(triple(await f.invoke('/tools/whygraph '+args.map(quote).join(' '))),usage);const raw=await wire(join(f.work,'service.sock'),Buffer.concat([Buffer.from((await shared.getClosed()).token),fields(['why','x\0y'])]));assert.equal(raw.readUInt32BE(),2);assert.equal(raw.readUInt32BE(4),0);assert.equal(raw.subarray(12).toString(),usage.stderr.toString());}));
  for(const [label,args]of [['65 arguments',Array(65).fill('x')],['60001 byte argument',['search','x'.repeat(60001)]],['over 65536-byte tool frame',['search','x'.repeat(34000),'x'.repeat(34000)]]])add(`B7-80 ${label} rejects locally with exact usage and unchanged service counters`,()=>run(async f=>{const before=f.service.stats(),r=await f.invoke('/tools/whygraph '+args.map(quote).join(' '));assert.deepEqual(triple(r),expected(2,'','usage: whygraph <carry|why|impact|search> <target>\n'));assert.deepEqual(f.service.stats(),before);}));
  add('B7-80 tool transport accepts exact 64 args 60000-byte arg and 65536-byte frame',()=>run(async f=>{for(const args of [Array(64).fill('build'),['build','x'.repeat(60000)],['build','x'.repeat(60000),'y'.repeat(5515)]]){if(args.length===3)assert.equal(fields(args).length,65536);const before=f.service.stats();const r=await f.invoke('/tools/whygraph '+args.map(quote).join(' '));assert.equal(r.status,2,'valid-sized frame reaches direct usage parser');assert.equal(f.service.stats().calls,before.calls+1,'request dispatched once');assert.equal(f.service.stats().failures,before.failures,'not a transport failure');}}));
  // B7-81: captured initial manifests include both compiled entry points.

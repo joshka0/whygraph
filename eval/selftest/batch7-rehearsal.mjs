@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {createConnection} from 'node:net';
-import {cpSync,existsSync,mkdirSync,readFileSync,readdirSync,statSync,symlinkSync} from 'node:fs';
+import {closeSync,cpSync,existsSync,mkdirSync,readFileSync,readdirSync,statSync,symlinkSync} from 'node:fs';
 import {basename,join,resolve,relative} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {b7 as h} from './batch7-support.mjs';
@@ -102,12 +102,14 @@ export async function batch7RehearsalChecks({scratch,shared,scoreRun,stress=fals
    for(const [i,r]of attempts.entries()){
     assert.equal(r.value.status,'done',r.value.reason);
     const args=h.json(join(r.out,'command.json')).args,work=r.value.work,repo=join(work,'repo'),socket=join(work,'service.sock'),client=args[args.indexOf('/tools/whygraph')-1];
-    const service=await api.startClosedStore({condition:i?'stub':'graph',repo,store:r.store,socket,log:join(r.at,'live-service.jsonl')});
-    const owner={r,work,repo,socket,client,service,args:args.slice(1,args.lastIndexOf('--')+1)};owners.push(owner);
-    owner.launcher=await api.startClosedShell({work,repo,client,socket,log:join(r.at,'live-shell.jsonl')});
+    // ADR 0011 (2026-11-17), B7-192/195: a restarted fixture service gets a new run client.
+    const assigned=api.runClient(api.closedClient(join(r.at,'live-client')),r.at);args[args.indexOf('/tools/whygraph')-1]=assigned.client;
+    const service=await api.startClosedStore({condition:i?'stub':'graph',repo,store:r.store,socket,log:join(r.at,'live-service.jsonl'),token:assigned.token});
+    const owner={r,work,repo,socket,client:assigned.client,service,args:args.slice(1,args.lastIndexOf('--')+1)};owners.push(owner);
+    owner.launcher=await api.startClosedShell({work,repo,client:assigned.client,socket,log:join(r.at,'live-shell.jsonl')});
    }
    for(const [i,o]of owners.entries())for(const shell of [false,true]){
-    const invoke=args=>collect(spawn('bwrap',[...o.args,...args],{cwd:h.root,env}));
+    const invoke=async args=>{const fd=api.seccompFilter(o.work);try{return await collect(spawn('bwrap',[...o.args,...args],{cwd:h.root,env,stdio:['ignore','pipe','pipe',fd]}));}finally{closeSync(fd);}};
     const own=await invoke(shell?['/tools/shell','-c',"whygraph search 'Money in cents'"]:['/tools/whygraph','search','Money in cents']);h.ok(own);
     if(i)assert.equal(own.stdout,'no result\n');else assert.match(own.stdout,/Money in cents/);
     const script=`const s=require('net').connect(${JSON.stringify(owners[1-i].socket)});s.on('connect',()=>{s.destroy();process.exit(51)});s.on('error',e=>{process.stdout.write(e.code);process.exit(e.code==='ENOENT'?0:52)});`;
@@ -150,11 +152,12 @@ export async function batch7RehearsalChecks({scratch,shared,scoreRun,stress=fals
   // repeating all sixteen services for each independent smoke corruption.
   const source=f.first.results;h.wrapped(at.at,'run.mjs','settleCell',`const [p,,options]=args,fs=await import('node:fs'),path=await import('node:path');const id=fileKey(p.id);fs.cpSync(path.join(${JSON.stringify(source)},id),path.join(options.results,id),{recursive:true});fs.mkdirSync(path.join(options.results,'_ledger'),{recursive:true});fs.copyFileSync(path.join(${JSON.stringify(source)},'_ledger',id+'.json'),path.join(options.results,'_ledger',id+'.json'));return JSON.parse(fs.readFileSync(path.join(options.results,id,'meta.json')));`);
   const r=await rehearse(at,{resultRoot});assert.notEqual(r.status,0,'a failed smoke check must fail rehearsal');assert.match(r.stderr,/rehearsal smoke-check failed/);assert.match(r.stdout,/^FAIL /m);assert.equal(h.json(join(r.results,'measurement.json')).success,false);});
+ // ADR 0011 (2026-11-17), B7-188/190: the isolated transport needs the list and filter.
  add('B7-115 transport imports without registry and retains exact unavailable product-format guard',async()=>{
-  const at=join(root,'isolated-transport');mkdirSync(join(at,'eval'),{recursive:true});for(const f of ['closed-store.mjs','closed-client.c'])cpSync(join(h.root,'eval',f),join(at,'eval',f));for(const f of ['src','recipes','node_modules'])symlinkSync(join(h.root,f),join(at,f),'dir');
+  const at=join(root,'isolated-transport');mkdirSync(join(at,'eval'),{recursive:true});for(const f of ['closed-store.mjs','closed-client.c','closed-shell.json'])cpSync(join(h.root,'eval',f),join(at,'eval',f));for(const f of ['src','recipes','node_modules','scripts'])symlinkSync(join(h.root,f),join(at,f),'dir');
   const module=await import(pathToFileURL(join(at,'eval/closed-store.mjs')).href);assert.equal(typeof module.closedWorkRoot,'function');assert.equal(typeof module.execBudget,'function');assert.equal(typeof module.filesystemPath,'function');assert.equal(existsSync(join(at,'eval/registry.mjs')),false);
   h.write(join(at,'bin/whygraph'),`#!${process.execPath}\nimport{spawn}from 'node:child_process';const p=spawn(${JSON.stringify(process.execPath)},[${JSON.stringify(join(h.root,'src/main.ts'))},...process.argv.slice(2)],{stdio:['ignore','pipe','inherit']});let text='';p.stdout.on('data',d=>text+=d);p.on('close',code=>{process.stdout.write(text.replace(/Decision records linked only through a commit[^\\n]*/g,'CHANGED PRODUCT FORMAT'));process.exitCode=code;});\n`);h.ok(command('chmod',['+x',join(at,'bin/whygraph')]));
-  const f=await shared.getClosed(),p=f.prepared['graph-nolink'],socket=join(shortRoot('transport'),'service.sock'),service=await module.startClosedStore({condition:'graph-nolink',repo:f.repo,store:f.stores['graph-nolink'],fullStore:f.store,socket,log:join(at,'service.jsonl')});
+  const f=await shared.getClosed(),p=f.prepared['graph-nolink'],socket=join(shortRoot('transport'),'service.sock'),service=await module.startClosedStore({condition:'graph-nolink',repo:f.repo,store:f.stores['graph-nolink'],fullStore:f.store,socket,log:join(at,'service.jsonl'),token:f.token});
   try{const args=module.closedConfinement({work:p.work,repo:p.repo,client:f.client,socket}),r=await collect(spawn(args[0],[...args.slice(1),'--','/tools/whygraph','carry','src/money.ts:formatCents'],{cwd:h.root,env}));assert.deepEqual({status:r.status,stdout:r.stdout,stderr:r.stderr},{status:70,stdout:'',stderr:'whygraph service unavailable\n'});}finally{await service.stop();}
  });
  add('B7-116 failed archives keep readable bounded prefix UUID and exact evidence bytes',async()=>{const {settleCell}=await import('../run.mjs');for(const id of ['a'.repeat(128),'unicode-雪/'.repeat(40),'earlier5__graph__r1']){const results=join(root,'archives-'+serial++),task={...(await fixture()).tasks[0],id},cell={task,id,condition:'graph',repeat:1};let launches=0;const evidence=Buffer.from([0,255,13,10,1]);await assert.rejects(()=>settleCell(cell,[],{results,rule:'closed',runAttempt:async()=>{launches++;h.write(join(results,key(id),'meta.json'),{id,status:'invalid',reason:'harness failure: invented'});h.write(join(results,key(id),'evidence.bin'),evidence);return {id,status:'invalid',reason:'harness failure: invented',rehearsal:true};}}),/harness failure after one retry/);assert.equal(launches,2);const ledger=h.json(join(results,'_ledger',key(id)+'.json'));for(const a of ledger){const name=basename(a.archived);assert.ok(name.startsWith(key(id)+'__'),'archive must retain its canonical result-key prefix');assert.match(name.slice(key(id).length+2),uuid);assert.ok(Buffer.byteLength(name)<=166);assert.deepEqual(readFileSync(join(a.archived,'evidence.bin')),evidence);}}});
