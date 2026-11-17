@@ -242,6 +242,7 @@ export async function closedAttempt({task,condition,repeat,workRoot,out,prompt,s
     const normalized=JSON.parse(JSON.stringify(tools).replaceAll('/repo/',`${identity}/`).replaceAll('"/repo"',JSON.stringify(identity)));
     const breaches=isolationBreaches(repo,normalized);
     await launcher.stop();
+    await service.stop();
     const stats=service.stats();
     const serviceDown=tools.some(t=>/whygraph (?:service|shell launcher) unavailable/.test(String(t.result)));
     const shellStats=launcher.stats();
