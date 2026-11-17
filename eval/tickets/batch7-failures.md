@@ -280,3 +280,37 @@ exposed executable. No store bytes or fingerprints change.
 - B7-165: Keep the mounts, modes and probes intact but corrupt a service answer, its direct reference, selected store identity or ablation receipt. Expected: B7-60 still fails. Removing the tool-output heuristic never admits a bad service answer.
 - B7-166: Compare batch 5/6 plans, checks, shared launcher and old reports with d1f41cf. Expected: byte identity. Part 2 changes only the closed runner and the batch-7-and-later smoke entry, not the shared `isolationBreaches` implementation or its older callers.
 - B7-167: Replay all five per-attempt smoke callbacks on the four archived real attempts after applying frame refusal accounting in memory. Expected: all four pass condition answers, closed access, service accounting and usage/time. The original four agent-command false failures are absent. The complete identical-files callback still reports missing four-task coverage because the archive contains one task; peer file hashes and instruction assertions pass. Never weaken that coverage check to make this partial archive pass a full smoke run.
+
+## Calls stopped with their run, 2026-11-17
+
+Ruling of the code author (`sandpiper-whygraph`), confirmed by the
+coordinator `rowan-joshka-main` on 2026-11-17 and recorded in ADR 0011: a
+call that the run's own stop cuts is a stopped call, not a service failure. In the sixth smoke, the
+first attempt of `zustand7-conflict-zs-13__graph-nolink__r1` timed out while
+the agent's own socket program held eight `search` calls open. The runner
+killed the command, read `failures: 0` into `meta.json`, and then stopped the
+service. The stop aborted the eight product commands, and the service wrote
+eight `failure` events 4 ms after `meta.json`. The log and the metadata
+disagreed, and smoke-check failed two lines on a service that had answered
+every call it could. Evidence:
+`eval/results/_smoke-archive/6-stop-logged-as-failure/`. The following cases
+belong to an independent test author. The code author writes no tests. B7-14,
+B7-15, B7-117 and B7-144 keep their rules: a call that fails while the run
+still lives is a service failure.
+
+Not covered: a product command that hangs until the 20-minute limit ends as a
+stopped call in an attempt that timed out. The runner classed that attempt as
+an agent timeout before this ruling too. Also not covered: the stop waits for
+the exit of the product command, not of a `relate` query that this command
+started; such a query only reads and ends on its own.
+
+- B7-168: Stop the service while one or more dispatched calls wait for the product command. Expected: `stop()` resolves only after each of them settled; each writes exactly one `{"event":"stopped","args":[...]}` row with its own arguments, and no `failure` event, no reply row and no `whygraph service unavailable` row. `stats()` after the stop gives `stopped` equal to the row count, `failures` 0, empty `reasons`, and `calls` that still includes the stopped calls. No product command of a stopped call survives the stop.
+- B7-169: Call `stop()` twice, also at the same time, with and without calls in flight. Expected: both calls resolve, neither rejects, each stopped call is logged and counted once, and the socket no longer accepts a connection.
+- B7-170: Fail a dispatched call while the service is not stopping (a product exit 1, a changed carry section, a spawn error), also after an earlier run of the same process logged stopped calls. Expected: B7-117 and B7-144 unchanged: one `failure` event, the `whygraph service unavailable` row with exit 70, `failures` raised by one, `stopped` unchanged. A stop never hides a failure that happened before it.
+- B7-171: Stop a service with no call in flight, and one whose every call already got its reply. Expected: `stopped` 0, no `stopped` row, the log unchanged by the stop.
+- B7-172: Time out a closed attempt, or let the agent end, while a command of the agent still holds service calls open. Expected: the runner stops the launcher, then the service, then reads the stats: `meta.json.service.stopped` equals the `stopped` rows of that attempt's `service.jsonl`, `failures` is 0, and no row is written to `service.jsonl` after `meta.json`. The attempt keeps the classification it had without the stopped calls (timeout, isolation breach, or `done`); stopped calls trigger no harness retry, invalid archive or runner stop. Both services still close on every path (B7-15, B7-16, B7-133).
+- B7-173: Complete an attempt with no stopped call. Expected: `meta.json.service.stopped` is 0 next to `calls`, `failures`, `refused` and `refusalReasons`.
+- B7-174: Give smoke-check attempts whose stopped rows match their metadata. Expected: `PASS service answered every call` prints the refusal total and the stopped-call total, including zero; `calls` equals reply rows plus stopped rows; a stopped call needs no reply receipt; condition answers and closed access compare only reply rows.
+- B7-175: Remove or add a `stopped` row, change `meta.json.service.stopped`, remove that field, give a `stopped` row no `args` or a non-string argument, or keep a `failure` event beside valid stopped rows. Expected: nonzero smoke-check exit; four reply rows are still required per attempt, so stopped calls never stand in for the health replies.
+- B7-176: Replay smoke-check on the archived sixth-smoke attempt (eight `failure` events, `failures: 0` in its metadata). Expected: it still fails `service failure`; old evidence is not reinterpreted.
+- B7-177: Compare batch 5 and 6 plans, shared launcher, frozen inputs and reports with `94f31bf`. Expected: no change (B7-132).

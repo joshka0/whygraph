@@ -22,7 +22,7 @@ const serviceRows=dir=>{
  for(const row of rows) {
   require(row!==null&&typeof row==='object'&&!Array.isArray(row),'invalid service log row');
   if(Object.hasOwn(row,'event')) {
-   require((row.event==='refused'&&['invalid argument count','argument too large','request too large'].includes(row.message))||(row.event==='failure'&&typeof row.message==='string'),'invalid service log event');
+   require((row.event==='refused'&&['invalid argument count','argument too large','request too large'].includes(row.message))||(row.event==='failure'&&typeof row.message==='string')||(row.event==='stopped'&&Array.isArray(row.args)&&row.args.every(arg=>typeof arg==='string')),'invalid service log event');
   } else {
    require(Array.isArray(row.args)&&row.args.every(arg=>typeof arg==='string')&&Number.isInteger(row.code)&&typeof row.stdout==='string'&&typeof row.stderr==='string','bad service reply');
   }
@@ -137,18 +137,20 @@ check('closed store and tool code',()=>{
 });
 check('service answered every call',()=>{
  require(attempts.length>0,'no attempts');
- let refused=0;
+ let refused=0,stopped=0;
  for(const {dir,meta} of attempts) {
   const events=serviceRows(dir);
-  const refusals=events.filter(row=>row.event==='refused'),calls=events.filter(row=>!Object.hasOwn(row,'event'));
+  const refusals=events.filter(row=>row.event==='refused'),stops=events.filter(row=>row.event==='stopped'),calls=events.filter(row=>!Object.hasOwn(row,'event'));
   require(!events.some(row=>row.event==='failure'),'service failure');
   require(meta.service?.refused===refusals.length&&JSON.stringify(meta.service.refusalReasons)===JSON.stringify(refusals.map(row=>row.message)), 'refused requests differ from metadata');
   refused+=refusals.length;
-  require(meta.service?.failures===0&&meta.service.calls===calls.length&&calls.length>=4,'missing service replies or failure');
+  require(meta.service.stopped===stops.length,'stopped calls differ from metadata');
+  stopped+=stops.length;
+  require(meta.service?.failures===0&&meta.service.calls===calls.length+stops.length&&calls.length>=4,'missing service replies or failure');
   require(calls.every(c=>Number.isInteger(c.code)&&typeof c.stdout==='string'&&typeof c.stderr==='string'&&c.code!==70),'bad service reply');
   require(!read(dir,'tools.json').some(t=>String(t.result).includes('whygraph service unavailable')),'client lost service');
  }
- return `${refused} refused requests`;
+ return `${refused} refused requests; ${stopped} calls stopped with their run`;
 });
 check('scorer batch blocks',()=>{
  const r=spawnSync(process.execPath,[join(here,'score.mjs'),'--results',results],{encoding:'utf8',maxBuffer:1<<28});

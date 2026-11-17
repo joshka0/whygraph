@@ -270,10 +270,10 @@ export function closedConfinement({ work, repo, client, socket, network = false,
 export async function startClosedStore({ condition, repo, store, fullStore = store, socket, log }) {
   socketPath(socket);
   repo=realpathSync(repo);
-  let failures = 0, calls = 0, refused = 0;
+  let failures = 0, calls = 0, refused = 0, stopped = 0, stopping;
   const reasons=[], refusalReasons=[];
   const failure=message=>{failures++;reasons.push(message);appendFileSync(log,JSON.stringify({event:'failure',message})+'\n');};
-  const abort=new AbortController(), connections=new Set();
+  const abort=new AbortController(), connections=new Set(), pending=new Set(), commands=new Set();
   const server = createServer(connection => {
     connections.add(connection);connection.on('close',()=>connections.delete(connection));
     let input = Buffer.alloc(0), dispatched = false;
@@ -298,12 +298,15 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
         args.push(input.subarray(at,at+size).toString()); at+=size;
       }
       dispatched=true;
-      void answer(args).then(respond, error => {
+      const settled=answer(args).then(respond, error => {
+        // The run's own stop cut this call: its client is gone, and the service did not fail.
+        if(abort.signal.aborted&&error.name==='AbortError') { stopped++;appendFileSync(log,JSON.stringify({event:'stopped',args})+'\n');return; }
         failure(error.message);
         const result={stdout:'',stderr:'whygraph service unavailable\n',code:70};
         appendFileSync(log,JSON.stringify({args,...result,failure:error.message,sections:[]})+'\n');
         respond(result);
-      });
+      }).finally(()=>pending.delete(settled));
+      pending.add(settled);
     });
     function respond(result) {
       dispatched=true;
@@ -327,7 +330,11 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
       const mapped = !diagnostic && command !== 'search' && target.startsWith('/repo/') ? join(repo,target.slice(6)) : target;
       try {
         const selectedStore=condition==='graph-nolink'&&['carry','impact'].includes(command)?fullStore:store;
-        const r = await execute(join(root,'bin/whygraph'), diagnostic ? args : [command,mapped,'--repo',repo,'--store',selectedStore], { env:quiet, maxBuffer:1<<26, signal:abort.signal });
+        const running = execute(join(root,'bin/whygraph'), diagnostic ? args : [command,mapped,'--repo',repo,'--store',selectedStore], { env:quiet, maxBuffer:1<<26, signal:abort.signal });
+        // An abort rejects the call before its command has exited; stop() waits for the exit itself.
+        const exited=new Promise(ok=>{running.child.once('close',ok);running.child.once('error',()=>{if(running.child.pid===undefined)ok();});}).then(()=>commands.delete(exited));
+        commands.add(exited);
+        const r = await running;
         result={stdout:r.stdout,stderr:r.stderr,code:0};
         reference={...result};referenceStore=realpathSync(selectedStore);
         if(condition==='graph-nolink' && command==='carry') {
@@ -353,7 +360,14 @@ export async function startClosedStore({ condition, repo, store, fullStore = sto
     return result;
   }
   await new Promise((ok,fail) => {server.once('error',fail); server.listen(socket,ok);});
-  return { server, stats:()=>({calls,failures,reasons:[...reasons],refused,refusalReasons:[...refusalReasons]}), stop:()=>new Promise((ok,fail)=>{abort.abort();for(const connection of connections)connection.destroy();server.close(error=>error?fail(error):ok());}) };
+  const stop=async()=>{
+    abort.abort();
+    await Promise.allSettled(pending);
+    await Promise.all(commands);
+    for(const connection of connections)connection.destroy();
+    await new Promise((ok,fail)=>server.close(error=>error?fail(error):ok()));
+  };
+  return { server, stats:()=>({calls,failures,reasons:[...reasons],refused,refusalReasons:[...refusalReasons],stopped}), stop:()=>stopping??=stop() };
 }
 
 /** Launch shell commands from the host, outside the agent's user namespace.
