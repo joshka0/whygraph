@@ -397,4 +397,52 @@ needs a case that takes its command from an archived `tools.json` or
 Not covered: `node` stays, so a shell command can still write and run its
 own program in `/repo`. Such a program gets no token, cannot trace the
 client and cannot preload into it. A run's own valid calls through the real
-client are not limited in number.
+client are not limited in number; "Command limit" below bounds how many run
+at the same time.
+
+## Command limit, 2026-11-17
+
+Cause: the first pilot's run scope was killed at its 6 GB memory limit
+(2026-11-17 21:41). In `zustand7-conflict-zs-03__graph-nosearch__r3` an
+agent ran `xargs -P 16` of `timeout 15 whygraph impact <id>` over about 120
+ids. The service started one product command per call and kept each one
+after its client had gone: 40 `node` commands and 32 `relate` queries were
+alive at the kill. Evidence: `eval/results/_pilot-archive/1-scope-oom-kill`
+(the storm is the last `start` row of the graph-nosearch cell's
+`shell.jsonl`). Rule (ADR 0011, "Command limit"): one service runs at most
+two product commands at the same time; later calls wait in arrival order.
+
+The following cases belong to an independent test author from Codex or agy.
+The code author writes no tests. Keep each case small: no case may load the
+shared box (at most 16 parallel clients, a few dozen calls).
+
+- B7-200: Send 16 valid calls at the same time through the real client to one service. Expected: at no moment does that service have more than two product commands alive (`bin/whygraph` children of the service process); all 16 calls get a reply; each reply and each log row equals that of the same call made alone.
+- B7-201: Send calls while two commands run. Expected: the waiting calls start in arrival order, and none starts before a running command has exited. No waiting call is lost or answered twice: `calls` equals the reply rows.
+- B7-202: Replay the storm command from the archived `shell.jsonl` in a small form (parallel clients that a `timeout` kills before their reply). Expected: the number of live product commands stays at most two for the whole storm and after it; each call whose frame arrived is still answered in the log with one reply row; a later call from a living client gets its reply.
+- B7-203: Stop the service while two calls run and more wait. Expected: no waiting call starts a product command; each waiting call and each running call writes exactly one `stopped` row and no `failure` event; `calls` equals reply rows plus stopped rows; B7-168 and B7-169 hold; smoke-check passes on such an attempt (B7-174).
+- B7-204: While two product commands run, send a stub call, a `search` under `graph-nosearch`, an unsupported command, and a frame without the token. Expected: each is answered or refused at once, without waiting for a command to end. A parser diagnostic (a missing target, an unknown option, help) comes from the product CLI and takes a place like any product command: it waits, then gives the same bytes and exit status as alone.
+- B7-205: Run two services in one process and storm one of them. Expected: a call to the other service starts its command at once; each service counts its own limit.
+- B7-206: Let a product command fail (exit 1, exit 2, a spawn error, a changed carry section under `graph-nolink`) while calls wait. Expected: the failed call frees its place, the next waiting call starts, and B7-117, B7-144 and B7-170 hold unchanged.
+- B7-207: Run the real client through every valid and invalid call of B7-196, one at a time. Expected: the same stdout, stderr, exit status and log rows as on `6ccfc5b`. Replay smoke-check on the cells of the eighth smoke: still eight PASS lines with the same totals.
+- B7-208: Compare batches 5 and 6 with `6ccfc5b`. Expected: no change (B7-132).
+
+Plants that the cases must catch: the limit removed; the limit raised to 16; the place freed when the call starts and not when the command exits; a waiting call started after the stop; a waiting call dropped on stop without its `stopped` row; one limit shared by all services.
+
+## Review findings, 2026-11-18
+
+Source: the reviews of Codex `gpt-6.2-astra` and Gemini Carbon
+(`test-results/scratch/review-astra/`, `test-results/scratch/review-carbon/`;
+ADR 0011, "Review findings"). The repro files there are the starting point
+of the cases; a case must use the real launcher and the real agent
+confinement, not a hand-built `bwrap` line.
+
+- B7-209: From a shell command and from the agent namespace, try to replace the service socket: rename `/whygraph`, `/tools` and `/home`; create a file or folder in `/`, `/whygraph` and `/tools`; remove or rename `/whygraph/service.sock` and `/tools/whygraph`; then run Carbon's proxy (`finding-1-token-intercept.mjs`). Expected: each write fails; the proxy never receives a byte; no file holds the token; the client still gets its normal reply.
+- B7-210: On the read-only root, do the ordinary work of B7-188 and B7-189, and write in `/repo`, `/tmp`, `/home/agent`, `/config`, `/cache` and `/state` from a shell command and with the agent's file tools. Expected: all of it works as before; the scripted agent of the startup cases (B7-125) still starts.
+- B7-211: Stop the service while a connection has sent 1 to 63 bytes, and while several have. Expected: when `stop()` returns, `refused`, `refusalReasons` and the log already hold each `missing client token` refusal; no row is written after the stop; smoke-check accounting holds (B7-197).
+- B7-212: Give `closedClient` a cache folder that already holds a dynamic client, a client with no or two token fields, and a client whose bytes differ from its `.sha256`, each under the right name. Expected: each is refused before any run uses it; a good cached client is accepted without a rebuild.
+- B7-213: In B7-194, require a witness that the sampled PID is the live client (its `/proc/<pid>/comm` or an equal proof) before a failed read counts. Expected: the case goes red when its probes aim at a PID that is not the client.
+
+Plants that the cases must catch: no `--remount-ro` in the shell namespace; none in the agent namespace; the remount placed before the last mount; the stop does not wait for the connection closes; the cached client is not checked; B7-194 probes PID 0.
+
+Known limit, not a case: the shell mounts all of `/etc` (task `jos-whygraph-etc-list-iut`).
+

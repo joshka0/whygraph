@@ -231,6 +231,84 @@ program; that program has no token and cannot trace or preload the client.
 The seventh smoke and its results stay archived; an eighth smoke runs with
 the block. Failure items B7-187 to B7-199. Batches 5 and 6 stay frozen.
 
+### Command limit, 2026-11-17
+
+Ruling of the code author `sandpiper-whygraph` on 2026-11-17, sent to the
+coordinator `rowan-joshka-main` before any result under it: one run's
+service runs at most two product commands at the same time. Later calls
+wait in arrival order.
+
+The first batch 7 pilot ended after 27 of 258 cells: the kernel killed the
+run scope at its 6 GB memory limit (2026-11-17 21:41). In
+`zustand7-conflict-zs-03__graph-nosearch__r3` the agent ran
+`xargs -P 16` over about 120 guessed record ids, each as
+`timeout 15 whygraph impact <id>`. The service started one product command
+for each call and kept each command after its client had timed out, so the
+commands piled up. The kernel's report lists 40 `node` product commands
+(2.0 GB), 32 `relate` queries (2.9 GB) and three agents (1.8 GB). One
+product command with its query holds about 180 MB.
+
+With the limit, three runs hold at most six product commands, about
+1.1 GB. The limit changes no answer and no log row: a waiting call gets the
+same reply later. A call whose client went away still runs when its turn
+comes and logs its reply row, as before. Direct answers (a stub call, a
+disabled search, an unsupported command) and refusals start no product
+command and do not wait. A parser diagnostic (a missing target, an unknown
+option, help) comes from the product CLI, as decided earlier for its exact
+bytes, so it takes a place like any product command. On stop, each waiting
+call ends as a stopped call and starts no command. The limit is per
+service, so one run's calls do not delay another run.
+
+The three cells in flight at the kill had a reserved attempt and no
+result. Their files are in `eval/results/_pilot-archive/1-scope-oom-kill`.
+Their reservations were removed by hand, so each cell keeps its two
+attempts: the runner never judged these attempts. The 27 finished cells
+stay. Not covered: a run can still make an unlimited number of calls one
+after the other, and a shell command can still start many `node` programs
+of its own. Failure items B7-200 to B7-208.
+
+### Review findings, 2026-11-18
+
+Two reviewers read the spy block and the command limit on 2026-11-17:
+Codex `gpt-6.2-astra` and Gemini Carbon. Each finding came with a failing
+check. Rulings of the coordinator `ash-coordinator`, 2026-11-17 and
+2026-11-18, recorded before any result under them.
+
+**Read-only namespace root.** The root of the agent namespace and of each
+shell-command namespace was a writable tmpfs. A shell command could rename
+`/whygraph`, put its own socket at `/whygraph/service.sock` and read the
+token that the client sends (Carbon; the repro got the run's token). Both
+namespaces now end with `--remount-ro /`. `/repo`, `/tmp`, `/home/agent`,
+`/config`, `/cache` and `/state` are their own mounts and stay writable.
+The coordinator kept the 43 finished cells on two conditions. Condition 1,
+checked on 2026-11-18: in the 43 cells and the 3 archived attempts (2,128
+shell commands, 138 file-tool calls), no command wrote under the root
+outside those mounts; two commands that tried (`touch /whygraph/testfile`,
+`mv /whygraph/service.sock`) were refused by the agent's own permission
+rule and never ran. The check reads command text and file-tool paths; it
+does not trace system calls. Condition 2: a smoke on the read-only root
+passes all eight lines before the pilot resumes.
+
+**Refusals counted at stop.** A connection that sent part of a token counts
+its refusal when it closes. The stop returned before that close, so the
+metadata could miss a refusal that the log then held (Astra). The stop now
+waits for each connection's close.
+
+**Cached client.** The static-link check ran only on a new build. Each use
+now checks the client file and compares it with its recorded hash (Astra).
+
+**Known limit: the shell mounts all of `/etc`.** On the dev box 97 files
+under `/etc` are runnable `#!/bin/sh` scripts (Astra). They add no program:
+`sh` and `bash` are listed, and a script reaches only the listed programs.
+The coordinator kept the mount for this pilot, because a mount change
+would need a new smoke for no closed route. Task
+`jos-whygraph-etc-list-iut` replaces it with a file list before the next
+pilot.
+
+Not covered: a program that calls `unshare` or `mount` itself could build a
+nested namespace; no listed program offers these calls. Failure items
+B7-209 to B7-213.
+
 ### Evidence for closed access, 2026-11-16
 
 The parent's ruling removes read-success guesses from agent tool logs.
