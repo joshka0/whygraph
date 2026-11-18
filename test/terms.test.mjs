@@ -1,7 +1,7 @@
 /** Term contracts derived from failures T1-T28 and ADR 0002; public synthetic text only. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync, renameSync } from 'node:fs';
+import { accessSync, chmodSync, constants, existsSync, readFileSync, renameSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { harness as h } from './support.mjs';
@@ -205,17 +205,39 @@ contract('T23', 'Markdown, shell and config files need no graph symbol to get te
     assert.deepEqual(ids(section(other)), ['note-1', 'ADR-0002', 'ADR-0003']);
   }
 });
-contract('T25', 'range syntax, limits, outside paths, missing files and lone numbers retain distinct exit codes', 'fixture', s => {
+contract('T25', 'range syntax, limits, outside paths, missing files and lone numbers retain distinct exit codes', 'fixture', (s, t) => {
   const cases = [
     ['src/tax.ts:20-10', 2, 'starts at line 20 and ends at 10; a range\'s start must not be after its end'],
     ['src/tax.ts:0-3', 2, 'starts at line 0; a line range is 1-based'],
     ['src/tax.ts:abc-def', 2, 'is not <file>:<symbol> or <file>:<start>-<end>'],
     ['src/tax.ts:1-x', 2, 'is not <file>:<symbol> or <file>:<start>-<end>'],
     ['../x.ts:1-5', 2, `is outside the repo ${s.repo}`],
-    ['src/missing.ts:1-5', 1, 'cannot read src/missing.ts:'],
     ['src/tax.ts:5', 3, 'has no symbol 5'],
   ];
   for (const [target, code, message] of cases) failure(s.cli(['carry', target]), code, message);
+  for (const path of ['src/missing.ts', 'src', 'src/tax.ts/x.ts', 'src/tax.ts:src/tax.ts']) {
+    for (const target of [`${path}:1-5`, `${s.repo}/${path}:1-5`]) {
+      const r = s.cli(['carry', target]);
+      failure(r, 3, `whygraph: No file ${path} in the working tree.`);
+      assert.equal(r.stdout, '');
+      assert.doesNotMatch(r.stderr, /ENOENT|ENOTDIR|EISDIR|open '/);
+      assert.doesNotMatch(r.stderr, /(?:^|[\s'"])\//);
+      assert.ok(!r.stderr.includes(s.repo), r.stderr);
+      if (path === 'src') has(r.stderr, 'Close files: ', 'src/tax.ts');
+    }
+  }
+  const unreadable = s.write(join(s.repo, 'src/unreadable.ts'), 'export const secret = 1;\n');
+  chmodSync(unreadable, 0o000);
+  try {
+    let readable = false;
+    try { accessSync(unreadable, constants.R_OK); readable = true; } catch (e) { assert.equal(e.code, 'EACCES'); }
+    if (readable) t.diagnostic('SKIP unreadable existing file: this user can read mode 000 files');
+    else {
+      const r = s.cli(['carry', 'src/unreadable.ts:1-1']);
+      failure(r, 1, 'cannot read src/unreadable.ts:');
+      assert.equal(r.stdout, '');
+    }
+  } finally { chmodSync(unreadable, 0o644); }
   failure(s.cli(['why', 'src/tax.ts:1-5']), 2, 'why takes <file>:<symbol>, not a line range; the range form is for carry');
 });
 contract('T26', 'the forty-line boundary keeps candidates at forty and recommends a range at forty-one', 'empty', s => {
