@@ -1063,7 +1063,8 @@ store rather than merging into it.
 - `carry` takes a range, `<file>:<start>-<end>`, for a long symbol. The term
   section then reads exactly those lines, with no symbol name or file path
   added, and a range that overlaps several symbols renders one body per symbol.
-  A bad range exits 2 and a missing file exits 1, each naming the problem. The
+  A bad range exits 2 and a path that is not a file in the working tree exits
+  3, each naming the problem. The
   range form is `carry` only.
 - The recipes use no `CALL { }` subquery: relate's read-only MCP tool rejects
   one.

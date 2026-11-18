@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { carryAnswer, carryRangeAnswer, impactAnswer, shown, whyAnswer, type RangeSymbol, type Row, type TermCandidate, type TermSection } from "./answers.pure.ts";
 import { fail, type Exit } from "./build.ts";
 import { fuse, searchAnswer, searchWords } from "./search.pure.ts";
-import { closest, missingSymbol, readSymbolTarget } from "./target.pure.ts";
+import { closest, missingRangeFile, missingSymbol, notAFile, readSymbolTarget } from "./target.pure.ts";
 import { symbolSource, termsOf } from "./terms.pure.ts";
 import { readQuery } from "./tools.ts";
 import { embedTexts, ModelUnavailable } from "./embed.ts";
@@ -38,7 +38,7 @@ function noStore(store: string): Exit {
 /**
  * Answers `why`, `impact` or `carry` from the store.
  * owns: [[whygraph-questions]]
- * post: exit 0 with the answer on stdout; exit 2 for a target that is not `<file>:<symbol>` (or, for carry, `<file>:<start>-<end>`) or lies outside the repo, and for a line range on why or impact; exit 3 when the store has no such symbol or decision, with a message that names it and close names; exit 1 when there is no store.
+ * post: exit 0 with the answer on stdout; exit 2 for a target that is not `<file>:<symbol>` (or, for carry, `<file>:<start>-<end>`) or lies outside the repo, and for a line range on why or impact; exit 3 when the store has no such symbol or decision, or a carry range names a path that is not a file in the working tree, with a message that names it and close names; exit 1 when there is no store.
  */
 export function ask(command: "why" | "impact" | "carry", target: string, root: string, store: string): Exit {
   if (!existsSync(store)) return noStore(store);
@@ -74,7 +74,7 @@ export function ask(command: "why" | "impact" | "carry", target: string, root: s
 /**
  * Answers `carry <file>:<start>-<end>`: the term section over exactly those lines, plus every symbol whose stored range overlaps them.
  * owns: [[whygraph-questions]]
- * post: exit 0 with the answer; exit 1 when the working-tree file cannot be read; exit 2 when the range is past the end of the file.
+ * post: exit 0 with the answer; exit 3 when the path is not a file in the working tree; exit 1 when the file exists and cannot be read; exit 2 when the range is past the end of the file.
  * post: a file with no symbol still gets the term section; the answer says no symbol covers the lines.
  */
 function askRange(store: string, root: string, t: { readonly path: string; readonly start: number; readonly end: number }, names: readonly Row[]): Exit {
@@ -82,6 +82,7 @@ function askRange(store: string, root: string, t: { readonly path: string; reado
   try {
     text = readFileSync(join(root, t.path), "utf8");
   } catch (e) {
+    if (notAFile((e as NodeJS.ErrnoException).code)) return fail(missingRangeFile(t.path, names.filter((n) => n.kind === "file").map((n) => String(n.name))), 3);
     return fail(`cannot read ${t.path}: ${(e as Error).message}`, 1);
   }
   const lines = text.split("\n");

@@ -69,6 +69,26 @@ export function closest(wanted: string, candidates: readonly string[], max = 5):
 }
 
 /**
+ * Explains a range target whose path is not a file in the working tree.
+ * owns: [[whygraph-targets]]
+ * decided: this is a target error (exit 3), like a symbol the store does not hold, because the caller named the path: exit 1 means whygraph itself failed, and a harness that counts exit 1 as a lost service voided an agent's attempt for its own wrong target on 2026-11-18 (ADR 0002, "Missing range file").
+ * post: names the path as given and lists the closest files of the store; no system error text and no absolute path.
+ */
+export function missingRangeFile(path: string, files: readonly string[]): string {
+  const near = closest(path, files);
+  return `No file ${path} in the working tree.${near.length > 0 ? ` Close files: ${near.join(", ")}.` : ""}`;
+}
+
+/**
+ * Says whether a failed read means the path is not a file, as against a file that exists and could not be read.
+ * owns: [[whygraph-targets]]
+ * post: true for a missing path, a path through a non-folder, and a folder.
+ */
+export function notAFile(code: unknown): boolean {
+  return code === "ENOENT" || code === "ENOTDIR" || code === "EISDIR";
+}
+
+/**
  * Explains a symbol target that the store does not hold.
  * owns: [[whygraph-targets]]
  * post: when the file is in the store: names the symbol as missing and lists the closest symbols of that file, or says the file has none.

@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {createConnection} from 'node:net';
 import {chmodSync,closeSync,cpSync,existsSync,mkdirSync,readFileSync,readdirSync,statSync,unlinkSync} from 'node:fs';
-import {join,resolve} from 'node:path';
+import {basename,join,resolve} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {b7 as h} from './batch7-support.mjs';
 import {batch7ClosedChecks} from './batch7-closed.mjs';
@@ -166,7 +166,53 @@ export async function batch7CommandLimitChecks({scratch,shared={}}){
   const comparison=(await batch7CommandLimitChecks({scratch:root,shared})).find(c=>c.name.includes('B7-207 stub valid calls equal'));assert.ok(comparison);await comparison.run();assert.equal(statSync(work).ino,inode,'comparison keeps the spy directory');assert.equal(h.read(marker),'spy workspace','comparison keeps the spy contents');
  });
  add('B7-207 NUL frames retain base bytes and log rows outside the exec route',async()=>{const observe=revision=>rig(async f=>{const s=await f.start('stub'),c=await f.raw(s.socket,Buffer.concat([Buffer.from(s.token),frame(['why','x\0y'])]));const reply=await c.closed;return {reply,rows:rows(s.log),stats:s.service.stats()};},{revision});assert.deepEqual(await observe(),await observe('6ccfc5b'));});
- add('B7-207 eighth smoke still has eight PASS lines',()=>{const r=h.node(join(h.root,'eval/smoke-check.mjs'),['--batch','7']);h.write(join(scratch,'eighth-smoke.json'),r);h.ok(r);assert.equal(r.stdout.split('\n').filter(l=>l.startsWith('PASS ')).length,8);});
+ function eighthSmoke(label,run){
+  const archive=join(h.root,'eval/results/_smoke-archive/8-before-read-only-root');
+  if(!existsSync(archive))throw new Error(`B7-207 evidence is missing on this machine: ${archive}; restore the archive, this case cannot pass without it`);
+  const before=h.tree(archive);
+  try{
+   const recorded=h.read(join(archive,'runner.log')).match(/^Agent preflight passed: .*; .*\/_preflight\/([^/\n]+)\/record\.json$/gm);
+   assert.equal(recorded?.length,1,'one recorded eighth-smoke preflight');
+   const preflight=recorded[0].match(/\/_preflight\/([^/\n]+)\/record\.json$/)[1];
+   const record=join(h.root,'eval/results/_preflight',preflight,'record.json');
+   if(!existsSync(record))throw new Error(`B7-207 preflight evidence is missing on this machine: ${record}; restore the record, this case cannot pass without it`);
+   const recordBefore=readFileSync(record),copy=h.mkdtempSync(join(scratch,'eighth-'+label+'-'));
+   cpSync(archive,copy,{recursive:true});
+   assert.deepEqual(h.tree(copy),before,'scratch starts with the exact archive bytes');
+   for(const name of readdirSync(join(copy,'_ledger'))){
+    const path=join(copy,'_ledger',name),original=h.read(path),entries=JSON.parse(original);let text=original;
+    for(const entry of entries)if(entry.archived){
+     const target=join(copy,'_attempts',basename(entry.archived));
+     assert.ok(existsSync(join(target,'meta.json')),'attempt exists in the archive copy: '+target);
+     const from=JSON.stringify(entry.archived);assert.equal(text.split(from).length,2,'one archived path per ledger entry');
+     text=text.replace(from,JSON.stringify(target));entry.archived=target;
+    }
+    assert.deepEqual(JSON.parse(text),entries,'only archived paths change in the ledger');
+    h.write(path,text);
+   }
+   const copiedRecord=join(copy,'_preflight',preflight,'record.json');h.write(copiedRecord,recordBefore);
+   h.write(join(copy,'_preflight/latest.json'),{record:copiedRecord});
+   try{return run(copy,archive);}
+   finally{assert.deepEqual(readFileSync(record),recordBefore,'preflight record bytes stay read-only');}
+  }finally{assert.deepEqual(h.tree(archive),before,'archive bytes stay read-only');}
+ }
+ const replayEighth=(copy,label)=>{const r=h.node(join(h.root,'eval/smoke-check.mjs'),['--batch','7','--results',copy]);h.write(join(scratch,'eighth-smoke-'+label+'.json'),r);return r;};
+ add('B7-207 eighth smoke still has eight PASS lines',()=>eighthSmoke('green',(copy,archive)=>{
+  const r=replayEighth(copy,'green');h.ok(r);
+  assert.equal(r.stdout.split('\n').filter(l=>l.startsWith('PASS ')).length,8);
+  assert.equal(r.stdout,h.read(join(archive,'smoke-check.log')),'all check totals and per-attempt usage equal the recorded eighth smoke');
+ }));
+ add('B7-207 eighth smoke catches a planted service failure',()=>eighthSmoke('plant',(copy,archive)=>{
+  const good=replayEighth(copy,'plant-before');h.ok(good);assert.equal(good.stdout,h.read(join(archive,'smoke-check.log')),'plant starts from a passing eighth smoke');
+  const cell=readdirSync(join(copy,'_ledger')).sort()[0],entry=h.json(join(copy,'_ledger',cell))[0];
+  const dir=entry.archived??join(copy,cell.slice(0,-5)),message='B7-207 planted service failure';
+  const log=join(dir,'service.jsonl'),text=h.read(log);h.write(log,text+(text.endsWith('\n')?'':'\n')+JSON.stringify({event:'failure',message})+'\n');
+  const meta=h.json(join(dir,'meta.json'));meta.service.failures++;meta.service.reasons.push(message);h.write(join(dir,'meta.json'),meta);
+  const r=replayEighth(copy,'plant');assert.equal(r.status,1,r.stdout+r.stderr);
+  assert.deepEqual(r.stdout.split('\n').filter(l=>/^(PASS|FAIL) /.test(l)),good.stdout.split('\n').filter(l=>l.startsWith('PASS ')).map(l=>
+   l==='PASS condition answers'?'FAIL condition answers: service failure':l.startsWith('PASS service answered every call:')?'FAIL service answered every call: service failure':l),
+   'only the two service-failure checks reject the plant; preflight, paths and other checks still pass');
+ }));
  add('B7-208 batches 5 and 6 protected bytes match 6ccfc5b',()=>{const r=h.command('git',['diff','--exit-code','6ccfc5b','--','eval/opencode.mjs','eval/registry.mjs','eval/registry.json','eval/score.mjs','eval/score.txt','eval/tasks','eval/tickets/zustand','eval/tickets/hono','eval/tickets/memod','eval/tickets/memoryd','eval/selftest/batch5.mjs','eval/selftest/batch6.mjs','eval/selftest/batch5-report.mjs','eval/selftest/batch6-report.mjs']);h.ok(r);const current=fresh('plan-current'),old=fresh('plan-base');for(const at of [current,old])cpSync(join(h.root,'eval/tasks'),join(at,'eval/tasks'),{recursive:true});for(const name of ['run.mjs','opencode.mjs','registry.mjs','registry.json','closed-run.mjs','closed-store.mjs','closed-client.c'])h.write(join(old,'eval',name),h.ok(h.command('git',['show','6ccfc5b:eval/'+name])));for(const batch of [5,6])assert.deepEqual(triple(h.node(join(current,'eval/run.mjs'),['--batch',String(batch),'--plan'])),triple(h.node(join(old,'eval/run.mjs'),['--batch',String(batch),'--plan'])),'unchanged batch '+batch+' plan');});
  return checks;
 }

@@ -172,9 +172,9 @@ on the first target of each memoryd entry with a target:
   record that names the file or the symbol but shares no line of the range will
   not match it; the symbol form adds both and would. The reference measurement
   added them too, so the range ranks can differ from its numbers.
-- A range needs the file in the working tree. A file that is gone exits 1, and
-  a range past the end of the file exits 2, each naming the problem; the term
-  section never reads a wrong range.
+- A range needs the file in the working tree. A path that is not a file there
+  exits 3 (see "Missing range file"), and a range past the end of the file
+  exits 2, each naming the problem; the term section never reads a wrong range.
 - A range that overlaps several symbols renders one body per symbol. A record
   linked to two of them appears under each, and the term section still lists it
   only once (or not at all, if a body already lists it).
@@ -192,3 +192,34 @@ on the first target of each memoryd entry with a target:
   has none; the query side treats a missing `Term` node as no match, not as an
   error. A store built before `line`/`endLine` likewise gives the one-line
   "no source line range" note until it is rebuilt.
+
+## Missing range file, 2026-11-18
+
+This section changes a public exit code of the CLI.
+
+Until 2026-11-18, `carry <file>:<start>-<end>` exited 1 with
+`cannot read <file>: <system error>` when the path was not a file in the
+working tree. Exit 1 is also the code for a failure of whygraph itself: no
+store, no model, a failed `relate` query. A caller could not tell its own wrong
+path from a broken tool.
+
+The batch 7 trial showed the cost. Its store service counts a product exit 1
+as a lost service (ADR 0011, B7-170). On 2026-11-18 an agent called
+`carry src/middleware/redux.ts:src/middleware/redux.ts:1-50`. The service
+answered `whygraph service unavailable`, the runner voided the attempt and ran
+the cell again, and the smoke check failed. Only the conditions that run the
+product get such a second attempt.
+
+Choice (operator, 2026-11-18): a range on a path that is not a file in the
+working tree is a target error. It exits 3, like a symbol that the store does
+not hold. The message is `No file <path> in the working tree.`, followed by
+`Close files: ...` when the store holds close file names. It holds no system
+error text and no absolute path. "Not a file" means a missing path, a path
+through a file, and a folder.
+
+A file that exists and cannot be read keeps exit 1 and `cannot read`: the
+caller named a real file, and the tool failed to read it.
+
+Rejected: a rule in the trial's service that reads the `cannot read` text and
+passes it on. It hides the cause and leaves other callers with the same
+ambiguous code.
