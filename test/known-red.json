@@ -9,11 +9,6 @@
       "name": "B7 B7-132 earlier plans launcher setup task input and old score bytes match ec76408",
       "cause": "The case compares the scorer's output on eval/results with the frozen eval/score.txt. Batch 7 pilot results exist in eval/results since 2026-11-17 and the frozen file does not hold them.",
       "remove": "Remove when batch 7 ends and eval/score.txt is regenerated (fleet task of ash-coordinator, 2026-11-18)."
-    },
-    {
-      "name": "B7 B7-207 eighth smoke still has eight PASS lines",
-      "cause": "The case runs eval/smoke-check.mjs --batch 7 on the live eval/results. The live smoke cells are the ninth smoke of 2026-11-18, which fails two checks (service failure) because a product exit 1 for a missing carry range file voided one attempt (ADR 0002, \"Missing range file\").",
-      "remove": "Remove when the tenth smoke, run on the code that holds the missing range file answer, passes its check with 8 PASS."
     }
   ],
   "suite": [
