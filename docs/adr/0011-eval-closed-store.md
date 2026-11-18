@@ -289,6 +289,26 @@ rule and never ran. The check reads command text and file-tool paths; it
 does not trace system calls. Condition 2: a smoke on the read-only root
 passes all eight lines before the pilot resumes.
 
+Condition 2, result. The 16 smoke cells that ran on the writable root were
+moved to `eval/results/_smoke-archive/8-before-read-only-root`, so of the 43
+cells only the 27 pilot cells stay in the data. Two smokes ran on the
+read-only root on 2026-11-18:
+
+- Ninth smoke (`513b9be`): 16 of 16 cells, 6 of 8 lines. No line failed from
+  the read-only root. `condition answers` and `service answered every call`
+  failed on one service failure: the agent named a carry range on a path that
+  is not a file, the product exited 1, and the service counted a lost service
+  (B7-170). The product now answers that as a target error, exit 3 (ADR 0002,
+  "Missing range file"; B7-214 to B7-219). The cells are in
+  `eval/results/_smoke-archive/9-missing-range-file-voided-attempt`.
+- Tenth smoke (`8acbbdc`): 16 of 16 cells, 8 of 8 lines: 90 denied probes,
+  22 refused requests, 1 call stopped with its run, no service failure, no
+  unscored cell. Two cells used their second agent attempt (a file tool
+  pointed at `/whygraph`; an agent timeout).
+
+The pilot resumed on 2026-11-18 at cell 28 with the 16 cells of the tenth
+smoke counted as done.
+
 **Refusals counted at stop.** A connection that sent part of a token counts
 its refusal when it closes. The stop returned before that close, so the
 metadata could miss a refusal that the log then held (Astra). The stop now
