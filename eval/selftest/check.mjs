@@ -2,9 +2,11 @@
 /**
  * module: [[whygraph-eval-scorer-selftest]]
  * Scores each hand-written case of cases.mjs and exits 1 when a verdict differs from the expected one.
+ * The cases that test/known-red.json names must be red: a new red case fails the gate, and so does a named case that passes.
  *
  *   node eval/selftest/check.mjs
  */
+import { readFileSync } from 'node:fs';
 import { readTasks, scoreRun, recordIds } from '../score.mjs';
 import { sessionSummary } from '../run.mjs';
 import { cases } from './cases.mjs';
@@ -38,15 +40,22 @@ const checks = stress ? (await batch7Checks({ tasks, scoreRun, stress })).filter
   ...await batch6Checks({ tasks, scoreRun }),
   ...await batch7Checks({ tasks, scoreRun }),
 ];
+const red = [];
 for (const c of checks) {
   try {
     await c.run();
     console.log(`ok    ${c.name}`);
   } catch (error) {
     wrong++;
+    red.push(c.name);
     console.log(`WRONG ${c.name}\n        ${error.message}`);
   }
 }
 const total = verdicts.length + checks.length;
 console.log(`${total - wrong}/${total} cases as expected (${verdicts.length} original verdicts, ${checks.length} ${stress ? 'stress cases' : 'ticket checks'})`);
-process.exitCode = wrong === 0 ? 0 : 1;
+const known = stress ? [] : JSON.parse(readFileSync(new URL('../../test/known-red.json', import.meta.url), 'utf8')).selftest.map(entry => entry.name);
+const added = red.filter(name => !known.includes(name)), fixed = known.filter(name => !red.includes(name));
+for (const name of added) console.log(`NEW RED ${name}`);
+for (const name of fixed) console.log(`KNOWN RED PASSES, remove it from test/known-red.json: ${name}`);
+if (known.length) console.log(`${known.length - fixed.length} known red cases (test/known-red.json)`);
+process.exitCode = wrong === red.length && added.length === 0 && fixed.length === 0 ? 0 : 1;

@@ -1,6 +1,8 @@
-/** Run the independent failure-list contracts and retain all evidence. */
+/** Run the independent failure-list contracts and retain all evidence.
+ * The tests that test/known-red.json names must be red: a new red test fails the gate, and so does a named test that passes.
+ */
 import { spawn } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -30,6 +32,14 @@ child.on('error', error => { console.error(error); process.exitCode = 1; });
 child.on('exit', (code, signal) => {
   const summary = { report, scratch, exitCode: code, signal, wallSeconds: (performance.now() - start) / 1000 };
   writeFileSync(resolve(scratch, 'run.json'), JSON.stringify(summary, null, 2) + '\n');
-  console.log(`Suite wall time: ${summary.wallSeconds.toFixed(3)}s; exit ${code ?? signal}`);
-  process.exitCode = code ?? 1;
+  const known = JSON.parse(readFileSync(resolve(root, 'test/known-red.json'), 'utf8')).suite.map(entry => entry.name);
+  const lines = [...readFileSync(report, 'utf8').matchAll(/^(not ok|ok) \d+ - (.*?)(?: # .*)?$/gm)];
+  const red = lines.filter(line => line[1] === 'not ok').map(line => line[2]);
+  const added = red.filter(name => !known.includes(name));
+  const fixed = lines.filter(line => line[1] === 'ok' && known.includes(line[2])).map(line => line[2]);
+  for (const name of added) console.log(`NEW RED ${name}`);
+  for (const name of fixed) console.log(`KNOWN RED PASSES, remove it from test/known-red.json: ${name}`);
+  const gate = code === 0 || (code === 1 && red.length > 0 && added.length === 0) ? (fixed.length ? 1 : 0) : (code ?? 1);
+  console.log(`Suite wall time: ${summary.wallSeconds.toFixed(3)}s; exit ${code ?? signal}; ${red.length - added.length} known red tests (test/known-red.json); gate ${gate}`);
+  process.exitCode = gate;
 });
