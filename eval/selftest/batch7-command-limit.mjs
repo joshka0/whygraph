@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {createConnection} from 'node:net';
-import {chmodSync,closeSync,cpSync,existsSync,mkdirSync,readFileSync,statSync,unlinkSync} from 'node:fs';
+import {chmodSync,closeSync,cpSync,existsSync,mkdirSync,readFileSync,readdirSync,statSync,unlinkSync} from 'node:fs';
 import {join,resolve} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {b7 as h} from './batch7-support.mjs';
@@ -28,6 +28,8 @@ const placeholder=Buffer.from('whygraph-client-token-placeholder-xxxxxxxxxxxxxxx
  * owns: [[whygraph-batch7-command-limit-selftest]]
  */
 export async function batch7CommandLimitChecks({scratch,shared={}}){
+ const suppliedScratch=scratch;scratch=h.mkdtempSync(join(scratch,'c-'));
+ console.log('Command-limit scratch retained: '+scratch);
  const checks=[],add=(name,run)=>checks.push({name:'B7 '+name,group:'command-limit',run});let serial=0,template;
  const fresh=label=>h.copy(scratch,'limit-'+label+'-'+serial++);
  const apiAt=at=>import(pathToFileURL(join(at,'eval/closed-store.mjs')).href);
@@ -146,7 +148,7 @@ export async function batch7CommandLimitChecks({scratch,shared={}}){
  add('plant stop-skips-connection-closes caught by B7-211',()=>caught('stop-skips-closes','B7-211',()=>own211({edit:inStore('    await Promise.all(closed);','')})));
  add('plant unchecked-cache caught by B7-212',()=>caught('unchecked-cache','B7-212',()=>own212({edit:inStore("  if (hash(check(dest)) !== readFileSync(`${dest}.sha256`,'utf8')) throw new Error('closed client differs from its recorded hash');",'')})));
  for(const [id,run]of [['B7-209',o=>own209('shell',o)],['B7-211',own211],['B7-212',own212]])add('regression '+id+' is red on 99d7573',()=>caught('review-base-'+id,id,()=>run({revision:'99d7573'})));
- async function procWitness({revision,plant=false}={}){const p=join(scratch,'proc-witness-'+serial+++'.mjs');let source=revision?h.ok(h.command('git',['show',revision+':eval/selftest/batch7-spy-block.mjs'])):h.read(join(h.root,'eval/selftest/batch7-spy-block.mjs'));if(plant){const anchor=revision?"const p='/proc/'+child.pid+'/'+name":"const sampledPid=child.pid";assert.equal(source.split(anchor).length,2);source=source.replace(anchor,revision?"const p='/proc/0/'+name":"const sampledPid=0");}source=source.replace(/from '(\.\/[^']+)'/g,(_,p)=>"from '"+new URL(p,pathToFileURL(join(h.root,'eval/selftest/batch7-spy-block.mjs'))).href+"'");h.write(p,source);const procScratch=join(scratch,'proc-'+serial++);mkdirSync(procScratch);const cases=await(await import(pathToFileURL(p))).batch7SpyBlockChecks({scratch:procScratch,shared});const owner=cases.find(c=>c.name.includes('native file reads and live client'));assert.ok(owner);await owner.run();}
+ async function procWitness({revision,plant=false}={}){const p=join(scratch,'proc-witness-'+serial+++'.mjs');let source=revision?h.ok(h.command('git',['show',revision+':eval/selftest/batch7-spy-block.mjs'])):h.read(join(h.root,'eval/selftest/batch7-spy-block.mjs'));if(plant){const anchor=revision?"const p='/proc/'+child.pid+'/'+name":"const sampledPid=child.pid";assert.equal(source.split(anchor).length,2);source=source.replace(anchor,revision?"const p='/proc/0/'+name":"const sampledPid=0");}source=source.replace(/from '(\.\/[^']+)'/g,(_,p)=>"from '"+new URL(p,pathToFileURL(join(h.root,'eval/selftest/batch7-spy-block.mjs'))).href+"'");h.write(p,source);const procScratch=h.mkdtempSync(join(suppliedScratch,'p-'));const cases=await(await import(pathToFileURL(p))).batch7SpyBlockChecks({scratch:procScratch,shared});const owner=cases.find(c=>c.name.includes('native file reads and live client'));assert.ok(owner);await owner.run();}
  add('B7-213 live client proc probes require a witnessed client PID',()=>procWitness());
  add('plant B7-194 probes PID 0 caught by B7-213',()=>caught('proc-pid-zero','B7-213',()=>procWitness({plant:true})));
  add('regression B7-213 PID-0 guard is red on 99d7573',async()=>{await procWitness({revision:'99d7573',plant:true});await caught('review-base-B7-213','B7-213',async()=>assert.fail('Old B7-194 accepted PID 0: missing expected rejection'));});
@@ -157,6 +159,11 @@ export async function batch7CommandLimitChecks({scratch,shared={}}){
   try{for(const revision of [null,'6ccfc5b']){const copy=fresh('serial-api');if(revision)h.write(join(copy,'eval/closed-store.mjs'),h.ok(h.command('git',['show',revision+':eval/closed-store.mjs'])));const api=await apiAt(copy),socket=join(scratch,'s'+serial++),log=join(at,'log-'+services.length+'.jsonl'),service=await api.startClosedStore({condition,repo:fixture.repo,store:fixture.stores[condition]??fixture.store,fullStore:fixture.store,socket,log,token:fixture.token});services.push({api,socket,log,service});}
    for(const args of inputs){const results=[];for(const service of services){const a=service.api.closedConfinement({work,repo,client,socket:service.socket}),before=rows(service.log).length;const r=await collect(spawn(a[0],[...a.slice(1),'--','/tools/whygraph',...args],{env:{...h.env,PATH:'/tools:/usr/bin:/bin'}}));results.push({reply:triple(r),rows:rows(service.log).slice(before)});}assert.deepEqual(results[0],results[1],condition+' '+kind+' '+args[0]);}
   }finally{for(const s of services)await s.service.stop();}
+ });
+ add('B7-207 shared scratch preserves a previous spy workspace',async()=>{
+  const root=h.mkdtempSync(join(suppliedScratch,'i-')),spy=(await batch7SpyBlockChecks({scratch:root,shared})).find(c=>c.name.includes('B7-199 shell namespace cannot connect'));assert.ok(spy);await spy.run();
+  const workspaces=readdirSync(root,{withFileTypes:true}).filter(d=>d.isDirectory()&&existsSync(join(root,d.name,'stand-in.mjs')));assert.equal(workspaces.length,1,'one real spy workspace');const work=join(root,workspaces[0].name),inode=statSync(work).ino,marker=h.write(join(work,'owner.txt'),'spy workspace');
+  const comparison=(await batch7CommandLimitChecks({scratch:root,shared})).find(c=>c.name.includes('B7-207 stub valid calls equal'));assert.ok(comparison);await comparison.run();assert.equal(statSync(work).ino,inode,'comparison keeps the spy directory');assert.equal(h.read(marker),'spy workspace','comparison keeps the spy contents');
  });
  add('B7-207 NUL frames retain base bytes and log rows outside the exec route',async()=>{const observe=revision=>rig(async f=>{const s=await f.start('stub'),c=await f.raw(s.socket,Buffer.concat([Buffer.from(s.token),frame(['why','x\0y'])]));const reply=await c.closed;return {reply,rows:rows(s.log),stats:s.service.stats()};},{revision});assert.deepEqual(await observe(),await observe('6ccfc5b'));});
  add('B7-207 eighth smoke still has eight PASS lines',()=>{const r=h.node(join(h.root,'eval/smoke-check.mjs'),['--batch','7']);h.write(join(scratch,'eighth-smoke.json'),r);h.ok(r);assert.equal(r.stdout.split('\n').filter(l=>l.startsWith('PASS ')).length,8);});
