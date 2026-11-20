@@ -11,13 +11,13 @@ importers:
       '@huggingface/transformers':
         specifier: 4.3.2
         version: 4.3.2(@types/node@26.6.6)
+      memod:
+        specifier: file:vendor/memod-0.2.0.tgz
+        version: file:vendor/memod-0.2.0.tgz
     devDependencies:
       '@types/node':
         specifier: ^26.6.6
         version: 26.6.6
-      memod:
-        specifier: git+file:///home/dev/repos/personal/memod#d0b4d689225899a458647948b680176dd83ea830
-        version: git+file:///home/dev/repos/personal/memod#d0b4d689225899a458647948b680176dd83ea830
       tsrs:
         specifier: 0.23.0-ts7.1.0-beta
         version: 0.23.0-ts7.1.0-beta
@@ -456,8 +456,8 @@ packages:
     resolution: {integrity: sha512-S6x5wmcDmsDRRU/c2dkccDwQPXoFczc5+HpQ2lON8pnvHlnvHAHj5WlLVvw6n6vNyHuVugYrFohYxbS+pvFpKQ==}
     engines: {node: '>=10'}
 
-  memod@git+file:///home/dev/repos/personal/memod#d0b4d689225899a458647948b680176dd83ea830:
-    resolution: {commit: d0b4d689225899a458647948b680176dd83ea830, repo: file:///home/dev/repos/personal/memod, type: git}
+  memod@file:vendor/memod-0.2.0.tgz:
+    resolution: {integrity: sha512-gBGDZOGcvml+e1yhjum4Ji6Yu+wHPv8WukjsSkjh+FHubgsj3N08UCHHyx9LCAZwkcBgl7FpEu0vZuZNblDrKQ==, tarball: file:vendor/memod-0.2.0.tgz}
     version: 0.2.0
     engines: {node: '>=24'}
     hasBin: true
@@ -804,7 +804,7 @@ snapshots:
     dependencies:
       escape-string-regexp: 4.0.0
 
-  memod@git+file:///home/dev/repos/personal/memod#d0b4d689225899a458647948b680176dd83ea830:
+  memod@file:vendor/memod-0.2.0.tgz:
     dependencies:
       oxc-parser: 0.157.0
 
