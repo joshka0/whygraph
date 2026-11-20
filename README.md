@@ -68,6 +68,12 @@ Show thousands separators in totals,73ebd46,formatCents
 Show thousands separators in totals,a3bcb76,formatCents
 ```
 
+Ask whygraph which other shop symbols those commits changed:
+
+```sh
+whygraph impact note-2 --store examples/shop.rl
+```
+
 To explore other relationships, open the same file in the Relate shell
 with `relate --database examples/shop.rl --read-only`. To rebuild the
 graph and ask whygraph about the source code, follow
