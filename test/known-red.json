@@ -1,21 +1,4 @@
 {
-  "selftest": [
-    {
-      "name": "B7 B7-108 scorer ignores rehearsal by default and reads it only with results option",
-      "cause": "The case compares the scorer's output on eval/results with the frozen eval/score.txt. Batch 7 pilot results exist in eval/results since 2026-11-17 and the frozen file does not hold them.",
-      "remove": "Remove when batch 7 ends and eval/score.txt is regenerated (fleet task of ash-coordinator, 2026-11-18)."
-    },
-    {
-      "name": "B7 B7-132 earlier plans launcher setup task input and old score bytes match ec76408",
-      "cause": "The case compares the scorer's output on eval/results with the frozen eval/score.txt. Batch 7 pilot results exist in eval/results since 2026-11-17 and the frozen file does not hold them.",
-      "remove": "Remove when batch 7 ends and eval/score.txt is regenerated (fleet task of ash-coordinator, 2026-11-18)."
-    }
-  ],
-  "suite": [
-    {
-      "name": "X8 removal preserves eval history and frozen batch 3-6 inputs",
-      "cause": "The case compares the scorer's output on eval/results with the frozen eval/score.txt. Batch 7 pilot results exist in eval/results since 2026-11-17 and the frozen file does not hold them.",
-      "remove": "Remove when batch 7 ends and eval/score.txt is regenerated (fleet task of ash-coordinator, 2026-11-18)."
-    }
-  ]
+  "selftest": [],
+  "suite": []
 }
