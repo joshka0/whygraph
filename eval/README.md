@@ -1708,3 +1708,29 @@ Three repeats and word/diff pass rules limit what the trial can establish.
 Saved agent tool answers still stop at 4,000 characters; service logs keep
 full answers for health checks. [Batch 7 failure cases](tickets/batch7-failures.md)
 are the contract for the independent test author.
+
+## Zustand pilot exceptions
+
+Of 258 planned cells, 256 finished with a score. Two cells reached the
+1,200-second limit on both attempts and remained unscored:
+
+- `zustand7-conflict-zs-15__graph__r3`
+- `zustand7-conflict-zs-17__stub__r2`
+
+Counting both as failures gives the same paired difference and interval
+to two decimal places. During the memory stall on 2026-11-18 from 16:30 to
+16:45 (Europe/Tallinn), ten runs overlapped the window. All ten were
+`zustand7-conflict-zs-04` and passed.
+
+| Condition | Repetitions during the stall |
+| --- | --- |
+| stub | r2 |
+| graph | r1, r2 |
+| graph-nolink | r1, r2 |
+| graph-nosearch | r2 |
+| graph-noterms | r1, r2 |
+| graph-norule | r1, r2 |
+
+Each row was checked against the pilot log. To estimate the start of each
+run, subtract the recorded wall time from its ledger file's modification
+time. Each overlapping cell had one attempt.

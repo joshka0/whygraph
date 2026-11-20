@@ -2462,3 +2462,528 @@ Batch 6 graph: 46782686 tokens; cost USD 1.014001
 Batch 6 graph-nosearch: 55203260 tokens; cost USD 1.096991
 
 Batch 6 total tokens: 217811955
+
+Batch 7: 256 finished runs
+
+Runs:
+  PASS  zustand7-conflict-zs-02__graph-nolink__r1  whygraph calls: 13
+  PASS  zustand7-conflict-zs-02__graph-nolink__r2  whygraph calls: 8
+  PASS  zustand7-conflict-zs-02__graph-nolink__r3  whygraph calls: 11
+  FAIL  zustand7-conflict-zs-02__graph-norule__r1  whygraph calls: 7  (names no required record)
+  PASS  zustand7-conflict-zs-02__graph-norule__r2  whygraph calls: 6
+  PASS  zustand7-conflict-zs-02__graph-norule__r3  whygraph calls: 4
+  PASS  zustand7-conflict-zs-02__graph-nosearch__r1  whygraph calls: 9
+  PASS  zustand7-conflict-zs-02__graph-nosearch__r2  whygraph calls: 5
+  PASS  zustand7-conflict-zs-02__graph-nosearch__r3  whygraph calls: 10
+  PASS  zustand7-conflict-zs-02__graph-noterms__r1  whygraph calls: 8
+  PASS  zustand7-conflict-zs-02__graph-noterms__r2  whygraph calls: 6
+  PASS  zustand7-conflict-zs-02__graph-noterms__r3  whygraph calls: 10
+  PASS  zustand7-conflict-zs-02__graph__r1  whygraph calls: 6
+  PASS  zustand7-conflict-zs-02__graph__r2  whygraph calls: 9
+  PASS  zustand7-conflict-zs-02__graph__r3  whygraph calls: 10
+  PASS  zustand7-conflict-zs-02__stub__r1  whygraph calls: 18
+  PASS  zustand7-conflict-zs-02__stub__r2  whygraph calls: 16
+  FAIL  zustand7-conflict-zs-02__stub__r3  whygraph calls: 12  (names no required record; edited protected files: docs/reference/middlewares/redux.md, src/middleware/redux.ts, tests/middlewareTypes.test.tsx)
+  PASS  zustand7-conflict-zs-03__graph-nolink__r1  whygraph calls: 13
+  PASS  zustand7-conflict-zs-03__graph-nolink__r2  whygraph calls: 18
+  PASS  zustand7-conflict-zs-03__graph-nolink__r3  whygraph calls: 20
+  PASS  zustand7-conflict-zs-03__graph-norule__r1  whygraph calls: 26
+  PASS  zustand7-conflict-zs-03__graph-norule__r2  whygraph calls: 8
+  PASS  zustand7-conflict-zs-03__graph-norule__r3  whygraph calls: 14
+  PASS  zustand7-conflict-zs-03__graph-nosearch__r1  whygraph calls: 8
+  FAIL  zustand7-conflict-zs-03__graph-nosearch__r2  whygraph calls: 9  (names no required record)
+  PASS  zustand7-conflict-zs-03__graph-nosearch__r3  whygraph calls: 19
+  PASS  zustand7-conflict-zs-03__graph-noterms__r1  whygraph calls: 12
+  PASS  zustand7-conflict-zs-03__graph-noterms__r2  whygraph calls: 24
+  PASS  zustand7-conflict-zs-03__graph-noterms__r3  whygraph calls: 10
+  FAIL  zustand7-conflict-zs-03__graph__r1  whygraph calls: 15  (names no required record)
+  PASS  zustand7-conflict-zs-03__graph__r2  whygraph calls: 11
+  FAIL  zustand7-conflict-zs-03__graph__r3  whygraph calls: 18  (names no required record)
+  FAIL  zustand7-conflict-zs-03__stub__r1  whygraph calls: 15  (names no required record; edited protected files: src/middleware/persist.ts, tests/devtools.test.tsx, tests/persistAsync.test.tsx, tests/persistSync.test.tsx)
+  FAIL  zustand7-conflict-zs-03__stub__r2  whygraph calls: 20  (names no required record; edited protected files: src/middleware/persist.ts, tests/devtools.test.tsx, tests/persistAsync.test.tsx, tests/persistSync.test.tsx)
+  PASS  zustand7-conflict-zs-03__stub__r3  whygraph calls: 16
+  PASS  zustand7-conflict-zs-04__graph-nolink__r1  whygraph calls: 12
+  PASS  zustand7-conflict-zs-04__graph-nolink__r2  whygraph calls: 9
+  PASS  zustand7-conflict-zs-04__graph-nolink__r3  whygraph calls: 9
+  PASS  zustand7-conflict-zs-04__graph-norule__r1  whygraph calls: 9
+  PASS  zustand7-conflict-zs-04__graph-norule__r2  whygraph calls: 6
+  PASS  zustand7-conflict-zs-04__graph-norule__r3  whygraph calls: 6
+  PASS  zustand7-conflict-zs-04__graph-nosearch__r1  whygraph calls: 8
+  PASS  zustand7-conflict-zs-04__graph-nosearch__r2  whygraph calls: 12
+  PASS  zustand7-conflict-zs-04__graph-nosearch__r3  whygraph calls: 7
+  PASS  zustand7-conflict-zs-04__graph-noterms__r1  whygraph calls: 9
+  PASS  zustand7-conflict-zs-04__graph-noterms__r2  whygraph calls: 6
+  PASS  zustand7-conflict-zs-04__graph-noterms__r3  whygraph calls: 4
+  PASS  zustand7-conflict-zs-04__graph__r1  whygraph calls: 13
+  PASS  zustand7-conflict-zs-04__graph__r2  whygraph calls: 5
+  PASS  zustand7-conflict-zs-04__graph__r3  whygraph calls: 13
+  PASS  zustand7-conflict-zs-04__stub__r1  whygraph calls: 13
+  PASS  zustand7-conflict-zs-04__stub__r2  whygraph calls: 16
+  PASS  zustand7-conflict-zs-04__stub__r3  whygraph calls: 16
+  PASS  zustand7-conflict-zs-05__graph-nolink__r1  whygraph calls: 4
+  PASS  zustand7-conflict-zs-05__graph-nolink__r2  whygraph calls: 4
+  PASS  zustand7-conflict-zs-05__graph-nolink__r3  whygraph calls: 9
+  PASS  zustand7-conflict-zs-05__graph-norule__r1  whygraph calls: 3
+  PASS  zustand7-conflict-zs-05__graph-norule__r2  whygraph calls: 3
+  PASS  zustand7-conflict-zs-05__graph-norule__r3  whygraph calls: 2
+  PASS  zustand7-conflict-zs-05__graph-nosearch__r1  whygraph calls: 4
+  PASS  zustand7-conflict-zs-05__graph-nosearch__r2  whygraph calls: 6
+  PASS  zustand7-conflict-zs-05__graph-nosearch__r3  whygraph calls: 6
+  PASS  zustand7-conflict-zs-05__graph-noterms__r1  whygraph calls: 5
+  PASS  zustand7-conflict-zs-05__graph-noterms__r2  whygraph calls: 2
+  PASS  zustand7-conflict-zs-05__graph-noterms__r3  whygraph calls: 5
+  PASS  zustand7-conflict-zs-05__graph__r1  whygraph calls: 4
+  PASS  zustand7-conflict-zs-05__graph__r2  whygraph calls: 3
+  PASS  zustand7-conflict-zs-05__graph__r3  whygraph calls: 4
+  FAIL  zustand7-conflict-zs-05__stub__r1  whygraph calls: 9  (names no required record; edited protected files: src/middleware/devtools.ts, tests/devtools.test.tsx)
+  PASS  zustand7-conflict-zs-05__stub__r2  whygraph calls: 10
+  PASS  zustand7-conflict-zs-05__stub__r3  whygraph calls: 14
+  PASS  zustand7-conflict-zs-06__graph-nolink__r1  whygraph calls: 6
+  PASS  zustand7-conflict-zs-06__graph-nolink__r2  whygraph calls: 8
+  PASS  zustand7-conflict-zs-06__graph-nolink__r3  whygraph calls: 4
+  PASS  zustand7-conflict-zs-06__graph-norule__r1  whygraph calls: 6
+  PASS  zustand7-conflict-zs-06__graph-norule__r2  whygraph calls: 9
+  PASS  zustand7-conflict-zs-06__graph-norule__r3  whygraph calls: 8
+  PASS  zustand7-conflict-zs-06__graph-nosearch__r1  whygraph calls: 4
+  PASS  zustand7-conflict-zs-06__graph-nosearch__r2  whygraph calls: 11
+  PASS  zustand7-conflict-zs-06__graph-nosearch__r3  whygraph calls: 4
+  PASS  zustand7-conflict-zs-06__graph-noterms__r1  whygraph calls: 4
+  PASS  zustand7-conflict-zs-06__graph-noterms__r2  whygraph calls: 5
+  PASS  zustand7-conflict-zs-06__graph-noterms__r3  whygraph calls: 4
+  PASS  zustand7-conflict-zs-06__graph__r1  whygraph calls: 4
+  PASS  zustand7-conflict-zs-06__graph__r2  whygraph calls: 8
+  PASS  zustand7-conflict-zs-06__graph__r3  whygraph calls: 5
+  PASS  zustand7-conflict-zs-06__stub__r1  whygraph calls: 10
+  PASS  zustand7-conflict-zs-06__stub__r2  whygraph calls: 14
+  PASS  zustand7-conflict-zs-06__stub__r3  whygraph calls: 28
+  FAIL  zustand7-conflict-zs-07__graph-nolink__r1  whygraph calls: 21  (names no required record)
+  FAIL  zustand7-conflict-zs-07__graph-nolink__r2  whygraph calls: 20  (names no required record)
+  FAIL  zustand7-conflict-zs-07__graph-nolink__r3  whygraph calls: 9  (names no required record)
+  FAIL  zustand7-conflict-zs-07__graph-norule__r1  whygraph calls: 11  (names no required record; edited protected files: docs/reference/integrations/persisting-store-data.md, src/middleware/persist.ts, tests/persistAsync.test.tsx, tests/persistSync.test.tsx)
+  FAIL  zustand7-conflict-zs-07__graph-norule__r2  whygraph calls: 9  (names no required record; edited protected files: docs/reference/integrations/persisting-store-data.md, docs/reference/middlewares/persist.md, src/middleware/persist.ts, tests/persistAsync.test.tsx, tests/persistPromiseLike.test.ts, tests/persistSync.test.tsx)
+  FAIL  zustand7-conflict-zs-07__graph-norule__r3  whygraph calls: 9  (names no required record)
+  FAIL  zustand7-conflict-zs-07__graph-nosearch__r1  whygraph calls: 13  (names no required record)
+  FAIL  zustand7-conflict-zs-07__graph-nosearch__r2  whygraph calls: 15  (names no required record)
+  FAIL  zustand7-conflict-zs-07__graph-nosearch__r3  whygraph calls: 16  (names no required record)
+  FAIL  zustand7-conflict-zs-07__graph-noterms__r1  whygraph calls: 4  (names no required record)
+  FAIL  zustand7-conflict-zs-07__graph-noterms__r2  whygraph calls: 10  (names no required record; edited protected files: docs/reference/integrations/persisting-store-data.md, src/middleware/persist.ts)
+  FAIL  zustand7-conflict-zs-07__graph-noterms__r3  whygraph calls: 12  (names no required record)
+  FAIL  zustand7-conflict-zs-07__graph__r1  whygraph calls: 9  (names no required record)
+  FAIL  zustand7-conflict-zs-07__graph__r2  whygraph calls: 5  (names no required record)
+  FAIL  zustand7-conflict-zs-07__graph__r3  whygraph calls: 12  (names no required record; edited protected files: docs/reference/integrations/persisting-store-data.md, src/middleware/persist.ts, tests/persistAsync.test.tsx, tests/persistSync.test.tsx)
+  FAIL  zustand7-conflict-zs-07__stub__r1  whygraph calls: 7  (names no required record; edited protected files: docs/reference/integrations/persisting-store-data.md, src/middleware/persist.ts)
+  FAIL  zustand7-conflict-zs-07__stub__r2  whygraph calls: 11  (names no required record; edited protected files: docs/reference/integrations/persisting-store-data.md, docs/reference/middlewares/persist.md, src/middleware/persist.ts, tests/persistAsync.test.tsx, tests/persistPromiseLike.test.ts, tests/persistSync.test.tsx)
+  FAIL  zustand7-conflict-zs-07__stub__r3  whygraph calls: 13  (names no required record; edited protected files: docs/reference/integrations/persisting-store-data.md, src/middleware/persist.ts, tests/persistAsync.test.tsx, tests/persistSync.test.tsx)
+  FAIL  zustand7-conflict-zs-13__graph-nolink__r1  whygraph calls: 7  (names no required record)
+  FAIL  zustand7-conflict-zs-13__graph-nolink__r2  whygraph calls: 5  (names no required record)
+  PASS  zustand7-conflict-zs-13__graph-nolink__r3  whygraph calls: 12
+  FAIL  zustand7-conflict-zs-13__graph-norule__r1  whygraph calls: 10  (names no required record)
+  PASS  zustand7-conflict-zs-13__graph-norule__r2  whygraph calls: 15
+  FAIL  zustand7-conflict-zs-13__graph-norule__r3  whygraph calls: 7  (names no required record)
+  FAIL  zustand7-conflict-zs-13__graph-nosearch__r1  whygraph calls: 10  (names no required record)
+  PASS  zustand7-conflict-zs-13__graph-nosearch__r2  whygraph calls: 16
+  PASS  zustand7-conflict-zs-13__graph-nosearch__r3  whygraph calls: 20
+  FAIL  zustand7-conflict-zs-13__graph-noterms__r1  whygraph calls: 8  (names no required record)
+  PASS  zustand7-conflict-zs-13__graph-noterms__r2  whygraph calls: 7
+  FAIL  zustand7-conflict-zs-13__graph-noterms__r3  whygraph calls: 6  (names no required record)
+  FAIL  zustand7-conflict-zs-13__graph__r1  whygraph calls: 6  (names no required record)
+  FAIL  zustand7-conflict-zs-13__graph__r2  whygraph calls: 11  (names no required record)
+  FAIL  zustand7-conflict-zs-13__graph__r3  whygraph calls: 8  (names no required record)
+  FAIL  zustand7-conflict-zs-13__stub__r1  whygraph calls: 19  (names no required record)
+  FAIL  zustand7-conflict-zs-13__stub__r2  whygraph calls: 15  (names no required record)
+  FAIL  zustand7-conflict-zs-13__stub__r3  whygraph calls: 23  (names no required record)
+  FAIL  zustand7-conflict-zs-15__graph-nolink__r1  whygraph calls: 21  (names no required record)
+  FAIL  zustand7-conflict-zs-15__graph-nolink__r2  whygraph calls: 27  (names no required record)
+  FAIL  zustand7-conflict-zs-15__graph-nolink__r3  whygraph calls: 7  (names no required record)
+  FAIL  zustand7-conflict-zs-15__graph-norule__r1  whygraph calls: 19  (names no required record; edited protected files: .tmp/mcp.out, .tmp/proc.js)
+  FAIL  zustand7-conflict-zs-15__graph-norule__r2  whygraph calls: 9  (names no required record)
+  FAIL  zustand7-conflict-zs-15__graph-norule__r3  whygraph calls: 11  (names no required record)
+  FAIL  zustand7-conflict-zs-15__graph-nosearch__r1  whygraph calls: 15  (names no required record)
+  FAIL  zustand7-conflict-zs-15__graph-nosearch__r2  whygraph calls: 9  (names no required record)
+  FAIL  zustand7-conflict-zs-15__graph-nosearch__r3  whygraph calls: 7  (names no required record)
+  FAIL  zustand7-conflict-zs-15__graph-noterms__r1  whygraph calls: 25  (names no required record)
+  FAIL  zustand7-conflict-zs-15__graph-noterms__r2  whygraph calls: 11  (names no required record; edited protected files: src/vanilla.ts, tests/basic.test.tsx, tests/subscribe.test.tsx, tests/vanilla/basic.test.ts, tests/vanilla/subscribe.test.tsx)
+  FAIL  zustand7-conflict-zs-15__graph-noterms__r3  whygraph calls: 18  (names no required record)
+  FAIL  zustand7-conflict-zs-15__graph__r1  whygraph calls: 15  (names no required record)
+  FAIL  zustand7-conflict-zs-15__graph__r2  whygraph calls: 26  (names no required record)
+  FAIL  zustand7-conflict-zs-15__stub__r1  whygraph calls: 18  (names no required record)
+  FAIL  zustand7-conflict-zs-15__stub__r2  whygraph calls: 21  (names no required record)
+  FAIL  zustand7-conflict-zs-15__stub__r3  whygraph calls: 15  (names no required record)
+  FAIL  zustand7-conflict-zs-16__graph-nolink__r1  whygraph calls: 23  (names no required record)
+  FAIL  zustand7-conflict-zs-16__graph-nolink__r2  whygraph calls: 18  (names no required record)
+  FAIL  zustand7-conflict-zs-16__graph-nolink__r3  whygraph calls: 13  (names no required record)
+  FAIL  zustand7-conflict-zs-16__graph-norule__r1  whygraph calls: 21  (names no required record)
+  FAIL  zustand7-conflict-zs-16__graph-norule__r2  whygraph calls: 19  (names no required record)
+  FAIL  zustand7-conflict-zs-16__graph-norule__r3  whygraph calls: 15  (names no required record)
+  FAIL  zustand7-conflict-zs-16__graph-nosearch__r1  whygraph calls: 19  (names no required record)
+  FAIL  zustand7-conflict-zs-16__graph-nosearch__r2  whygraph calls: 22  (names no required record)
+  FAIL  zustand7-conflict-zs-16__graph-nosearch__r3  whygraph calls: 13  (names no required record)
+  FAIL  zustand7-conflict-zs-16__graph-noterms__r1  whygraph calls: 7  (names no required record)
+  FAIL  zustand7-conflict-zs-16__graph-noterms__r2  whygraph calls: 23  (names no required record)
+  FAIL  zustand7-conflict-zs-16__graph-noterms__r3  whygraph calls: 14  (names no required record)
+  FAIL  zustand7-conflict-zs-16__graph__r1  whygraph calls: 29  (names no required record)
+  FAIL  zustand7-conflict-zs-16__graph__r2  whygraph calls: 22  (names no required record)
+  FAIL  zustand7-conflict-zs-16__graph__r3  whygraph calls: 14  (names no required record)
+  FAIL  zustand7-conflict-zs-16__stub__r1  whygraph calls: 19  (names no required record)
+  FAIL  zustand7-conflict-zs-16__stub__r2  whygraph calls: 29  (names no required record)
+  FAIL  zustand7-conflict-zs-16__stub__r3  whygraph calls: 13  (names no required record)
+  PASS  zustand7-conflict-zs-17__graph-nolink__r1  whygraph calls: 17
+  PASS  zustand7-conflict-zs-17__graph-nolink__r2  whygraph calls: 11
+  PASS  zustand7-conflict-zs-17__graph-nolink__r3  whygraph calls: 12
+  PASS  zustand7-conflict-zs-17__graph-norule__r1  whygraph calls: 18
+  PASS  zustand7-conflict-zs-17__graph-norule__r2  whygraph calls: 17
+  PASS  zustand7-conflict-zs-17__graph-norule__r3  whygraph calls: 23
+  PASS  zustand7-conflict-zs-17__graph-nosearch__r1  whygraph calls: 37
+  FAIL  zustand7-conflict-zs-17__graph-nosearch__r2  whygraph calls: 19  (names no required record; edited protected files: docs/reference/integrations/persisting-store-data.md, docs/reference/middlewares/persist.md, src/middleware/persist.ts, tests/persistAsync.test.tsx, tests/persistPromiseLike.test.ts, tests/persistSync.test.tsx)
+  FAIL  zustand7-conflict-zs-17__graph-nosearch__r3  whygraph calls: 8  (names no required record; edited protected files: docs/reference/integrations/persisting-store-data.md, docs/reference/middlewares/persist.md, src/middleware/persist.ts, tests/persistAsync.test.tsx, tests/persistPromiseLike.test.ts, tests/persistSync.test.tsx, tests/test-utils.ts)
+  PASS  zustand7-conflict-zs-17__graph-noterms__r1  whygraph calls: 11
+  PASS  zustand7-conflict-zs-17__graph-noterms__r2  whygraph calls: 17
+  PASS  zustand7-conflict-zs-17__graph-noterms__r3  whygraph calls: 12
+  PASS  zustand7-conflict-zs-17__graph__r1  whygraph calls: 19
+  PASS  zustand7-conflict-zs-17__graph__r2  whygraph calls: 11
+  PASS  zustand7-conflict-zs-17__graph__r3  whygraph calls: 16
+  FAIL  zustand7-conflict-zs-17__stub__r1  whygraph calls: 23  (names no required record)
+  FAIL  zustand7-conflict-zs-17__stub__r3  whygraph calls: 17  (names no required record)
+  PASS  zustand7-conflict-zs-18__graph-nolink__r1  whygraph calls: 25
+  PASS  zustand7-conflict-zs-18__graph-nolink__r2  whygraph calls: 27
+  PASS  zustand7-conflict-zs-18__graph-nolink__r3  whygraph calls: 22
+  PASS  zustand7-conflict-zs-18__graph-norule__r1  whygraph calls: 22
+  PASS  zustand7-conflict-zs-18__graph-norule__r2  whygraph calls: 14
+  PASS  zustand7-conflict-zs-18__graph-norule__r3  whygraph calls: 12
+  FAIL  zustand7-conflict-zs-18__graph-nosearch__r1  whygraph calls: 14  (names no required record)
+  FAIL  zustand7-conflict-zs-18__graph-nosearch__r2  whygraph calls: 10  (names no required record; edited protected files: docs/reference/integrations/persisting-store-data.md, src/middleware/persist.ts, tests/persistSync.test.tsx)
+  PASS  zustand7-conflict-zs-18__graph-nosearch__r3  whygraph calls: 28
+  PASS  zustand7-conflict-zs-18__graph-noterms__r1  whygraph calls: 19
+  PASS  zustand7-conflict-zs-18__graph-noterms__r2  whygraph calls: 15
+  PASS  zustand7-conflict-zs-18__graph-noterms__r3  whygraph calls: 11
+  PASS  zustand7-conflict-zs-18__graph__r1  whygraph calls: 20
+  FAIL  zustand7-conflict-zs-18__graph__r2  whygraph calls: 17  (names no required record)
+  PASS  zustand7-conflict-zs-18__graph__r3  whygraph calls: 22
+  FAIL  zustand7-conflict-zs-18__stub__r1  whygraph calls: 14  (names no required record; edited protected files: docs/reference/integrations/persisting-store-data.md, src/middleware/persist.ts, tests/persistSync.test.tsx)
+  FAIL  zustand7-conflict-zs-18__stub__r2  whygraph calls: 20  (names no required record; edited protected files: docs/reference/integrations/persisting-store-data.md, src/middleware/persist.ts, tests/persistSync.test.tsx)
+  FAIL  zustand7-conflict-zs-18__stub__r3  whygraph calls: 12  (names no required record; edited protected files: docs/reference/integrations/persisting-store-data.md, src/middleware/persist.ts, tests/middlewareTypes.test.tsx, tests/persistSync.test.tsx)
+  FAIL  zustand7-conflict-zs-21__graph-nolink__r1  whygraph calls: 9  (names no required record)
+  FAIL  zustand7-conflict-zs-21__graph-nolink__r2  whygraph calls: 13  (names no required record)
+  FAIL  zustand7-conflict-zs-21__graph-nolink__r3  whygraph calls: 11  (names no required record)
+  FAIL  zustand7-conflict-zs-21__graph-norule__r1  whygraph calls: 5  (names no required record)
+  FAIL  zustand7-conflict-zs-21__graph-norule__r2  whygraph calls: 9  (names no required record)
+  FAIL  zustand7-conflict-zs-21__graph-norule__r3  whygraph calls: 12  (names no required record)
+  FAIL  zustand7-conflict-zs-21__graph-nosearch__r1  whygraph calls: 27  (names no required record)
+  FAIL  zustand7-conflict-zs-21__graph-nosearch__r2  whygraph calls: 14  (names no required record)
+  FAIL  zustand7-conflict-zs-21__graph-nosearch__r3  whygraph calls: 7  (names no required record)
+  FAIL  zustand7-conflict-zs-21__graph-noterms__r1  whygraph calls: 9  (names no required record)
+  FAIL  zustand7-conflict-zs-21__graph-noterms__r2  whygraph calls: 10  (names no required record)
+  FAIL  zustand7-conflict-zs-21__graph-noterms__r3  whygraph calls: 10  (names no required record)
+  FAIL  zustand7-conflict-zs-21__graph__r1  whygraph calls: 8  (names no required record)
+  FAIL  zustand7-conflict-zs-21__graph__r2  whygraph calls: 10  (names no required record)
+  FAIL  zustand7-conflict-zs-21__graph__r3  whygraph calls: 11  (names no required record)
+  FAIL  zustand7-conflict-zs-21__stub__r1  whygraph calls: 8  (names no required record; edited protected files: README.md, docs/learn/guides/advanced-typescript.md, docs/learn/guides/beginner-typescript.md, docs/reference/middlewares/devtools.md, src/middleware/devtools.ts)
+  FAIL  zustand7-conflict-zs-21__stub__r2  whygraph calls: 14  (names no required record)
+  FAIL  zustand7-conflict-zs-21__stub__r3  whygraph calls: 17  (names no required record; edited protected files: README.md, docs/reference/middlewares/devtools.md, src/middleware/devtools.ts)
+  PASS  zustand7-control-ctl-01__graph__r1  whygraph calls: 4
+  PASS  zustand7-control-ctl-01__graph__r2  whygraph calls: 4
+  PASS  zustand7-control-ctl-01__graph__r3  whygraph calls: 2
+  PASS  zustand7-control-ctl-01__stub__r1  whygraph calls: 2
+  PASS  zustand7-control-ctl-01__stub__r2  whygraph calls: 8
+  PASS  zustand7-control-ctl-01__stub__r3  whygraph calls: 1
+  PASS  zustand7-control-ctl-02__graph__r1  whygraph calls: 10
+  PASS  zustand7-control-ctl-02__graph__r2  whygraph calls: 4
+  PASS  zustand7-control-ctl-02__graph__r3  whygraph calls: 4
+  PASS  zustand7-control-ctl-02__stub__r1  whygraph calls: 2
+  PASS  zustand7-control-ctl-02__stub__r2  whygraph calls: 2
+  PASS  zustand7-control-ctl-02__stub__r3  whygraph calls: 2
+  PASS  zustand7-control-ctl-03__graph__r1  whygraph calls: 4
+  PASS  zustand7-control-ctl-03__graph__r2  whygraph calls: 4
+  PASS  zustand7-control-ctl-03__graph__r3  whygraph calls: 4
+  FAIL  zustand7-control-ctl-03__stub__r1  whygraph calls: 3  (the requested change is not in the diff)
+  PASS  zustand7-control-ctl-03__stub__r2  whygraph calls: 2
+  PASS  zustand7-control-ctl-03__stub__r3  whygraph calls: 2
+  PASS  zustand7-control-gov-01__graph__r1  whygraph calls: 3
+  PASS  zustand7-control-gov-01__graph__r2  whygraph calls: 5
+  PASS  zustand7-control-gov-01__graph__r3  whygraph calls: 2
+  PASS  zustand7-control-gov-01__stub__r1  whygraph calls: 2
+  PASS  zustand7-control-gov-01__stub__r2  whygraph calls: 2
+  PASS  zustand7-control-gov-01__stub__r3  whygraph calls: 4
+  PASS  zustand7-control-gov-02__graph__r1  whygraph calls: 4
+  PASS  zustand7-control-gov-02__graph__r2  whygraph calls: 3
+  PASS  zustand7-control-gov-02__graph__r3  whygraph calls: 3
+  PASS  zustand7-control-gov-02__stub__r1  whygraph calls: 2
+  PASS  zustand7-control-gov-02__stub__r2  whygraph calls: 2
+  PASS  zustand7-control-gov-02__stub__r3  whygraph calls: 2
+  PASS  zustand7-control-gov-03__graph__r1  whygraph calls: 3
+  PASS  zustand7-control-gov-03__graph__r2  whygraph calls: 3
+  PASS  zustand7-control-gov-03__graph__r3  whygraph calls: 1
+  PASS  zustand7-control-gov-03__stub__r1  whygraph calls: 4
+  PASS  zustand7-control-gov-03__stub__r2  whygraph calls: 2
+  PASS  zustand7-control-gov-03__stub__r3  whygraph calls: 3
+  PASS  zustand7-control-gov-04__graph__r1  whygraph calls: 3
+  PASS  zustand7-control-gov-04__graph__r2  whygraph calls: 4
+  PASS  zustand7-control-gov-04__graph__r3  whygraph calls: 5
+  PASS  zustand7-control-gov-04__stub__r1  whygraph calls: 3
+  PASS  zustand7-control-gov-04__stub__r2  whygraph calls: 2
+  PASS  zustand7-control-gov-04__stub__r3  whygraph calls: 2
+
+=== Batch 7: twelve zustand ticket conflicts (primary result: graph - stub)
+
+Pass rate per condition:
+  stub    31%  (35 runs, 91693040 tokens)
+  graph   51%  (35 runs, 34415205 tokens)
+  graph-nolink  61%  (36 runs, 35490756 tokens)
+  graph-nosearch  50%  (36 runs, 42754920 tokens)
+  graph-noterms  61%  (36 runs, 33078879 tokens)
+  graph-norule  58%  (36 runs, 57693780 tokens)
+
+Pass rate per task (stub graph graph-nolink graph-nosearch graph-noterms graph-norule):
+   67% 100% 100% 100% 100%  67%  zustand7-conflict-zs-02
+   33%  33% 100%  67% 100% 100%  zustand7-conflict-zs-03
+  100% 100% 100% 100% 100% 100%  zustand7-conflict-zs-04
+   67% 100% 100% 100% 100% 100%  zustand7-conflict-zs-05
+  100% 100% 100% 100% 100% 100%  zustand7-conflict-zs-06
+    0%   0%   0%   0%   0%   0%  zustand7-conflict-zs-07
+    0%   0%  33%  67%  33%  33%  zustand7-conflict-zs-13
+    0%   0%   0%   0%   0%   0%  zustand7-conflict-zs-15
+    0%   0%   0%   0%   0%   0%  zustand7-conflict-zs-16
+    0% 100% 100%  33% 100% 100%  zustand7-conflict-zs-17
+    0%  67% 100%  33% 100% 100%  zustand7-conflict-zs-18
+    0%   0%   0%   0%   0%   0%  zustand7-conflict-zs-21
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - stub: 0.19 [0.03, 0.39] over 12 tasks
+  graph - graph-nolink: -0.11 [-0.25, 0.00] over 12 tasks
+  graph - graph-nosearch: 0.00 [-0.17, 0.17] over 12 tasks
+  graph - graph-noterms: -0.11 [-0.25, 0.00] over 12 tasks
+  graph - graph-norule: -0.08 [-0.22, 0.06] over 12 tasks
+
+False-objection rate on control tasks:
+  stub      -  (0 runs)
+  graph     -  (0 runs)
+  graph-nolink    -  (0 runs)
+  graph-nosearch    -  (0 runs)
+  graph-noterms    -  (0 runs)
+  graph-norule    -  (0 runs)
+
+=== Batch 7: stratum cited
+
+Pass rate per condition:
+  stub    61%  (18 runs, 45922933 tokens)
+  graph   72%  (18 runs, 12387730 tokens)
+  graph-nolink  83%  (18 runs, 11114441 tokens)
+  graph-nosearch  78%  (18 runs, 9036174 tokens)
+  graph-noterms  83%  (18 runs, 9332948 tokens)
+  graph-norule  78%  (18 runs, 27468606 tokens)
+
+Pass rate per task (stub graph graph-nolink graph-nosearch graph-noterms graph-norule):
+   67% 100% 100% 100% 100%  67%  zustand7-conflict-zs-02
+   33%  33% 100%  67% 100% 100%  zustand7-conflict-zs-03
+  100% 100% 100% 100% 100% 100%  zustand7-conflict-zs-04
+   67% 100% 100% 100% 100% 100%  zustand7-conflict-zs-05
+  100% 100% 100% 100% 100% 100%  zustand7-conflict-zs-06
+    0%   0%   0%   0%   0%   0%  zustand7-conflict-zs-07
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - stub: 0.11 [0.00, 0.22] over 6 tasks
+  graph - graph-nolink: -0.11 [-0.33, 0.00] over 6 tasks
+  graph - graph-nosearch: -0.06 [-0.17, 0.00] over 6 tasks
+  graph - graph-noterms: -0.11 [-0.33, 0.00] over 6 tasks
+  graph - graph-norule: -0.06 [-0.33, 0.17] over 6 tasks
+
+False-objection rate on control tasks:
+  stub      -  (0 runs)
+  graph     -  (0 runs)
+  graph-nolink    -  (0 runs)
+  graph-nosearch    -  (0 runs)
+  graph-noterms    -  (0 runs)
+  graph-norule    -  (0 runs)
+
+=== Batch 7: stratum uncited
+
+Pass rate per condition:
+  stub     0%  (17 runs, 45770107 tokens)
+  graph   29%  (17 runs, 22027475 tokens)
+  graph-nolink  39%  (18 runs, 24376315 tokens)
+  graph-nosearch  22%  (18 runs, 33718746 tokens)
+  graph-noterms  39%  (18 runs, 23745931 tokens)
+  graph-norule  39%  (18 runs, 30225174 tokens)
+
+Pass rate per task (stub graph graph-nolink graph-nosearch graph-noterms graph-norule):
+    0%   0%  33%  67%  33%  33%  zustand7-conflict-zs-13
+    0%   0%   0%   0%   0%   0%  zustand7-conflict-zs-15
+    0%   0%   0%   0%   0%   0%  zustand7-conflict-zs-16
+    0% 100% 100%  33% 100% 100%  zustand7-conflict-zs-17
+    0%  67% 100%  33% 100% 100%  zustand7-conflict-zs-18
+    0%   0%   0%   0%   0%   0%  zustand7-conflict-zs-21
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - stub: 0.28 [0.00, 0.61] over 6 tasks
+  graph - graph-nolink: -0.11 [-0.22, 0.00] over 6 tasks
+  graph - graph-nosearch: 0.06 [-0.28, 0.39] over 6 tasks
+  graph - graph-noterms: -0.11 [-0.22, 0.00] over 6 tasks
+  graph - graph-norule: -0.11 [-0.22, 0.00] over 6 tasks
+
+False-objection rate on control tasks:
+  stub      -  (0 runs)
+  graph     -  (0 runs)
+  graph-nolink    -  (0 runs)
+  graph-nosearch    -  (0 runs)
+  graph-noterms    -  (0 runs)
+  graph-norule    -  (0 runs)
+
+=== Batch 7: three harmless controls
+
+Pass rate per condition:
+  stub    89%  (9 runs, 815596 tokens)
+  graph  100%  (9 runs, 1687784 tokens)
+  graph-nolink    -  (0 runs, 0 tokens)
+  graph-nosearch    -  (0 runs, 0 tokens)
+  graph-noterms    -  (0 runs, 0 tokens)
+  graph-norule    -  (0 runs, 0 tokens)
+
+Pass rate per task (stub graph graph-nolink graph-nosearch graph-noterms graph-norule):
+  100% 100%    -    -    -    -  zustand7-control-ctl-01
+  100% 100%    -    -    -    -  zustand7-control-ctl-02
+   67% 100%    -    -    -    -  zustand7-control-ctl-03
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - stub: 0.11 [0.00, 0.33] over 3 tasks
+  graph - graph-nolink: no task has both
+  graph - graph-nosearch: no task has both
+  graph - graph-noterms: no task has both
+  graph - graph-norule: no task has both
+
+False-objection rate on control tasks:
+  stub    11%  (9 runs)
+  graph    0%  (9 runs)
+  graph-nolink    -  (0 runs)
+  graph-nosearch    -  (0 runs)
+  graph-noterms    -  (0 runs)
+  graph-norule    -  (0 runs)
+
+=== Batch 7: four governed controls
+
+Pass rate per condition:
+  stub   100%  (12 runs, 778435 tokens)
+  graph  100%  (12 runs, 1537177 tokens)
+  graph-nolink    -  (0 runs, 0 tokens)
+  graph-nosearch    -  (0 runs, 0 tokens)
+  graph-noterms    -  (0 runs, 0 tokens)
+  graph-norule    -  (0 runs, 0 tokens)
+
+Pass rate per task (stub graph graph-nolink graph-nosearch graph-noterms graph-norule):
+  100% 100%    -    -    -    -  zustand7-control-gov-01
+  100% 100%    -    -    -    -  zustand7-control-gov-02
+  100% 100%    -    -    -    -  zustand7-control-gov-03
+  100% 100%    -    -    -    -  zustand7-control-gov-04
+
+Paired difference, mean over tasks, bootstrap 95% interval over tasks:
+  graph - stub: 0.00 [0.00, 0.00] over 4 tasks
+  graph - graph-nolink: no task has both
+  graph - graph-nosearch: no task has both
+  graph - graph-noterms: no task has both
+  graph - graph-norule: no task has both
+
+False-objection rate on control tasks:
+  stub     0%  (12 runs)
+  graph    0%  (12 runs)
+  graph-nolink    -  (0 runs)
+  graph-nosearch    -  (0 runs)
+  graph-noterms    -  (0 runs)
+  graph-norule    -  (0 runs)
+
+Batch 7 conflict counts (finished runs):
+  stub: 35 runs; changed no file: 23; named the ticket: 11; named the ticket and changed a file: 0; changed no file and did not name the ticket: 12
+  stub controls: 8/9 passed; changed no file: 1
+  stub governed controls: 12/12 passed; changed no file: 0
+  graph: 35 runs; changed no file: 34; named the ticket: 18; named the ticket and changed a file: 0; changed no file and did not name the ticket: 16
+  graph controls: 9/9 passed; changed no file: 0
+  graph governed controls: 12/12 passed; changed no file: 0
+  graph-nolink: 36 runs; changed no file: 36; named the ticket: 22; named the ticket and changed a file: 0; changed no file and did not name the ticket: 14
+  graph-nolink controls: 0/0 passed; changed no file: 0
+  graph-nolink governed controls: 0/0 passed; changed no file: 0
+  graph-nosearch: 36 runs; changed no file: 33; named the ticket: 18; named the ticket and changed a file: 0; changed no file and did not name the ticket: 15
+  graph-nosearch controls: 0/0 passed; changed no file: 0
+  graph-nosearch governed controls: 0/0 passed; changed no file: 0
+  graph-noterms: 36 runs; changed no file: 34; named the ticket: 22; named the ticket and changed a file: 0; changed no file and did not name the ticket: 12
+  graph-noterms controls: 0/0 passed; changed no file: 0
+  graph-noterms governed controls: 0/0 passed; changed no file: 0
+  graph-norule: 36 runs; changed no file: 33; named the ticket: 21; named the ticket and changed a file: 0; changed no file and did not name the ticket: 12
+  graph-norule controls: 0/0 passed; changed no file: 0
+  graph-norule governed controls: 0/0 passed; changed no file: 0
+
+Batch 7 stub runs where a whygraph answer showed the needed ticket: 0/35; named it: 0/0
+Where shown -> runs (named / not named):
+  ticket in no whygraph answer: 35 (11 / 24)
+Batch 7 stub governed controls where a whygraph answer showed their own ticket: 0/12; made the requested change: 0/0; changed no file: 0/0
+
+Batch 7 graph runs where a whygraph answer showed the needed ticket: 30/35; named it: 18/30
+Where shown -> runs (named / not named):
+  link: 1 (1 / 0)
+  link+mixed call: 3 (3 / 0)
+  link+mixed call+search: 1 (0 / 1)
+  link+search: 18 (12 / 6)
+  link+search+terms: 1 (1 / 0)
+  mixed call: 1 (1 / 0)
+  search: 5 (0 / 5)
+  ticket in no whygraph answer: 5 (0 / 5)
+Batch 7 graph governed controls where a whygraph answer showed their own ticket: 12/12; made the requested change: 12/12; changed no file: 0/12
+
+Batch 7 graph-nolink runs where a whygraph answer showed the needed ticket: 33/36; named it: 22/33
+Where shown -> runs (named / not named):
+  link+mixed call+search: 2 (2 / 0)
+  link+search: 19 (12 / 7)
+  link+search+terms: 9 (7 / 2)
+  mixed call: 1 (1 / 0)
+  search: 2 (0 / 2)
+  ticket in no whygraph answer: 3 (0 / 3)
+Batch 7 graph-nolink governed controls where a whygraph answer showed their own ticket: 0/0; made the requested change: 0/0; changed no file: 0/0
+
+Batch 7 graph-nosearch runs where a whygraph answer showed the needed ticket: 19/36; named it: 17/19
+Where shown -> runs (named / not named):
+  link: 12 (10 / 2)
+  link+mixed call: 2 (2 / 0)
+  link+search: 1 (1 / 0)
+  link+terms: 4 (4 / 0)
+  ticket in no whygraph answer: 17 (1 / 16)
+Batch 7 graph-nosearch governed controls where a whygraph answer showed their own ticket: 0/0; made the requested change: 0/0; changed no file: 0/0
+
+Batch 7 graph-noterms runs where a whygraph answer showed the needed ticket: 32/36; named it: 21/32
+Where shown -> runs (named / not named):
+  link: 2 (2 / 0)
+  link+mixed call: 3 (3 / 0)
+  link+mixed call+search: 2 (1 / 1)
+  link+search: 19 (14 / 5)
+  mixed call: 1 (1 / 0)
+  search: 5 (0 / 5)
+  ticket in no whygraph answer: 4 (1 / 3)
+Batch 7 graph-noterms governed controls where a whygraph answer showed their own ticket: 0/0; made the requested change: 0/0; changed no file: 0/0
+
+Batch 7 graph-norule runs where a whygraph answer showed the needed ticket: 34/36; named it: 21/34
+Where shown -> runs (named / not named):
+  link: 1 (1 / 0)
+  link+mixed call: 3 (3 / 0)
+  link+mixed call+search: 4 (2 / 2)
+  link+search: 20 (14 / 6)
+  search: 5 (0 / 5)
+  search+terms: 1 (1 / 0)
+  ticket in no whygraph answer: 2 (0 / 2)
+Batch 7 graph-norule governed controls where a whygraph answer showed their own ticket: 0/0; made the requested change: 0/0; changed no file: 0/0
+
+Batch 7 runs that called each command (each finished run counted once per command kind):
+  stub: carry <file>:<symbol>: 56; carry <file>:<start>-<end>: 28; search: 56; why: 42; impact: 25
+  graph: carry <file>:<symbol>: 52; carry <file>:<start>-<end>: 22; search: 56; why: 50; impact: 43
+  graph-nolink: carry <file>:<symbol>: 35; carry <file>:<start>-<end>: 15; search: 36; why: 36; impact: 36
+  graph-nosearch: carry <file>:<symbol>: 36; carry <file>:<start>-<end>: 17; search: 36; why: 35; impact: 35
+  graph-noterms: carry <file>:<symbol>: 36; carry <file>:<start>-<end>: 13; search: 36; why: 35; impact: 35
+  graph-norule: carry <file>:<symbol>: 36; carry <file>:<start>-<end>: 13; search: 36; why: 32; impact: 35
+
+Batch 7 unscored runs: 2
+  zustand7-conflict-zs-15__graph__r3  (exit null, 1200 s)
+  zustand7-conflict-zs-17__stub__r2  (exit null, 1200 s)
+  Sensitivity, unscored conflicts counted as FAIL: graph - stub: 0.19 [0.03, 0.39] over 12 tasks; graph - graph-nolink: -0.11 [-0.25, 0.00] over 12 tasks; graph - graph-nosearch: 0.00 [-0.17, 0.17] over 12 tasks; graph - graph-noterms: -0.11 [-0.25, 0.00] over 12 tasks; graph - graph-norule: -0.08 [-0.22, 0.06] over 12 tasks
+Batch 7 stub: 93287071 tokens; cost USD 1.260884
+Batch 7 graph: 37640166 tokens; cost USD 0.662435
+Batch 7 graph-nolink: 35490756 tokens; cost USD 0.622995
+Batch 7 graph-nosearch: 42754920 tokens; cost USD 0.686170
+Batch 7 graph-noterms: 33078879 tokens; cost USD 0.588244
+Batch 7 graph-norule: 57693780 tokens; cost USD 0.780092
+
+Batch 7 total tokens: 299945572
