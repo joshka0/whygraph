@@ -15,6 +15,90 @@ or you, asks before changing code:
 - **search**: which decision record best matches this change, when no tag or
   commit links it to the code?
 
+## How and why we use Relate
+
+whygraph runs Relate as an embedded database through its CLI. A decision
+can name a commit without naming a function. Cypher follows the decision to
+the commit and from the commit to each symbol it changed. It can also
+follow calls between symbols or find a decision named directly in a code
+comment. The CLI and the read-only MCP server use the same query recipes.
+
+## Where the data lives
+
+[examples/shop.rl](examples/shop.rl) contains the shop graph, with 93
+nodes and 139 relationships. When you build a graph for your own repo,
+whygraph writes the store under its Git directory at `whygraph/store`.
+Code, history and decisions stay local. The first build downloads about
+35 MB of embedding weights for `Xenova/bge-small-en-v1.5` into
+`~/.cache/whygraph`. Later builds and searches reuse them.
+
+## Set up
+
+Use Linux or macOS with Bash, Git, Node.js 26 or later, pnpm 10 and the
+Relate CLI. We tested pnpm 10.28.2 and Relate 1.0.1. Check the latter with
+`relate --version`. [Install Relate](https://relatedb.ai/).
+
+```sh
+git clone https://github.com/joshka0/whygraph.git
+cd whygraph
+pnpm install --frozen-lockfile
+export WHYGRAPH="$PWD"
+export PATH="$WHYGRAPH/bin:$WHYGRAPH/node_modules/.bin:$PATH"
+```
+
+Node runs the TypeScript source directly. The install includes the built
+memod CLI from commit `d0b4d68` and the ONNX runtime for local search.
+
+## Quickstart
+
+Find the commits that connect the thousands-separators decision to the
+formatter. Run this query from the whygraph checkout. It reads the bundled
+graph and works offline.
+
+```sh
+relate --database examples/shop.rl --read-only --csv \
+  'MATCH (d:Decision {id: "note-2"})-[:CITES]->(c:Commit)-[:CHANGES]->(s:Symbol)
+   WHERE s.name = "formatCents"
+   RETURN DISTINCT d.title AS decision, c.short AS commit, s.name AS symbol ORDER BY commit'
+```
+
+```text
+decision,commit,symbol
+Show thousands separators in totals,73ebd46,formatCents
+Show thousands separators in totals,a3bcb76,formatCents
+```
+
+To explore other relationships, open the same file in the Relate shell
+with `relate --database examples/shop.rl --read-only`. To rebuild the
+graph and ask whygraph about the source code, follow
+[Try it on the fixture](#try-it-on-the-fixture).
+
+## Measured results and limits
+
+On 20 Hono change requests (batch 6), the graph led the stub by 31
+percentage points (95% paired bootstrap interval, 15 to 48). The stub
+gave the agent the same commands and returned no results.
+
+On 12 Zustand conflict tasks (batch 7), agents passed 51% of scored runs
+with the graph and 31% with the stub. The paired mean difference across
+tasks was 19 points (95% interval, 3 to 39). The 35 scored graph runs
+used 34.4 million tokens. The 35 scored stub runs used 91.7 million.
+Those totals cover conflict runs only.
+
+Removing links, search, shared terms or the agent rule produced scores
+within the uncertainty of the full graph or higher. The pilot cannot
+attribute the gain to one part. Four of the twelve tasks failed in every
+condition. On harmless controls, the graph raised false objections in
+0 of 9 runs and the stub in 1 of 9 (11%). On governed controls, neither
+raised a false objection in 12 runs per condition. These trials measure
+responses to selected requests. They do not establish a gain for other
+repos or models, or the quality of changes after a person approves them.
+
+[Read the pilot exceptions](eval/README.md#zustand-pilot-exceptions) and
+[the complete score report](eval/score.txt).
+
+## What the graph tells you before an edit
+
 Here is the question an agent asks before it edits `formatCents` in the small
 shop repo that comes with whygraph. The code of `formatCents` mentions no
 decision. The graph finds two: ADR-0001 through the commits that changed it,
@@ -72,50 +156,6 @@ Decision records that share the most distinctive terms with its code (candidates
 
 An agent that reads this before it removes the separators can tell you that
 the change reverses `note-2`, instead of making it silently.
-
-## Requirements
-
-- Linux or macOS, with `bash`, `git` and Node 26 or later.
-- pnpm 10.
-- [relate](https://relatedb.ai) 1.0.1, an embedded Cypher graph database, as
-  the `relate` CLI on `PATH`. whygraph stores and queries the graph with it.
-  Check with `relate --version`.
-- memod, at commit `d0b4d68` of its `main` branch. memod is a separate
-  tool by the same author: it reads a repo's code, doc-comment tags and git
-  history into a graph (`memod graph --history`), and whygraph loads that
-  graph. memod has no public release. This repo gets it as a dev dependency
-  pinned in `package.json` to a local clone:
-  `git+file:///home/dev/repos/personal/memod#d0b4d68...`. To install whygraph
-  you need a memod clone that holds that commit, at that path or at a path
-  you write into `package.json` instead.
-
-whygraph has one runtime dependency, `@huggingface/transformers`, which runs
-a local ONNX model to rank decision records by meaning for `whygraph
-search`. It otherwise runs `git`, `memod` and `relate` as child processes.
-Every `relate` call it makes sets `RELATE_TELEMETRY=0` and `DO_NOT_TRACK=1`.
-
-The model is `Xenova/bge-small-en-v1.5` (384 dimensions, cosine). The first
-`whygraph build` downloads it: about 35 MB of weights into `~/.cache/whygraph`.
-Later builds and every `search` read it from there. With no network and no
-cache, `build` and `search` exit 1 with an error that names the model; they
-do not fall back to the word search alone.
-
-## Set up
-
-In the folder where you cloned whygraph:
-
-```sh
-pnpm install
-export WHYGRAPH="$PWD"
-export PATH="$WHYGRAPH/bin:$WHYGRAPH/node_modules/.bin:$PATH"
-```
-
-`pnpm install` builds memod from the pinned commit and installs the
-embedding runtime (about 500 MB, mostly the ONNX runtime binaries for every
-platform). `bin/` holds the `whygraph` command and `node_modules/.bin` holds
-`memod`. Put the two `export` lines in your shell profile (with the folder's
-full path in place of `$PWD`) so that every shell, and every agent you start
-from one, finds them.
 
 ```console
 $ whygraph help
