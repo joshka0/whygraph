@@ -6,7 +6,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, lstatSync, readFileSync, readdirSync, readlinkSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { harness as h } from './support.mjs';
 
@@ -284,7 +284,7 @@ contract('B21', 'a failed or malformed memod run preserves the store', 'fixture'
 contract('B22', 'a relate statement failure preserves the link and leaves no new build', 'fixture', s => {
   const builds = `${s.store.slice(0, s.store.lastIndexOf('/'))}/.store.builds`;
   const before = readdirSync(builds).sort();
-  const realRelate = resolve(process.env.HOME, '.local/bin/relate');
+  const realRelate = ok(s.run('/usr/bin/which', ['relate'])).trim();
   const body = `
 import { spawnSync } from 'node:child_process';
 import { readFileSync, appendFileSync } from 'node:fs';
@@ -771,7 +771,7 @@ contract('E3', 'help, --help and no arguments print usage successfully', 'empty'
 });
 contract('E4', 'every relate invocation disables telemetry', 'fixture-unbuilt', s => {
   const log = join(s.dir, 'relate-env.jsonl');
-  const real = resolve(process.env.HOME, '.local/bin/relate');
+  const real = ok(s.run('/usr/bin/which', ['relate'])).trim();
   const body = `
 import { appendFileSync, readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
