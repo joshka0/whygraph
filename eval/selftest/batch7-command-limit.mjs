@@ -8,6 +8,7 @@ import {chmodSync,closeSync,cpSync,existsSync,mkdirSync,readFileSync,readdirSync
 import {basename,join,resolve} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {b7 as h} from './batch7-support.mjs';
+import {trialResults} from './trial-results.mjs';
 import {batch7ClosedChecks} from './batch7-closed.mjs';
 import {batch7AttemptChecks} from './batch7-attempts.mjs';
 import {batch7SmokeChecks} from './batch7-smoke.mjs';
@@ -167,14 +168,14 @@ export async function batch7CommandLimitChecks({scratch,shared={}}){
  });
  add('B7-207 NUL frames retain base bytes and log rows outside the exec route',async()=>{const observe=revision=>rig(async f=>{const s=await f.start('stub'),c=await f.raw(s.socket,Buffer.concat([Buffer.from(s.token),frame(['why','x\0y'])]));const reply=await c.closed;return {reply,rows:rows(s.log),stats:s.service.stats()};},{revision});assert.deepEqual(await observe(),await observe('6ccfc5b'));});
  function eighthSmoke(label,run){
-  const archive=join(h.root,'eval/results/_smoke-archive/8-before-read-only-root');
+  const archive=join(trialResults(h.root),'_smoke-archive/8-before-read-only-root');
   if(!existsSync(archive))throw new Error(`B7-207 evidence is missing on this machine: ${archive}; restore the archive, this case cannot pass without it`);
   const before=h.tree(archive);
   try{
    const recorded=h.read(join(archive,'runner.log')).match(/^Agent preflight passed: .*; .*\/_preflight\/([^/\n]+)\/record\.json$/gm);
    assert.equal(recorded?.length,1,'one recorded eighth-smoke preflight');
    const preflight=recorded[0].match(/\/_preflight\/([^/\n]+)\/record\.json$/)[1];
-   const record=join(h.root,'eval/results/_preflight',preflight,'record.json');
+   const record=join(trialResults(h.root),'_preflight',preflight,'record.json');
    if(!existsSync(record))throw new Error(`B7-207 preflight evidence is missing on this machine: ${record}; restore the record, this case cannot pass without it`);
    const recordBefore=readFileSync(record),copy=h.mkdtempSync(join(scratch,'eighth-'+label+'-'));
    cpSync(archive,copy,{recursive:true});
@@ -213,7 +214,7 @@ export async function batch7CommandLimitChecks({scratch,shared={}}){
    l==='PASS condition answers'?'FAIL condition answers: service failure':l.startsWith('PASS service answered every call:')?'FAIL service answered every call: service failure':l),
    'only the two service-failure checks reject the plant; preflight, paths and other checks still pass');
  }));
- add('B7-208 batches 5 and 6 protected bytes match 6ccfc5b',()=>{const r=h.command('git',['diff','--exit-code','6ccfc5b','--','eval/opencode.mjs','eval/registry.mjs','eval/registry.json','eval/score.mjs','eval/score.txt','eval/tasks','eval/tickets/zustand','eval/tickets/hono','eval/tickets/memod','eval/tickets/memoryd','eval/selftest/batch5.mjs','eval/selftest/batch6.mjs','eval/selftest/batch5-report.mjs','eval/selftest/batch6-report.mjs']);h.ok(r);const current=fresh('plan-current'),old=fresh('plan-base');for(const at of [current,old])cpSync(join(h.root,'eval/tasks'),join(at,'eval/tasks'),{recursive:true});for(const name of ['run.mjs','opencode.mjs','registry.mjs','registry.json','closed-run.mjs','closed-store.mjs','closed-client.c'])h.write(join(old,'eval',name),h.ok(h.command('git',['show','6ccfc5b:eval/'+name])));for(const batch of [5,6])assert.deepEqual(triple(h.node(join(current,'eval/run.mjs'),['--batch',String(batch),'--plan'])),triple(h.node(join(old,'eval/run.mjs'),['--batch',String(batch),'--plan'])),'unchanged batch '+batch+' plan');});
+ add('B7-208 batches 5 and 6 protected bytes match 6ccfc5b',()=>{const r=h.command('git',['diff','--exit-code','6ccfc5b','--','eval/opencode.mjs','eval/registry.mjs','eval/registry.json','eval/score.mjs','eval/tasks','eval/tickets/zustand','eval/tickets/hono','eval/tickets/memod','eval/tickets/memoryd','eval/selftest/batch5.mjs','eval/selftest/batch6.mjs','eval/selftest/batch5-report.mjs','eval/selftest/batch6-report.mjs']);h.ok(r);assert.ok(h.read(join(h.root,'eval/score.txt')).startsWith(h.ok(h.command('git',['show','6ccfc5b'+':eval/score.txt']))),'eval/score.txt keeps the '+'6ccfc5b'+' report as its prefix; later batches only append');const current=fresh('plan-current'),old=fresh('plan-base');for(const at of [current,old])cpSync(join(h.root,'eval/tasks'),join(at,'eval/tasks'),{recursive:true});for(const name of ['run.mjs','opencode.mjs','registry.mjs','registry.json','closed-run.mjs','closed-store.mjs','closed-client.c'])h.write(join(old,'eval',name),h.ok(h.command('git',['show','6ccfc5b:eval/'+name])));for(const batch of [5,6])assert.deepEqual(triple(h.node(join(current,'eval/run.mjs'),['--batch',String(batch),'--plan'])),triple(h.node(join(old,'eval/run.mjs'),['--batch',String(batch),'--plan'])),'unchanged batch '+batch+' plan');});
  return checks;
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){

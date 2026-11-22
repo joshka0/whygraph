@@ -10,6 +10,7 @@ import {syncBuiltinESMExports} from 'node:module';
 import {join,resolve,basename} from 'node:path';
 import {pathToFileURL,fileURLToPath} from 'node:url';
 import {b7 as h} from './batch7-support.mjs';
+import {trialResults} from './trial-results.mjs';
 import {batch7ClosedChecks} from './batch7-closed.mjs';
 import {batch7AttemptChecks} from './batch7-attempts.mjs';
 import {batch7SmokeChecks} from './batch7-smoke.mjs';
@@ -25,7 +26,7 @@ const within=(p,label)=>Promise.race([p,new Promise((_,fail)=>setTimeout(()=>fai
 async function raw(socket,bytes){return within(new Promise((ok,fail)=>{const chunks=[],s=createConnection(socket);s.on('error',e=>{if(!['ECONNRESET','EPIPE'].includes(e.code))fail(e);});s.on('data',b=>chunks.push(b));s.on('connect',()=>s.end(bytes));s.on('close',()=>ok(Buffer.concat(chunks)));}),'raw request');}
 const placeholder=Buffer.from('whygraph-client-token-placeholder-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
 const archives=['6-stop-logged-as-failure','7-private-tmp-classed-as-breach'];
-function evidence(includeRoots=false){const out=[];for(const archive of archives){const at=join(h.root,'eval/results/_smoke-archive',archive),dirs=readdirSync(join(at,'_attempts')).map(name=>join(at,'_attempts',name));if(includeRoots)dirs.push(...readdirSync(at).filter(name=>existsSync(join(at,name,'tools.json'))).map(name=>join(at,name)));for(const dir of dirs){if(existsSync(join(dir,'tools.json')))out.push({archive,name:basename(dir),dir,tools:h.json(join(dir,'tools.json')),shell:rows(join(dir,'shell.jsonl')),service:rows(join(dir,'service.jsonl'))});}}return out;}
+function evidence(includeRoots=false){const out=[];for(const archive of archives){const at=join(trialResults(h.root),'_smoke-archive',archive),dirs=readdirSync(join(at,'_attempts')).map(name=>join(at,'_attempts',name));if(includeRoots)dirs.push(...readdirSync(at).filter(name=>existsSync(join(at,name,'tools.json'))).map(name=>join(at,name)));for(const dir of dirs){if(existsSync(join(dir,'tools.json')))out.push({archive,name:basename(dir),dir,tools:h.json(join(dir,'tools.json')),shell:rows(join(dir,'shell.jsonl')),service:rows(join(dir,'service.jsonl'))});}}return out;}
 const probeC=`#define _GNU_SOURCE
 #include <errno.h>
 #include <stdio.h>
@@ -159,7 +160,7 @@ export async function batch7SpyBlockChecks({scratch,shared={}}){
  add('B7-187 old-code red archived strace',()=>oldRed('strace',async f=>{const sample=archived.flatMap(a=>a.tools.map((t,index)=>({a,index,command:t.input?.command}))).find(v=>typeof v.command==='string'&&v.command.startsWith('strace '));const r=await f.shell(sample.command);assert.match(r.stdout+r.stderr,/strace: command not found/,'archived strace must be absent');}));
  add('B7-191 old-code red LD_PRELOAD hook',()=>oldRed('preload',preload));
  add('B7-192 old-code red valid raw frame without token receives reply',()=>oldRed('token-free-frame',f=>refuse(f,frame(['search','tax']))));
- add('B7-199 frozen launcher and batch 5/6 inputs match 1d5c55b',()=>{const r=h.command('git',['diff','--exit-code','1d5c55b','--','eval/opencode.mjs','eval/registry.mjs','eval/registry.json','eval/score.mjs','eval/tasks','eval/tickets/zustand','eval/tickets/hono','eval/tickets/memod','eval/tickets/memoryd','eval/score.txt','eval/selftest/batch5.mjs','eval/selftest/batch6.mjs','eval/selftest/batch5-report.mjs','eval/selftest/batch6-report.mjs']);h.ok(r);});
+ add('B7-199 frozen launcher and batch 5/6 inputs match 1d5c55b',()=>{const r=h.command('git',['diff','--exit-code','1d5c55b','--','eval/opencode.mjs','eval/registry.mjs','eval/registry.json','eval/score.mjs','eval/tasks','eval/tickets/zustand','eval/tickets/hono','eval/tickets/memod','eval/tickets/memoryd','eval/selftest/batch5.mjs','eval/selftest/batch6.mjs','eval/selftest/batch5-report.mjs','eval/selftest/batch6-report.mjs']);h.ok(r);assert.ok(h.read(join(h.root,'eval/score.txt')).startsWith(h.ok(h.command('git',['show','1d5c55b'+':eval/score.txt']))),'eval/score.txt keeps the '+'1d5c55b'+' report as its prefix; later batches only append');});
  add('B7-199 shell namespace cannot connect to launcher socket',()=>rig(async f=>{const r=await f.shell('node -e '+quote("const fs=require('fs');if(fs.existsSync('/whygraph/shell.sock'))process.exit(1);const s=require('net').createConnection('/whygraph/shell.sock');s.on('connect',()=>process.exit(1));s.on('error',e=>{console.log(e.code);process.exit(e.code==='ENOENT'?0:1)});"));h.ok(r);assert.equal(r.stdout,'ENOENT\n');}));
  // B7-209 and ADR 0011, Review findings: the final root remount is the sole addition to this baseline.
  add('B7-199 whole-agent mounts add only the B7-209 final read-only root to 1d5c55b',()=>rig(async f=>{const at=await oldCopy(),old=await apiAt(at),options={work:f.work,repo:f.repo,client:f.client,socket:f.socket,network:true,opencode:join(f.work,'stand-in.mjs')};assert.deepEqual(f.api.closedConfinement(options),[...old.closedConfinement(options),'--remount-ro','/']);}));

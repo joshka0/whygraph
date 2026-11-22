@@ -10,6 +10,7 @@ import {join,resolve} from 'node:path';
 import {pathToFileURL,fileURLToPath} from 'node:url';
 import {runInNewContext} from 'node:vm';
 import {b7 as h} from './batch7-support.mjs';
+import {trialResults} from './trial-results.mjs';
 import {batch7ClosedChecks} from './batch7-closed.mjs';
 import {batch7AttemptChecks} from './batch7-attempts.mjs';
 import {batch7SmokeChecks} from './batch7-smoke.mjs';
@@ -169,15 +170,15 @@ export async function batch7RefusalChecks({scratch,shared}){
  for(const [id,kind]of [['B7-160','client'],['B7-161','service'],['B7-162','product'],['B7-163','relate']])add(`${id} real ${kind} leak fails despite agent denial words`,()=>exposed(kind));
  add('B7-163 disabled relate version alias remains denied with exit 126',()=>exposed('denied'));
  add('B7-152 B7-166 frozen batch plans launcher inputs checks and reports stay identical',()=>{
-  const bases=['6fc48a3','d1f41cf'];const protectedPaths=['eval/opencode.mjs','eval/registry.mjs','eval/registry.json','eval/score.mjs','eval/tasks','eval/tickets/zustand','eval/tickets/hono','eval/tickets/memod','eval/tickets/memoryd','eval/score.txt','eval/selftest/batch5.mjs','eval/selftest/batch6.mjs','eval/selftest/batch5-report.mjs','eval/selftest/batch6-report.mjs'];
-  for(const base of bases){const r=h.command('git',['diff','--exit-code',base,'--',...protectedPaths]);assert.equal(r.status,0,r.stdout+r.stderr);}
+  const bases=['6fc48a3','d1f41cf'];const protectedPaths=['eval/opencode.mjs','eval/registry.mjs','eval/registry.json','eval/score.mjs','eval/tasks','eval/tickets/zustand','eval/tickets/hono','eval/tickets/memod','eval/tickets/memoryd','eval/selftest/batch5.mjs','eval/selftest/batch6.mjs','eval/selftest/batch5-report.mjs','eval/selftest/batch6-report.mjs'];
+  for(const base of bases){const r=h.command('git',['diff','--exit-code',base,'--',...protectedPaths]);assert.equal(r.status,0,r.stdout+r.stderr);assert.ok(h.read(join(h.root,'eval/score.txt')).startsWith(h.ok(h.command('git',['show',base+':eval/score.txt']))),'eval/score.txt keeps the '+base+' report as its prefix; later batches only append');}
   const at=fresh('old-plan'),taskFiles=h.command('git',['ls-tree','-r','--name-only','6fc48a3','eval/tasks']);h.ok(taskFiles);for(const p of taskFiles.stdout.trim().split('\n').filter(Boolean)){const text=h.command('git',['show',`6fc48a3:${p}`]);h.ok(text);h.write(join(at,p),text.stdout);}
   for(const base of bases){const copy=fresh('base-plan');for(const p of ['run.mjs','opencode.mjs','registry.mjs','registry.json','closed-run.mjs','closed-store.mjs','closed-client.c'])h.write(join(copy,'eval',p),h.ok(h.command('git',['show',`${base}:eval/${p}`])));cpSync(join(at,'eval/tasks'),join(copy,'eval/tasks'),{recursive:true});
    for(const batch of [5,6]){const args=['--batch',String(batch),'--plan'],current=h.node(join(at,'eval/run.mjs'),args),old=h.node(join(copy,'eval/run.mjs'),args);assert.equal(current.status,0,current.stderr);assert.deepEqual(triple(current),triple(old),`batch ${batch} plan versus ${base}`);}
   }
  });
  add('B7-167 all archived callbacks retain receipts coverage and remove four command false failures',()=>{
-  const archive=join(h.root,'eval/results/_smoke-archive/5-agent-socket-probe'),dirs=[...readdirSync(join(archive,'_invalid')).map(n=>join(archive,'_invalid',n)),...readdirSync(archive).filter(n=>existsSync(join(archive,n,'meta.json'))).map(n=>join(archive,n))].filter(dir=>existsSync(join(dir,'service.jsonl'))&&['graph','graph-nolink'].includes(h.json(join(dir,'meta.json')).condition));assert.equal(dirs.length,4);const before=h.tree(archive),virtual=new Map(),attempts=[];
+  const archive=join(trialResults(h.root),'_smoke-archive/5-agent-socket-probe'),dirs=[...readdirSync(join(archive,'_invalid')).map(n=>join(archive,'_invalid',n)),...readdirSync(archive).filter(n=>existsSync(join(archive,n,'meta.json'))).map(n=>join(archive,n))].filter(dir=>existsSync(join(dir,'service.jsonl'))&&['graph','graph-nolink'].includes(h.json(join(dir,'meta.json')).condition));assert.equal(dirs.length,4);const before=h.tree(archive),virtual=new Map(),attempts=[];
   for(const dir of dirs){const meta=h.json(join(dir,'meta.json')),events=rows(join(dir,'service.jsonl')).map(r=>r.event==='failure'&&['invalid argument count','argument too large','request too large'].includes(r.message)?{...r,event:'refused'}:r),refusals=events.filter(r=>r.event==='refused');meta.service={...meta.service,stopped:0,failures:events.filter(r=>r.event==='failure').length,reasons:events.filter(r=>r.event==='failure').map(r=>r.message),refused:refusals.length,refusalReasons:refusals.map(r=>r.message)};virtual.set(join(dir,'service.jsonl'),events.map(JSON.stringify).join('\n')+'\n');attempts.push(...selection(dir,meta));}
   const run=checker({virtual}),report=[];
   for(const a of attempts)for(const label of ['condition answers','identical agent files','closed store and tool code','service answered every call','tokens and wall time per run']){const r=run(label,[a]);verdict(r,label,label!=='identical agent files');if(label==='identical agent files')assert.match(r.stdout,/not all four tasks have manifests/);report.push({dir:a.dir,label,...r});}

@@ -7,6 +7,7 @@ import {accessSync,chmodSync,closeSync,constants,cpSync,existsSync,mkdirSync,ren
 import {join,resolve,relative} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {b7 as h} from './batch7-support.mjs';
+import {trialResults} from './trial-results.mjs';
 import {batch7ClosedChecks} from './batch7-closed.mjs';
 import {batch7AttemptChecks} from './batch7-attempts.mjs';
 import {batch7SmokeChecks} from './batch7-smoke.mjs';
@@ -82,9 +83,9 @@ export async function batch7MissingRangeFileChecks({scratch,shared={}}){
   const r=h.node(join(at,'eval/smoke-check.mjs'),['--batch','7']);h.write(join(at,'missing-smoke.json'),triple(r));for(const label of ['condition answers','service answered every call'])assert.match(r.stdout,new RegExp('^PASS '+label,'m'),r.stdout+r.stderr);
  });
  add('B7-218 archived failing attempt still fails smoke answers and accounting',async()=>{
-  const archived=join(h.root,'eval/results/_smoke-archive/9-missing-range-file-voided-attempt');let results=archived;
+  const archived=join(trialResults(h.root),'_smoke-archive/9-missing-range-file-voided-attempt');let results=archived;
   if(!existsSync(archived)){
-   const at=await smokeShared.smokeFixture('voided-evidence'),source=join(h.root,'eval/results/_invalid/zustand7-conflict-zs-02__graph-norule__r1__ef6e40ca-25ba-4461-8112-b39f5a93b6d7');results=join(at,'eval/results');
+   const at=await smokeShared.smokeFixture('voided-evidence'),source=join(trialResults(h.root),'_invalid/zustand7-conflict-zs-02__graph-norule__r1__ef6e40ca-25ba-4461-8112-b39f5a93b6d7');results=join(at,'eval/results');
    const dir=join(results,'_invalid/original-missing-range');cpSync(source,dir,{recursive:true});
    h.write(join(results,'_ledger/c1__graph-norule__r1.json'),[{kind:'harness',archived:dir,meta:h.json(join(dir,'meta.json'))},{kind:'done'}]);
   }
