@@ -468,6 +468,14 @@ quoted line differs from it or when that section holds a number outside the
 quote. Regenerate it with `node eval/score.mjs > eval/score.txt` only from a
 complete results folder.
 
+Git tracks no saved run, so a fresh clone cannot reproduce `score.txt`. The
+checks that compare scorer output with it (suite case X8, self-test cases
+B7-108 and B7-132) read the runs from the folder that `WHYGRAPH_EVAL_RESULTS`
+names. If it is unset, they read `eval/results`. If that folder holds no run,
+they fail and name the folder. A later batch only appends to `score.txt`, so
+the historical cases (X8, B7-132, B7-219) require each older report to be a
+prefix of the current one.
+
 ## Batch 2 results
 
 From `score.txt`, all 240 runs scored (none timed out; the four runs lost to the

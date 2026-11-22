@@ -4,7 +4,8 @@
  *     (default /var/tmp/whygraph-eval) is absent. It is never rebuilt or written.
  * X2: value, missing value, repeated --at, and carry/why/impact reject with exact
  *     status/error/usage; file/store guards, model trace and tool traps prove no IO.
- * X3: removed modules/imports absent; embedding dependency and lock bytes preserved.
+ * X3: removed modules/imports absent; the manifest and lockfile hold the base dependencies,
+ *     with memod moved to the vendored runtime tarball (ADR 0014) and nothing else added.
  * X4: help/README/bin/recipes and every current skill omit removed instructions.
  *     ADR 0010 pins earlier batches' instructions in history, not the working tree.
  * X5: why/impact/symbol carry/range carry match baseline bytes; recipe bytes,
@@ -14,7 +15,9 @@
  * X7: runner and mutation entry points lose deleted paths; remaining anchors and
  *     Q27 test/mutation remain usable (Q27 also runs in the normal suite).
  * X8: the removal diff changes no eval or skill byte; current saved scorer output,
- *     batch 3-6 task/blind bytes and the old score prefix remain pinned.
+ *     batch 3-6 task/blind bytes and the old score prefix remain pinned. The scorer reads
+ *     the saved runs that trialResults names (WHYGRAPH_EVAL_RESULTS, else eval/results);
+ *     X8 fails when there are none.
  * Not claimed: agent trials S4/S6 (parent owns them); arbitrary external stores;
  *     physical database bytes (readers may change engine metadata). X5 compares
  *     all logical properties and index definitions instead.
@@ -29,6 +32,7 @@ import { once } from 'node:events';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { harness as h } from './support.mjs';
+import { trialResults } from '../eval/selftest/trial-results.mjs';
 
 const read = path => readFileSync(path, 'utf8');
 const gold = JSON.parse(read(join(h.root, 'test/fixtures/cut-reranker-42ab13f.json')));
@@ -62,6 +66,26 @@ function files(dir) {
 function contract(id, description, mode, body) {
   test(`${id} ${description}`, async t => body(h.state(t, mode), t));
 }
+function lockSection(text, name) {
+  const at = text.indexOf(`\n${name}:\n`);
+  assert.ok(at >= 0, `lockfile section ${name}`);
+  const body = text.slice(at + name.length + 3);
+  return body.slice(0, body.search(/\n\S|$/));
+}
+const unquote = key => key.replace(/^'(.*)'$/, '$1');
+function lockKeys(text, name) { return [...lockSection(text, name).matchAll(/^  (\S.*):$/gm)].map(m => unquote(m[1])).sort(); }
+function lockImporter(text) {
+  const groups = {}; let group, name;
+  for (const line of lockSection(text, 'importers').split('\n')) {
+    let m;
+    if ((m = line.match(/^    (\w+):$/))) groups[group = m[1]] = {};
+    else if ((m = line.match(/^      (\S.*):$/))) name = unquote(m[1]);
+    else if ((m = line.match(/^        specifier: (.*)$/))) groups[group][name] = m[1];
+  }
+  return groups;
+}
+const dependencyFields = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies'];
+function declared(manifest) { return Object.fromEntries(dependencyFields.filter(f => manifest[f] !== undefined).map(f => [f, manifest[f]])); }
 function sorted(rows) { return rows.map(row => JSON.stringify(row)).sort(); }
 function canonical(value) {
   if (Array.isArray(value)) return value.map(canonical);
@@ -117,10 +141,26 @@ contract('X3', 'removed modules have no imports or exclusive dependencies', 'emp
     const imports = [...read(file).matchAll(/(?:\bfrom\s*|\bimport\s*(?:\(\s*)?|\brequire\s*\(\s*)["']([^"']+)["']/g)].map(m => m[1]);
     for (const specifier of imports) assert.doesNotMatch(specifier, /(?:^|\/)rerank(?:\.pure)?(?:\.[a-z]+)?$/, `${file}: removed import ${specifier}`);
   }
+  // The old reranker had no package of its own, so the base set stays. ADR 0014 then moves
+  // memod from a local git checkout to the vendored tarball, as a runtime dependency.
+  const vendored = 'file:vendor/memod-0.2.0.tgz';
   const before = JSON.parse(base('package.json')), after = JSON.parse(read(join(h.subject, 'package.json')));
-  assert.deepEqual(after.dependencies, before.dependencies, 'the old reranker had no exclusive package dependency');
-  assert.ok(after.dependencies['@huggingface/transformers'], 'local embeddings retain transformers');
-  assert.equal(read(join(h.subject, 'pnpm-lock.yaml')), base('pnpm-lock.yaml'), 'no lockfile churn');
+  assert.ok(before.dependencies['@huggingface/transformers'] && before.devDependencies.memod, 'base manifest names transformers and memod');
+  const { memod: localMemod, ...baseDev } = before.devDependencies;
+  const intended = {
+    dependencies: { '@huggingface/transformers': before.dependencies['@huggingface/transformers'], memod: vendored },
+    devDependencies: baseDev,
+  };
+  assert.deepEqual(declared(after), intended, 'manifest dependencies: base set, memod vendored (ADR 0014), nothing added');
+  const packed = h.ok(h.command('tar', ['-xOzf', join(h.subject, vendored.slice('file:'.length)), 'package/package.json'], h.subject));
+  assert.deepEqual((({ name, version }) => ({ name, version }))(JSON.parse(packed)), { name: 'memod', version: '0.2.0' }, 'vendored tarball is memod 0.2.0');
+  const lock = read(join(h.subject, 'pnpm-lock.yaml')), baseLock = base('pnpm-lock.yaml');
+  assert.deepEqual(lockImporter(lock), intended, 'lockfile importer matches the intended manifest');
+  for (const section of ['packages', 'snapshots']) {
+    const expected = lockKeys(baseLock, section).map(key => key === `memod@${localMemod}` ? `memod@${vendored}` : key).sort();
+    assert.ok(lockKeys(baseLock, section).includes(`memod@${localMemod}`), `base lockfile ${section} hold the local memod`);
+    assert.deepEqual(lockKeys(lock, section), expected, `lockfile ${section}: base set with memod vendored, nothing added or removed`);
+  }
 });
 
 contract('X4', 'current instructions omit removed options and settings', 'empty', async (s, t) => {
@@ -213,7 +253,8 @@ contract('X8', 'removal preserves eval history and frozen batch 3-6 inputs', 'em
   const removal = 'c243073707ac95df6d93b74ccf4417541dd7647e';
   const changed = h.ok(s.run('git', ['diff', '--name-only', '--no-renames', gold.base, removal, '--', 'eval', 'skills'], h.subject));
   assert.equal(changed, '', 'removal commit changes no eval or skill bytes');
-  same(s.run(process.execPath, [join(h.subject, 'eval/score.mjs')], h.subject), { code: 0, stdout: read(join(h.subject, 'eval/score.txt')), stderr: '' }, 'saved scoring history');
+  const results = trialResults(h.subject);
+  same(s.run(process.execPath, [join(h.subject, 'eval/score.mjs'), '--results', results], h.subject), { code: 0, stdout: read(join(h.subject, 'eval/score.txt')), stderr: '' }, `saved scoring history from ${results}`);
   assert.ok(read(join(h.subject, 'eval/score.txt')).startsWith(base('eval/score.txt')), 'frozen saved-score prefix');
   const registry = JSON.parse(base('eval/registry.json'));
   const batches = [3, 4, 5, 6];

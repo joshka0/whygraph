@@ -92,7 +92,8 @@ export async function batch7MissingRangeFileChecks({scratch,shared={}}){
   h.write(join(scratch,'archived-smoke.json'),triple(checker));for(const label of ['condition answers','service answered every call'])assert.match(checker.stdout,new RegExp('^FAIL '+label+': service failure','m'),checker.stdout+checker.stderr);
  });
  add('B7-219 batches 3 to 6 protected bytes and frozen score match 513b9be',()=>{
-  h.ok(h.command('git',['diff','--exit-code','513b9be','--','eval/opencode.mjs','eval/registry.mjs','eval/registry.json','eval/score.mjs','eval/score.txt','eval/tasks','eval/tickets/zustand','eval/tickets/hono','eval/tickets/memod','eval/tickets/memoryd','eval/selftest/batch5.mjs','eval/selftest/batch6.mjs','eval/selftest/batch5-report.mjs','eval/selftest/batch6-report.mjs']));
+  h.ok(h.command('git',['diff','--exit-code','513b9be','--','eval/opencode.mjs','eval/registry.mjs','eval/registry.json','eval/score.mjs','eval/tasks','eval/tickets/zustand','eval/tickets/hono','eval/tickets/memod','eval/tickets/memoryd','eval/selftest/batch5.mjs','eval/selftest/batch6.mjs','eval/selftest/batch5-report.mjs','eval/selftest/batch6-report.mjs']));
+  assert.ok(h.read(join(h.root,'eval/score.txt')).startsWith(h.ok(h.command('git',['show','513b9be:eval/score.txt']))),'eval/score.txt keeps the 513b9be report as its prefix; later batches only append');
   for(const p of ['eval/selftest/batch3.mjs','eval/selftest/batch4.mjs'])if(existsSync(join(h.root,p)))assert.equal(h.read(join(h.root,p)),h.ok(h.command('git',['show','513b9be:'+p])));
  });
  add('regression B7-214 is red on 513b9be',()=>caught('old-B7-214','B7-214',()=>own214('graph',{revision:'513b9be'},['src/missing.ts'])));

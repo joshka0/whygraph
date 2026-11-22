@@ -50,6 +50,15 @@ const plants = [
   { name: 'removed-import-restored', group: 'X3', file: 'src/ask.ts',
     before: 'import { existsSync,', after: 'import "./rerank.ts";\nimport { existsSync,',
     assertion: 'removed import' },
+  { name: 'unexpected-runtime-dependency', group: 'X3', file: 'package.json',
+    before: '"memod": "file:vendor/memod-0.2.0.tgz"', after: '"memod": "file:vendor/memod-0.2.0.tgz",\n    "left-pad": "1.3.0"',
+    assertion: 'manifest dependencies' },
+  { name: 'unexpected-dev-dependency', group: 'X3', file: 'package.json',
+    before: '"tsrs": "0.23.0-ts7.1.0-beta"', after: '"tsrs": "0.23.0-ts7.1.0-beta",\n    "left-pad": "1.3.0"',
+    assertion: 'manifest dependencies' },
+  { name: 'unexpected-lock-package', group: 'X3', file: 'pnpm-lock.yaml',
+    before: "\npackages:\n\n", after: "\npackages:\n\n  left-pad@1.3.0:\n    resolution: {integrity: sha512-planted}\n\n",
+    assertion: 'lockfile packages' },
   { name: 'unknown-option-reads-store-first', group: 'X2', file: 'src/main.ts',
     before: 'if ("usage" in args) return fail',
     after: 'if ("usage" in args) (await import("node:fs")).existsSync(argv[argv.indexOf("--store") + 1]!);\n  if ("usage" in args) return fail',
@@ -62,7 +71,7 @@ const plants = [
 const env = { ...process.env, RELATE_TELEMETRY: '0', DO_NOT_TRACK: '1',
   NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ''} --import=${join(root, 'test/search-offline.mjs')}`.trim(),
 };
-const listed = spawnSync('git', ['ls-files', 'src', 'recipes', 'test', 'skills', 'eval', 'bin', 'package.json', 'pnpm-lock.yaml', 'README.md'], { cwd: root, encoding: 'utf8' });
+const listed = spawnSync('git', ['ls-files', 'src', 'recipes', 'test', 'skills', 'eval', 'bin', 'package.json', 'pnpm-lock.yaml', 'README.md', 'vendor'], { cwd: root, encoding: 'utf8' });
 assert.ifError(listed.error); assert.equal(listed.status, 0, listed.stderr);
 // Include this uncommitted test bundle when running before its first commit.
 const extras = ['test/cut-reranker.test.mjs', 'test/cut-reranker-guard.mjs', 'test/cut-reranker-loopback.mjs', 'test/fixtures/cut-reranker-42ab13f.json'];
