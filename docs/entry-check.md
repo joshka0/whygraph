@@ -1,8 +1,48 @@
-# Entry check, 2026-11-20
+# Entry checks
+
+## Frozen test run, 2026-11-23
+
+The packaging branch fast-forwarded to `entry-tests-frozen-1`
+(`d2e145863ba93193056883a8fa64f49c092aff10`). A fresh full-history
+clone used an empty home. The separate memod source checkout was hidden.
+The clone had no local `eval/results`. `WHYGRAPH_EVAL_RESULTS` pointed to
+the original pilot results, mounted read-only. The resource limits were
+the same as in the original run below.
+
+| Command | Exit | Result |
+| --- | ---: | --- |
+| `pnpm install --frozen-lockfile` through Socket Firewall | 0 | 49 packages installed |
+| `pnpm check` | 0 | 0 type errors |
+| `node_modules/.bin/memod lint` | 0 | 0 findings |
+| `whygraph build --decisions ../adrs.json --decisions decisions/notes.json` in the shop fixture | 0 | 9 commits, 5 decision records, 93 nodes, 139 relationships, 0 warnings |
+| `node test/run.mjs` | 0 | 237 passed, 0 failed, 0 skipped, 0 known-red exceptions. X3 and X8 both passed |
+| `node eval/selftest/check.mjs` | 1 | 22 scorer verdicts passed. Test collection then stopped on a missing archive before the ticket checks ran |
+| Eval self-tests B7-108 (scorer), B7-132 and B7-219, run directly | 0 each | All three frozen checks passed using the real pilot data |
+| Eval self-tests B7-152/B7-166, B7-177, B7-185, B7-199 and B7-208, run directly | 1 each | All five compared the entire report with an older commit and rejected the 525 appended batch 7 lines |
+
+The eval self-test opens
+`eval/results/_smoke-archive/6-stop-logged-as-failure/_attempts`
+relative to the clone. That directory exists in the supplied trial data.
+The archive reader in `eval/selftest/batch7-spy-block.mjs` uses the
+checkout path directly.
+
+B7-108's rehearsal requires a short checkout path for Unix sockets and
+creates its own Linux namespace. The first attempt exceeded the socket
+path limit. A short mount inside the install-check namespace prevented
+the rehearsal from creating its namespace. Moving the same clone to a
+short path on the SSD and running the rehearsal under its own isolation
+resolved both setup errors.
+
+B7-199 and B7-208 ran in the checkout containing the archives. Across
+the six Git revisions used by the five failing checks, only
+`eval/score.txt` differed among the protected files. The packaging
+branch includes the frozen tests unchanged.
+
+## Original packaging run, 2026-11-20
 
 A fresh clone installed and built the shop graph with the separate memod
 source directory hidden. Both README quickstart commands, tsrs and lint
-passed. The product and historical-score gates are red.
+passed. The following results describe the commits tested on that date.
 
 ## Environment
 
@@ -57,7 +97,7 @@ The README lists the tools needed to use whygraph.
 All commits used the repository's memod pre-commit hook. The private-word
 list was checked separately. Its entries stay outside the repository.
 
-## Outstanding checks
+## Failures observed on 2026-11-20
 
 - **X3.** The reranker-removal test compares all runtime dependencies with
   the manifest at `42ab13f`. That comparison rejects the bundled memod runtime.
@@ -74,7 +114,7 @@ list was checked separately. Its entries stay outside the repository.
   153,320 bytes match the pre-pilot file exactly. The new file adds 525 lines.
   B7-219 rejects that addition against `513b9be`.
 
-To reproduce the two self-test failures without starting an eval:
+At `c98eea5`, the following command reproduced the two self-test failures:
 
 ```sh
 node --input-type=module <<'JS'
