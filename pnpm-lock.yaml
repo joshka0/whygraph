@@ -457,7 +457,7 @@ packages:
     engines: {node: '>=10'}
 
   memod@file:vendor/memod-0.2.0.tgz:
-    resolution: {integrity: sha512-gBGDZOGcvml+e1yhjum4Ji6Yu+wHPv8WukjsSkjh+FHubgsj3N08UCHHyx9LCAZwkcBgl7FpEu0vZuZNblDrKQ==, tarball: file:vendor/memod-0.2.0.tgz}
+    resolution: {integrity: sha512-MQ1c6va9AesFBHBO3B6T1CVOGvcJpD6mWkjIiJTwW6uWBwEnZYfYi9cy3+A3Evh++OPM6PnAyzyCv19n6OuOIg==, tarball: file:vendor/memod-0.2.0.tgz}
     version: 0.2.0
     engines: {node: '>=24'}
     hasBin: true

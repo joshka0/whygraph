@@ -23,33 +23,43 @@ the commit and from the commit to each symbol it changed. It can also
 follow calls between symbols or find a decision named directly in a code
 comment. The CLI and the read-only MCP server use the same query recipes.
 
+- **Mode:** single file for the bundled sample graph, and directory for the
+  graph of your own repo. whygraph does not use the in-memory mode.
+- **Why a single file for the sample:** the sample is one file in this
+  repo, [examples/shop.rl](examples/shop.rl). You can open it read-only
+  with the Relate CLI alone, before you install whygraph.
+- **Why a directory for your repo:** Relate commits each load statement on
+  its own. A build loads into a new directory. whygraph moves the store
+  link to that directory only when every statement succeeded, so a failed
+  build leaves the old graph in use.
+- **What the graph models:** files and symbols, the commits that changed
+  them, and the decision records that cite those commits or that a code
+  comment names. [The graph](#the-graph) lists each label and relationship.
+
 ## Where the data lives
 
-[examples/shop.rl](examples/shop.rl) contains the shop graph, with 93
-nodes and 139 relationships. When you build a graph for your own repo,
-whygraph writes the store under its Git directory at `whygraph/store`.
+[examples/shop.rl](examples/shop.rl) is the persistent store in this repo.
+It is a single file that contains the shop graph, with 93 nodes and 139
+relationships. When you build a graph for your own repo, whygraph writes a
+directory store under the Git directory of that repo, at `whygraph/store`.
 Code, history and decisions stay local. The first build downloads about
 35 MB of embedding weights for `Xenova/bge-small-en-v1.5` into
 `~/.cache/whygraph`. Later builds and searches reuse them.
 
-## Set up
+## Quickstart
 
-Use Linux or macOS with Bash, Git, Node.js 26 or later, pnpm 10 and the
-Relate CLI. We tested pnpm 10.28.2 and Relate 1.0.1. Check the latter with
-`relate --version`. [Install Relate](https://relatedb.ai/).
+The quickstart has two parts. The first part needs only Git and the Relate
+CLI. The second part needs the install in [Set up](#set-up).
+
+### Query the bundled graph with Relate alone
+
+[Install Relate](https://relatedb.ai/). We tested Relate 1.0.1. Check your
+version with `relate --version`. This part does not need Node.js or pnpm.
 
 ```sh
 git clone https://github.com/joshka0/whygraph.git
 cd whygraph
-pnpm install --frozen-lockfile
-export WHYGRAPH="$PWD"
-export PATH="$WHYGRAPH/bin:$WHYGRAPH/node_modules/.bin:$PATH"
 ```
-
-Node runs the TypeScript source directly. The install includes the built
-memod CLI from commit `d0b4d68` and the ONNX runtime for local search.
-
-## Quickstart
 
 Find the commits that connect the thousands-separators decision to the
 formatter. Run this query from the whygraph checkout. It reads the bundled
@@ -68,15 +78,33 @@ Show thousands separators in totals,73ebd46,formatCents
 Show thousands separators in totals,a3bcb76,formatCents
 ```
 
+To explore other relationships, open the same file in the Relate shell
+with `relate --database examples/shop.rl --read-only`.
+
+### Set up
+
+The whygraph commands need Linux or macOS with Bash, Git, Node.js 26 or
+later, pnpm 10 and the Relate CLI. We tested pnpm 10.28.2. Run the install
+from the whygraph checkout:
+
+```sh
+pnpm install --frozen-lockfile
+export WHYGRAPH="$PWD"
+export PATH="$WHYGRAPH/bin:$WHYGRAPH/node_modules/.bin:$PATH"
+```
+
+Node runs the TypeScript source directly. The install includes the built
+memod CLI from commit `d0b4d68` and the ONNX runtime for local search.
+
+### Ask whygraph about the same graph
+
 Ask whygraph which other shop symbols those commits changed:
 
 ```sh
 whygraph impact note-2 --store examples/shop.rl
 ```
 
-To explore other relationships, open the same file in the Relate shell
-with `relate --database examples/shop.rl --read-only`. To rebuild the
-graph and ask whygraph about the source code, follow
+To rebuild the graph and ask whygraph about the source code, follow
 [Try it on the fixture](#try-it-on-the-fixture).
 
 ## Measured results and limits
@@ -102,6 +130,72 @@ repos or models, or the quality of changes after a person approves them.
 
 [Read the pilot exceptions](eval/README.md#zustand-pilot-exceptions) and
 [the complete score report](eval/score.txt).
+
+## Reused code, third-party tools and AI tools
+
+### Relate capabilities
+
+- The Relate CLI as an embedded database. `relate query` loads each build
+  and answers each question.
+- Cypher with variable-length paths, such as `RESTS_ON*0..` in
+  [recipes/impact.cypher](recipes/impact.cypher).
+- A full-text index and a vector index (384 dimensions, cosine) on the
+  decision records, in the same store as the graph.
+- The read-only MCP server, `relate serve --mcp stdio`.
+- A single-file store and a directory store.
+
+### Reused code
+
+whygraph is new work. Its first commit, `176d818`, is from 2026-11-12.
+
+It reuses one earlier project of the author: **memod**. memod reads the
+code and the Git history, and gives whygraph the files, symbols, uses and
+commits. The first memod commit is from 2026-11-09, before the contest
+period. The memod source repo is private. This repo bundles the compiled
+JavaScript of memod commit `d0b4d68` (2026-11-14) as
+[vendor/memod-0.2.0.tgz](vendor/memod-0.2.0.tgz).
+
+The author licenses the bundled memod package under MIT. The tarball holds
+the license text as `package/LICENSE` and names it in the `license` field
+of `package/package.json`. To read it, run
+`tar -xOzf vendor/memod-0.2.0.tgz package/LICENSE`.
+[ADR 0015](docs/adr/0015-license-the-bundled-memod-package.md) records the
+decision. whygraph has the same license: [LICENSE](LICENSE).
+
+### Third-party tools
+
+| Tool | Use | License |
+| --- | --- | --- |
+| Relate CLI 1.0.1 | The graph database | Apache 2.0 (binary) |
+| `@huggingface/transformers` 4.3.2 | Runs the embedding model | Apache-2.0 |
+| `onnxruntime-node` 1.30.0 | The model runtime, a dependency of transformers | MIT |
+| `Xenova/bge-small-en-v1.5` | The embedding model: the ONNX weights of `BAAI/bge-small-en-v1.5` | MIT, on the BAAI model card |
+| `oxc-parser` 0.157.0 | The JavaScript and TypeScript parser of memod | MIT |
+| `tsrs` 0.23.0-ts7.1.0-beta | Type check, development only | Apache-2.0 |
+| `@types/node` 26.6.6 | Node.js types, development only | MIT |
+
+[pnpm-lock.yaml](pnpm-lock.yaml) lists each indirect dependency with its
+version. whygraph also runs Git, Node.js, pnpm and Bash. The trials used
+the public repos ripgrep, Hono and Zustand as subjects. This repo holds the
+trial requests and their targets under `eval/`, not copies of those repos.
+
+### AI tools
+
+AI coding agents wrote most of the code, the tests and the documents in
+this repo. The author set the goals, made the design decisions and is
+responsible for the result.
+
+- **To build whygraph:** Claude Code with Claude Opus 5.5 and Claude
+  Fable 5.2 wrote most of the changes and directed the other agents. The
+  commit trailers name those models. Codex with GPT models wrote tests from
+  the failure list in [docs/failures.md](docs/failures.md) and reviewed
+  designs. DeepSeek models wrote some features. Gemini models reviewed
+  designs and checked this entry against the contest rules.
+- **In whygraph when it runs:** `build` and `search` run the embedding
+  model on your machine. whygraph calls no hosted model.
+- **In the trials:** the agents under test were Claude Code with its
+  `sonnet` model, and opencode with DeepSeek 4.1 Flash.
+  [eval/README.md](eval/README.md) gives the setup.
 
 ## What the graph tells you before an edit
 
