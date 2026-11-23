@@ -16,10 +16,11 @@
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
-    "memod": "git+file:///home/dev/repos/personal/memod#d0b4d689225899a458647948b680176dd83ea830",
     "tsrs": "0.23.0-ts7.1.0-beta"
   },
   "dependencies": {
-    "@huggingface/transformers": "4.3.2"
-  }
+    "@huggingface/transformers": "4.3.2",
+    "memod": "file:vendor/memod-0.2.0.tgz"
+  },
+  "license": "MIT"
 }

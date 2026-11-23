@@ -9,6 +9,7 @@ import {join,resolve} from 'node:path';
 import {pathToFileURL,fileURLToPath} from 'node:url';
 import {runInNewContext} from 'node:vm';
 import {b7 as h} from './batch7-support.mjs';
+import {trialResults} from './trial-results.mjs';
 import {batch7ClosedChecks} from './batch7-closed.mjs';
 import {batch7AttemptChecks} from './batch7-attempts.mjs';
 import {batch7SmokeChecks} from './batch7-smoke.mjs';
@@ -221,7 +222,7 @@ export async function batch7StoppedChecks({scratch,shared}){
   meta.service.stopped=1;h.write(join(out,'meta.json'),meta);const bad=h.node(join(at,'eval/smoke-check.mjs'),['--batch','7']);h.write(join(at,'cli-red.json'),bad);assert.equal(bad.status,1,bad.stdout+bad.stderr);assert.match(bad.stdout,/^FAIL service answered every call:/m);
  });
  add('B7-176 the archived sixth-smoke attempt still fails as a service failure',()=>{
-  const archive=join(h.root,'eval/results/_smoke-archive/6-stop-logged-as-failure');
+  const archive=join(trialResults(h.root),'_smoke-archive/6-stop-logged-as-failure');
   if(!existsSync(archive))throw new Error(`B7-176 evidence is missing on this machine: ${archive}; restore the archive, this case cannot pass without it`);
   const base=join(archive,'_attempts'),names=readdirSync(base);assert.equal(names.length,1,'one archived attempt');const dir=join(base,names[0]),before=h.tree(archive);
   const meta=h.json(join(dir,'meta.json')),events=rows(join(dir,'service.jsonl'));assert.equal(events.filter(r=>r.event==='failure').length,8,'archive holds eight failure events');assert.equal(meta.service.failures,0,'and metadata that says failures 0');
@@ -229,8 +230,8 @@ export async function batch7StoppedChecks({scratch,shared}){
   assert.deepEqual(h.tree(archive),before,'archive bytes stay read-only');h.write(join(scratch,'archived-stop-replay.json'),r);
  });
  add('B7-177 frozen batch 5 and 6 plans, launcher, inputs and reports match 94f31bf',()=>{
-  const base='94f31bf',protectedPaths=['eval/opencode.mjs','eval/registry.mjs','eval/registry.json','eval/score.mjs','eval/tasks','eval/tickets/zustand','eval/tickets/hono','eval/tickets/memod','eval/tickets/memoryd','eval/score.txt','eval/selftest/batch5.mjs','eval/selftest/batch6.mjs','eval/selftest/batch5-report.mjs','eval/selftest/batch6-report.mjs'];
-  const d=h.command('git',['diff','--exit-code',base,'--',...protectedPaths]);assert.equal(d.status,0,d.stdout+d.stderr);
+  const base='94f31bf',protectedPaths=['eval/opencode.mjs','eval/registry.mjs','eval/registry.json','eval/score.mjs','eval/tasks','eval/tickets/zustand','eval/tickets/hono','eval/tickets/memod','eval/tickets/memoryd','eval/selftest/batch5.mjs','eval/selftest/batch6.mjs','eval/selftest/batch5-report.mjs','eval/selftest/batch6-report.mjs'];
+  const d=h.command('git',['diff','--exit-code',base,'--',...protectedPaths]);assert.equal(d.status,0,d.stdout+d.stderr);assert.ok(h.read(join(h.root,'eval/score.txt')).startsWith(h.ok(h.command('git',['show',base+':eval/score.txt']))),'eval/score.txt keeps the '+base+' report as its prefix; later batches only append');
   const at=fresh('old-plan'),taskFiles=h.command('git',['ls-tree','-r','--name-only','6fc48a3','eval/tasks']);h.ok(taskFiles);for(const p of taskFiles.stdout.trim().split('\n').filter(Boolean)){const text=h.command('git',['show',`6fc48a3:${p}`]);h.ok(text);h.write(join(at,p),text.stdout);}
   const copy=fresh('base-plan');for(const p of ['run.mjs','opencode.mjs','registry.mjs','registry.json','closed-run.mjs','closed-store.mjs','closed-client.c'])h.write(join(copy,'eval',p),h.ok(h.command('git',['show',`${base}:eval/${p}`])));cpSync(join(at,'eval/tasks'),join(copy,'eval/tasks'),{recursive:true});
   for(const batch of [5,6]){const args=['--batch',String(batch),'--plan'],current=h.node(join(at,'eval/run.mjs'),args),old=h.node(join(copy,'eval/run.mjs'),args);assert.equal(current.status,0,current.stderr);assert.equal(old.status,0,old.stderr);assert.deepEqual({status:current.status,stdout:current.stdout,stderr:current.stderr},{status:old.status,stdout:old.stdout,stderr:old.stderr},`batch ${batch} plan versus ${base}`);}

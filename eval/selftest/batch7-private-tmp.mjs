@@ -13,12 +13,13 @@ import {isolationBreaches} from '../opencode.mjs';
 import {settleCell} from '../run.mjs';
 import {fileKey} from '../registry.mjs';
 import {b7 as h} from './batch7-support.mjs';
+import {trialResults} from './trial-results.mjs';
 import {storeCommand} from './batch7-records.mjs';
 import {batch7ClosedChecks} from './batch7-closed.mjs';
 import {batch7AttemptChecks} from './batch7-attempts.mjs';
 import {batch7SmokeChecks} from './batch7-smoke.mjs';
 
-const archive=join(h.root,'eval/results/_smoke-archive/7-private-tmp-classed-as-breach');
+const archive=()=>join(trialResults(h.root),'_smoke-archive/7-private-tmp-classed-as-breach');
 const privatePaths=['/tmp','/tmp/x','/tmp/opencode/a/b.c','/tmp/a/../b','/tmp/./a','/tmp//a','/tmp/a/'];
 const outsidePaths=['/tmp/../etc/passwd','/tmp/../../x','/tmp/a/../../home/agent/x','/tmpx/a','/var/tmp/x','/home/agent/x','/tools/whygraph','/identity/opencode/x','/whygraph/service.sock','/etc/hosts','/config/x'];
 const fields=['filePath','file_path','path','paths','directory','dir','root','cwd','workdir','targetFile','target_file','oldPath','old_path','newPath','new_path'];
@@ -59,15 +60,15 @@ export async function batch7PrivateTmpChecks({scratch,shared}){
  const repo=join(scratch,'private-tmp-path-repo');mkdirSync(repo,{recursive:true});
  const classify=(tools,rule=closedBreaches)=>rule(isolationBreaches(repo,tools));
  function evidence(){
-  if(!existsSync(join(archive,'_attempts')))throw new Error('B7-178 evidence is missing on this machine: '+archive+'; restore it before this case can pass');
-  const dirs=readdirSync(join(archive,'_attempts')).sort();assert.equal(dirs.length,5,'five archived attempts required');return dirs;
+  if(!existsSync(join(archive(),'_attempts')))throw new Error('B7-178 evidence is missing on this machine: '+archive()+'; restore it before this case can pass');
+  const dirs=readdirSync(join(archive(),'_attempts')).sort();assert.equal(dirs.length,5,'five archived attempts required');return dirs;
  }
  // A copy gets its own pure module. Never write through h.copy's scripts symlink.
  async function plantedRule(name,from,to){const at=fresh('rule-'+name);unlinkSync(join(at,'scripts'));mkdirSync(join(at,'scripts'));const path=join(at,'scripts/attempts.pure.ts');h.write(path,h.read(join(h.root,'scripts/attempts.pure.ts')));replace(path,from,to);return (await import(pathToFileURL(path).href)).closedBreaches;}
  async function caught(name,owner,run){let error;try{await run();}catch(e){if(e.code!=='ERR_ASSERTION')throw e;error=e;}assert.ok(error,`plant ${name} must turn ${owner} red`);h.write(join(scratch,'private-tmp-plant-'+name+'.json'),{name,owner,assertion:error.message,actual:error.actual,expected:error.expected});}
  function archived(rule=closedBreaches){
   for(const n of evidence()){
-   const dir=join(archive,'_attempts',n),tools=h.json(join(dir,'tools.json')),meta=h.json(join(dir,'meta.json'));
+   const dir=join(archive(),'_attempts',n),tools=h.json(join(dir,'tools.json')),meta=h.json(join(dir,'meta.json'));
    // Apply the same namespace normalization as the runner to the actual recorded tools.
    const normalized=JSON.parse(JSON.stringify(tools).replaceAll('/repo/',repo+'/').replaceAll('"/repo"',JSON.stringify(repo)));
    const hits=isolationBreaches(repo,normalized);assert.deepEqual(hits,meta.isolation,'raw archive reproduces its recorded breach');
@@ -80,12 +81,12 @@ export async function batch7PrivateTmpChecks({scratch,shared}){
   // ADR 0011 B7-191/192: a historical runner needs its historical transport, before tokens.
   for(const name of ['closed-store.mjs','closed-client.c'])h.write(join(at,'eval',name),h.ok(h.command('git',['show','0af356e:eval/'+name])));
   // Exercise the old runner itself with an archived native tool stream, below.
-  const n=evidence()[0],tools=h.json(join(archive,'_attempts',n,'tools.json'));
+  const n=evidence()[0],tools=h.json(join(archive(),'_attempts',n,'tools.json'));
   const result=await attempt({at,extra:tools});
   let red;try{assert.equal(result.meta.status,'done','B7-178 archived private /tmp tools must complete');}catch(e){assert.equal(e.code,'ERR_ASSERTION');red=e;}
   assert.ok(red,'old runner must be red');assert.equal(result.meta.reason,'isolation breach');assert.ok(result.meta.isolation.some(s=>s.startsWith('external file-tool path: /tmp/opencode/')));
-  assert.deepEqual(result.meta.isolation,['external file-tool path: /tmp/opencode/wrap.c',...h.json(join(archive,'_attempts',n,'meta.json')).isolation],'old rule rejected the archived tools themselves');
-  const output={base:'0af356e',fixture:join(archive,'_attempts',n,'tools.json'),status:result.meta.status,reason:result.meta.reason,isolation:result.meta.isolation,red:red.message};
+  assert.deepEqual(result.meta.isolation,['external file-tool path: /tmp/opencode/wrap.c',...h.json(join(archive(),'_attempts',n,'meta.json')).isolation],'old rule rejected the archived tools themselves');
+  const output={base:'0af356e',fixture:join(archive(),'_attempts',n,'tools.json'),status:result.meta.status,reason:result.meta.reason,isolation:result.meta.isolation,red:red.message};
   h.write(join(scratch,'private-tmp-old-rule-red.json'),output);console.log('EXPECTED RED B7-178 on 0af356e: '+JSON.stringify(output));
  });
  for(const field of fields)add(`B7-179 ${field} resolves private paths and retains every outside path`,()=>{
@@ -184,21 +185,21 @@ export async function batch7PrivateTmpChecks({scratch,shared}){
  add('B7-184 real agent and shell confinements have one private tmpfs, no mounted child and no cross-start file',()=>mounts());
  add('B7-185 open-store rule and frozen batch 5 and 6 inputs retain baseline bytes',()=>{
   assert.deepEqual(isolationBreaches(repo,[fileTool('/tmp/opencode/wrap.c')]),['external file-tool path: /tmp/opencode/wrap.c']);
-  const paths=['eval/opencode.mjs','eval/run.mjs','eval/registry.mjs','eval/registry.json','eval/score.mjs','eval/tasks','eval/tickets/zustand','eval/tickets/hono','eval/tickets/memod','eval/tickets/memoryd','eval/score.txt','eval/selftest/batch5.mjs','eval/selftest/batch6.mjs','eval/selftest/batch5-report.mjs','eval/selftest/batch6-report.mjs'];
-  const r=h.command('git',['diff','--exit-code','0af356e','--',...paths]);assert.equal(r.status,0,r.stdout+r.stderr);
+  const paths=['eval/opencode.mjs','eval/run.mjs','eval/registry.mjs','eval/registry.json','eval/score.mjs','eval/tasks','eval/tickets/zustand','eval/tickets/hono','eval/tickets/memod','eval/tickets/memoryd','eval/selftest/batch5.mjs','eval/selftest/batch6.mjs','eval/selftest/batch5-report.mjs','eval/selftest/batch6-report.mjs'];
+  const r=h.command('git',['diff','--exit-code','0af356e','--',...paths]);assert.equal(r.status,0,r.stdout+r.stderr);assert.ok(h.read(join(h.root,'eval/score.txt')).startsWith(h.ok(h.command('git',['show','0af356e'+':eval/score.txt']))),'eval/score.txt keeps the '+'0af356e'+' report as its prefix; later batches only append');
  });
  function smokeArchive(){
-  evidence();const before=h.tree(archive),at=fresh('archived-smoke');cpSync(archive,join(at,'eval/results'),{recursive:true});cpSync(join(h.root,'eval/tasks'),join(at,'eval/tasks'),{recursive:true});
+  evidence();const before=h.tree(archive()),at=fresh('archived-smoke');cpSync(archive(),join(at,'eval/results'),{recursive:true});cpSync(join(h.root,'eval/tasks'),join(at,'eval/tasks'),{recursive:true});
   const registry=h.json(join(at,'eval/registry.json'));registry.batches[7].instructionsCommit=h.json(join(h.root,'eval/registry.json')).batches[7].instructionsCommit;h.write(join(at,'eval/registry.json'),registry);
   // The archive retains absolute ledger references from before its move.
   // Relocate references only in the disposable replay copy, never the evidence.
   const results=join(at,'eval/results');for(const n of readdirSync(join(results,'_ledger'))){const p=join(results,'_ledger',n),ledger=h.json(p);for(const row of ledger)if(row.archived)row.archived=join(results,'_attempts',basename(row.archived));h.write(p,ledger);}
-  const pointer=join(h.root,'eval/results/_preflight/latest.json');assert.ok(existsSync(pointer),'archived smoke needs its retained real preflight receipt');h.write(join(results,'_preflight/latest.json'),h.json(pointer));
+  const pointer=join(trialResults(h.root),'_preflight/latest.json');assert.ok(existsSync(pointer),'archived smoke needs its retained real preflight receipt');h.write(join(results,'_preflight/latest.json'),h.json(pointer));
   const r=h.node(join(at,'eval/smoke-check.mjs'),['--batch','7']);h.write(join(at,'smoke-output.json'),r);assert.equal(r.status,0,r.stdout+r.stderr);
-  const passes=s=>s.split('\n').filter(l=>l.startsWith('PASS ')).map(l=>l.split(':')[0]);assert.deepEqual(passes(r.stdout),passes(h.read(join(archive,'smoke-check.log'))));assert.equal(passes(r.stdout).length,8);
+  const passes=s=>s.split('\n').filter(l=>l.startsWith('PASS ')).map(l=>l.split(':')[0]);assert.deepEqual(passes(r.stdout),passes(h.read(join(archive(),'smoke-check.log'))));assert.equal(passes(r.stdout).length,8);
   const unscored=readdirSync(results).filter(n=>existsSync(join(results,n,'meta.json'))&&h.json(join(results,n,'meta.json')).unscored).sort();
   assert.deepEqual(unscored,['zustand7-conflict-zs-13__graph-norule__r1','zustand7-conflict-zs-13__stub__r1']);
-  assert.deepEqual(h.tree(archive),before,'archive bytes unchanged');
+  assert.deepEqual(h.tree(archive()),before,'archive bytes unchanged');
  }
  add('B7-186 archived seventh smoke replays eight PASS lines and keeps both unscored cells',()=>smokeArchive());
  add('B7-186 smoke with done cells holding private /tmp paths has no unscored cells',async()=>{

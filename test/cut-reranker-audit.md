@@ -1,5 +1,28 @@
 # Reranker removal test audit
 
+## Packaging update (2026-11-22)
+
+ADR 0014 moves memod from a local Git checkout to the vendored tarball
+`vendor/memod-0.2.0.tgz`, as a runtime dependency. X3 now derives the
+intended dependencies from that decision and the base manifest at `42ab13f`:
+
+| Item | Current check |
+| --- | --- |
+| X3 manifest | `dependencies` is the base transformers entry plus `memod: file:vendor/memod-0.2.0.tgz`. `devDependencies` is the base set without memod. No optional or peer dependencies exist. |
+| X3 tarball | The vendored tarball holds memod 0.2.0. |
+| X3 lockfile | The root importer matches the intended manifest. The `packages` and `snapshots` keys are the base keys, with the local memod key replaced by the vendored one. |
+| X8 saved scores | The scorer reads the saved runs from `WHYGRAPH_EVAL_RESULTS`, else `eval/results`. X8 fails and names the folder when it holds no run. |
+
+| Added plant | Caught by |
+| --- | --- |
+| `unexpected-runtime-dependency` | X3: `manifest dependencies` |
+| `unexpected-dev-dependency` | X3: `manifest dependencies` |
+| `unexpected-lock-package` | X3: `lockfile packages` |
+
+The plant runner now copies `vendor/` into each subject. The existing
+`removed-import-restored` plant and the X8 history, task and blind plants
+are still caught.
+
 ## History correction (2026-11-16)
 
 The X4 and X8 checks now follow ADR 0009, ADR 0010 and the task brief.

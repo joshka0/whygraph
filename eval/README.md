@@ -468,6 +468,14 @@ quoted line differs from it or when that section holds a number outside the
 quote. Regenerate it with `node eval/score.mjs > eval/score.txt` only from a
 complete results folder.
 
+Git tracks no saved run, so a fresh clone cannot reproduce `score.txt`. The
+checks that compare scorer output with it (suite case X8, self-test cases
+B7-108 and B7-132) read the runs from the folder that `WHYGRAPH_EVAL_RESULTS`
+names. If it is unset, they read `eval/results`. If that folder holds no run,
+they fail and name the folder. A later batch only appends to `score.txt`, so
+the historical cases (X8, B7-132, B7-219) require each older report to be a
+prefix of the current one.
+
 ## Batch 2 results
 
 From `score.txt`, all 240 runs scored (none timed out; the four runs lost to the
@@ -1708,3 +1716,29 @@ Three repeats and word/diff pass rules limit what the trial can establish.
 Saved agent tool answers still stop at 4,000 characters; service logs keep
 full answers for health checks. [Batch 7 failure cases](tickets/batch7-failures.md)
 are the contract for the independent test author.
+
+## Zustand pilot exceptions
+
+Of 258 planned cells, 256 finished with a score. Two cells reached the
+1,200-second limit on both attempts and remained unscored:
+
+- `zustand7-conflict-zs-15__graph__r3`
+- `zustand7-conflict-zs-17__stub__r2`
+
+Counting both as failures gives the same paired difference and interval
+to two decimal places. During the memory stall on 2026-11-18 from 16:30 to
+16:45 (Europe/Tallinn), ten runs overlapped the window. All ten were
+`zustand7-conflict-zs-04` and passed.
+
+| Condition | Repetitions during the stall |
+| --- | --- |
+| stub | r2 |
+| graph | r1, r2 |
+| graph-nolink | r1, r2 |
+| graph-nosearch | r2 |
+| graph-noterms | r1, r2 |
+| graph-norule | r1, r2 |
+
+Each row was checked against the pilot log. To estimate the start of each
+run, subtract the recorded wall time from its ledger file's modification
+time. Each overlapping cell had one attempt.

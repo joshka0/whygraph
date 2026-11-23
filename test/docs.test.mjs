@@ -130,7 +130,8 @@ contract('R4', 'previews reuse the first later run and orphan previews fail befo
 contract('R5', 'checks isolate HOME and git config, disable relate telemetry, and clean temporary homes on failure', 'empty', s => {
   const caller = join(s.dir, 'caller-home'); const config = s.write(join(caller, '.gitconfig'), 'not a valid git config\n');
   const sentinel = s.write(join(caller, 'sentinel'), 'keep caller home\n');
-  const envLog = join(s.dir, 'relate-environment.json'); const real = join(process.env.HOME, '.local/bin/relate');
+  const envLog = join(s.dir, 'relate-environment.json');
+  const real = ok(s.run('/usr/bin/which', ['relate'])).trim();
   const wrapper = s.wrapper('relate', `import { writeFileSync } from 'node:fs'; import { spawnSync } from 'node:child_process';
 writeFileSync(${JSON.stringify(envLog)}, JSON.stringify({ home: process.env.HOME, telemetry: process.env.RELATE_TELEMETRY, dnt: process.env.DO_NOT_TRACK, global: process.env.GIT_CONFIG_GLOBAL }));
 const r = spawnSync(${JSON.stringify(real)}, process.argv.slice(2), { env: process.env }); process.stdout.write(r.stdout ?? ''); process.stderr.write(r.stderr ?? ''); process.exit(r.status ?? 1);`);
