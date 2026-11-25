@@ -1,9 +1,11 @@
 # Agents
 
-This repo uses [memod](https://gitlab.com/joshka0/memod): every exported value
-names the concept it owns with an `owns: [[topic]]` tag, and lint reports two
-owners of one topic. Run `node_modules/.bin/memod topics` before you name a
-topic, and reuse a topic only for an export that does the same job.
+This repo uses memod (bundled in [vendor/memod-0.2.0.tgz](vendor/memod-0.2.0.tgz);
+the source repo is private; see [ADR 0014](docs/adr/0014-distribute-the-shop-graph.md)):
+every exported value names the concept it owns with an `owns: [[topic]]` tag,
+and lint reports two owners of one topic. Run `node_modules/.bin/memod topics`
+before you name a topic, and reuse a topic only for an export that does the
+same job.
 
 - Decision logic lives in `src/*.pure.ts` (`boundary: pure`); child processes
   and files stay in the other files of `src/`.
