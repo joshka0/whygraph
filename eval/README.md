@@ -1742,3 +1742,16 @@ to two decimal places. During the memory stall on 2026-11-18 from 16:30 to
 Each row was checked against the pilot log. To estimate the start of each
 run, subtract the recorded wall time from its ledger file's modification
 time. Each overlapping cell had one attempt.
+
+## Instruction commit history note, 2026-11-25
+
+`eval/registry.json` records `instructionsCommit: "c92205d"` for batches 1
+through 6, because batches 4 to 6 ran that text and the registry keeps one
+frozen value for earlier batches. In fact, batches 1 to 3 ran earlier bytes:
+
+- Batches 1 and 2 ran three agent commands (`carry`, `why`, `impact`) and no
+  `search` (commits `08e4b83` and `d721455`).
+- Batch 3 ran `search` with no stop rule (commit `a744496`).
+- Batches 4 to 6 ran `c92205d` (which first held "then stop" in commit
+  `5b43558`).
+- Batch 7 ran `c1ae17c`, which equals `skills/` at HEAD (`243e796`).

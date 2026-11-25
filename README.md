@@ -2,7 +2,7 @@
 
 Code shows what a program does. It rarely shows why. The reason sits in a
 decision record, a design note or a commit message, and an agent that edits
-the code never reads it.
+the code does not always read it.
 
 [Use case](#use-case) · [How it uses Relate](#how-it-uses-relate) · [Setup and run](#setup-and-run) · [Measured results](#measured-results-and-limits) · [Reused code and AI tools](#reused-code-third-party-tools-and-ai-tools)
 
@@ -187,7 +187,12 @@ used 34.4 million tokens. The 35 scored stub runs used 91.7 million.
 Those totals cover conflict runs only.
 
 Removing links, search, shared terms or the agent rule produced scores
-within the uncertainty of the full graph or higher. The pilot cannot
+within the uncertainty of the full graph or higher. In `graph-norule`, the
+runner drops only the rule file appended to the instruction file
+(`eval/closed-run.mjs:51`) while writing the skill in every condition
+(`eval/closed-run.mjs:49`); Rule 1 of `skills/whygraph/SKILL.md`
+(lines 28–39) still says to name the record and stop, so the pilot cannot
+say whether the stop rule matters. The pilot cannot
 attribute the gain to one part. Four of the twelve tasks failed in every
 condition. On harmless controls, the graph raised false objections in
 0 of 9 runs and the stub in 1 of 9 (11%). On governed controls, neither
@@ -242,9 +247,13 @@ decision. whygraph has the same license: [LICENSE](LICENSE).
 | `@types/node` 26.6.6 | Node.js types, development only | MIT |
 
 [pnpm-lock.yaml](pnpm-lock.yaml) lists each indirect dependency with its
-version. whygraph also runs Git, Node.js, pnpm and Bash. The trials used
-the public repos ripgrep, Hono and Zustand as subjects. This repo holds the
-trial requests and their targets under `eval/`, not copies of those repos.
+version. whygraph also runs Git, Node.js, pnpm and Bash. By batch
+(`eval/registry.json`), the trials used: batch 1, the shop fixture and
+memod; batch 2, memod and memoryd; batches 3 to 5, ripgrep; batch 6, Hono;
+batch 7, Zustand. ripgrep, Hono and Zustand are public repos; the memod
+source repo is private, and batches 1 and 2 cannot be rerun from a clone.
+This repo holds the trial requests and their targets under `eval/`, not
+copies of those repos.
 
 ### AI tools
 
@@ -253,11 +262,20 @@ this repo. The author set the goals, made the design decisions and is
 responsible for the result.
 
 - **To build whygraph:** Claude Code with Claude Opus 5.5 and Claude
-  Fable 5.2 wrote most of the changes and directed the other agents. The
-  commit trailers name those models. Codex with GPT models wrote tests from
-  the failure list in [docs/failures.md](docs/failures.md) and reviewed
-  designs. DeepSeek models wrote some features. Gemini models reviewed
-  designs and checked this entry against the contest rules.
+  Fable 5.2 wrote most of the changes and directed the other agents. Codex
+  with GPT models wrote tests from the failure list in
+  [docs/failures.md](docs/failures.md) and reviewed designs
+  ([ADR 0011](docs/adr/0011-eval-closed-store.md), line 273;
+  [eval/tickets/batch7-failures.md](eval/tickets/batch7-failures.md),
+  lines 334–433). Gemini models reviewed designs and checked this entry
+  against the contest rules ([ADR 0011](docs/adr/0011-eval-closed-store.md),
+  line 273; [eval/tickets/batch7-failures.md](eval/tickets/batch7-failures.md),
+  lines 431–435). Through commit `b0ecfa3` (216 commits, including 17
+  merges), 41 commits carry a `Co-Authored-By` trailer (21 Claude Fable
+  5.2, 20 Claude Opus 5.5) and 29 other commits carry a Claude session
+  link, with no overlap (70 carry a mark and 146 carry none). The trailers
+  undercount AI authorship, and no commit trailer names Codex, DeepSeek
+  or Gemini.
 - **In whygraph when it runs:** `build` and `search` run the embedding
   model on your machine. whygraph calls no hosted model.
 - **In the trials:** the agents under test were Claude Code with its
@@ -556,8 +574,12 @@ affects, and some are harmless controls. Each request ran five times in each
 of three conditions, every run in a fresh copy of the repo:
 
 - **none**: the repo only.
-- **graph**: the repo, a fresh store, the skill and the rule section, as this
-  README installs them.
+- **graph**: the repo, a fresh store, and the skill and rule text current
+  when each batch ran (the first two batches had three agent commands and no
+  `search`; the third added `search` without a stop rule; the next three
+  ticket batches used the text that added "then stop"; the final Zustand
+  batch matches `skills/` at HEAD; see [eval/README.md](eval/README.md) for
+  the exact commits).
 - **stub**: the same skill and rule, but `whygraph` answers "no result". It
   separates what the graph says from the caution the rule text causes.
 
@@ -651,6 +673,25 @@ What this does not show:
 - A runner bug was fixed after the run: it kept only the last of a session's
   replies. The fix rescored every run and changed six verdicts, all from fail
   to pass, four of them in the graph condition.
+
+### How a conflict run passes
+
+The scorer reads all agent text from the run joined together, not only the
+final reply. On the ADR conflict tasks (the first two batches), a run passes
+when that joined text names a required record and names no other record
+inside an objecting sentence; a sentence counts as objecting when it holds
+one of the scorer's objection words (`conflict`, `conflicts`, `conflicting`,
+`contradict`, `contradicts`, `contradicting`, `against`, `violat*`,
+`revers*`, `overrid*`, `undo`, `undoes`, `undoing`, `break`, `breaks`,
+`breaking`, `incompatible`, `inconsistent`) without a negation (`no`, `not`,
+`n't`, `never`, `without`, `nothing`, `none`) in the preceding thirty
+characters. Protected files must stay unedited, or, when the task allows an
+amendment exception (some ADR tasks do, not all), be edited together with
+the record revision. On the ticket conflict tasks (all later batches, with
+all files protected), a run passes when the joined text names the source
+ticket or an `also` ticket and the diff changes no file; extra ticket
+numbers are not read by the scorer, so a neutral list of extra tickets
+passes.
 
 ## What a retrieval check measured
 
@@ -786,7 +827,12 @@ last two rows were counted after the results were seen
 
 Those 6 runs followed the skill as it was written: it said only not to make
 such a change silently. The skill now says not to make it: name the record,
-say what the change would undo, and stop. A second run tested that on the 19
+say what the change would undo, and stop. Across the batches, the skill and
+rule text changed as follows: batches 1 and 2 ran three agent commands with
+no `search` (`08e4b83`, `d721455`); batch 3 ran `search` with no stop rule
+(`a744496`); batches 4 to 6 ran the `c92205d` text (which first held "then
+stop" in `5b43558`); and batch 7 ran `c1ae17c`, equal to `skills/` at HEAD
+(see the dated note at the end of [eval/README.md](eval/README.md)). A second run tested that on the 19
 requests the pilot had not used, with 5 harmless requests as controls,
 everything fixed before the first run:
 
