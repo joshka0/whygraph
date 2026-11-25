@@ -1,6 +1,6 @@
 # ADR 0004: An optional reranker for `search`
 
-Date: 2026-11-13. Status: superseded by [ADR 0009](0009-unused-search-options-removed.md). Topic: [[whygraph-relate-loader]].
+Date: 2026-11-13. Status: superseded by ADR 0009. Topic: [[whygraph-relate-loader]].
 
 ## Context
 

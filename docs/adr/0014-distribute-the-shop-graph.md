@@ -1,6 +1,6 @@
 # ADR 0014. Distribute the shop graph and its build tools
 
-Topic: [[whygraph-entry-packaging]]
+Date: 2026-11-20. Status: accepted. Topic: [[whygraph-entry-packaging]].
 
 ## Context
 

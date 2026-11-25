@@ -1,6 +1,6 @@
 # ADR 0015. License the bundled memod package under MIT
 
-Topic: [[whygraph-entry-packaging]]
+Date: 2026-11-23. Status: accepted. Topic: [[whygraph-entry-packaging]].
 
 ## Context
 

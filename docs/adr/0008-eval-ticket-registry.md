@@ -1,6 +1,6 @@
 # ADR 0008: One registry for ticket trials
 
-Topic: [[whygraph-trial-design]]
+Date: 2026-11-15. Status: accepted. Topic: [[whygraph-trial-design]].
 
 ## Context
 

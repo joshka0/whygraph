@@ -1,6 +1,6 @@
 # ADR 0012: Include outcomes and maintainer comments in ticket records
 
-Topic: [[whygraph-ticket-pilot-tasks]]
+Date: 2026-11-15. Status: accepted. Topic: [[whygraph-ticket-pilot-tasks]].
 
 ## Context
 

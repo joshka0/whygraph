@@ -1,6 +1,6 @@
 # ADR 0011: Keep batch 7 stores outside the agent filesystem
 
-Topic: [[whygraph-eval-runner]]
+Date: 2026-11-15. Status: accepted. Topic: [[whygraph-eval-runner]].
 
 ## Context
 

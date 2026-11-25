@@ -1,6 +1,6 @@
 # ADR 0013: Rehearse the committed plan without a hosted agent
 
-Topic: [[whygraph-eval-runner]]
+Date: 2026-11-16. Status: accepted. Topic: [[whygraph-eval-runner]].
 
 ## Context
 
