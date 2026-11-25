@@ -8,6 +8,24 @@ the code does not always read it.
 
 ## Use case
 
+A record reaches code through a `decided:` tag that names it or a commit it
+lists. Words and meaning only suggest candidates, `carry` says unknown for
+languages memod cannot read, and the [pilot](#measured-results-and-limits)
+reports results and limits.
+
+```mermaid
+flowchart LR
+  Decision -->|CITES| Commit
+  Commit -->|CHANGES| Symbol
+  Symbol -->|DECIDED| DecidedTag
+  DecidedTag -->|NAMES| Decision
+  Symbol -->|USES| Symbol
+  Decision -->|RESTS_ON| Decision
+  Decision -->|SUPERSEDES| Decision
+```
+
+Every label and relationship: [The graph](#the-graph).
+
 Here is the question an agent asks before it edits `formatCents` in the small
 shop repo that comes with whygraph. The code of `formatCents` mentions no
 decision. The graph finds two: ADR-0001 through the commits that changed it,
