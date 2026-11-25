@@ -42,7 +42,9 @@ contract('CF6', 'What a trial measured ends with how a conflict run passes, on a
   const after = text.slice(text.indexOf('\n```\n', marker));
   const at = after.search(/How a conflict run passes/); assert.ok(at >= 0, 'no "How a conflict run passes" after the score block');
   const rule = flat(after.slice(at));
-  assert.match(rule, /contradict/); assert.doesNotMatch(rule, /final reply|last message/i);
+  assert.match(rule, /contradict/);
+  assert.match(rule, /\bjoined\b|\ball (?:of )?(?:the )?(?:agent'?s? )?(?:text|replies|messages)\b/i, 'the pass rule does not say the scorer reads all replies joined');
+  assert.doesNotMatch(rule, /(?<!not only (?:the )?|not just (?:the )?|not (?:the )?)(?:final reply|last message)/i, 'the pass rule says the scorer reads the final reply');
 });
 contract('CF7', 'README, AGENTS.md and docs/entry-check.md name no host path', () => {
   for (const file of ['README.md', 'AGENTS.md', 'docs/entry-check.md']) assert.doesNotMatch(read(file), /\/home\/dev\b|\/mnt\/ssd\b|\/Users\/[a-z]/, file);

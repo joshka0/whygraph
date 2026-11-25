@@ -132,7 +132,8 @@ contract('RO12', 'ADR 0014: the first command under Setup and run is the Relate-
   assert.ok(code.length > 0, 'Setup and run holds no command');
   assert.match(code[0], /^relate --database examples\/shop\.rl --read-only\b/, `first command: ${code[0]}`);
   const before = text.slice(0, text.indexOf(code[0]));
-  const fenced = [...before.matchAll(/^```[a-z]*\n([\s\S]*?)^```$/gm)].map(m => m[1]).join('\n');
+  const fenced = [...before.matchAll(/^```[a-z]*\n([\s\S]*?)^```$/gm)].flatMap(m => m[1].split('\n'))
+    .filter(l => !/^(?:\$ )?(?:git clone |cd whygraph$)/.test(l.trim())).join('\n');
   assert.doesNotMatch(fenced, /\b(?:pnpm|npm|node|whygraph)\b/, 'a Node, pnpm or whygraph command precedes the Relate query');
 });
 
