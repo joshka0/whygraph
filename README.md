@@ -152,9 +152,9 @@ with `relate --database examples/shop.rl --read-only`.
 
 ### Set up
 
-The whygraph commands need Linux or macOS with Bash, Git, Node.js 26 or
-later, pnpm 10 and the Relate CLI. We tested pnpm 10.28.2. Run the install
-from the whygraph checkout:
+The whygraph commands need Bash, Git, Node.js 26 or later, pnpm 10 and the
+Relate CLI. Tested on Linux. macOS is not tested. We tested pnpm 10.28.2.
+Run the install from the whygraph checkout:
 
 ```sh
 pnpm install --frozen-lockfile
