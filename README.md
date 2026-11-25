@@ -122,8 +122,9 @@ CLI. The second part needs the install in [Set up](#set-up).
 
 ### Query the bundled graph with Relate alone
 
-[Install Relate](https://relatedb.ai/). We tested Relate 1.0.1. Check your
-version with `relate --version`.
+[Install Relate](https://relatedb.ai/). We tested `Relate v1.2.0`
+(`examples/shop.rl` opens unchanged on 1.0.1 and 1.2.0; the recorded trials
+in `eval/` ran on 1.0.1). Check your version with `relate --version`.
 
 ```sh
 git clone https://github.com/joshka0/whygraph.git
@@ -256,7 +257,7 @@ decision. whygraph has the same license: [LICENSE](LICENSE).
 
 | Tool | Use | License |
 | --- | --- | --- |
-| Relate CLI 1.0.1 | The graph database | Apache 2.0 (binary) |
+| Relate CLI 1.2.0 (trials ran on 1.0.1) | The graph database | Apache 2.0 (binary) |
 | `@huggingface/transformers` 4.3.2 | Runs the embedding model | Apache-2.0 |
 | `onnxruntime-node` 1.30.0 | The model runtime, a dependency of transformers | MIT |
 | `Xenova/bge-small-en-v1.5` | The embedding model: the ONNX weights of `BAAI/bge-small-en-v1.5` | MIT, on the BAAI model card |
@@ -1305,4 +1306,7 @@ node scripts/readme-check.mjs       # reruns this README's commands; exit 1 when
 Decision logic lives in `src/*.pure.ts`; child processes and files stay in
 the other files of `src/`. [docs/failures.md](docs/failures.md) lists every
 way a command can fail or answer wrong, as input and required result.
+Without the saved trial data, test `X8` and the B7 eval self-tests fail by
+design; [docs/entry-check.md](docs/entry-check.md) records the latest
+clean-clone check.
 [docs/demo.md](docs/demo.md) is the shot list for the demo video.

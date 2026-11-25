@@ -1,133 +1,55 @@
 # Entry checks
 
-## Frozen test run, 2026-11-23
-
-The packaging branch fast-forwarded to `entry-tests-frozen-1`
-(`d2e145863ba93193056883a8fa64f49c092aff10`). A fresh full-history
-clone used an empty home. The separate memod source checkout was hidden.
-The clone had no local `eval/results`. `WHYGRAPH_EVAL_RESULTS` pointed to
-the original pilot results, mounted read-only. The resource limits were
-the same as in the original run below.
-
-| Command | Exit | Result |
-| --- | ---: | --- |
-| `pnpm install --frozen-lockfile` through Socket Firewall | 0 | 49 packages installed |
-| `pnpm check` | 0 | 0 type errors |
-| `node_modules/.bin/memod lint` | 0 | 0 findings |
-| `whygraph build --decisions ../adrs.json --decisions decisions/notes.json` in the shop fixture | 0 | 9 commits, 5 decision records, 93 nodes, 139 relationships, 0 warnings |
-| `node test/run.mjs` | 0 | 237 passed, 0 failed, 0 skipped, 0 known-red exceptions. X3 and X8 both passed |
-| `node eval/selftest/check.mjs` | 1 | 22 scorer verdicts passed. Test collection then stopped on a missing archive before the ticket checks ran |
-| Eval self-tests B7-108 (scorer), B7-132 and B7-219, run directly | 0 each | All three frozen checks passed using the real pilot data |
-| Eval self-tests B7-152/B7-166, B7-177, B7-185, B7-199 and B7-208, run directly | 1 each | All five compared the entire report with an older commit and rejected the 525 appended batch 7 lines |
-
-The eval self-test opens
-`eval/results/_smoke-archive/6-stop-logged-as-failure/_attempts`
-relative to the clone. That directory exists in the supplied trial data.
-The archive reader in `eval/selftest/batch7-spy-block.mjs` uses the
-checkout path directly.
-
-B7-108's rehearsal requires a short checkout path for Unix sockets and
-creates its own Linux namespace. The first attempt exceeded the socket
-path limit. A short mount inside the install-check namespace prevented
-the rehearsal from creating its namespace. Moving the same clone to a
-short path on the SSD and running the rehearsal under its own isolation
-resolved both setup errors.
-
-B7-199 and B7-208 ran in the checkout containing the archives. Across
-the six Git revisions used by the five failing checks, only
-`eval/score.txt` differed among the protected files. The packaging
-branch includes the frozen tests unchanged.
-
-## Original packaging run, 2026-11-20
-
-A fresh clone installed and built the shop graph with the separate memod
-source directory hidden. Both README quickstart commands, tsrs and lint
-passed. The following results describe the commits tested on that date.
+**Verdict (2026-11-25): PASS on a clean Linux clone for all product commands, README checks, type checks, lint, and 236 of 237 contract tests on `Relate v1.2.0`; the remaining contract test (`X8`) and `eval/selftest/check.mjs` require the git-ignored saved trial data and fail on a clean clone by design (237 of 237 pass when the saved trial data is supplied).**
 
 ## Environment
 
-Linux, Bash, Git, Node 26.5.1, pnpm 10.28.2 and Relate 1.0.1. The clone
-had full history. The first install started with an empty home, an empty
-package store and no model cache. The clone had no trial results.
-
-The commands below use these names: `$BRANCH` is
-`whygraph-entry-packaging`, `$SOURCE` is its worktree, and `$RUN` is the
-scratch directory on the SSD. `$MEMOD_SOURCE` is the separate memod
-checkout. The clone used `$RUN/clone/bin` and
-`$RUN/clone/node_modules/.bin` first on PATH. Each check ran separately
-under these limits:
-
-```sh
-TMPDIR=/mnt/ssd/tmp systemd-run --user --scope -q \
-  -p MemoryMax=6G -p MemorySwapMax=0 -p CPUQuota=200% <command>
-```
-
-Inside that scope, the cold checks used
-`env HOME="$RUN/home" RELATE_TELEMETRY=0 DO_NOT_TRACK=1` and
-`bwrap --bind / / --dev /dev --tmpfs "$MEMOD_SOURCE" --`.
-The first install and Relate CSV query used the same mount configuration
-without `--dev /dev`. That setup prevented Git from opening `/dev/null`
-during the first lint run (exit 1). The check then supplied `/dev` and
-reran lint successfully. These tools and limits belong to the check.
-The README lists the tools needed to use whygraph.
+- **Tested commit:** `b0ecfa323c6d641a6afd3135e3119d9a91dafbca`
+- **Date:** 2026-11-25
+- **OS:** Linux (`x86_64`); macOS is not tested
+- **Tools:** Bash, Git `2.53.0`, Node.js `v26.5.1`, pnpm `10.28.2`, `Relate v1.2.0` (`License: Apache 2.0 (binary)`, `relate-linux-amd64` SHA-256 `03e05e7cf25eec498e328837a3b6636c7a4807410b989e4b72948f1ebc8a99a5`)
+- **Bundled sample store:** `examples/shop.rl` (77,824 bytes, SHA-256 `f6b8cff12eb9951696659fcd37810603dba52675ebe9d0a39e8410e4445d83be`) opens unchanged on both Relate `1.0.1` and `Relate v1.2.0`. The recorded trials in `eval/` ran on Relate `1.0.1`.
 
 ## Commands and outcomes
 
-| Command | Exit | Observed result |
+All commands ran from a fresh full-history clone with a clean `HOME` and no separate `memod` source checkout.
+
+| Command | Exit | Result |
 | --- | ---: | --- |
-| `git clone --no-local --branch "$BRANCH" "$SOURCE" "$RUN/clone"` | 0 | New full-history clone at `f8808a4` |
-| `sfw /home/dev/.npm-global/bin/pnpm install --frozen-lockfile` | 0 | 49 packages downloaded, 49 added, 0 reused |
-| `test ! -e "$MEMOD_SOURCE/package.json"` inside the namespace | 0 | The separate source package was inaccessible |
-| `scripts/fixture.sh ../cold-shop` | 0 | 9 commits, head `0ede283` |
-| In the shop, `whygraph decisions adr docs/adr > ../cold-adrs.json` | 0 | 3 ADRs |
-| `whygraph build --decisions ../cold-adrs.json --decisions decisions/notes.json` | 0 | 2 decision files, 5 records, 93 nodes, 139 relationships, 0 warnings |
-| `node test/run.mjs` | 1 | 237 tests, 232 passed, 5 failed, 0 skipped. B22, E4, R5, X3 and X8 failed |
-| `git pull --ff-only` from the packaging worktree | 0 | Updated the clone to `c98eea5` after fixing the three Relate test wrappers |
-| Both shell blocks in [README Setup and run](../README.md#setup-and-run), verbatim | 0 each | Relate returned 2 commit rows. whygraph reported 5 affected symbols |
-| `node_modules/.bin/tsrs -p tsconfig.json` | 0 | 0 diagnostics |
+| Relate query in [README Setup and run](../README.md#setup-and-run) on `examples/shop.rl` | 0 | Exact byte match to README output; `examples/shop.rl` SHA-256 and `git status` unchanged (also verified offline and with `CLAUDECODE=1` piped stdout) |
+| `pnpm install --frozen-lockfile` | 0 | 49 packages installed (includes bundled `vendor/memod-0.2.0.tgz`) |
+| `whygraph impact note-2 --store examples/shop.rl` | 0 | 5 affected symbols; matches freshly built fixture store (also verified alongside an open `--read-only` Relate shell) |
+| `scripts/fixture.sh` + `whygraph decisions adr docs/adr` + `whygraph build` | 0 | 9 commits (`0ede283`), 5 decision records, 93 nodes, 139 relationships, 0 warnings |
+| `pnpm check` | 0 | 0 type errors |
 | `node_modules/.bin/memod lint` | 0 | 0 findings |
-| `node test/run.mjs '--test-name-pattern=^(B22\|E4\|R5\|X3\|X8) '` | 1 | B22, E4 and R5 passed. X3 and X8 failed |
-| `node eval/score.mjs --results "$PILOT_RESULTS" > "$RUN/pilot-score.txt"` on the saved trials | 0 | 188,961 bytes, including 256 finished batch 7 cells |
-| `cmp "$RUN/pilot-score.txt" eval/score.txt` | 0 | Identical report |
-| `node eval/score.mjs > ../clone-score.txt` in the clean clone | 0 | 0 finished runs, 2,370 bytes |
-| `cmp -s eval/score.txt ../clone-score.txt` | 1 | The clean clone cannot reproduce the saved report |
-| Existing self-test cases B7-132 and B7-219, run directly (below) | 1 | Both failed. The full eval self-test did not run |
-| `git grep -ailF -f "$PRIVATE_WORDS" HEAD --` | 1 | 0 matching files (Git's no-match status). The unpacked memod package also had 0 hits |
+| `node scripts/readme-check.mjs` | 0 | 14 commands, 0 drifted |
+| `node test/run.mjs` (clean clone, no saved trial data) | 1 | 236 passed, 1 failed (`X8` fails by design without `WHYGRAPH_EVAL_RESULTS`; `S4`, `S5`, and `S6` pass when `claude` and `codex` are on `PATH`) |
+| `node test/run.mjs` (with `WHYGRAPH_EVAL_RESULTS` set to saved trial data) | 0 | 237 passed, 0 failed, 0 skipped, 0 known-red exceptions (`X3` and `X8` pass) |
+| `node eval/score.mjs` (clean clone) | 0 | 0 finished runs (2,370 bytes; differs from `eval/score.txt` by design) |
+| `node eval/score.mjs --results <saved-trial-data>` | 0 | 188,961 bytes, byte-for-byte identical to `eval/score.txt` |
+| `node eval/selftest/check.mjs` (clean clone) | 1 | Fails by design without the git-ignored saved trial archives |
 
-All commits used the repository's memod pre-commit hook. The private-word
-list was checked separately. Its entries stay outside the repository.
+## Notes
 
-## Failures observed on 2026-11-20
+- On `examples/shop.rl`, `Relate v1.2.0` returns 93 nodes and 139 relationships with exact per-label and per-type counts matching `README.md`, both `decision_search` (full-text) and `decision_search_vector` (vector) indexes `ONLINE`, and exact matches for `why`, `carry`, `impact`, and `search`.
+- Opening a writable Relate shell on a store while running `whygraph impact` exits 1 with Relate's storage-lock error (`exit 5`); opening a `--read-only` shell as shown in [README Setup and run](../README.md#setup-and-run) does not block `impact`.
+- The earlier 2026-11-20 and 2026-11-23 packaging check tables remain in Git history (commit `699f991` and `b0ecfa3`).
 
-- **X3.** The reranker-removal test compares all runtime dependencies with
-  the manifest at `42ab13f`. That comparison rejects the bundled memod runtime.
-  The X3 contract in [the failure list](failures.md) concerns dependencies
-  used only by the removed reranker. [ADR 0009](adr/0009-unused-search-options-removed.md)
-  records the removal and [ADR 0014](adr/0014-distribute-the-shop-graph.md)
-  records the packaging decision.
-- **X8 and B7-108.** Both compare the default scorer output to
-  `eval/score.txt`. Git tracks zero files under `eval/results`. The original
-  checkout holds the saved trials. The new report matches the scorer there.
-- **B7-132 and B7-219.** In a fresh clone B7-132 cannot enumerate
-  `eval/results`. Even with results supplied, multiple historical checks
-  require the *whole* score file to equal an older commit. The first
-  153,320 bytes match the pre-pilot file exactly. The new file adds 525 lines.
-  B7-219 rejects that addition against `513b9be`.
+## Files changed since tested SHA (`b0ecfa3`)
 
-At `c98eea5`, the following command reproduced the two self-test failures:
+Only documentation and ADR files changed on this branch after `b0ecfa3` (no edits to `src/`, `recipes/`, `skills/`, `test/`, `vendor/`, `examples/shop.rl`, `eval/registry.json`, `eval/score.txt`, `eval/score.mjs`, or `eval/selftest/`):
 
-```sh
-node --input-type=module <<'JS'
-import { mkdtempSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { batch7StartupChecks } from './eval/selftest/batch7-startup.mjs';
-import { batch7MissingRangeFileChecks } from './eval/selftest/batch7-missing-range-file.mjs';
-const scratch = mkdtempSync(join(tmpdir(), 'entry-selftest-'));
-for (const [cases, id] of [[batch7StartupChecks, 'B7-132'], [batch7MissingRangeFileChecks, 'B7-219']]) {
-  const check = (await cases({scratch})).find(c => c.name.startsWith('B7 ' + id + ' '));
-  try { await check.run(); }
-  catch (error) { console.error(id, error.message); process.exitCode = 1; }
-}
-JS
-```
+- `AGENTS.md`
+- `README.md`
+- `docs/adr/0004-optional-reranker.md`
+- `docs/adr/0008-eval-ticket-registry.md`
+- `docs/adr/0009-unused-search-options-removed.md`
+- `docs/adr/0010-eval-instruction-history.md`
+- `docs/adr/0011-eval-closed-store.md`
+- `docs/adr/0012-ticket-record-outcomes.md`
+- `docs/adr/0013-eval-rehearsal.md`
+- `docs/adr/0014-distribute-the-shop-graph.md`
+- `docs/adr/0015-license-the-bundled-memod-package.md`
+- `docs/entry-check.md`
+- `docs/failures.md`
+- `eval/README.md` (dated note appended only)
