@@ -19,8 +19,9 @@ The registry records `instructionsCommit`, `storeAccess` and
 conditions; a batch number does not override that design. Preparation reads both
 `skills/whygraph/SKILL.md` and `skills/whygraph-rule.md` with `git show`.
 A missing commit or file stops preparation before work files change.
-Batches 1 through 6 record `c92205d`. Batch 7 has no recorded commit until
-the parent cleans the skill and records that commit. Plans need no skill.
+Batches 1 through 6 record `c92205d`. Commit `c1ae17c` (2026-11-16 02:22)
+cleaned the working skill and rule files, and `243e796` recorded `c1ae17c`
+for batch 7 in `eval/registry.json`. Plans need no skill.
 
 ## Consequences
 

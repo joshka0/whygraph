@@ -46,9 +46,12 @@ store schema stay the same. Existing stores need no rebuild.
 Search makes no hosted ranking request. The local embedding package remains
 because build and search use it. No package or lockfile change is needed.
 The checks for the removed paths are removed. Existing search-author checks
-stay; an independent author will add checks from the removal failure list.
+stay; an independent author added checks from the removal failure list in
+`74d1246` (2026-11-15).
 
-The batch-6 selftest pins both skill files to commit c92205d. The removal
-brief requires preserving those bytes when an edit would fail that check.
-Their stale instructions remain a parked contract conflict. The parent must
-resolve how trial inputs are preserved before those instructions can change.
+The batch-6 selftest pinned both skill files to commit `c92205d`. At the time
+of this decision, preserving those bytes prevented editing the working skill
+files. ADR 0010 settled the instruction pin the same day (2026-11-15) by
+reading each batch's skill from history, and `c1ae17c` (2026-11-16 02:22)
+cleaned the working skill and rule files. Batches 1 to 6 still read `c92205d`;
+batch 7 reads `c1ae17c` (`243e796`, `eval/registry.json`).
