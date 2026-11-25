@@ -196,28 +196,51 @@ change without objecting; a **governed control** is a harmless request on code
 that a decision record governs without conflicting with it. Differences use a
 **paired bootstrap interval** over per-task pass-rate differences.
 
-On 20 Hono change requests (batch 6), the graph led the stub by 31
-percentage points (95% paired bootstrap interval, 15 to 48).
+On 12 Zustand conflict tasks (batch 7), agents with the graph stopped and left
+protected code untouched in **34 of 35 scored runs (97%)** vs **23 of 35 (66%)**
+with the stub, using 2.7x fewer tokens (34.4 million vs 91.7 million across the
+35 scored conflict runs per condition) and raising **0 false objections across
+21 control runs** (0 of 9 harmless controls vs 1 of 9 (11%) for the stub, and
+0 of 12 governed controls in both conditions). On 20 Hono change requests
+(batch 6), the graph left protected code untouched in 60 of 60 conflict runs
+(100%) vs 50 of 58 (86%) for the stub, and led the stub on the pre-registered
+exact-ticket pass rate by 31 percentage points (95% paired bootstrap interval,
+15 to 48).
 
-On 12 Zustand conflict tasks (batch 7), agents passed 51% of scored runs
-with the graph and 31% with the stub. The paired mean difference across
-tasks was 19 points (95% interval, 3 to 39). The 35 scored graph runs
-used 34.4 million tokens. The 35 scored stub runs used 91.7 million.
-Those totals cover conflict runs only.
+On the pre-registered Zustand strict single-ID pass rate (no edit *and* naming
+the one sampled issue number), agents passed 51% of scored runs with the graph
+and 31% with the stub. The paired mean difference across tasks was 19 points
+(95% interval, 3 to 39). The 35 scored graph runs used 34.4 million tokens.
+The 35 scored stub runs used 91.7 million. Those totals cover conflict runs
+only.
+
+Post-hoc inspection of the saved Batch 7 runs explains why 97% stopped while
+only 51% passed the single-ID check: on all four tasks that scored 0% in every
+condition (`zs-07`, `zs-15`, `zs-16`, `zs-21`), the graph agent stopped and
+cited a valid sibling or newer superseding PR for the same decision (for
+example, fixing PR `#781` instead of issue `#780`, newer PR `#3391` instead of
+`#455`, commit-linked `#25` instead of uncited `#311`, and breaking PR `#604`
+instead of `#331`), while each task's frozen ground truth accepted only the one
+sampled ticket (`"also": []`). Because the scorer and ground truth were frozen
+before any run, the pre-registered scores above stay untouched.
 
 Removing links, search, shared terms or the agent rule produced scores
-within the uncertainty of the full graph or higher. In `graph-norule`, the
+within the uncertainty of the full graph or higher under that strict single-ID
+scorer (post-hoc trace shows the same sibling-PR effect on `zs-03` and `zs-13`,
+where commit links surfaced sibling PRs `#238` and `#1029` directly so the
+agent stopped 3 of 3 times without naming the sampled ID, whereas hiding links
+forced broader search). In `graph-norule`, the
 runner drops only the rule file appended to the instruction file
 (`eval/closed-run.mjs:51`) while writing the skill in every condition
 (`eval/closed-run.mjs:49`); Rule 1 of `skills/whygraph/SKILL.md`
 (lines 28–39) still says to name the record and stop, so the pilot cannot
 say whether the stop rule matters. The pilot cannot
-attribute the gain to one part. Four of the twelve tasks failed in every
-condition. On harmless controls, the graph raised false objections in
-0 of 9 runs and the stub in 1 of 9 (11%). On governed controls, neither
-raised a false objection in 12 runs per condition. These trials measure
-responses to selected requests. They do not establish a gain for other
-repos or models, or the quality of changes after a person approves them.
+attribute the gain to one part. Four of the twelve tasks failed the strict
+single-ID check in every condition. On harmless controls, the graph raised
+false objections in 0 of 9 runs and the stub in 1 of 9 (11%). On governed
+controls, neither raised a false objection in 12 runs per condition. These
+trials measure responses to selected requests. They do not establish a gain for
+other repos or models, or the quality of changes after a person approves them.
 
 [Read the pilot exceptions](eval/README.md#zustand-pilot-exceptions) and
 [the complete score report](eval/score.txt).
@@ -300,6 +323,12 @@ responsible for the result.
 - **In the trials:** the agents under test were Claude Code with its
   `sonnet` model, and opencode with DeepSeek 4.1 Flash.
   [eval/README.md](eval/README.md) gives the setup.
+- **In the demo video:** live 1x-speed terminal recordings ran headless
+  Claude Code (`claude 2.1.330`, resolved `--model sonnet` = `claude-sonnet-5-5`)
+  against `Relate v1.2.0` via `vhs`; motion-graphics framing and compositing
+  used headless Chromium and `ffmpeg` with no voice track.
+  [docs/demo.md](docs/demo.md) holds the shot list, 10-run rehearsal table,
+  and take log.
 
 ## Try it on the fixture
 
