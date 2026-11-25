@@ -83,7 +83,7 @@ The README lists the tools needed to use whygraph.
 | `whygraph build --decisions ../cold-adrs.json --decisions decisions/notes.json` | 0 | 2 decision files, 5 records, 93 nodes, 139 relationships, 0 warnings |
 | `node test/run.mjs` | 1 | 237 tests, 232 passed, 5 failed, 0 skipped. B22, E4, R5, X3 and X8 failed |
 | `git pull --ff-only` from the packaging worktree | 0 | Updated the clone to `c98eea5` after fixing the three Relate test wrappers |
-| Both shell blocks in the [README quickstart](../README.md#quickstart), verbatim | 0 each | Relate returned 2 commit rows. whygraph reported 5 affected symbols |
+| Both shell blocks in [README Setup and run](../README.md#setup-and-run), verbatim | 0 each | Relate returned 2 commit rows. whygraph reported 5 affected symbols |
 | `node_modules/.bin/tsrs -p tsconfig.json` | 0 | 0 diagnostics |
 | `node_modules/.bin/memod lint` | 0 | 0 findings |
 | `node test/run.mjs '--test-name-pattern=^(B22\|E4\|R5\|X3\|X8) '` | 1 | B22, E4 and R5 passed. X3 and X8 failed |

@@ -4,6 +4,68 @@ Code shows what a program does. It rarely shows why. The reason sits in a
 decision record, a design note or a commit message, and an agent that edits
 the code never reads it.
 
+[Use case](#use-case) · [How it uses Relate](#how-it-uses-relate) · [Setup and run](#setup-and-run) · [Measured results](#measured-results-and-limits) · [Reused code and AI tools](#reused-code-third-party-tools-and-ai-tools)
+
+## Use case
+
+Here is the question an agent asks before it edits `formatCents` in the small
+shop repo that comes with whygraph. The code of `formatCents` mentions no
+decision. The graph finds two: ADR-0001 through the commits that changed it,
+and the design note `note-2` ("Show thousands separators in totals") through
+the commit that added the separators. It also lists what sits one step away
+(the decisions, checks and topics of the symbols it uses and of those that use
+it), who calls it, and the commits that changed it.
+
+<!-- readme-check: preview -->
+```console
+$ whygraph carry src/money.ts:formatCents
+Before you edit src/money.ts:formatCents
+
+Topics it owns (keep its job inside these; another file that owns one and does not import this one is a duplicate):
+  - fx-money: no other file owns it
+No formal check covers it.
+
+Its doc comment holds no decided: tag.
+The header of src/money.ts holds no decided: tag.
+No decided: tag names a decision record.
+Decision records linked only through a commit that cites them and changed its code or tags, tightest commit first (a commit that changed many symbols links each of them loosely):
+  2026-01-04  note-2  Show thousands separators in totals
+      author: R. Chen
+      source: decisions/notes.json
+      changed by: 73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001); that commit changed 1 symbol
+                  a3bcb76 2026-01-08 Name every amount by its unit; that commit changed 5 symbols
+  2026-01-01  ADR-0001  Money in cents
+      status: accepted
+      source: docs/adr/0001-money-in-cents.md
+      changed by: dfb4ff8 2026-01-01 Add money and cart in cents; that commit changed 3 symbols
+  2026-01-02  note-1  Tax is computed once per order, not per line
+      author: A. Lee
+      source: decisions/notes.json
+      changed by: a3bcb76 2026-01-08 Name every amount by its unit; that commit changed 5 symbols
+
+One step away, most binding first (what formatCents uses, then what uses formatCents):
+  - topic owned by src/cart.ts:total, which uses formatCents: fx-cart
+Searched: src/money.ts:formatCents, the header of src/money.ts, the 0 symbols formatCents uses, 1 symbol that uses formatCents, and the headers of their files.
+Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript, JavaScript, Rust and Swift); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.
+
+Decision records that share the most distinctive terms with its code (candidates to pick from one list; not links: a shared word does not mean the record governs this symbol):
+  2026-01-02  ADR-0002  One flat tax rate
+      shared terms: cents
+  2026-01-03  ADR-0003  Tax rate by region
+      shared terms: cents
+
+1 symbol uses it directly, 1 in all (distance n: through n-1 other symbols; type: only a type use):
+   1  src/cart.ts:total
+
+3 commits changed its code or tags, newest first:
+  a3bcb76 2026-01-08 Name every amount by its unit
+  73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001)
+  dfb4ff8 2026-01-01 Add money and cart in cents
+```
+
+An agent that reads this before it removes the separators can tell you that
+the change reverses `note-2`, instead of making it silently.
+
 whygraph joins the three in one graph: the code (files, symbols, who uses
 whom), its history (which commit changed which symbol) and the decision
 records (ADRs, or any notes you convert to one JSON format). Then an agent,
@@ -15,7 +77,7 @@ or you, asks before changing code:
 - **search**: which decision record best matches this change, when no tag or
   commit links it to the code?
 
-## How and why we use Relate
+## How it uses Relate
 
 whygraph runs Relate as an embedded database through its CLI. A decision
 can name a commit without naming a function. Cypher follows the decision to
@@ -25,36 +87,25 @@ comment. The CLI and the read-only MCP server use the same query recipes.
 
 - **Mode:** single file for the bundled sample graph, and directory for the
   graph of your own repo. whygraph does not use the in-memory mode.
-- **Why a single file for the sample:** the sample is one file in this
-  repo, [examples/shop.rl](examples/shop.rl). You can open it read-only
-  with the Relate CLI alone, before you install whygraph.
-- **Why a directory for your repo:** Relate commits each load statement on
-  its own. A build loads into a new directory. whygraph moves the store
-  link to that directory only when every statement succeeded, so a failed
-  build leaves the old graph in use.
+- **Why this mode:** a single file for the sample,
+  [examples/shop.rl](examples/shop.rl), lets you open it read-only with the
+  Relate CLI alone, before you install whygraph. A directory for your repo
+  keeps failed builds from breaking the graph in use: Relate commits each
+  load statement on its own, so a build loads into a new directory and
+  whygraph moves the store link only when every statement succeeded.
 - **What the graph models:** files and symbols, the commits that changed
   them, and the decision records that cite those commits or that a code
   comment names. [The graph](#the-graph) lists each label and relationship.
 
-## Where the data lives
+## Setup and run
 
-[examples/shop.rl](examples/shop.rl) is the persistent store in this repo.
-It is a single file that contains the shop graph, with 93 nodes and 139
-relationships. When you build a graph for your own repo, whygraph writes a
-directory store under the Git directory of that repo, at `whygraph/store`.
-Code, history and decisions stay local. The first build downloads about
-35 MB of embedding weights for `Xenova/bge-small-en-v1.5` into
-`~/.cache/whygraph`. Later builds and searches reuse them.
-
-## Quickstart
-
-The quickstart has two parts. The first part needs only Git and the Relate
+This setup has two parts. The first part needs only Git and the Relate
 CLI. The second part needs the install in [Set up](#set-up).
 
 ### Query the bundled graph with Relate alone
 
 [Install Relate](https://relatedb.ai/). We tested Relate 1.0.1. Check your
-version with `relate --version`. This part does not need Node.js or pnpm.
+version with `relate --version`.
 
 ```sh
 git clone https://github.com/joshka0/whygraph.git
@@ -107,11 +158,27 @@ whygraph impact note-2 --store examples/shop.rl
 To rebuild the graph and ask whygraph about the source code, follow
 [Try it on the fixture](#try-it-on-the-fixture).
 
+## Where the data lives
+
+[examples/shop.rl](examples/shop.rl) is the persistent store in this repo.
+It is a single file that contains the shop graph, with 93 nodes and 139
+relationships. When you build a graph for your own repo, whygraph writes a
+directory store under the Git directory of that repo, at `whygraph/store`.
+Code, history and decisions stay local. The first build downloads about
+35 MB of embedding weights for `Xenova/bge-small-en-v1.5` into
+`~/.cache/whygraph`. Later builds and searches reuse them.
+
 ## Measured results and limits
 
+Each **batch** is a fixed set of change requests on one or two repos. A **stub**
+run gives the agent the same skill and rule, where `whygraph` answers `no result`.
+A **control** is a harmless change request that passes when the agent makes the
+change without objecting; a **governed control** is a harmless request on code
+that a decision record governs without conflicting with it. Differences use a
+**paired bootstrap interval** over per-task pass-rate differences.
+
 On 20 Hono change requests (batch 6), the graph led the stub by 31
-percentage points (95% paired bootstrap interval, 15 to 48). The stub
-gave the agent the same commands and returned no results.
+percentage points (95% paired bootstrap interval, 15 to 48).
 
 On 12 Zustand conflict tasks (batch 7), agents passed 51% of scored runs
 with the graph and 31% with the stub. The paired mean difference across
@@ -196,81 +263,6 @@ responsible for the result.
 - **In the trials:** the agents under test were Claude Code with its
   `sonnet` model, and opencode with DeepSeek 4.1 Flash.
   [eval/README.md](eval/README.md) gives the setup.
-
-## What the graph tells you before an edit
-
-Here is the question an agent asks before it edits `formatCents` in the small
-shop repo that comes with whygraph. The code of `formatCents` mentions no
-decision. The graph finds two: ADR-0001 through the commits that changed it,
-and the design note `note-2` ("Show thousands separators in totals") through
-the commit that added the separators. It also lists what sits one step away
-(the decisions, checks and topics of the symbols it uses and of those that use
-it), who calls it, and the commits that changed it.
-
-<!-- readme-check: preview -->
-```console
-$ whygraph carry src/money.ts:formatCents
-Before you edit src/money.ts:formatCents
-
-Topics it owns (keep its job inside these; another file that owns one and does not import this one is a duplicate):
-  - fx-money: no other file owns it
-No formal check covers it.
-
-Its doc comment holds no decided: tag.
-The header of src/money.ts holds no decided: tag.
-No decided: tag names a decision record.
-Decision records linked only through a commit that cites them and changed its code or tags, tightest commit first (a commit that changed many symbols links each of them loosely):
-  2026-01-04  note-2  Show thousands separators in totals
-      author: R. Chen
-      source: decisions/notes.json
-      changed by: 73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001); that commit changed 1 symbol
-                  a3bcb76 2026-01-08 Name every amount by its unit; that commit changed 5 symbols
-  2026-01-01  ADR-0001  Money in cents
-      status: accepted
-      source: docs/adr/0001-money-in-cents.md
-      changed by: dfb4ff8 2026-01-01 Add money and cart in cents; that commit changed 3 symbols
-  2026-01-02  note-1  Tax is computed once per order, not per line
-      author: A. Lee
-      source: decisions/notes.json
-      changed by: a3bcb76 2026-01-08 Name every amount by its unit; that commit changed 5 symbols
-
-One step away, most binding first (what formatCents uses, then what uses formatCents):
-  - topic owned by src/cart.ts:total, which uses formatCents: fx-cart
-Searched: src/money.ts:formatCents, the header of src/money.ts, the 0 symbols formatCents uses, 1 symbol that uses formatCents, and the headers of their files.
-Not searched: symbols further away (run carry on a neighbor to look past it); code in languages without symbol edges (memod reads uses only in TypeScript, JavaScript, Rust and Swift); uses the graph cannot see, such as a function passed as a value or called through an interface; records linked to a neighbor only through a commit.
-
-Decision records that share the most distinctive terms with its code (candidates to pick from one list; not links: a shared word does not mean the record governs this symbol):
-  2026-01-02  ADR-0002  One flat tax rate
-      shared terms: cents
-  2026-01-03  ADR-0003  Tax rate by region
-      shared terms: cents
-
-1 symbol uses it directly, 1 in all (distance n: through n-1 other symbols; type: only a type use):
-   1  src/cart.ts:total
-
-3 commits changed its code or tags, newest first:
-  a3bcb76 2026-01-08 Name every amount by its unit
-  73ebd46 2026-01-04 Format cents with thousands separators (ADR 0001)
-  dfb4ff8 2026-01-01 Add money and cart in cents
-```
-
-An agent that reads this before it removes the separators can tell you that
-the change reverses `note-2`, instead of making it silently.
-
-```console
-$ whygraph help
-whygraph: why the code is the way it is, as a relate graph
-
-  whygraph build [--repo <path>] [--store <path>] [--decisions <file>]...
-  whygraph decisions adr <folder>
-  whygraph why <file>:<symbol> [--repo <path>] [--store <path>]
-  whygraph impact <decision id> [--repo <path>] [--store <path>]
-  whygraph carry <file>:<symbol>|<file>:<start>-<end> [--repo <path>] [--store <path>]
-  whygraph search "<text>" [--repo <path>] [--store <path>]
-  whygraph mcp [--repo <path>] [--store <path>]
-
-Exit: 0 answer, 1 failure, 2 usage, 3 target not in the graph.
-```
 
 ## Try it on the fixture
 
@@ -404,7 +396,7 @@ Rests on it directly: note-2 (2026-01-04) Show thousands separators in totals
 5 distinct symbols in all: 0 named by a decided: tag, 5 reached only through a commit.
 ```
 
-And before an edit, the answer from the top of this page:
+And before an edit, the live `carry` run from [Use case](#use-case):
 
 ```console
 $ whygraph carry src/money.ts:formatCents
@@ -1003,6 +995,21 @@ jq '{records: (.items | group_by(.memo) | map({
 ```
 
 ## Commands
+
+```console
+$ whygraph help
+whygraph: why the code is the way it is, as a relate graph
+
+  whygraph build [--repo <path>] [--store <path>] [--decisions <file>]...
+  whygraph decisions adr <folder>
+  whygraph why <file>:<symbol> [--repo <path>] [--store <path>]
+  whygraph impact <decision id> [--repo <path>] [--store <path>]
+  whygraph carry <file>:<symbol>|<file>:<start>-<end> [--repo <path>] [--store <path>]
+  whygraph search "<text>" [--repo <path>] [--store <path>]
+  whygraph mcp [--repo <path>] [--store <path>]
+
+Exit: 0 answer, 1 failure, 2 usage, 3 target not in the graph.
+```
 
 | Command | Result |
 | --- | --- |
